@@ -316,15 +316,16 @@ const MEMBERS = [
   { id: 'baeksoon2',   name: '파니',   emoji: '🦊' },
 ];
 
-const PROXY = 'https://api.allorigins.win/get?url=';
-
 async function fetchStation(userId) {
   try {
     const url = `https://ch.sooplive.co.kr/api/${userId}/station`;
-    const res = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
+    // corsproxy.io는 null origin(로컬파일) 허용
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    const wrapper = await res.json();
-    const data = JSON.parse(wrapper.contents);
+    const data = await res.json();
+    if (userId === '243000') {
+      console.log(`[디버그] ${userId} 응답:`, JSON.stringify(data, null, 2));
+    }
     return data;
   } catch(e) {
     console.warn(`[${userId}] fetch 실패:`, e.message);
@@ -334,12 +335,28 @@ async function fetchStation(userId) {
 
 function isLive(data) {
   if (!data) return false;
-  // broad 객체가 있고 broad_no가 있으면 방송 중
-  return !!(data.broad && data.broad.broad_no);
+  // 여러 구조 대응
+  const broad = data.broad || data.data?.broad || data.station?.broad;
+  if (broad) {
+    // broad_no가 있으면 방송 중
+    if (broad.broad_no) return true;
+  }
+  // station 안에 broad_no가 있는 경우
+  const station = data.station || data.data?.station;
+  if (station?.broad_no) return true;
+  // live 플래그가 있는 경우
+  if (data.is_live || data.live) return true;
+  return false;
+}
+
+function getBroadData(data) {
+  // 여러 구조에서 broad 데이터 추출
+  return data?.broad || data?.data?.broad || data?.station?.broad || null;
 }
 
 function getViewers(data) {
-  const v = data?.broad?.current_sum_viewer_cnt;
+  const broad = getBroadData(data);
+  const v = broad?.current_sum_viewer_cnt;
   if (!v) return null;
   const n = parseInt(v);
   if (isNaN(n) || n <= 0) return null;
@@ -348,11 +365,13 @@ function getViewers(data) {
 }
 
 function getTitle(data) {
-  return data?.broad?.broad_title || '';
+  const broad = getBroadData(data);
+  return broad?.broad_title || '';
 }
 
 function getThumbUrl(data) {
-  const broadNo = data?.broad?.broad_no;
+  const broad = getBroadData(data);
+  const broadNo = broad?.broad_no;
   if (!broadNo) return null;
   return `https://liveimg.sooplive.co.kr/m/${broadNo}`;
 }

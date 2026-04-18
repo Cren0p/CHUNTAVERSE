@@ -1,6 +1,6 @@
 import json
 import urllib.request
-import urllib.error
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 
 MEMBERS = [
@@ -20,25 +20,36 @@ MEMBERS = [
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Origin": "https://www.sooplive.co.kr",
-    "Referer": "https://www.sooplive.co.kr/",
+    "Origin": "https://play.sooplive.co.kr",
+    "Referer": "https://play.sooplive.co.kr/",
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "ko-KR,ko;q=0.9",
+    "Content-Type": "application/x-www-form-urlencoded",
 }
 
 
-def fetch_station(user_id):
-    url = f"https://ch.sooplive.co.kr/api/{user_id}/station"
-    req = urllib.request.Request(url, headers=HEADERS)
+def fetch_live(user_id):
+    url = "https://live.sooplive.co.kr/afreeca/player_live_api.php"
+    data = urllib.parse.urlencode({
+        "bid": user_id,
+        "bno": "",
+        "type": "live",
+        "confirm_adult": "false",
+        "player_type": "html5",
+        "mode": "landing",
+        "from_api": "0",
+        "pwd": "",
+        "stream_type": "common",
+        "quality": "HD",
+    }).encode("utf-8")
+
+    req = urllib.request.Request(url, data=data, headers=HEADERS, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read().decode("utf-8")
-            # 디버그: 첫 200자 출력
             if user_id == "nanamoon777":
-                print(f"\n=== {user_id} 원본 응답 (200자) ===")
-                print(repr(raw[:200]))
-                print(f"Content-Type: {resp.headers.get('Content-Type')}")
-                print(f"Status: {resp.status}")
+                print(f"\n=== {user_id} 원본 응답 (500자) ===")
+                print(raw[:500])
                 print("=== 끝 ===\n")
             return json.loads(raw)
     except Exception as e:
@@ -60,17 +71,20 @@ def extract(member, data):
     if not data:
         return result
 
-    broad = data.get("broad")
-    if broad and broad.get("broad_no"):
+    channel = data.get("CHANNEL", {})
+    result_code = channel.get("RESULT")
+
+    # RESULT=1: 방송 중, 0: 오프라인, -6: 비공개 등
+    if result_code == 1:
         result["live"] = True
-        result["title"] = broad.get("broad_title", "")
-        result["broad_no"] = broad.get("broad_no")
-        viewers = broad.get("current_sum_viewer_cnt")
+        result["title"] = channel.get("TITLE", "")
+        result["broad_no"] = channel.get("BNO")
         try:
-            result["viewers"] = int(viewers) if viewers is not None else None
+            result["viewers"] = int(channel.get("CTUSER", 0))
         except (ValueError, TypeError):
             result["viewers"] = None
-        result["thumb"] = f"https://liveimg.sooplive.co.kr/m/{broad['broad_no']}"
+        if result["broad_no"]:
+            result["thumb"] = f"https://liveimg.sooplive.co.kr/m/{result['broad_no']}"
 
     return result
 
@@ -78,7 +92,7 @@ def extract(member, data):
 def main():
     results = []
     for member in MEMBERS:
-        data = fetch_station(member["id"])
+        data = fetch_live(member["id"])
         results.append(extract(member, data))
 
     kst = timezone(timedelta(hours=9))

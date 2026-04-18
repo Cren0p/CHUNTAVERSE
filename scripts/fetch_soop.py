@@ -35,7 +35,12 @@ def fetch_station(user_id):
         print(f"[{user_id}] 실패: {e}")
         return None
 
-
+def debug_print(member, data):
+    if member["id"] == "nanamoon777":
+        print(f"\n=== {member['id']} 응답 ===")
+        print(json.dumps(data, ensure_ascii=False, indent=2)[:2000])
+        print("=== 끝 ===\n")
+        
 def extract(member, data):
     result = {
         "id": member["id"],
@@ -69,6 +74,7 @@ def main():
     results = []
     for member in MEMBERS:
         data = fetch_station(member["id"])
+        debug_print(member, data)
         results.append(extract(member, data))
 
     kst = timezone(timedelta(hours=9))

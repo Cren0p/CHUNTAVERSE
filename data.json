@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-19T04:00:13.908698+09:00",
+  "updated_at": "2026-04-19T04:30:52.664158+09:00",
   "members": [
     {
       "id": "243000",
@@ -25,11 +25,11 @@
       "id": "nanamoon777",
       "name": "나나문",
       "emoji": "🐰",
-      "live": true,
-      "title": "[천옵대 안스팀] 화이팅",
-      "viewers": 50000,
-      "thumb": "https://liveimg.sooplive.co.kr/m/293323027",
-      "broad_no": "293323027"
+      "live": false,
+      "title": null,
+      "viewers": null,
+      "thumb": null,
+      "broad_no": null
     },
     {
       "id": "imha22",

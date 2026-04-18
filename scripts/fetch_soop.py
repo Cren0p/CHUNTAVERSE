@@ -47,10 +47,6 @@ def fetch_live(user_id):
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read().decode("utf-8")
-            if user_id == "nanamoon777":
-                print(f"\n=== {user_id} 원본 응답 (500자) ===")
-                print(raw[:500])
-                print("=== 끝 ===\n")
             return json.loads(raw)
     except Exception as e:
         print(f"[{user_id}] 실패: {e}")
@@ -64,7 +60,7 @@ def extract(member, data):
         "emoji": member["emoji"],
         "live": False,
         "title": None,
-        "viewers": None,
+        "btime": None,
         "thumb": None,
         "broad_no": None,
     }
@@ -72,17 +68,14 @@ def extract(member, data):
         return result
 
     channel = data.get("CHANNEL", {})
-    result_code = channel.get("RESULT")
-
-    # RESULT=1: 방송 중, 0: 오프라인, -6: 비공개 등
-    if result_code == 1:
+    if channel.get("RESULT") == 1:
         result["live"] = True
         result["title"] = channel.get("TITLE", "")
         result["broad_no"] = channel.get("BNO")
         try:
-            result["viewers"] = int(channel.get("CTUSER", 0))
+            result["btime"] = int(channel.get("BTIME", 0))
         except (ValueError, TypeError):
-            result["viewers"] = None
+            result["btime"] = None
         if result["broad_no"]:
             result["thumb"] = f"https://liveimg.sooplive.co.kr/m/{result['broad_no']}"
 
@@ -105,7 +98,7 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     live_count = sum(1 for r in results if r["live"])
-    print(f"\n완료: {live_count}명 방송 중")
+    print(f"완료: {live_count}명 방송 중")
 
 
 if __name__ == "__main__":

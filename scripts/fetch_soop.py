@@ -20,8 +20,10 @@ MEMBERS = [
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Origin": "https://play.sooplive.co.kr",
-    "Referer": "https://play.sooplive.co.kr/",
+    "Origin": "https://www.sooplive.co.kr",
+    "Referer": "https://www.sooplive.co.kr/",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "ko-KR,ko;q=0.9",
 }
 
 
@@ -30,17 +32,20 @@ def fetch_station(user_id):
     req = urllib.request.Request(url, headers=HEADERS)
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            raw = resp.read().decode("utf-8")
+            # 디버그: 첫 200자 출력
+            if user_id == "nanamoon777":
+                print(f"\n=== {user_id} 원본 응답 (200자) ===")
+                print(repr(raw[:200]))
+                print(f"Content-Type: {resp.headers.get('Content-Type')}")
+                print(f"Status: {resp.status}")
+                print("=== 끝 ===\n")
+            return json.loads(raw)
     except Exception as e:
         print(f"[{user_id}] 실패: {e}")
         return None
 
-def debug_print(member, data):
-    if member["id"] == "nanamoon777":
-        print(f"\n=== {member['id']} 응답 ===")
-        print(json.dumps(data, ensure_ascii=False, indent=2)[:2000])
-        print("=== 끝 ===\n")
-        
+
 def extract(member, data):
     result = {
         "id": member["id"],
@@ -74,7 +79,6 @@ def main():
     results = []
     for member in MEMBERS:
         data = fetch_station(member["id"])
-        debug_print(member, data)
         results.append(extract(member, data))
 
     kst = timezone(timedelta(hours=9))
@@ -87,7 +91,7 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     live_count = sum(1 for r in results if r["live"])
-    print(f"완료: {live_count}명 방송 중")
+    print(f"\n완료: {live_count}명 방송 중")
 
 
 if __name__ == "__main__":

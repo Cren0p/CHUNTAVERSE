@@ -15,7 +15,7 @@
     --accent: #7c6af7;
     --text: #e2e8f0;
     --muted: #64748b;
-    --viewer: #34d399;
+    --time: #fbbf24;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -41,23 +41,21 @@
   header {
     position: relative;
     z-index: 1;
-    padding: 32px 24px 24px;
+    padding: 32px 24px 20px;
     text-align: center;
     background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
   }
   .logo {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 28px;
-    font-weight: 900;
-    letter-spacing: 2px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 3px;
     background: linear-gradient(135deg, #a78bfa, #7c6af7, #818cf8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 6px;
   }
-  .subtitle { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
   .live-status {
     display: inline-flex;
     align-items: center;
@@ -85,11 +83,20 @@
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 16px;
-    padding: 28px 20px;
-    max-width: 1300px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    padding: 24px 20px;
+    max-width: 1400px;
     margin: 0 auto;
+  }
+  @media (max-width: 1100px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
   }
   .card {
     background: var(--surface);
@@ -112,10 +119,7 @@
     border-color: var(--accent);
     box-shadow: 0 8px 32px rgba(124,106,247,0.15);
   }
-  .card.live {
-    border-color: var(--live);
-    box-shadow: 0 0 16px var(--live-glow);
-  }
+  .card.live { border-color: var(--live); box-shadow: 0 0 16px var(--live-glow); }
   .card.live:hover { box-shadow: 0 8px 32px var(--live-glow); border-color: #ff6060; }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted); }
@@ -143,11 +147,11 @@
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(255,59,59,0.5);
   }
-  .badge-viewer {
+  .badge-time {
     position: absolute;
     bottom: 8px; right: 8px;
     background: rgba(0,0,0,0.75);
-    color: var(--viewer);
+    color: var(--time);
     font-size: 11px; font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
@@ -193,7 +197,6 @@
 <body>
 <header>
   <div class="logo">CHUNTAVERSE</div>
-  <div class="subtitle">천타버스 지통실</div>
   <div class="live-status">
     <span class="live-dot none" id="liveDot"></span>
     <span id="liveText">불러오는 중...</span>
@@ -207,10 +210,12 @@
 </div>
 <footer id="footer"></footer>
 <script>
-function formatViewers(n) {
-  if (!n || n <= 0) return null;
-  if (n >= 10000) return (n / 10000).toFixed(1) + '만';
-  return n.toLocaleString();
+function formatBtime(seconds) {
+  if (!seconds || seconds <= 0) return null;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return h + '시간 ' + m + '분';
+  return m + '분';
 }
 
 function buildCard(m, delay) {
@@ -225,7 +230,7 @@ function buildCard(m, delay) {
     card.rel = 'noopener';
   }
 
-  const viewers = formatViewers(m.viewers);
+  const btime = formatBtime(m.btime);
   const thumbHtml = m.thumb
     ? `<img src="${m.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
@@ -235,7 +240,7 @@ function buildCard(m, delay) {
       ${thumbHtml}
       <div class="placeholder" style="display:${m.thumb ? 'none' : 'flex'}">${m.emoji}</div>
       ${m.live ? '<span class="badge-live">LIVE</span>' : ''}
-      ${viewers ? `<span class="badge-viewer">👁 ${viewers}</span>` : ''}
+      ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
       <div class="card-name">${m.name}</div>

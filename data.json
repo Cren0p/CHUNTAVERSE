@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-19T06:55:23.975364+09:00",
+  "updated_at": "2026-04-19T07:34:38.436835+09:00",
   "members": [
     {
       "id": "243000",
@@ -7,7 +7,7 @@
       "emoji": "🌙",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -17,7 +17,7 @@
       "emoji": "🌸",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -27,7 +27,7 @@
       "emoji": "🐰",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -37,7 +37,7 @@
       "emoji": "🌿",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -47,7 +47,7 @@
       "emoji": "🌷",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -57,7 +57,7 @@
       "emoji": "🌟",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -67,7 +67,7 @@
       "emoji": "☁️",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -77,7 +77,7 @@
       "emoji": "🔥",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -87,7 +87,7 @@
       "emoji": "🎵",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -97,7 +97,7 @@
       "emoji": "☕",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -107,7 +107,7 @@
       "emoji": "⚡",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     },
@@ -117,7 +117,7 @@
       "emoji": "🦊",
       "live": false,
       "title": null,
-      "viewers": null,
+      "btime": null,
       "thumb": null,
       "broad_no": null
     }

@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>천타버스 지통실</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #070a14;
@@ -15,23 +13,17 @@
     --live: #ff3b3b;
     --live-glow: rgba(255,59,59,0.3);
     --accent: #7c6af7;
-    --accent2: #a78bfa;
     --text: #e2e8f0;
     --muted: #64748b;
     --viewer: #34d399;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    overflow-x: hidden;
   }
-
-  /* 별 배경 */
   body::before {
     content: '';
     position: fixed;
@@ -42,15 +34,10 @@
       radial-gradient(1px 1px at 55% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
       radial-gradient(1px 1px at 80% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),
       radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1.5px 1.5px at 25% 85%, rgba(255,255,255,0.2) 0%, transparent 100%),
-      radial-gradient(1px 1px at 90% 65%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.2) 0%, transparent 100%),
-      radial-gradient(2px 2px at 15% 50%, rgba(124,106,247,0.3) 0%, transparent 100%),
-      radial-gradient(2px 2px at 60% 90%, rgba(124,106,247,0.2) 0%, transparent 100%);
+      radial-gradient(2px 2px at 15% 50%, rgba(124,106,247,0.3) 0%, transparent 100%);
     pointer-events: none;
     z-index: 0;
   }
-
   header {
     position: relative;
     z-index: 1;
@@ -59,9 +46,8 @@
     background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
   }
-
   .logo {
-    font-family: 'Orbitron', monospace;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 28px;
     font-weight: 900;
     letter-spacing: 2px;
@@ -69,16 +55,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: none;
     margin-bottom: 6px;
   }
-
-  .subtitle {
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-
+  .subtitle { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
   .live-status {
     display: inline-flex;
     align-items: center;
@@ -89,30 +68,19 @@
     border-radius: 99px;
     padding: 6px 18px;
     font-size: 13px;
-    color: var(--text);
   }
-
   .live-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--live);
     box-shadow: 0 0 6px var(--live-glow);
     animation: pulse 1.8s ease-in-out infinite;
   }
-
-  .live-dot.none {
-    background: var(--muted);
-    box-shadow: none;
-    animation: none;
-  }
-
+  .live-dot.none { background: var(--muted); box-shadow: none; animation: none; }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
   }
-
-  /* 그리드 */
   .grid {
     position: relative;
     z-index: 1;
@@ -123,8 +91,6 @@
     max-width: 1300px;
     margin: 0 auto;
   }
-
-  /* 카드 */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -133,41 +99,26 @@
     text-decoration: none;
     color: inherit;
     display: block;
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
     opacity: 0;
     animation: fadeIn 0.4s ease forwards;
   }
-
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
   .card:hover {
     transform: translateY(-5px);
     border-color: var(--accent);
     box-shadow: 0 8px 32px rgba(124,106,247,0.15);
   }
-
   .card.live {
     border-color: var(--live);
     box-shadow: 0 0 16px var(--live-glow);
   }
-
-  .card.live:hover {
-    box-shadow: 0 8px 32px var(--live-glow);
-    border-color: #ff6060;
-  }
-
-  .card.offline {
-    opacity: 0;
-    animation: fadeIn 0.4s ease forwards;
-  }
-
+  .card.live:hover { box-shadow: 0 8px 32px var(--live-glow); border-color: #ff6060; }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted); }
-
-  /* 썸네일 */
   .card-thumb {
     width: 100%;
     aspect-ratio: 16/9;
@@ -175,62 +126,35 @@
     position: relative;
     overflow: hidden;
   }
-
-  .card-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
+  .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .card-thumb .placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    opacity: 0.3;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; opacity: 0.3;
   }
-
   .badge-live {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 8px; left: 8px;
     background: var(--live);
     color: white;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 10px; font-weight: 700;
     letter-spacing: 1px;
     padding: 3px 8px;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(255,59,59,0.5);
   }
-
   .badge-viewer {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 8px; right: 8px;
     background: rgba(0,0,0,0.75);
     color: var(--viewer);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 11px; font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
     backdrop-filter: blur(4px);
   }
-
-  /* 카드 정보 */
-  .card-info {
-    padding: 12px 14px 14px;
-  }
-
-  .card-name {
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
+  .card-info { padding: 12px 14px 14px; }
+  .card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
   .card-title {
     font-size: 12px;
     color: var(--muted);
@@ -239,38 +163,24 @@
     white-space: nowrap;
     line-height: 1.4;
   }
-
-  .card-title.is-live {
-    color: #94a3b8;
-  }
-
-  /* 로딩 */
+  .card-title.is-live { color: #94a3b8; }
   .loading {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     text-align: center;
     padding: 80px 20px;
     color: var(--muted);
   }
-
   .spinner {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border: 3px solid var(--border);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
   }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* 하단 */
+  @keyframes spin { to { transform: rotate(360deg); } }
   footer {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     text-align: center;
     padding: 16px;
     color: var(--muted);
@@ -281,188 +191,100 @@
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">CHUNTOVERSE</div>
+  <div class="logo">CHUNTAVERSE</div>
   <div class="subtitle">천타버스 지통실</div>
   <div class="live-status">
     <span class="live-dot none" id="liveDot"></span>
     <span id="liveText">불러오는 중...</span>
   </div>
 </header>
-
 <div id="app">
   <div class="loading">
     <div class="spinner"></div>
     <div>방송 정보를 가져오는 중...</div>
   </div>
 </div>
-
 <footer id="footer"></footer>
-
 <script>
-const MEMBERS = [
-  { id: '243000',      name: '천양',   emoji: '🌙' },
-  { id: 'madaomm',     name: '마다옴', emoji: '🌸' },
-  { id: 'nanamoon777', name: '나나문', emoji: '🐰' },
-  { id: 'imha22',      name: '임하밍', emoji: '🌿' },
-  { id: 'doormomo',    name: '문모모', emoji: '🌷' },
-  { id: 'kim91709',    name: '한아밍', emoji: '🌟' },
-  { id: 'kappuchan',   name: '카푸',   emoji: '☁️' },
-  { id: 'kyaang123',   name: '캬앙',   emoji: '🔥' },
-  { id: 'wellro314',   name: '김웰로', emoji: '🎵' },
-  { id: 'mocamu2',     name: '모카',   emoji: '☕' },
-  { id: 'dalta20',     name: '달타',   emoji: '⚡' },
-  { id: 'baeksoon2',   name: '파니',   emoji: '🦊' },
-];
-
-async function fetchStation(userId) {
-  try {
-    const url = `https://ch.sooplive.co.kr/api/${userId}/station`;
-    // corsproxy.io는 null origin(로컬파일) 허용
-    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (userId === '243000') {
-      console.log(`[디버그] ${userId} 응답:`, JSON.stringify(data, null, 2));
-    }
-    return data;
-  } catch(e) {
-    console.warn(`[${userId}] fetch 실패:`, e.message);
-    return null;
-  }
-}
-
-function isLive(data) {
-  if (!data) return false;
-  // 여러 구조 대응
-  const broad = data.broad || data.data?.broad || data.station?.broad;
-  if (broad) {
-    // broad_no가 있으면 방송 중
-    if (broad.broad_no) return true;
-  }
-  // station 안에 broad_no가 있는 경우
-  const station = data.station || data.data?.station;
-  if (station?.broad_no) return true;
-  // live 플래그가 있는 경우
-  if (data.is_live || data.live) return true;
-  return false;
-}
-
-function getBroadData(data) {
-  // 여러 구조에서 broad 데이터 추출
-  return data?.broad || data?.data?.broad || data?.station?.broad || null;
-}
-
-function getViewers(data) {
-  const broad = getBroadData(data);
-  const v = broad?.current_sum_viewer_cnt;
-  if (!v) return null;
-  const n = parseInt(v);
-  if (isNaN(n) || n <= 0) return null;
-  if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
+function formatViewers(n) {
+  if (!n || n <= 0) return null;
+  if (n >= 10000) return (n / 10000).toFixed(1) + '만';
   return n.toLocaleString();
 }
 
-function getTitle(data) {
-  const broad = getBroadData(data);
-  return broad?.broad_title || '';
-}
-
-function getThumbUrl(data) {
-  const broad = getBroadData(data);
-  const broadNo = broad?.broad_no;
-  if (!broadNo) return null;
-  return `https://liveimg.sooplive.co.kr/m/${broadNo}`;
-}
-
-function buildCard(member, data, delay) {
-  const live = isLive(data);
-  const tag = live ? 'a' : 'div';
+function buildCard(m, delay) {
+  const tag = m.live ? 'a' : 'div';
   const card = document.createElement(tag);
-  card.className = `card ${live ? 'live' : 'offline'}`;
-  card.style.animationDelay = `${delay}ms`;
+  card.className = 'card ' + (m.live ? 'live' : 'offline');
+  card.style.animationDelay = delay + 'ms';
 
-  if (live) {
-    card.href = `https://play.sooplive.co.kr/${member.id}`;
+  if (m.live) {
+    card.href = 'https://play.sooplive.co.kr/' + m.id;
     card.target = '_blank';
     card.rel = 'noopener';
   }
 
-  const thumbUrl = getThumbUrl(data);
-  const viewers = getViewers(data);
-  const title = getTitle(data);
+  const viewers = formatViewers(m.viewers);
+  const thumbHtml = m.thumb
+    ? `<img src="${m.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
 
   card.innerHTML = `
     <div class="card-thumb">
-      ${thumbUrl
-        ? `<img src="${thumbUrl}" alt="${member.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : ''
-      }
-      <div class="placeholder" style="display:${thumbUrl ? 'none' : 'flex'}">${member.emoji}</div>
-      ${live ? '<span class="badge-live">LIVE</span>' : ''}
+      ${thumbHtml}
+      <div class="placeholder" style="display:${m.thumb ? 'none' : 'flex'}">${m.emoji}</div>
+      ${m.live ? '<span class="badge-live">LIVE</span>' : ''}
       ${viewers ? `<span class="badge-viewer">👁 ${viewers}</span>` : ''}
     </div>
     <div class="card-info">
-      <div class="card-name">${member.name}</div>
-      <div class="card-title ${live ? 'is-live' : ''}">${
-        live ? (title || '방송 중') : '오프라인'
-      }</div>
+      <div class="card-name">${m.name}</div>
+      <div class="card-title ${m.live ? 'is-live' : ''}">${m.live ? (m.title || '방송 중') : '오프라인'}</div>
     </div>
   `;
-
-  return { card, live };
+  return card;
 }
 
-async function loadAll() {
-  const results = await Promise.all(
-    MEMBERS.map(async (member) => {
-      const data = await fetchStation(member.id);
-      return { member, data };
-    })
-  );
+async function load() {
+  try {
+    const res = await fetch('data.json?t=' + Date.now());
+    const data = await res.json();
+    const members = [...data.members].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0));
 
-  // 방송 중인 멤버 먼저
-  results.sort((a, b) => {
-    const aL = isLive(a.data) ? 1 : 0;
-    const bL = isLive(b.data) ? 1 : 0;
-    return bL - aL;
-  });
+    const grid = document.createElement('div');
+    grid.className = 'grid';
 
-  const grid = document.createElement('div');
-  grid.className = 'grid';
+    let liveCount = 0;
+    members.forEach((m, i) => {
+      grid.appendChild(buildCard(m, i * 40));
+      if (m.live) liveCount++;
+    });
 
-  let liveCount = 0;
-  results.forEach(({ member, data }, i) => {
-    const { card, live } = buildCard(member, data, i * 40);
-    grid.appendChild(card);
-    if (live) liveCount++;
-  });
+    document.getElementById('app').innerHTML = '';
+    document.getElementById('app').appendChild(grid);
 
-  document.getElementById('app').innerHTML = '';
-  document.getElementById('app').appendChild(grid);
+    const dot = document.getElementById('liveDot');
+    const text = document.getElementById('liveText');
+    if (liveCount > 0) {
+      dot.className = 'live-dot';
+      text.textContent = liveCount + '명 방송 중';
+    } else {
+      dot.className = 'live-dot none';
+      text.textContent = '현재 방송 중인 멤버 없음';
+    }
 
-  // 상태 업데이트
-  const dot = document.getElementById('liveDot');
-  const text = document.getElementById('liveText');
-  if (liveCount > 0) {
-    dot.className = 'live-dot';
-    text.textContent = `${liveCount}명 방송 중`;
-  } else {
-    dot.className = 'live-dot none';
-    text.textContent = '현재 방송 중인 멤버 없음';
+    const updated = new Date(data.updated_at);
+    document.getElementById('footer').textContent =
+      '마지막 업데이트: ' + updated.toLocaleTimeString('ko-KR') + ' · 5분마다 자동 갱신';
+  } catch (e) {
+    document.getElementById('app').innerHTML =
+      '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';
+    console.error(e);
   }
-
-  const now = new Date();
-  document.getElementById('footer').textContent =
-    `마지막 업데이트: ${now.toLocaleTimeString('ko-KR')} · 3분마다 자동 갱신`;
 }
 
-// 초기 로드
-loadAll();
-
-// 3분마다 갱신
-setInterval(loadAll, 3 * 60 * 1000);
+load();
+setInterval(load, 60 * 1000);
 </script>
 </body>
 </html>

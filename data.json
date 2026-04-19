@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-19T15:13:26.368281+09:00",
+  "updated_at": "2026-04-19T16:47:57.499360+09:00",
   "members": [
     {
       "id": "243000",
@@ -49,12 +49,12 @@
       "id": "doormomo",
       "name": "문모모",
       "emoji": "🌷",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "오늘은 보여줘야한다 [천옵대/에스카]",
+      "category": "00040058",
+      "btime": 4713,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293348423",
+      "broad_no": "293348423"
     },
     {
       "id": "kim91709",
@@ -71,12 +71,12 @@
       "id": "kappuchan",
       "name": "카푸",
       "emoji": "☁️",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "ㅎㅇ 5시부터 1987본다고 말한다 ",
+      "category": "00810000",
+      "btime": 1947,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293349621",
+      "broad_no": "293349621"
     },
     {
       "id": "kyaang123",
@@ -94,9 +94,9 @@
       "name": "김웰로",
       "emoji": "🎵",
       "live": true,
-      "title": "허허허허 안녕하세용",
-      "category": "00810000",
-      "btime": 2527,
+      "title": "허허허허 안녕하세용 프래그마타 엔딩런",
+      "category": "00040402",
+      "btime": 8198,
       "thumb": "https://liveimg.sooplive.co.kr/m/293347053",
       "broad_no": "293347053"
     },
@@ -126,12 +126,12 @@
       "id": "baeksoon2",
       "name": "파니",
       "emoji": "🦊",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "안녕하세여",
+      "category": "00810000",
+      "btime": 2927,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293349149",
+      "broad_no": "293349149"
     }
   ]
 }

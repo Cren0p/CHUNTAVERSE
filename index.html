@@ -233,6 +233,18 @@
     padding: 4px 10px;
     backdrop-filter: blur(4px);
   }
+  .badge-adult {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: #dc2626;
+    color: white;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    box-shadow: 0 2px 8px rgba(220,38,38,0.4);
+  }
+  .card.adult .card-thumb { background: #1a0a0a; }
+  .card.adult .placeholder img { opacity: 0.6; }
   .card-info {
     padding: 12px 14px 14px;
     display: flex;
@@ -502,6 +514,7 @@ function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
   card.className = 'card ' + (info.live ? 'live' : 'offline');
+  if (info.adult) card.classList.add('adult');
   card.style.animationDelay = delay + 'ms';
 
   if (info.live) {
@@ -511,7 +524,8 @@ function buildCard(m, info, delay) {
   }
 
   const btime = formatBtime(info.btime);
-  const thumbHtml = info.thumb
+  // 19금이면 썸네일 안 띄우고 placeholder만
+  const thumbHtml = (info.thumb && !info.adult)
     ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
 
@@ -520,19 +534,24 @@ function buildCard(m, info, delay) {
     ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
     : `<img class="card-avatar" src="${m.img}" alt="${m.name}">`;
 
+  const titleText = info.live
+    ? (info.adult ? (info.title || '19+ 방송') : (info.title || '방송 중'))
+    : '오프라인';
+
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
-      <div class="placeholder" style="display:${info.thumb ? 'none' : 'flex'}">
+      <div class="placeholder" style="display:${(info.thumb && !info.adult) ? 'none' : 'flex'}">
         <img src="${m.img}" alt="${m.name}">
       </div>
+      ${info.adult ? '<span class="badge-adult">19+</span>' : ''}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
       ${avatarHtml}
       <div class="card-text">
         <div class="card-name">${m.name}</div>
-        <div class="card-title ${info.live ? 'is-live' : ''}">${info.live ? (info.title || '방송 중') : '오프라인'}</div>
+        <div class="card-title ${info.live ? 'is-live' : ''}">${escapeHtml(titleText)}</div>
       </div>
     </div>
   `;
@@ -590,7 +609,7 @@ async function loadEvents() {
 
     const tl = document.getElementById('timeline');
     if (events.length === 0) {
-      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송 시작/종료/방제·카테고리 변경 시 자동으로 쌓입니다</div>';
+      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
       return;
     }
     tl.innerHTML = events.map(renderEvent).join('');

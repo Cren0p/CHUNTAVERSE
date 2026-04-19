@@ -13,8 +13,8 @@
     --border: #1e2740;
     --live: #ff3b3b;
     --live-glow: rgba(255,59,59,0.25);
-    --accent: #7c6af7;
-    --accent2: #a78bfa;
+    --accent: #61FFEC;
+    --accent2: #61FFEC;
     --text: #e2e8f0;
     --muted: #64748b;
     --time: #fbbf24;
@@ -45,7 +45,7 @@
       radial-gradient(1px 1px at 55% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
       radial-gradient(1px 1px at 80% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),
       radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(2px 2px at 15% 50%, rgba(124,106,247,0.3) 0%, transparent 100%);
+      radial-gradient(2px 2px at 15% 50%, rgba(97,255,236,0.3) 0%, transparent 100%);
     pointer-events: none;
     z-index: 0;
   }
@@ -117,7 +117,7 @@
   .main-header {
     padding: 24px 32px 16px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(124,106,247,0.05) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(97,255,236,0.05) 0%, transparent 100%);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -186,10 +186,10 @@
   .card:hover {
     transform: translateY(-4px);
     border-color: var(--accent);
-    box-shadow: 0 8px 24px rgba(124,106,247,0.18);
+    box-shadow: 0 8px 24px rgba(97,255,236,0.18);
   }
   .card.live { border-color: var(--accent); }
-  .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(124,106,247,0.18); }
+  .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted); }
 
@@ -233,18 +233,6 @@
     padding: 4px 10px;
     backdrop-filter: blur(4px);
   }
-  .badge-adult {
-    position: absolute;
-    top: 10px; left: 10px;
-    background: #dc2626;
-    color: white;
-    font-size: 12px; font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 4px 10px;
-    box-shadow: 0 2px 8px rgba(220,38,38,0.4);
-  }
-  .card.adult .card-thumb { background: #1a0a0a; }
-  .card.adult .placeholder img { opacity: 0.6; }
   .card-info {
     padding: 12px 14px 14px;
     display: flex;
@@ -514,7 +502,6 @@ function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
   card.className = 'card ' + (info.live ? 'live' : 'offline');
-  if (info.adult) card.classList.add('adult');
   card.style.animationDelay = delay + 'ms';
 
   if (info.live) {
@@ -535,7 +522,7 @@ function buildCard(m, info, delay) {
     : `<img class="card-avatar" src="${m.img}" alt="${m.name}">`;
 
   const titleText = info.live
-    ? (info.adult ? (info.title || '19+ 방송') : (info.title || '방송 중'))
+    ? (info.title || '방송 중')
     : '오프라인';
 
   card.innerHTML = `
@@ -544,7 +531,6 @@ function buildCard(m, info, delay) {
       <div class="placeholder" style="display:${(info.thumb && !info.adult) ? 'none' : 'flex'}">
         <img src="${m.img}" alt="${m.name}">
       </div>
-      ${info.adult ? '<span class="badge-adult">19+</span>' : ''}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
@@ -668,7 +654,9 @@ async function loadLive() {
 
 loadLive();
 loadEvents();
-setInterval(() => { loadLive(); loadEvents(); }, 30 * 1000);
+// 라이브 카드는 30초마다, 이벤트는 20초마다, 상대시간은 30초마다 다시 그림
+setInterval(loadLive, 30 * 1000);
+setInterval(loadEvents, 20 * 1000);
 </script>
 </body>
 </html>

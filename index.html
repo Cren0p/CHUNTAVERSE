@@ -703,7 +703,7 @@ async function loadEvents() {
 
 async function loadLive() {
   try {
-    const res = await fetch('data.json?t=' + Date.now());
+    const res = await fetch('https://chuntaverse.crenop.workers.dev/?t=' + Date.now());
     const data = await res.json();
 
     const infoMap = {};

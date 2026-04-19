@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>천타버스</title>
+<link rel="icon" type="image/webp" href="Favicon.webp">
 <style>
   :root {
     --bg: #070a14;
@@ -63,17 +64,16 @@
     flex-shrink: 0;
   }
   .sidebar-logo {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    background: linear-gradient(135deg, #a78bfa, #7c6af7, #818cf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
     padding: 0 16px 20px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 16px;
+    text-align: center;
+  }
+  .sidebar-logo img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
   .nav-item {
     display: flex;
@@ -186,8 +186,8 @@
     border-color: var(--accent);
     box-shadow: 0 8px 24px rgba(124,106,247,0.18);
   }
-  .card.live { border-color: var(--live); box-shadow: 0 0 14px var(--live-glow); }
-  .card.live:hover { box-shadow: 0 8px 28px var(--live-glow); border-color: #ff5555; }
+  .card.live { border-color: var(--accent); }
+  .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(124,106,247,0.18); }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted); }
 
@@ -205,9 +205,11 @@
     overflow: hidden;
   }
   .card-thumb .placeholder img {
-    width: 60%;
-    height: 60%;
-    object-fit: cover;
+    max-width: 60%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
     opacity: 0.4;
   }
   .badge-live {
@@ -242,7 +244,6 @@
     flex-shrink: 0;
     border: 1.5px solid var(--border);
   }
-  .card.live .card-avatar { border-color: var(--live); }
   .card-text { min-width: 0; flex: 1; }
   .card-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
   .card-title {
@@ -367,10 +368,10 @@
 <body>
 
 <aside class="sidebar">
-  <div class="sidebar-logo">CHUNTAVERSE</div>
+  <div class="sidebar-logo"><img src="Title.webp" alt="CHUNTAVERSE"></div>
   <button class="nav-item active" data-page="live">
     <span class="nav-icon">●</span>
-    <span>지통실</span>
+    <span>생방송</span>
   </button>
   <button class="nav-item" data-page="events">
     <span class="nav-icon">▤</span>
@@ -380,7 +381,7 @@
 
 <main class="main">
   <div class="main-header">
-    <div class="page-title" id="pageTitle">지통실</div>
+    <div class="page-title" id="pageTitle">생방송</div>
     <div class="live-status" id="liveStatus">
       <span class="live-dot none" id="liveDot"></span>
       <span id="liveText">불러오는 중...</span>
@@ -429,7 +430,7 @@ const MEMBERS = [
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
 // 페이지 전환
-const PAGE_TITLES = { live: '지통실', events: '최근 이벤트' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트' };
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     const page = btn.dataset.page;
@@ -468,6 +469,13 @@ function escapeHtml(s) {
   })[c]);
 }
 
+function soopProfileUrl(userId) {
+  // SOOP 프로필 이미지: 숫자ID는 패턴이 다를 수 있어서 일단 이 패턴으로
+  if (/^\d+$/.test(userId)) return null; // 숫자ID면 폴백 사용
+  const prefix = userId.substring(0, 2);
+  return `https://stimg.sooplive.co.kr/LOGO/${prefix}/${userId}/${userId}.jpg`;
+}
+
 function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
@@ -485,17 +493,21 @@ function buildCard(m, info, delay) {
     ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
 
+  const profileUrl = soopProfileUrl(m.id);
+  const avatarHtml = profileUrl
+    ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
+    : `<img class="card-avatar" src="${m.img}" alt="${m.name}">`;
+
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
       <div class="placeholder" style="display:${info.thumb ? 'none' : 'flex'}">
         <img src="${m.img}" alt="${m.name}">
       </div>
-      ${info.live ? '<span class="badge-live">LIVE</span>' : ''}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
-      <img class="card-avatar" src="${m.img}" alt="${m.name}">
+      ${avatarHtml}
       <div class="card-text">
         <div class="card-name">${m.name}</div>
         <div class="card-title ${info.live ? 'is-live' : ''}">${info.live ? (info.title || '방송 중') : '오프라인'}</div>

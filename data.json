@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-19T16:47:57.499360+09:00",
+  "updated_at": "2026-04-19T17:38:41.383279+09:00",
   "members": [
     {
       "id": "243000",
@@ -27,12 +27,12 @@
       "id": "nanamoon777",
       "name": "나나문",
       "emoji": "🐰",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "[천옵대 안스팀] 화이팅",
+      "category": "00040058",
+      "btime": 2933,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293350467",
+      "broad_no": "293350467"
     },
     {
       "id": "imha22",
@@ -52,7 +52,7 @@
       "live": true,
       "title": "오늘은 보여줘야한다 [천옵대/에스카]",
       "category": "00040058",
-      "btime": 4713,
+      "btime": 7757,
       "thumb": "https://liveimg.sooplive.co.kr/m/293348423",
       "broad_no": "293348423"
     },
@@ -72,9 +72,9 @@
       "name": "카푸",
       "emoji": "☁️",
       "live": true,
-      "title": "ㅎㅇ 5시부터 1987본다고 말한다 ",
-      "category": "00810000",
-      "btime": 1947,
+      "title": "ㅎㅇ 5시 5분부터 1987본다고 말한다 ",
+      "category": "00960039",
+      "btime": 4990,
       "thumb": "https://liveimg.sooplive.co.kr/m/293349621",
       "broad_no": "293349621"
     },
@@ -96,7 +96,7 @@
       "live": true,
       "title": "허허허허 안녕하세용 프래그마타 엔딩런",
       "category": "00040402",
-      "btime": 8198,
+      "btime": 11242,
       "thumb": "https://liveimg.sooplive.co.kr/m/293347053",
       "broad_no": "293347053"
     },
@@ -129,7 +129,7 @@
       "live": true,
       "title": "안녕하세여",
       "category": "00810000",
-      "btime": 2927,
+      "btime": 5971,
       "thumb": "https://liveimg.sooplive.co.kr/m/293349149",
       "broad_no": "293349149"
     }

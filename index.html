@@ -22,6 +22,7 @@
     --ev-end: #f87171;
     --ev-title: #60a5fa;
     --ev-category: #fbbf24;
+    --ev-post: #c084fc;
     --sidebar-w: 200px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -321,6 +322,9 @@
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
   .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
+  .event-icon.post { background: rgba(192,132,252,0.15); color: var(--ev-post); }
+  .event a.event-link { color: inherit; text-decoration: none; display: contents; }
+  .event a.event-link:hover .event-detail { color: var(--accent2); }
   .event-avatar {
     width: 28px;
     height: 28px;
@@ -518,12 +522,13 @@ function buildCard(m, info, delay) {
 }
 
 function renderEvent(e) {
-  const iconMap = { start: '▶', end: '■', title: '✎', category: '#' };
+  const iconMap = { start: '▶', end: '■', title: '✎', category: '#', post: '글' };
   const actionMap = {
     start: '방송 시작',
     end: '방송 종료',
     title: '방제 변경',
     category: '카테고리 변경',
+    post: '숲 게시글',
   };
 
   const member = findMember(e.member_id);
@@ -534,22 +539,27 @@ function renderEvent(e) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
+  } else if (e.type === 'post' && e.title) {
+    detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
 
-  return `
-    <div class="event">
-      <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
-      ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
-      <div class="event-body">
-        <div>
-          <span class="event-member">${escapeHtml(e.member_name)}</span>
-          <span class="event-action">${actionMap[e.type]}</span>
-        </div>
-        ${detail}
+  const inner = `
+    <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
+    ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
+    <div class="event-body">
+      <div>
+        <span class="event-member">${escapeHtml(e.member_name)}</span>
+        <span class="event-action">${actionMap[e.type]}</span>
       </div>
-      <div class="event-time">${formatRelTime(e.time)}</div>
+      ${detail}
     </div>
+    <div class="event-time">${formatRelTime(e.time)}</div>
   `;
+
+  if (e.url) {
+    return `<div class="event"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
+  }
+  return `<div class="event">${inner}</div>`;
 }
 
 async function loadEvents() {

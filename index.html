@@ -13,9 +13,14 @@
     --live: #ff3b3b;
     --live-glow: rgba(255,59,59,0.3);
     --accent: #7c6af7;
+    --accent2: #a78bfa;
     --text: #e2e8f0;
     --muted: #64748b;
     --time: #fbbf24;
+    --ev-start: #34d399;
+    --ev-end: #f87171;
+    --ev-title: #60a5fa;
+    --ev-category: #fbbf24;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -46,8 +51,23 @@
     background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
   }
+  .nav-right {
+    position: absolute;
+    top: 28px;
+    right: 24px;
+  }
+  .nav-right a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface);
+    transition: all 0.2s;
+  }
+  .nav-right a:hover { color: var(--accent2); border-color: var(--accent); }
   .logo {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 32px;
     font-weight: 700;
     letter-spacing: 3px;
@@ -89,15 +109,9 @@
     max-width: 1400px;
     margin: 0 auto;
   }
-  @media (max-width: 1100px) {
-    .grid { grid-template-columns: repeat(4, 1fr); }
-  }
-  @media (max-width: 720px) {
-    .grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 480px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 720px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -192,23 +206,122 @@
     border-top: 1px solid var(--border);
     margin-top: 8px;
   }
+
+  /* 이벤트 타임라인 */
+  .timeline-section {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 24px;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+  .timeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .timeline::-webkit-scrollbar { width: 6px; }
+  .timeline::-webkit-scrollbar-track { background: transparent; }
+  .timeline::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .timeline-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .event {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .event:hover { background: var(--surface2); }
+  .event + .event { border-top: 1px solid var(--border); }
+  .event-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+  .event-icon.start { background: rgba(52,211,153,0.15); color: var(--ev-start); }
+  .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
+  .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
+  .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
+
+  .event-body {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+  }
+  .event-member {
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  .event-action {
+    color: var(--muted);
+  }
+  .event-detail {
+    color: #94a3b8;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .event-time {
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
 <header>
+  <div class="nav-right"><a href="draft.html">드래프트 →</a></div>
   <div class="logo">CHUNTAVERSE</div>
   <div class="live-status">
     <span class="live-dot none" id="liveDot"></span>
     <span id="liveText">불러오는 중...</span>
   </div>
 </header>
+
 <div id="app">
   <div class="loading">
     <div class="spinner"></div>
     <div>방송 정보를 가져오는 중...</div>
   </div>
 </div>
+
+<div class="timeline-section">
+  <div class="section-title">📋 최근 이벤트</div>
+  <div class="timeline" id="timeline">
+    <div class="timeline-empty">이벤트 불러오는 중...</div>
+  </div>
+</div>
+
 <footer id="footer"></footer>
+
 <script>
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
@@ -216,6 +329,16 @@ function formatBtime(seconds) {
   const m = Math.floor((seconds % 3600) / 60);
   if (h > 0) return h + '시간 ' + m + '분';
   return m + '분';
+}
+
+function formatRelTime(iso) {
+  const now = new Date();
+  const t = new Date(iso);
+  const diff = Math.floor((now - t) / 1000);
+  if (diff < 60) return '방금 전';
+  if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+  if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+  return Math.floor(diff / 86400) + '일 전';
 }
 
 function buildCard(m, delay) {
@@ -248,6 +371,64 @@ function buildCard(m, delay) {
     </div>
   `;
   return card;
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+
+function renderEvent(e) {
+  const iconMap = { start: '▶', end: '■', title: '✏', category: '🏷' };
+  const actionMap = {
+    start: '방송 시작',
+    end: '방송 종료',
+    title: '방제 변경',
+    category: '카테고리 변경',
+  };
+
+  let detail = '';
+  if (e.type === 'start' && e.title) {
+    detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
+  } else if (e.type === 'title') {
+    detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
+  } else if (e.type === 'category') {
+    detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
+  }
+
+  return `
+    <div class="event">
+      <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
+      <div class="event-body">
+        <div>
+          <span class="event-member">${e.emoji} ${e.member_name}</span>
+          <span class="event-action">${actionMap[e.type]}</span>
+        </div>
+        ${detail}
+      </div>
+      <div class="event-time">${formatRelTime(e.time)}</div>
+    </div>
+  `;
+}
+
+async function loadEvents() {
+  try {
+    const res = await fetch('events.json?t=' + Date.now());
+    if (!res.ok) throw new Error('no events');
+    const data = await res.json();
+    const events = data.events || [];
+
+    const tl = document.getElementById('timeline');
+    if (events.length === 0) {
+      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없습니다</div>';
+      return;
+    }
+    tl.innerHTML = events.slice(0, 30).map(renderEvent).join('');
+  } catch (e) {
+    document.getElementById('timeline').innerHTML =
+      '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';
+  }
 }
 
 async function load() {
@@ -289,7 +470,8 @@ async function load() {
 }
 
 load();
-setInterval(load, 60 * 1000);
+loadEvents();
+setInterval(() => { load(); loadEvents(); }, 60 * 1000);
 </script>
 </body>
 </html>

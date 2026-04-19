@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-19T13:24:47.808526+09:00",
+  "updated_at": "2026-04-19T15:13:26.368281+09:00",
   "members": [
     {
       "id": "243000",
@@ -93,12 +93,12 @@
       "id": "wellro314",
       "name": "김웰로",
       "emoji": "🎵",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "허허허허 안녕하세용",
+      "category": "00810000",
+      "btime": 2527,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293347053",
+      "broad_no": "293347053"
     },
     {
       "id": "mocamu2",

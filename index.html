@@ -11,7 +11,7 @@
     --surface2: #131929;
     --border: #1e2740;
     --live: #ff3b3b;
-    --live-glow: rgba(255,59,59,0.3);
+    --live-glow: rgba(255,59,59,0.25);
     --accent: #7c6af7;
     --accent2: #a78bfa;
     --text: #e2e8f0;
@@ -21,18 +21,15 @@
     --ev-end: #f87171;
     --ev-title: #60a5fa;
     --ev-category: #fbbf24;
-    --team1: #ff6b6b;
-    --team2: #4ecdc4;
-    --team3: #ffd93d;
-    --team4: #95e1d3;
-    --team5: #f38181;
-    --team6: #aa96da;
+    --sidebar-w: 200px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { min-height: 100vh; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
     min-height: 100vh;
   }
   body::before {
@@ -49,64 +46,98 @@
     pointer-events: none;
     z-index: 0;
   }
-  header {
-    position: relative;
-    z-index: 1;
-    padding: 32px 24px 16px;
-    text-align: center;
-    background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
+
+  /* 사이드바 */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 2;
+    flex-shrink: 0;
   }
-  .logo {
-    font-size: 32px;
+  .sidebar-logo {
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     background: linear-gradient(135deg, #a78bfa, #7c6af7, #818cf8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-align: center;
+    padding: 0 16px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
   }
-  .tabs {
-    display: inline-flex;
-    gap: 4px;
-    margin-top: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    padding: 4px;
-  }
-  .tab {
-    background: transparent;
-    border: none;
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
     color: var(--muted);
-    padding: 7px 18px;
-    border-radius: 99px;
     cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    transition: all 0.2s;
+    border: none;
+    background: none;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+    border-left: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
   }
-  .tab:hover { color: var(--text); }
-  .tab.active { background: var(--accent); color: white; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+  .nav-item:hover {
+    color: var(--text);
+    background: var(--surface2);
+  }
+  .nav-item.active {
+    color: var(--accent2);
+    background: var(--surface2);
+    border-left-color: var(--accent);
+  }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
 
+  /* 메인 영역 */
+  .main {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(124,106,247,0.05) 0%, transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 76px;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
   .live-status {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 14px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 99px;
-    padding: 6px 18px;
+    padding: 7px 16px;
     font-size: 13px;
-    margin-left: 12px;
   }
   .live-dot {
     width: 8px; height: 8px;
-    border-radius: 50%;
     background: var(--live);
     box-shadow: 0 0 6px var(--live-glow);
     animation: pulse 1.8s ease-in-out infinite;
@@ -117,44 +148,49 @@
     50% { opacity: 0.5; transform: scale(0.8); }
   }
 
+  .page { display: none; flex: 1; flex-direction: column; }
+  .page.active { display: flex; }
+
+  /* 그리드 4x3 */
   .grid {
-    position: relative;
-    z-index: 1;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 14px;
-    padding: 24px 20px;
-    max-width: 1400px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 24px 32px;
+    max-width: 1600px;
+    width: 100%;
     margin: 0 auto;
+    flex: 1;
   }
-  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 720px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
     overflow: hidden;
     text-decoration: none;
     color: inherit;
     display: block;
-    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     opacity: 0;
     animation: fadeIn 0.4s ease forwards;
   }
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     border-color: var(--accent);
-    box-shadow: 0 8px 32px rgba(124,106,247,0.15);
+    box-shadow: 0 8px 24px rgba(124,106,247,0.18);
   }
-  .card.live { border-color: var(--live); box-shadow: 0 0 16px var(--live-glow); }
-  .card.live:hover { box-shadow: 0 8px 32px var(--live-glow); border-color: #ff6060; }
+  .card.live { border-color: var(--live); box-shadow: 0 0 14px var(--live-glow); }
+  .card.live:hover { box-shadow: 0 8px 28px var(--live-glow); border-color: #ff5555; }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted); }
+
   .card-thumb {
     width: 100%;
     aspect-ratio: 16/9;
@@ -169,52 +205,48 @@
     overflow: hidden;
   }
   .card-thumb .placeholder img {
-    width: 70%;
-    height: 70%;
+    width: 60%;
+    height: 60%;
     object-fit: cover;
-    border-radius: 50%;
-    opacity: 0.5;
+    opacity: 0.4;
   }
   .badge-live {
     position: absolute;
-    top: 8px; left: 8px;
+    top: 10px; left: 10px;
     background: var(--live);
     color: white;
-    font-size: 10px; font-weight: 700;
+    font-size: 11px; font-weight: 700;
     letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 4px;
+    padding: 4px 10px;
     box-shadow: 0 2px 8px rgba(255,59,59,0.5);
   }
   .badge-time {
     position: absolute;
-    bottom: 8px; right: 8px;
-    background: rgba(0,0,0,0.75);
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.8);
     color: var(--time);
-    font-size: 11px; font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px;
     backdrop-filter: blur(4px);
   }
   .card-info {
-    padding: 10px 14px 12px;
+    padding: 12px 14px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
   }
   .card-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
     object-fit: cover;
     flex-shrink: 0;
     border: 1.5px solid var(--border);
   }
   .card.live .card-avatar { border-color: var(--live); }
   .card-text { min-width: 0; flex: 1; }
-  .card-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .card-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
   .card-title {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -222,97 +254,80 @@
     line-height: 1.3;
   }
   .card-title.is-live { color: #94a3b8; }
+
   .loading {
-    position: relative; z-index: 1;
     text-align: center;
     padding: 80px 20px;
     color: var(--muted);
+    flex: 1;
   }
   .spinner {
     width: 36px; height: 36px;
     border: 3px solid var(--border);
     border-top-color: var(--accent);
-    border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
   footer {
-    position: relative; z-index: 1;
     text-align: center;
-    padding: 16px;
+    padding: 14px 32px;
     color: var(--muted);
     font-size: 11px;
     border-top: 1px solid var(--border);
-    margin-top: 8px;
   }
 
-  .timeline-section {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
+  /* 이벤트 페이지 */
+  .events-wrap {
+    padding: 24px 32px;
+    max-width: 1000px;
+    width: 100%;
     margin: 0 auto;
-    padding: 0 20px 24px;
-  }
-  .section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    padding-left: 4px;
+    flex: 1;
   }
   .timeline {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 8px;
-    max-height: 280px;
-    overflow-y: auto;
   }
-  .timeline::-webkit-scrollbar { width: 6px; }
-  .timeline::-webkit-scrollbar-track { background: transparent; }
-  .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .timeline-empty {
     text-align: center;
-    padding: 30px 20px;
+    padding: 60px 20px;
     color: var(--muted);
     font-size: 13px;
   }
   .event {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    gap: 14px;
+    padding: 14px 18px;
     transition: background 0.15s;
   }
   .event:hover { background: var(--surface2); }
   .event + .event { border-top: 1px solid var(--border); }
   .event-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     flex-shrink: 0;
     background: var(--surface2);
+    font-weight: 700;
   }
   .event-icon.start { background: rgba(52,211,153,0.15); color: var(--ev-start); }
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
   .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
   .event-avatar {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
+    width: 28px;
+    height: 28px;
     object-fit: cover;
     flex-shrink: 0;
   }
-  .event-body { flex: 1; min-width: 0; font-size: 13px; }
-  .event-member { font-weight: 700; margin-right: 4px; }
+  .event-body { flex: 1; min-width: 0; font-size: 14px; }
+  .event-member { font-weight: 700; margin-right: 6px; }
   .event-action { color: var(--muted); }
   .event-detail {
     color: #94a3b8;
@@ -320,244 +335,82 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-top: 2px;
+    margin-top: 3px;
   }
-  .event-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .event-time { font-size: 12px; color: var(--muted); flex-shrink: 0; }
 
-  /* 드래프트 */
-  .draft-controls {
-    position: relative;
-    z-index: 1;
-    max-width: 1200px;
-    margin: 24px auto;
-    padding: 18px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-  }
-  .control-group { display: flex; align-items: center; gap: 10px; }
-  .control-label { font-size: 13px; color: var(--muted); }
-  .team-count-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    transition: all 0.2s;
-    min-width: 36px;
-  }
-  .team-count-btn:hover { border-color: var(--accent); }
-  .team-count-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-  }
-  .btn {
-    background: var(--accent);
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s;
-  }
-  .btn:hover { background: #6b5ae8; transform: translateY(-1px); }
-  .btn.secondary {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .btn.secondary:hover { border-color: var(--accent); background: var(--surface2); }
-  .draft-workspace {
-    position: relative;
-    z-index: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px 40px;
-  }
-  .pool {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-  .pool-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  .pool-title { font-size: 14px; font-weight: 600; color: var(--muted); }
-  .pool-count {
-    font-size: 12px;
-    color: var(--muted);
-    background: var(--surface2);
-    padding: 2px 10px;
-    border-radius: 99px;
-  }
-  .teams { display: grid; gap: 16px; }
-  .teams[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
-  .teams[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
-  .teams[data-count="4"] { grid-template-columns: repeat(2, 1fr); }
-  .teams[data-count="5"] { grid-template-columns: repeat(3, 1fr); }
-  .teams[data-count="6"] { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 900px) {
-    .teams[data-count="3"], .teams[data-count="4"],
-    .teams[data-count="5"], .teams[data-count="6"] {
-      grid-template-columns: repeat(2, 1fr);
+  /* 모바일 */
+  @media (max-width: 700px) {
+    body { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      flex-direction: row;
+      padding: 8px;
+      overflow-x: auto;
     }
-  }
-  @media (max-width: 600px) {
-    .teams { grid-template-columns: 1fr !important; }
-  }
-  .team {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    min-height: 200px;
-    transition: all 0.2s;
-  }
-  .team.drag-over {
-    border-color: var(--accent);
-    background: rgba(124,106,247,0.05);
-  }
-  .team-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--team-color);
-  }
-  .team-name { font-size: 15px; font-weight: 700; color: var(--team-color); }
-  .team-count {
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--surface2);
-    padding: 2px 8px;
-    border-radius: 99px;
-  }
-  .members {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    min-height: 120px;
-  }
-  .member {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    padding: 4px 14px 4px 4px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: grab;
-    user-select: none;
-    transition: all 0.2s;
-    opacity: 0;
-    animation: pop 0.3s ease forwards;
-  }
-  @keyframes pop {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  .member:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent);
-    box-shadow: 0 4px 12px rgba(124,106,247,0.2);
-  }
-  .member:active { cursor: grabbing; }
-  .member.dragging { opacity: 0.4; }
-  .member-avatar {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    object-fit: cover;
-    pointer-events: none;
-  }
-  .empty-hint {
-    width: 100%;
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-    padding: 30px 0;
-    opacity: 0.5;
+    .sidebar-logo { display: none; }
+    .nav-item {
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
+    .main-header { padding: 16px 20px; min-height: 0; }
+    .grid, .events-wrap { padding: 16px; }
+    .page-title { font-size: 18px; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">CHUNTAVERSE</div>
-  <div class="tabs">
-    <button class="tab active" data-tab="live">지통실</button>
-    <button class="tab" data-tab="draft">드래프트</button>
-  </div>
-  <div class="live-status" id="liveStatus">
-    <span class="live-dot none" id="liveDot"></span>
-    <span id="liveText">불러오는 중...</span>
-  </div>
-</header>
+<aside class="sidebar">
+  <div class="sidebar-logo">CHUNTAVERSE</div>
+  <button class="nav-item active" data-page="live">
+    <span class="nav-icon">●</span>
+    <span>지통실</span>
+  </button>
+  <button class="nav-item" data-page="events">
+    <span class="nav-icon">▤</span>
+    <span>최근 이벤트</span>
+  </button>
+</aside>
 
-<div class="tab-panel active" id="panel-live">
-  <div id="app">
-    <div class="loading">
-      <div class="spinner"></div>
-      <div>방송 정보를 가져오는 중...</div>
+<main class="main">
+  <div class="main-header">
+    <div class="page-title" id="pageTitle">지통실</div>
+    <div class="live-status" id="liveStatus">
+      <span class="live-dot none" id="liveDot"></span>
+      <span id="liveText">불러오는 중...</span>
     </div>
   </div>
-  <div class="timeline-section">
-    <div class="section-title">📋 최근 이벤트</div>
-    <div class="timeline" id="timeline">
-      <div class="timeline-empty">이벤트 불러오는 중...</div>
-    </div>
-  </div>
-  <footer id="footer"></footer>
-</div>
 
-<div class="tab-panel" id="panel-draft">
-  <div class="draft-controls">
-    <div class="control-group">
-      <span class="control-label">팀 수</span>
-      <button class="team-count-btn" data-count="2">2</button>
-      <button class="team-count-btn active" data-count="3">3</button>
-      <button class="team-count-btn" data-count="4">4</button>
-      <button class="team-count-btn" data-count="5">5</button>
-      <button class="team-count-btn" data-count="6">6</button>
-    </div>
-    <div class="control-group">
-      <button class="btn" id="shuffleBtn">🎲 랜덤 분배</button>
-      <button class="btn secondary" id="resetBtn">초기화</button>
-    </div>
-  </div>
-  <div class="draft-workspace">
-    <div class="pool">
-      <div class="pool-header">
-        <div class="pool-title">대기 명단</div>
-        <div class="pool-count" id="poolCount">12/12</div>
+  <!-- 지통실 -->
+  <div class="page active" id="page-live">
+    <div id="app">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>방송 정보를 가져오는 중...</div>
       </div>
-      <div class="members" id="pool"></div>
     </div>
-    <div class="teams" id="teamsEl" data-count="3"></div>
+    <footer id="footer"></footer>
   </div>
-</div>
+
+  <!-- 이벤트 -->
+  <div class="page" id="page-events">
+    <div class="events-wrap">
+      <div class="timeline" id="timeline">
+        <div class="timeline-empty">이벤트 불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+</main>
 
 <script>
+const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
+
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp' },
   { id: 'madaomm',     name: '마다옴', img: '02.webp' },
@@ -575,14 +428,19 @@ const MEMBERS = [
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
-    document.getElementById('liveStatus').style.display =
-      t.dataset.tab === 'live' ? 'inline-flex' : 'none';
+// 페이지 전환
+const PAGE_TITLES = { live: '지통실', events: '최근 이벤트' };
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
+    // 이벤트 페이지에선 라이브 상태 숨기기 (자리 차지는 유지하지 않음 → header 우측이 비어 보일 수 있어 visibility로)
+    document.getElementById('liveStatus').style.visibility =
+      page === 'live' ? 'visible' : 'hidden';
   });
 });
 
@@ -648,7 +506,7 @@ function buildCard(m, info, delay) {
 }
 
 function renderEvent(e) {
-  const iconMap = { start: '▶', end: '■', title: '✏', category: '🏷' };
+  const iconMap = { start: '▶', end: '■', title: '✎', category: '#' };
   const actionMap = {
     start: '방송 시작',
     end: '방송 종료',
@@ -684,17 +542,17 @@ function renderEvent(e) {
 
 async function loadEvents() {
   try {
-    const res = await fetch('events.json?t=' + Date.now());
+    const res = await fetch(WORKER_URL + '/events?t=' + Date.now());
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
     const events = data.events || [];
 
     const tl = document.getElementById('timeline');
     if (events.length === 0) {
-      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없습니다</div>';
+      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송 시작/종료/방제·카테고리 변경 시 자동으로 쌓입니다</div>';
       return;
     }
-    tl.innerHTML = events.slice(0, 30).map(renderEvent).join('');
+    tl.innerHTML = events.map(renderEvent).join('');
   } catch (e) {
     document.getElementById('timeline').innerHTML =
       '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';
@@ -703,7 +561,7 @@ async function loadEvents() {
 
 async function loadLive() {
   try {
-    const res = await fetch('https://chuntaverse.crenop.workers.dev/?t=' + Date.now());
+    const res = await fetch(WORKER_URL + '/?t=' + Date.now());
     const data = await res.json();
 
     const infoMap = {};
@@ -721,7 +579,7 @@ async function loadLive() {
     let liveCount = 0;
     sorted.forEach((m, i) => {
       const info = infoMap[m.id] || { id: m.id, live: false };
-      grid.appendChild(buildCard(m, info, i * 40));
+      grid.appendChild(buildCard(m, info, i * 35));
       if (info.live) liveCount++;
     });
 
@@ -735,12 +593,12 @@ async function loadLive() {
       text.textContent = liveCount + '명 방송 중';
     } else {
       dot.className = 'live-dot none';
-      text.textContent = '현재 방송 중인 멤버 없음';
+      text.textContent = '방송 중인 멤버 없음';
     }
 
     const updated = new Date(data.updated_at);
     document.getElementById('footer').textContent =
-      '마지막 업데이트: ' + updated.toLocaleTimeString('ko-KR') + ' · 5분마다 자동 갱신';
+      '실시간 데이터 · ' + updated.toLocaleTimeString('ko-KR') + ' 기준';
   } catch (e) {
     document.getElementById('app').innerHTML =
       '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';
@@ -750,142 +608,7 @@ async function loadLive() {
 
 loadLive();
 loadEvents();
-setInterval(() => { loadLive(); loadEvents(); }, 60 * 1000);
-
-// 드래프트
-const TEAM_COLORS = [
-  'var(--team1)', 'var(--team2)', 'var(--team3)',
-  'var(--team4)', 'var(--team5)', 'var(--team6)'
-];
-
-let teamCount = 3;
-let draftState = {
-  poolIds: MEMBERS.map(m => m.id),
-  teams: Array.from({ length: teamCount }, () => [])
-};
-
-function renderDraft() {
-  const pool = document.getElementById('pool');
-  pool.innerHTML = '';
-  if (draftState.poolIds.length === 0) {
-    pool.innerHTML = '<div class="empty-hint">모두 팀에 배치됐습니다 ✨</div>';
-  } else {
-    draftState.poolIds.forEach(id => pool.appendChild(createMemberEl(id)));
-  }
-  document.getElementById('poolCount').textContent = `${draftState.poolIds.length}/12`;
-
-  const teamsEl = document.getElementById('teamsEl');
-  teamsEl.setAttribute('data-count', teamCount);
-  teamsEl.innerHTML = '';
-  draftState.teams.forEach((memberIds, i) => {
-    const team = document.createElement('div');
-    team.className = 'team';
-    team.dataset.teamIndex = i;
-    team.style.setProperty('--team-color', TEAM_COLORS[i]);
-
-    team.innerHTML = `
-      <div class="team-header">
-        <span class="team-name">팀 ${i + 1}</span>
-        <span class="team-count">${memberIds.length}명</span>
-      </div>
-      <div class="members" data-team-index="${i}"></div>
-    `;
-
-    const memList = team.querySelector('.members');
-    if (memberIds.length === 0) {
-      memList.innerHTML = '<div class="empty-hint">여기로 드래그</div>';
-    } else {
-      memberIds.forEach(id => memList.appendChild(createMemberEl(id)));
-    }
-
-    setupDrop(team);
-    teamsEl.appendChild(team);
-  });
-
-  setupDrop(document.querySelector('.pool'));
-}
-
-function createMemberEl(id) {
-  const m = findMember(id);
-  const el = document.createElement('div');
-  el.className = 'member';
-  el.draggable = true;
-  el.dataset.memberId = id;
-  el.innerHTML = `<img class="member-avatar" src="${m.img}" alt="${m.name}"><span>${m.name}</span>`;
-
-  el.addEventListener('dragstart', (e) => {
-    el.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', id);
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  el.addEventListener('dragend', () => el.classList.remove('dragging'));
-  return el;
-}
-
-function setupDrop(zone) {
-  zone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    zone.classList.add('drag-over');
-  });
-  zone.addEventListener('dragleave', (e) => {
-    if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
-  });
-  zone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    const id = e.dataTransfer.getData('text/plain');
-    if (!id) return;
-    moveMember(id, zone);
-  });
-}
-
-function moveMember(id, targetZone) {
-  draftState.poolIds = draftState.poolIds.filter(x => x !== id);
-  draftState.teams = draftState.teams.map(t => t.filter(x => x !== id));
-
-  if (targetZone.classList.contains('pool')) {
-    draftState.poolIds.push(id);
-  } else if (targetZone.classList.contains('team')) {
-    const idx = parseInt(targetZone.dataset.teamIndex);
-    draftState.teams[idx].push(id);
-  }
-  renderDraft();
-}
-
-document.querySelectorAll('.team-count-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const n = parseInt(btn.dataset.count);
-    if (n === teamCount) return;
-    document.querySelectorAll('.team-count-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const allTeamMembers = draftState.teams.flat();
-    draftState.poolIds = [...draftState.poolIds, ...allTeamMembers];
-    teamCount = n;
-    draftState.teams = Array.from({ length: n }, () => []);
-    renderDraft();
-  });
-});
-
-document.getElementById('shuffleBtn').addEventListener('click', () => {
-  const all = [...MEMBERS.map(m => m.id)];
-  for (let i = all.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [all[i], all[j]] = [all[j], all[i]];
-  }
-  draftState.poolIds = [];
-  draftState.teams = Array.from({ length: teamCount }, () => []);
-  all.forEach((id, i) => { draftState.teams[i % teamCount].push(id); });
-  renderDraft();
-});
-
-document.getElementById('resetBtn').addEventListener('click', () => {
-  draftState.poolIds = MEMBERS.map(m => m.id);
-  draftState.teams = Array.from({ length: teamCount }, () => []);
-  renderDraft();
-});
-
-renderDraft();
+setInterval(() => { loadLive(); loadEvents(); }, 30 * 1000);
 </script>
 </body>
 </html>

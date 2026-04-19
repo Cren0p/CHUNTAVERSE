@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>천타버스 지통실</title>
+<title>천타버스</title>
 <style>
   :root {
     --bg: #070a14;
@@ -21,6 +21,12 @@
     --ev-end: #f87171;
     --ev-title: #60a5fa;
     --ev-category: #fbbf24;
+    --team1: #ff6b6b;
+    --team2: #4ecdc4;
+    --team3: #ffd93d;
+    --team4: #95e1d3;
+    --team5: #f38181;
+    --team6: #aa96da;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -46,27 +52,11 @@
   header {
     position: relative;
     z-index: 1;
-    padding: 32px 24px 20px;
+    padding: 32px 24px 16px;
     text-align: center;
     background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
   }
-  .nav-right {
-    position: absolute;
-    top: 28px;
-    right: 24px;
-  }
-  .nav-right a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    background: var(--surface);
-    transition: all 0.2s;
-  }
-  .nav-right a:hover { color: var(--accent2); border-color: var(--accent); }
   .logo {
     font-size: 32px;
     font-weight: 700;
@@ -76,6 +66,32 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .tabs {
+    display: inline-flex;
+    gap: 4px;
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 4px;
+  }
+  .tab {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 7px 18px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--accent); color: white; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   .live-status {
     display: inline-flex;
     align-items: center;
@@ -86,6 +102,7 @@
     border-radius: 99px;
     padding: 6px 18px;
     font-size: 13px;
+    margin-left: 12px;
   }
   .live-dot {
     width: 8px; height: 8px;
@@ -99,6 +116,7 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
   }
+
   .grid {
     position: relative;
     z-index: 1;
@@ -148,7 +166,14 @@
   .card-thumb .placeholder {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 32px; opacity: 0.3;
+    overflow: hidden;
+  }
+  .card-thumb .placeholder img {
+    width: 70%;
+    height: 70%;
+    object-fit: cover;
+    border-radius: 50%;
+    opacity: 0.5;
   }
   .badge-live {
     position: absolute;
@@ -171,15 +196,30 @@
     border-radius: 6px;
     backdrop-filter: blur(4px);
   }
-  .card-info { padding: 12px 14px 14px; }
-  .card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .card-info {
+    padding: 10px 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+  }
+  .card.live .card-avatar { border-color: var(--live); }
+  .card-text { min-width: 0; flex: 1; }
+  .card-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
   .card-title {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: 1.4;
+    line-height: 1.3;
   }
   .card-title.is-live { color: #94a3b8; }
   .loading {
@@ -207,7 +247,6 @@
     margin-top: 8px;
   }
 
-  /* 이벤트 타임라인 */
   .timeline-section {
     position: relative;
     z-index: 1;
@@ -233,10 +272,7 @@
   }
   .timeline::-webkit-scrollbar { width: 6px; }
   .timeline::-webkit-scrollbar-track { background: transparent; }
-  .timeline::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-  }
+  .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .timeline-empty {
     text-align: center;
     padding: 30px 20px;
@@ -268,19 +304,16 @@
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
   .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
-
-  .event-body {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
+  .event-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
   }
-  .event-member {
-    font-weight: 700;
-    margin-right: 4px;
-  }
-  .event-action {
-    color: var(--muted);
-  }
+  .event-body { flex: 1; min-width: 0; font-size: 13px; }
+  .event-member { font-weight: 700; margin-right: 4px; }
+  .event-action { color: var(--muted); }
   .event-detail {
     color: #94a3b8;
     font-size: 12px;
@@ -289,40 +322,270 @@
     white-space: nowrap;
     margin-top: 2px;
   }
-  .event-time {
+  .event-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+
+  /* 드래프트 */
+  .draft-controls {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .control-group { display: flex; align-items: center; gap: 10px; }
+  .control-label { font-size: 13px; color: var(--muted); }
+  .team-count-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    transition: all 0.2s;
+    min-width: 36px;
+  }
+  .team-count-btn:hover { border-color: var(--accent); }
+  .team-count-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: #6b5ae8; transform: translateY(-1px); }
+  .btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn.secondary:hover { border-color: var(--accent); background: var(--surface2); }
+  .draft-workspace {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+  }
+  .pool {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .pool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .pool-title { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .pool-count {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 2px 10px;
+    border-radius: 99px;
+  }
+  .teams { display: grid; gap: 16px; }
+  .teams[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+  .teams[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
+  .teams[data-count="4"] { grid-template-columns: repeat(2, 1fr); }
+  .teams[data-count="5"] { grid-template-columns: repeat(3, 1fr); }
+  .teams[data-count="6"] { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 900px) {
+    .teams[data-count="3"], .teams[data-count="4"],
+    .teams[data-count="5"], .teams[data-count="6"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .teams { grid-template-columns: 1fr !important; }
+  }
+  .team {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    min-height: 200px;
+    transition: all 0.2s;
+  }
+  .team.drag-over {
+    border-color: var(--accent);
+    background: rgba(124,106,247,0.05);
+  }
+  .team-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--team-color);
+  }
+  .team-name { font-size: 15px; font-weight: 700; color: var(--team-color); }
+  .team-count {
     font-size: 11px;
     color: var(--muted);
-    flex-shrink: 0;
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 120px;
+  }
+  .member {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 4px 14px 4px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.2s;
+    opacity: 0;
+    animation: pop 0.3s ease forwards;
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .member:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(124,106,247,0.2);
+  }
+  .member:active { cursor: grabbing; }
+  .member.dragging { opacity: 0.4; }
+  .member-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  .empty-hint {
+    width: 100%;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 30px 0;
+    opacity: 0.5;
   }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="nav-right"><a href="draft.html">드래프트 →</a></div>
   <div class="logo">CHUNTAVERSE</div>
-  <div class="live-status">
+  <div class="tabs">
+    <button class="tab active" data-tab="live">지통실</button>
+    <button class="tab" data-tab="draft">드래프트</button>
+  </div>
+  <div class="live-status" id="liveStatus">
     <span class="live-dot none" id="liveDot"></span>
     <span id="liveText">불러오는 중...</span>
   </div>
 </header>
 
-<div id="app">
-  <div class="loading">
-    <div class="spinner"></div>
-    <div>방송 정보를 가져오는 중...</div>
+<div class="tab-panel active" id="panel-live">
+  <div id="app">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>방송 정보를 가져오는 중...</div>
+    </div>
   </div>
+  <div class="timeline-section">
+    <div class="section-title">📋 최근 이벤트</div>
+    <div class="timeline" id="timeline">
+      <div class="timeline-empty">이벤트 불러오는 중...</div>
+    </div>
+  </div>
+  <footer id="footer"></footer>
 </div>
 
-<div class="timeline-section">
-  <div class="section-title">📋 최근 이벤트</div>
-  <div class="timeline" id="timeline">
-    <div class="timeline-empty">이벤트 불러오는 중...</div>
+<div class="tab-panel" id="panel-draft">
+  <div class="draft-controls">
+    <div class="control-group">
+      <span class="control-label">팀 수</span>
+      <button class="team-count-btn" data-count="2">2</button>
+      <button class="team-count-btn active" data-count="3">3</button>
+      <button class="team-count-btn" data-count="4">4</button>
+      <button class="team-count-btn" data-count="5">5</button>
+      <button class="team-count-btn" data-count="6">6</button>
+    </div>
+    <div class="control-group">
+      <button class="btn" id="shuffleBtn">🎲 랜덤 분배</button>
+      <button class="btn secondary" id="resetBtn">초기화</button>
+    </div>
+  </div>
+  <div class="draft-workspace">
+    <div class="pool">
+      <div class="pool-header">
+        <div class="pool-title">대기 명단</div>
+        <div class="pool-count" id="poolCount">12/12</div>
+      </div>
+      <div class="members" id="pool"></div>
+    </div>
+    <div class="teams" id="teamsEl" data-count="3"></div>
   </div>
 </div>
-
-<footer id="footer"></footer>
 
 <script>
+const MEMBERS = [
+  { id: '243000',      name: '천양',   img: '01.webp' },
+  { id: 'madaomm',     name: '마다옴', img: '02.webp' },
+  { id: 'nanamoon777', name: '나나문', img: '03.webp' },
+  { id: 'imha22',      name: '임하밍', img: '04.webp' },
+  { id: 'doormomo',    name: '문모모', img: '05.webp' },
+  { id: 'kim91709',    name: '한아밍', img: '06.webp' },
+  { id: 'kappuchan',   name: '카푸',   img: '07.webp' },
+  { id: 'kyaang123',   name: '캬앙',   img: '08.webp' },
+  { id: 'wellro314',   name: '김웰로', img: '09.webp' },
+  { id: 'mocamu2',     name: '모카',   img: '10.webp' },
+  { id: 'dalta20',     name: '달타',   img: '11.webp' },
+  { id: 'baeksoon2',   name: '파니',   img: '12.webp' },
+];
+
+function findMember(id) { return MEMBERS.find(m => m.id === id); }
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+    document.getElementById('liveStatus').style.display =
+      t.dataset.tab === 'live' ? 'inline-flex' : 'none';
+  });
+});
+
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);
@@ -341,42 +604,47 @@ function formatRelTime(iso) {
   return Math.floor(diff / 86400) + '일 전';
 }
 
-function buildCard(m, delay) {
-  const tag = m.live ? 'a' : 'div';
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+
+function buildCard(m, info, delay) {
+  const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
-  card.className = 'card ' + (m.live ? 'live' : 'offline');
+  card.className = 'card ' + (info.live ? 'live' : 'offline');
   card.style.animationDelay = delay + 'ms';
 
-  if (m.live) {
-    card.href = 'https://play.sooplive.co.kr/' + m.id;
+  if (info.live) {
+    card.href = 'https://play.sooplive.co.kr/' + info.id;
     card.target = '_blank';
     card.rel = 'noopener';
   }
 
-  const btime = formatBtime(m.btime);
-  const thumbHtml = m.thumb
-    ? `<img src="${m.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+  const btime = formatBtime(info.btime);
+  const thumbHtml = info.thumb
+    ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
 
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
-      <div class="placeholder" style="display:${m.thumb ? 'none' : 'flex'}">${m.emoji}</div>
-      ${m.live ? '<span class="badge-live">LIVE</span>' : ''}
+      <div class="placeholder" style="display:${info.thumb ? 'none' : 'flex'}">
+        <img src="${m.img}" alt="${m.name}">
+      </div>
+      ${info.live ? '<span class="badge-live">LIVE</span>' : ''}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
-      <div class="card-name">${m.name}</div>
-      <div class="card-title ${m.live ? 'is-live' : ''}">${m.live ? (m.title || '방송 중') : '오프라인'}</div>
+      <img class="card-avatar" src="${m.img}" alt="${m.name}">
+      <div class="card-text">
+        <div class="card-name">${m.name}</div>
+        <div class="card-title ${info.live ? 'is-live' : ''}">${info.live ? (info.title || '방송 중') : '오프라인'}</div>
+      </div>
     </div>
   `;
   return card;
-}
-
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[c]);
 }
 
 function renderEvent(e) {
@@ -388,21 +656,23 @@ function renderEvent(e) {
     category: '카테고리 변경',
   };
 
+  const member = findMember(e.member_id);
+  const avatarSrc = member ? member.img : '';
+
   let detail = '';
   if (e.type === 'start' && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
-  } else if (e.type === 'title') {
-    detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
-  } else if (e.type === 'category') {
+  } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
   }
 
   return `
     <div class="event">
       <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
+      ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
       <div class="event-body">
         <div>
-          <span class="event-member">${e.emoji} ${e.member_name}</span>
+          <span class="event-member">${escapeHtml(e.member_name)}</span>
           <span class="event-action">${actionMap[e.type]}</span>
         </div>
         ${detail}
@@ -431,19 +701,28 @@ async function loadEvents() {
   }
 }
 
-async function load() {
+async function loadLive() {
   try {
     const res = await fetch('data.json?t=' + Date.now());
     const data = await res.json();
-    const members = [...data.members].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0));
+
+    const infoMap = {};
+    data.members.forEach(m => { infoMap[m.id] = m; });
+
+    const sorted = [...MEMBERS].sort((a, b) => {
+      const al = (infoMap[a.id] && infoMap[a.id].live) ? 1 : 0;
+      const bl = (infoMap[b.id] && infoMap[b.id].live) ? 1 : 0;
+      return bl - al;
+    });
 
     const grid = document.createElement('div');
     grid.className = 'grid';
 
     let liveCount = 0;
-    members.forEach((m, i) => {
-      grid.appendChild(buildCard(m, i * 40));
-      if (m.live) liveCount++;
+    sorted.forEach((m, i) => {
+      const info = infoMap[m.id] || { id: m.id, live: false };
+      grid.appendChild(buildCard(m, info, i * 40));
+      if (info.live) liveCount++;
     });
 
     document.getElementById('app').innerHTML = '';
@@ -469,9 +748,144 @@ async function load() {
   }
 }
 
-load();
+loadLive();
 loadEvents();
-setInterval(() => { load(); loadEvents(); }, 60 * 1000);
+setInterval(() => { loadLive(); loadEvents(); }, 60 * 1000);
+
+// 드래프트
+const TEAM_COLORS = [
+  'var(--team1)', 'var(--team2)', 'var(--team3)',
+  'var(--team4)', 'var(--team5)', 'var(--team6)'
+];
+
+let teamCount = 3;
+let draftState = {
+  poolIds: MEMBERS.map(m => m.id),
+  teams: Array.from({ length: teamCount }, () => [])
+};
+
+function renderDraft() {
+  const pool = document.getElementById('pool');
+  pool.innerHTML = '';
+  if (draftState.poolIds.length === 0) {
+    pool.innerHTML = '<div class="empty-hint">모두 팀에 배치됐습니다 ✨</div>';
+  } else {
+    draftState.poolIds.forEach(id => pool.appendChild(createMemberEl(id)));
+  }
+  document.getElementById('poolCount').textContent = `${draftState.poolIds.length}/12`;
+
+  const teamsEl = document.getElementById('teamsEl');
+  teamsEl.setAttribute('data-count', teamCount);
+  teamsEl.innerHTML = '';
+  draftState.teams.forEach((memberIds, i) => {
+    const team = document.createElement('div');
+    team.className = 'team';
+    team.dataset.teamIndex = i;
+    team.style.setProperty('--team-color', TEAM_COLORS[i]);
+
+    team.innerHTML = `
+      <div class="team-header">
+        <span class="team-name">팀 ${i + 1}</span>
+        <span class="team-count">${memberIds.length}명</span>
+      </div>
+      <div class="members" data-team-index="${i}"></div>
+    `;
+
+    const memList = team.querySelector('.members');
+    if (memberIds.length === 0) {
+      memList.innerHTML = '<div class="empty-hint">여기로 드래그</div>';
+    } else {
+      memberIds.forEach(id => memList.appendChild(createMemberEl(id)));
+    }
+
+    setupDrop(team);
+    teamsEl.appendChild(team);
+  });
+
+  setupDrop(document.querySelector('.pool'));
+}
+
+function createMemberEl(id) {
+  const m = findMember(id);
+  const el = document.createElement('div');
+  el.className = 'member';
+  el.draggable = true;
+  el.dataset.memberId = id;
+  el.innerHTML = `<img class="member-avatar" src="${m.img}" alt="${m.name}"><span>${m.name}</span>`;
+
+  el.addEventListener('dragstart', (e) => {
+    el.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  return el;
+}
+
+function setupDrop(zone) {
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', (e) => {
+    if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+  });
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const id = e.dataTransfer.getData('text/plain');
+    if (!id) return;
+    moveMember(id, zone);
+  });
+}
+
+function moveMember(id, targetZone) {
+  draftState.poolIds = draftState.poolIds.filter(x => x !== id);
+  draftState.teams = draftState.teams.map(t => t.filter(x => x !== id));
+
+  if (targetZone.classList.contains('pool')) {
+    draftState.poolIds.push(id);
+  } else if (targetZone.classList.contains('team')) {
+    const idx = parseInt(targetZone.dataset.teamIndex);
+    draftState.teams[idx].push(id);
+  }
+  renderDraft();
+}
+
+document.querySelectorAll('.team-count-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const n = parseInt(btn.dataset.count);
+    if (n === teamCount) return;
+    document.querySelectorAll('.team-count-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const allTeamMembers = draftState.teams.flat();
+    draftState.poolIds = [...draftState.poolIds, ...allTeamMembers];
+    teamCount = n;
+    draftState.teams = Array.from({ length: n }, () => []);
+    renderDraft();
+  });
+});
+
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  const all = [...MEMBERS.map(m => m.id)];
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  draftState.poolIds = [];
+  draftState.teams = Array.from({ length: teamCount }, () => []);
+  all.forEach((id, i) => { draftState.teams[i % teamCount].push(id); });
+  renderDraft();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  draftState.poolIds = MEMBERS.map(m => m.id);
+  draftState.teams = Array.from({ length: teamCount }, () => []);
+  renderDraft();
+});
+
+renderDraft();
 </script>
 </body>
 </html>

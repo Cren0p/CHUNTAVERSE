@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-04-19T17:38:41.383279+09:00",
+  "updated_at": "2026-04-19T18:30:01.067488+09:00",
   "members": [
     {
       "id": "243000",
       "name": "천양",
       "emoji": "🌙",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "[천양 오버워치 대회] 2일차 - 패자조 [에스카팀 vs 안스팀]",
+      "category": "00130000",
+      "btime": 76,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293353085",
+      "broad_no": "293353085"
     },
     {
       "id": "madaomm",
@@ -30,7 +30,7 @@
       "live": true,
       "title": "[천옵대 안스팀] 화이팅",
       "category": "00040058",
-      "btime": 2933,
+      "btime": 6014,
       "thumb": "https://liveimg.sooplive.co.kr/m/293350467",
       "broad_no": "293350467"
     },
@@ -52,7 +52,7 @@
       "live": true,
       "title": "오늘은 보여줘야한다 [천옵대/에스카]",
       "category": "00040058",
-      "btime": 7757,
+      "btime": 10837,
       "thumb": "https://liveimg.sooplive.co.kr/m/293348423",
       "broad_no": "293348423"
     },
@@ -74,7 +74,7 @@
       "live": true,
       "title": "ㅎㅇ 5시 5분부터 1987본다고 말한다 ",
       "category": "00960039",
-      "btime": 4990,
+      "btime": 8070,
       "thumb": "https://liveimg.sooplive.co.kr/m/293349621",
       "broad_no": "293349621"
     },
@@ -96,7 +96,7 @@
       "live": true,
       "title": "허허허허 안녕하세용 프래그마타 엔딩런",
       "category": "00040402",
-      "btime": 11242,
+      "btime": 14322,
       "thumb": "https://liveimg.sooplive.co.kr/m/293347053",
       "broad_no": "293347053"
     },
@@ -104,12 +104,12 @@
       "id": "mocamu2",
       "name": "모카",
       "emoji": "☕",
-      "live": false,
-      "title": null,
-      "category": null,
-      "btime": null,
-      "thumb": null,
-      "broad_no": null
+      "live": true,
+      "title": "[UR:L] 천옵대대회2일차감블러팀 힐러 모카",
+      "category": "00040058",
+      "btime": 2246,
+      "thumb": "https://liveimg.sooplive.co.kr/m/293352023",
+      "broad_no": "293352023"
     },
     {
       "id": "dalta20",
@@ -129,7 +129,7 @@
       "live": true,
       "title": "안녕하세여",
       "category": "00810000",
-      "btime": 5971,
+      "btime": 9050,
       "thumb": "https://liveimg.sooplive.co.kr/m/293349149",
       "broad_no": "293349149"
     }

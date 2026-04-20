@@ -294,21 +294,142 @@
 
   /* 이벤트 페이지 */
   .events-wrap {
-    padding: 24px 32px;
-    max-width: 1000px;
+    padding: 20px 24px;
+    max-width: 1400px;
     width: 100%;
     margin: 0 auto;
     flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .events-wrap { grid-template-columns: 1fr; }
+    .filter-panel { position: static !important; }
   }
   .timeline {
     background: var(--surface);
     border: 1px solid var(--border);
+    min-width: 0;
   }
   .timeline-empty {
     text-align: center;
     padding: 60px 20px;
     color: var(--muted);
     font-size: 13px;
+  }
+
+  /* 필터 패널 */
+  .filter-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 20px;
+  }
+  .filter-section + .filter-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .filter-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .filter-toggle-all {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 9px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+  }
+  .filter-toggle-all:hover { color: var(--accent); border-color: var(--accent); }
+  .filter-members {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .filter-member {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .filter-member img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.15s;
+  }
+  .filter-member:not(.on) img { opacity: 0.25; filter: grayscale(1); }
+  .filter-member.on { border-color: var(--accent); }
+  .filter-member:hover { border-color: var(--accent); }
+  .filter-member .label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 4px;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .filter-types {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.15s;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+  }
+  .filter-type:hover { color: var(--text); border-color: var(--accent); }
+  .filter-type.on { border-color: var(--accent); color: var(--text); }
+  .filter-type .dot {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+  .filter-type[data-type="soop"] .dot { background: var(--ev-start); }
+  .filter-type[data-type="post"] .dot { background: var(--ev-post); }
+  .filter-type[data-type="youtube"] .dot { background: var(--ev-youtube); }
+
+  .filter-summary {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
   }
   .event {
     display: flex;
@@ -423,6 +544,36 @@
     <div class="events-wrap">
       <div class="timeline" id="timeline">
         <div class="timeline-empty">이벤트 불러오는 중...</div>
+      </div>
+      <div class="filter-panel">
+        <div class="filter-section">
+          <div class="filter-title">
+            <span>멤버</span>
+            <button class="filter-toggle-all" id="memberToggleAll">전체 선택</button>
+          </div>
+          <div class="filter-members" id="filterMembers"></div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">
+            <span>종류</span>
+            <button class="filter-toggle-all" id="typeToggleAll">전체 선택</button>
+          </div>
+          <div class="filter-types" id="filterTypes">
+            <button class="filter-type on" data-type="soop">
+              <span class="dot"></span>
+              <span>숲 방송</span>
+            </button>
+            <button class="filter-type on" data-type="post">
+              <span class="dot"></span>
+              <span>숲 게시글</span>
+            </button>
+            <button class="filter-type on" data-type="youtube">
+              <span class="dot"></span>
+              <span>유튜브 영상</span>
+            </button>
+          </div>
+        </div>
+        <div class="filter-summary" id="filterSummary"></div>
       </div>
     </div>
   </div>
@@ -621,19 +772,128 @@ function renderEvent(e) {
   return `<div class="event">${inner}</div>`;
 }
 
+// 필터 상태
+const filterState = {
+  members: new Set(MEMBERS.map(m => m.id)), // 전부 선택 기본
+  types: new Set(['soop', 'post', 'youtube']),
+};
+let allEvents = [];
+
+function initFilterUI() {
+  // 멤버 필터 렌더
+  const mc = document.getElementById('filterMembers');
+  if (mc && !mc.dataset.inited) {
+    mc.innerHTML = MEMBERS.map(m => `
+      <button class="filter-member on" data-id="${m.id}" title="${m.name}">
+        <img src="${m.img}" alt="${m.name}">
+        <span class="label">${m.name}</span>
+      </button>
+    `).join('');
+    mc.querySelectorAll('.filter-member').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        if (filterState.members.has(id)) {
+          filterState.members.delete(id);
+          btn.classList.remove('on');
+        } else {
+          filterState.members.add(id);
+          btn.classList.add('on');
+        }
+        applyFilter();
+      });
+    });
+    mc.dataset.inited = '1';
+  }
+
+  // 종류 필터
+  const tc = document.getElementById('filterTypes');
+  if (tc && !tc.dataset.inited) {
+    tc.querySelectorAll('.filter-type').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        if (filterState.types.has(type)) {
+          filterState.types.delete(type);
+          btn.classList.remove('on');
+        } else {
+          filterState.types.add(type);
+          btn.classList.add('on');
+        }
+        applyFilter();
+      });
+    });
+    tc.dataset.inited = '1';
+  }
+
+  // 전체 선택/해제 버튼
+  const mToggle = document.getElementById('memberToggleAll');
+  if (mToggle && !mToggle.dataset.inited) {
+    mToggle.addEventListener('click', () => {
+      const allOn = filterState.members.size === MEMBERS.length;
+      filterState.members.clear();
+      if (!allOn) MEMBERS.forEach(m => filterState.members.add(m.id));
+      document.querySelectorAll('.filter-member').forEach(btn => {
+        btn.classList.toggle('on', filterState.members.has(btn.dataset.id));
+      });
+      applyFilter();
+    });
+    mToggle.dataset.inited = '1';
+  }
+  const tToggle = document.getElementById('typeToggleAll');
+  if (tToggle && !tToggle.dataset.inited) {
+    tToggle.addEventListener('click', () => {
+      const allTypes = ['soop', 'post', 'youtube'];
+      const allOn = filterState.types.size === allTypes.length;
+      filterState.types.clear();
+      if (!allOn) allTypes.forEach(t => filterState.types.add(t));
+      document.querySelectorAll('.filter-type').forEach(btn => {
+        btn.classList.toggle('on', filterState.types.has(btn.dataset.type));
+      });
+      applyFilter();
+    });
+    tToggle.dataset.inited = '1';
+  }
+}
+
+function applyFilter() {
+  const tl = document.getElementById('timeline');
+  if (!tl) return;
+  // 이벤트 타입 → 카테고리 매핑
+  // soop 카테고리: start, end, title, category
+  // post 카테고리: post
+  // youtube 카테고리: youtube
+  const filtered = allEvents.filter(e => {
+    if (!filterState.members.has(e.member_id)) return false;
+    const cat = (e.type === 'post') ? 'post'
+              : (e.type === 'youtube') ? 'youtube'
+              : 'soop';
+    return filterState.types.has(cat);
+  });
+
+  if (filtered.length === 0) {
+    if (allEvents.length === 0) {
+      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
+    } else {
+      tl.innerHTML = '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
+    }
+  } else {
+    tl.innerHTML = filtered.map(renderEvent).join('');
+  }
+
+  // 요약
+  const summary = document.getElementById('filterSummary');
+  if (summary) {
+    summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
+  }
+}
+
 async function loadEvents() {
   try {
     const res = await fetch(WORKER_URL + '/events?t=' + Date.now());
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
-    const events = data.events || [];
-
-    const tl = document.getElementById('timeline');
-    if (events.length === 0) {
-      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
-    } else {
-      tl.innerHTML = events.map(renderEvent).join('');
-    }
+    allEvents = data.events || [];
+    initFilterUI();
+    applyFilter();
     lastEventsUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {

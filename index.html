@@ -55,10 +55,10 @@
     width: var(--sidebar-w);
     background: var(--surface);
     border-right: 1px solid var(--border);
-    padding: 24px 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0;
     position: sticky;
     top: 0;
     height: 100vh;
@@ -66,16 +66,25 @@
     flex-shrink: 0;
   }
   .sidebar-logo {
-    padding: 0 16px 20px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
     text-align: center;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .sidebar-logo img {
     max-width: 100%;
+    max-height: 32px;
     height: auto;
     display: block;
-    margin: 0 auto;
+  }
+  .nav-list {
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
   .nav-item {
     display: flex;
@@ -115,19 +124,29 @@
     flex-direction: column;
   }
   .main-header {
-    padding: 24px 32px 16px;
+    padding: 10px 24px;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(97,255,236,0.05) 0%, transparent 100%);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
-    min-height: 76px;
+    min-height: 56px;
   }
   .page-title {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+  .header-center {
+    flex: 1;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .live-status {
     display: inline-flex;
@@ -273,14 +292,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  footer {
-    text-align: center;
-    padding: 14px 32px;
-    color: var(--muted);
-    font-size: 11px;
-    border-top: 1px solid var(--border);
-  }
-
   /* 이벤트 페이지 */
   .events-wrap {
     padding: 24px 32px;
@@ -375,19 +386,22 @@
 
 <aside class="sidebar">
   <div class="sidebar-logo"><img src="Title.webp" alt="CHUNTAVERSE"></div>
-  <button class="nav-item active" data-page="live">
-    <span class="nav-icon">●</span>
-    <span>생방송</span>
-  </button>
-  <button class="nav-item" data-page="events">
-    <span class="nav-icon">▤</span>
-    <span>최근 이벤트</span>
-  </button>
+  <div class="nav-list">
+    <button class="nav-item active" data-page="live">
+      <span class="nav-icon">●</span>
+      <span>생방송</span>
+    </button>
+    <button class="nav-item" data-page="events">
+      <span class="nav-icon">▤</span>
+      <span>최근 이벤트</span>
+    </button>
+  </div>
 </aside>
 
 <main class="main">
   <div class="main-header">
     <div class="page-title" id="pageTitle">생방송</div>
+    <div class="header-center" id="headerCenter"></div>
     <div class="live-status" id="liveStatus">
       <span class="live-dot none" id="liveDot"></span>
       <span id="liveText">불러오는 중...</span>
@@ -402,7 +416,6 @@
         <div>방송 정보를 가져오는 중...</div>
       </div>
     </div>
-    <footer id="footer"></footer>
   </div>
 
   <!-- 이벤트 -->
@@ -439,8 +452,29 @@ function findMember(id) { return MEMBERS.find(m => m.id === id); }
 const PAGE_TITLES = { live: '생방송', events: '최근 이벤트' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
+let lastLiveUpdate = null;
+let lastEventsUpdate = null;
+let currentPage = 'live';
+
+function updateHeaderCenter() {
+  const el = document.getElementById('headerCenter');
+  if (!el) return;
+  if (currentPage === 'live') {
+    el.textContent = lastLiveUpdate
+      ? '30초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준'
+      : '';
+  } else if (currentPage === 'events') {
+    el.textContent = lastEventsUpdate
+      ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
+      : '';
+  } else {
+    el.textContent = '';
+  }
+}
+
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
+  currentPage = page;
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
   });
@@ -449,6 +483,7 @@ function switchPage(page) {
   document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
   document.getElementById('liveStatus').style.visibility =
     page === 'live' ? 'visible' : 'hidden';
+  updateHeaderCenter();
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -596,9 +631,11 @@ async function loadEvents() {
     const tl = document.getElementById('timeline');
     if (events.length === 0) {
       tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
-      return;
+    } else {
+      tl.innerHTML = events.map(renderEvent).join('');
     }
-    tl.innerHTML = events.map(renderEvent).join('');
+    lastEventsUpdate = new Date();
+    updateHeaderCenter();
   } catch (e) {
     document.getElementById('timeline').innerHTML =
       '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';
@@ -643,8 +680,8 @@ async function loadLive() {
     }
 
     const updated = new Date(data.updated_at);
-    document.getElementById('footer').textContent =
-      '실시간 데이터 · ' + updated.toLocaleTimeString('ko-KR') + ' 기준';
+    lastLiveUpdate = updated;
+    updateHeaderCenter();
   } catch (e) {
     document.getElementById('app').innerHTML =
       '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';

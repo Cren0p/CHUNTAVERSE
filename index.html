@@ -22,8 +22,12 @@
     --ev-end: #f87171;
     --ev-title: #60a5fa;
     --ev-category: #fbbf24;
+    --ev-mode: #a78bfa;
     --ev-post: #c084fc;
     --ev-youtube: #ef4444;
+    --mode-adult: #ec4899;
+    --mode-subscription: #f59e0b;
+    --mode-copyright: #94a3b8;
     --sidebar-w: 200px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -222,16 +226,24 @@
   .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .card-thumb .placeholder {
     width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
     overflow: hidden;
+    gap: 8px;
   }
   .card-thumb .placeholder img {
-    max-width: 60%;
-    max-height: 80%;
+    max-width: 50%;
+    max-height: 60%;
     width: auto;
     height: auto;
     object-fit: contain;
     opacity: 0.4;
+  }
+  .placeholder-mode-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-align: center;
   }
   .badge-live {
     position: absolute;
@@ -243,6 +255,18 @@
     padding: 4px 10px;
     box-shadow: 0 2px 8px rgba(255,59,59,0.5);
   }
+  .badge-mode {
+    position: absolute;
+    top: 10px; right: 10px;
+    color: white;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+  }
+  .badge-mode.adult { background: var(--mode-adult); box-shadow: 0 2px 8px rgba(236,72,153,0.45); }
+  .badge-mode.subscription { background: var(--mode-subscription); box-shadow: 0 2px 8px rgba(245,158,11,0.45); }
+  .badge-mode.copyright { background: var(--mode-copyright); box-shadow: 0 2px 8px rgba(148,163,184,0.45); }
+  .badge-mode.restricted { background: var(--muted); }
   .badge-time {
     position: absolute;
     bottom: 10px; right: 10px;
@@ -455,6 +479,7 @@
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
   .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
+  .event-icon.mode_change { background: rgba(167,139,250,0.15); color: var(--ev-mode); }
   .event-icon.post { background: rgba(192,132,252,0.15); color: var(--ev-post); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
@@ -468,6 +493,20 @@
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-action { color: var(--muted); }
+  .event-mode-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.3px;
+    vertical-align: 1px;
+  }
+  .event-mode-tag.adult { background: var(--mode-adult); }
+  .event-mode-tag.subscription { background: var(--mode-subscription); }
+  .event-mode-tag.copyright { background: var(--mode-copyright); }
+  .event-mode-tag.restricted { background: var(--muted); }
   .event-detail {
     color: #94a3b8;
     font-size: 12px;
@@ -597,6 +636,27 @@ const MEMBERS = [
   { id: 'baeksoon2',   name: '파니',   img: '12.webp' },
 ];
 
+// 모드 라벨/표시
+const MODE_LABEL = {
+  normal: '일반 방송',
+  adult: '19금',
+  subscription: '구독플러스',
+  copyright: '저작권',
+  restricted: '제한 방송',
+};
+const MODE_BADGE_LABEL = {
+  adult: '19+',
+  subscription: '구독플러스',
+  copyright: '저작권',
+  restricted: '제한',
+};
+const MODE_PLACEHOLDER_TEXT = {
+  adult: '19금 방송',
+  subscription: '구독플러스 전용 방송',
+  copyright: '저작권 방송',
+  restricted: '제한 방송',
+};
+
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
 // 페이지 전환
@@ -697,9 +757,20 @@ function buildCard(m, info, delay) {
   }
 
   const btime = formatBtime(info.btime);
-  // 19금이면 썸네일 안 띄우고 placeholder만
-  const thumbHtml = (info.thumb && !info.adult)
+  const mode = info.mode || (info.live ? 'normal' : null);
+  const isNormalLive = info.live && mode === 'normal';
+  const hasThumb = info.thumb && isNormalLive;
+
+  const thumbHtml = hasThumb
     ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+
+  const placeholderInner = info.live && mode && mode !== 'normal'
+    ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
+    : `<img src="${m.img}" alt="${m.name}">`;
+
+  const modeBadge = info.live && mode && mode !== 'normal'
+    ? `<span class="badge-mode ${mode}">${MODE_BADGE_LABEL[mode] || ''}</span>`
     : '';
 
   const profileUrl = soopProfileUrl(m.id);
@@ -707,16 +778,24 @@ function buildCard(m, info, delay) {
     ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
     : `<img class="card-avatar" src="${m.img}" alt="${m.name}">`;
 
-  const titleText = info.live
-    ? (info.title || '방송 중')
-    : '오프라인';
+  let titleText;
+  if (!info.live) {
+    titleText = '오프라인';
+  } else if (info.title) {
+    titleText = info.title;
+  } else if (mode && mode !== 'normal') {
+    titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
+  } else {
+    titleText = '방송 중';
+  }
 
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
-      <div class="placeholder" style="display:${(info.thumb && !info.adult) ? 'none' : 'flex'}">
-        <img src="${m.img}" alt="${m.name}">
+      <div class="placeholder" style="display:${hasThumb ? 'none' : 'flex'}">
+        ${placeholderInner}
       </div>
+      ${modeBadge}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
@@ -731,12 +810,17 @@ function buildCard(m, info, delay) {
 }
 
 function renderEvent(e) {
-  const iconMap = { start: '▶', end: '■', title: '✎', category: '#', post: '글', youtube: '▶' };
+  const iconMap = {
+    start: '▶', end: '■',
+    title: '✎', category: '#', mode_change: '◆',
+    post: '글', youtube: '▶'
+  };
   const actionMap = {
     start: '방송 시작',
     end: '방송 종료',
     title: '방제 변경',
     category: '카테고리 변경',
+    mode_change: '방송 모드 변경',
     post: '숲 게시글',
     youtube: '유튜브 영상',
   };
@@ -744,11 +828,22 @@ function renderEvent(e) {
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
 
+  // start/end에 모드 태그 (일반방송이 아닐 때만)
+  let modeTag = '';
+  if ((e.type === 'start' || e.type === 'end') && e.mode && e.mode !== 'normal') {
+    const label = MODE_BADGE_LABEL[e.mode] || '';
+    if (label) modeTag = `<span class="event-mode-tag ${e.mode}">${label}</span>`;
+  }
+
   let detail = '';
   if (e.type === 'start' && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
+  } else if (e.type === 'mode_change') {
+    const beforeLabel = MODE_LABEL[e.before] || e.before;
+    const afterLabel = MODE_LABEL[e.after] || e.after;
+    detail = `<div class="event-detail">${escapeHtml(beforeLabel)} → ${escapeHtml(afterLabel)}</div>`;
   } else if ((e.type === 'post' || e.type === 'youtube') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
@@ -759,7 +854,8 @@ function renderEvent(e) {
     <div class="event-body">
       <div>
         <span class="event-member">${escapeHtml(e.member_name)}</span>
-        <span class="event-action">${actionMap[e.type]}</span>
+        <span class="event-action">${actionMap[e.type] || e.type}</span>
+        ${modeTag}
       </div>
       ${detail}
     </div>
@@ -858,7 +954,7 @@ function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
   // 이벤트 타입 → 카테고리 매핑
-  // soop 카테고리: start, end, title, category
+  // soop 카테고리: start, end, title, category, mode_change
   // post 카테고리: post
   // youtube 카테고리: youtube
   const filtered = allEvents.filter(e => {

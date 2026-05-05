@@ -24,6 +24,7 @@
     --ev-category: #fbbf24;
     --ev-mode: #a78bfa;
     --ev-post: #c084fc;
+    --ev-comment: #ec4899;
     --ev-youtube: #ef4444;
     --mode-adult: #ec4899;
     --mode-subscription: #f59e0b;
@@ -363,21 +364,7 @@
     color: var(--muted);
     letter-spacing: 1px;
     margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
-  .filter-toggle-all {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 3px 9px;
-    font-size: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    letter-spacing: 0.5px;
-  }
-  .filter-toggle-all:hover { color: var(--accent); border-color: var(--accent); }
   .filter-members {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -414,6 +401,20 @@
     text-align: center;
     pointer-events: none;
   }
+  .filter-member.all-tile {
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .filter-member.all-tile.on {
+    background: var(--accent);
+    color: var(--bg);
+  }
 
   .filter-types {
     display: flex;
@@ -443,8 +444,10 @@
     height: 12px;
     flex-shrink: 0;
   }
+  .filter-type[data-type="all"] .dot { background: var(--accent); }
   .filter-type[data-type="soop"] .dot { background: var(--ev-start); }
   .filter-type[data-type="post"] .dot { background: var(--ev-post); }
+  .filter-type[data-type="comment"] .dot { background: var(--ev-comment); }
   .filter-type[data-type="youtube"] .dot { background: var(--ev-youtube); }
 
   .filter-summary {
@@ -481,6 +484,7 @@
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
   .event-icon.mode_change { background: rgba(167,139,250,0.15); color: var(--ev-mode); }
   .event-icon.post { background: rgba(192,132,252,0.15); color: var(--ev-post); }
+  .event-icon.comment_recommend { background: rgba(236,72,153,0.15); color: var(--ev-comment); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
@@ -493,6 +497,11 @@
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-action { color: var(--muted); }
+  .event-target {
+    color: var(--ev-comment);
+    font-weight: 600;
+    margin-left: 4px;
+  }
   .event-mode-tag {
     display: inline-block;
     margin-left: 6px;
@@ -515,7 +524,20 @@
     white-space: nowrap;
     margin-top: 3px;
   }
-  .event-time { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .event-time {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+    text-align: right;
+    line-height: 1.4;
+  }
+  .event-time-rel { display: block; }
+  .event-time-abs {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0.7;
+  }
 
   /* 모바일 */
   @media (max-width: 700px) {
@@ -586,27 +608,25 @@
       </div>
       <div class="filter-panel">
         <div class="filter-section">
-          <div class="filter-title">
-            <span>멤버</span>
-            <button class="filter-toggle-all" id="memberToggleAll">전체 선택</button>
-          </div>
+          <div class="filter-title">멤버</div>
           <div class="filter-members" id="filterMembers"></div>
         </div>
         <div class="filter-section">
-          <div class="filter-title">
-            <span>종류</span>
-            <button class="filter-toggle-all" id="typeToggleAll">전체 선택</button>
-          </div>
+          <div class="filter-title">종류</div>
           <div class="filter-types" id="filterTypes">
-            <button class="filter-type on" data-type="soop">
+            <button class="filter-type on" data-type="all">
+              <span class="dot"></span>
+              <span>전체</span>
+            </button>
+            <button class="filter-type" data-type="soop">
               <span class="dot"></span>
               <span>숲 방송</span>
             </button>
-            <button class="filter-type on" data-type="post">
+            <button class="filter-type" data-type="post">
               <span class="dot"></span>
               <span>숲 게시글</span>
             </button>
-            <button class="filter-type on" data-type="youtube">
+            <button class="filter-type" data-type="youtube">
               <span class="dot"></span>
               <span>유튜브 영상</span>
             </button>
@@ -705,7 +725,6 @@ document.querySelectorAll('.nav-item').forEach(btn => {
   });
 });
 
-// 페이지 로드 시 URL 해시로 탭 복원
 const initPage = (location.hash || '').replace('#', '') || 'live';
 switchPage(initPage);
 
@@ -732,6 +751,18 @@ function formatRelTime(iso) {
   return Math.floor(diff / 86400) + '일 전';
 }
 
+function formatAbsTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -739,7 +770,6 @@ function escapeHtml(s) {
 }
 
 function soopProfileUrl(userId) {
-  // SOOP 프로필 이미지: profile.img.sooplive.com/LOGO/{앞2글자}/{유저ID}/{유저ID}.jpg
   const prefix = userId.substring(0, 2);
   return `https://profile.img.sooplive.com/LOGO/${prefix}/${userId}/${userId}.jpg`;
 }
@@ -813,7 +843,8 @@ function renderEvent(e) {
   const iconMap = {
     start: '▶', end: '■',
     title: '✎', category: '#', mode_change: '◆',
-    post: '글', youtube: '▶'
+    post: '글', comment_recommend: '↑',
+    youtube: '▶'
   };
   const actionMap = {
     start: '방송 시작',
@@ -822,6 +853,7 @@ function renderEvent(e) {
     category: '카테고리 변경',
     mode_change: '방송 모드 변경',
     post: '숲 게시글',
+    comment_recommend: '댓글 추천',
     youtube: '유튜브 영상',
   };
 
@@ -835,6 +867,12 @@ function renderEvent(e) {
     if (label) modeTag = `<span class="event-mode-tag ${e.mode}">${label}</span>`;
   }
 
+  // comment_recommend는 액션 라벨에 대상 멤버 같이 표시
+  let targetTag = '';
+  if (e.type === 'comment_recommend' && e.target_name) {
+    targetTag = `<span class="event-target">(${escapeHtml(e.target_name)} 컨텐츠)</span>`;
+  }
+
   let detail = '';
   if (e.type === 'start' && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
@@ -844,7 +882,7 @@ function renderEvent(e) {
     const beforeLabel = MODE_LABEL[e.before] || e.before;
     const afterLabel = MODE_LABEL[e.after] || e.after;
     detail = `<div class="event-detail">${escapeHtml(beforeLabel)} → ${escapeHtml(afterLabel)}</div>`;
-  } else if ((e.type === 'post' || e.type === 'youtube') && e.title) {
+  } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
 
@@ -855,11 +893,15 @@ function renderEvent(e) {
       <div>
         <span class="event-member">${escapeHtml(e.member_name)}</span>
         <span class="event-action">${actionMap[e.type] || e.type}</span>
+        ${targetTag}
         ${modeTag}
       </div>
       ${detail}
     </div>
-    <div class="event-time">${formatRelTime(e.time)}</div>
+    <div class="event-time">
+      <span class="event-time-rel">${formatRelTime(e.time)}</span>
+      <span class="event-time-abs">${formatAbsTime(e.time)}</span>
+    </div>
   `;
 
   if (e.url) {
@@ -868,85 +910,52 @@ function renderEvent(e) {
   return `<div class="event">${inner}</div>`;
 }
 
-// 필터 상태
+// 필터 상태 (단일 선택)
 const filterState = {
-  members: new Set(MEMBERS.map(m => m.id)), // 전부 선택 기본
-  types: new Set(['soop', 'post', 'youtube']),
+  member: 'all',  // 'all' | member.id
+  type: 'all',    // 'all' | 'soop' | 'post' | 'comment' | 'youtube'
 };
 let allEvents = [];
 
 function initFilterUI() {
-  // 멤버 필터 렌더
+  // 멤버 필터: 전체 + 12명
   const mc = document.getElementById('filterMembers');
   if (mc && !mc.dataset.inited) {
-    mc.innerHTML = MEMBERS.map(m => `
-      <button class="filter-member on" data-id="${m.id}" title="${m.name}">
+    const tilesHtml = [
+      `<button class="filter-member all-tile on" data-id="all" title="전체"><span>전체</span></button>`
+    ].concat(MEMBERS.map(m => `
+      <button class="filter-member" data-id="${m.id}" title="${m.name}">
         <img src="${m.img}" alt="${m.name}">
         <span class="label">${m.name}</span>
       </button>
-    `).join('');
+    `)).join('');
+    mc.innerHTML = tilesHtml;
     mc.querySelectorAll('.filter-member').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        if (filterState.members.has(id)) {
-          filterState.members.delete(id);
-          btn.classList.remove('on');
-        } else {
-          filterState.members.add(id);
-          btn.classList.add('on');
-        }
+        filterState.member = btn.dataset.id;
+        // UI 갱신
+        mc.querySelectorAll('.filter-member').forEach(b => {
+          b.classList.toggle('on', b.dataset.id === filterState.member);
+        });
         applyFilter();
       });
     });
     mc.dataset.inited = '1';
   }
 
-  // 종류 필터
+  // 종류 필터 (이미 HTML에 5개 있음)
   const tc = document.getElementById('filterTypes');
   if (tc && !tc.dataset.inited) {
     tc.querySelectorAll('.filter-type').forEach(btn => {
       btn.addEventListener('click', () => {
-        const type = btn.dataset.type;
-        if (filterState.types.has(type)) {
-          filterState.types.delete(type);
-          btn.classList.remove('on');
-        } else {
-          filterState.types.add(type);
-          btn.classList.add('on');
-        }
+        filterState.type = btn.dataset.type;
+        tc.querySelectorAll('.filter-type').forEach(b => {
+          b.classList.toggle('on', b.dataset.type === filterState.type);
+        });
         applyFilter();
       });
     });
     tc.dataset.inited = '1';
-  }
-
-  // 전체 선택/해제 버튼
-  const mToggle = document.getElementById('memberToggleAll');
-  if (mToggle && !mToggle.dataset.inited) {
-    mToggle.addEventListener('click', () => {
-      const allOn = filterState.members.size === MEMBERS.length;
-      filterState.members.clear();
-      if (!allOn) MEMBERS.forEach(m => filterState.members.add(m.id));
-      document.querySelectorAll('.filter-member').forEach(btn => {
-        btn.classList.toggle('on', filterState.members.has(btn.dataset.id));
-      });
-      applyFilter();
-    });
-    mToggle.dataset.inited = '1';
-  }
-  const tToggle = document.getElementById('typeToggleAll');
-  if (tToggle && !tToggle.dataset.inited) {
-    tToggle.addEventListener('click', () => {
-      const allTypes = ['soop', 'post', 'youtube'];
-      const allOn = filterState.types.size === allTypes.length;
-      filterState.types.clear();
-      if (!allOn) allTypes.forEach(t => filterState.types.add(t));
-      document.querySelectorAll('.filter-type').forEach(btn => {
-        btn.classList.toggle('on', filterState.types.has(btn.dataset.type));
-      });
-      applyFilter();
-    });
-    tToggle.dataset.inited = '1';
   }
 }
 
@@ -954,15 +963,20 @@ function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
   // 이벤트 타입 → 카테고리 매핑
-  // soop 카테고리: start, end, title, category, mode_change
-  // post 카테고리: post
-  // youtube 카테고리: youtube
+  // soop: start, end, title, category, mode_change
+  // post: post
+  // comment: comment_recommend
+  // youtube: youtube
+  const typeToCat = (et) => {
+    if (et === 'post' || et === 'comment_recommend') return 'post';
+    if (et === 'youtube') return 'youtube';
+    return 'soop';
+  };
+
   const filtered = allEvents.filter(e => {
-    if (!filterState.members.has(e.member_id)) return false;
-    const cat = (e.type === 'post') ? 'post'
-              : (e.type === 'youtube') ? 'youtube'
-              : 'soop';
-    return filterState.types.has(cat);
+    if (filterState.member !== 'all' && e.member_id !== filterState.member) return false;
+    if (filterState.type !== 'all' && typeToCat(e.type) !== filterState.type) return false;
+    return true;
   });
 
   if (filtered.length === 0) {
@@ -975,7 +989,6 @@ function applyFilter() {
     tl.innerHTML = filtered.map(renderEvent).join('');
   }
 
-  // 요약
   const summary = document.getElementById('filterSummary');
   if (summary) {
     summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
@@ -1047,7 +1060,6 @@ async function loadLive() {
 
 loadLive();
 loadEvents();
-// 라이브 카드는 30초마다, 이벤트는 20초마다, 상대시간은 30초마다 다시 그림
 setInterval(loadLive, 30 * 1000);
 setInterval(loadEvents, 20 * 1000);
 </script>

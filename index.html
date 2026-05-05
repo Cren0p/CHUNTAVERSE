@@ -20,10 +20,10 @@
     --time: #fbbf24;
     --ev-start: #34d399;
     --ev-end: #f87171;
-    --ev-yellow: #fbbf24;       /* 카테고리/방제/방송모드 변경 */
-    --ev-blue: #60a5fa;          /* 게시글/댓글 추천 */
-    --ev-comment: #ec4899;       /* 댓글 추천 (대표색) */
-    --ev-post: #60a5fa;          /* 게시글 */
+    --ev-yellow: #fbbf24;
+    --ev-blue: #60a5fa;
+    --ev-comment: #ec4899;
+    --ev-post: #60a5fa;
     --ev-youtube: #ef4444;
     --mode-adult: #ec4899;
     --mode-subscription: #f59e0b;
@@ -56,7 +56,6 @@
     z-index: 0;
   }
 
-  /* 사이드바 */
   .sidebar {
     width: var(--sidebar-w);
     background: var(--surface);
@@ -80,18 +79,8 @@
     align-items: center;
     justify-content: center;
   }
-  .sidebar-logo img {
-    max-width: 100%;
-    max-height: 32px;
-    height: auto;
-    display: block;
-  }
-  .nav-list {
-    padding: 8px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+  .sidebar-logo img { max-width: 100%; max-height: 32px; height: auto; display: block; }
+  .nav-list { padding: 8px 0; display: flex; flex-direction: column; gap: 2px; }
   .nav-item {
     display: flex;
     align-items: center;
@@ -109,18 +98,10 @@
     border-left: 3px solid transparent;
     transition: color 0.15s, background 0.15s, border-color 0.15s;
   }
-  .nav-item:hover {
-    color: var(--text);
-    background: var(--surface2);
-  }
-  .nav-item.active {
-    color: var(--accent2);
-    background: var(--surface2);
-    border-left-color: var(--accent);
-  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent2); background: var(--surface2); border-left-color: var(--accent); }
   .nav-icon { font-size: 16px; width: 18px; text-align: center; }
 
-  /* 메인 영역 */
   .main {
     flex: 1;
     min-width: 0;
@@ -138,12 +119,7 @@
     gap: 16px;
     min-height: 56px;
   }
-  .page-title {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    flex-shrink: 0;
-  }
+  .page-title { font-size: 18px; font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
   .header-center {
     flex: 1;
     text-align: center;
@@ -178,7 +154,6 @@
   .page { display: none; flex: 1; flex-direction: column; }
   .page.active { display: flex; }
 
-  /* 그리드 4x3 */
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -208,11 +183,7 @@
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-    box-shadow: 0 8px 24px rgba(97,255,236,0.18);
-  }
+  .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.offline .card-thumb { opacity: 0.4; }
@@ -233,10 +204,8 @@
     gap: 8px;
   }
   .card-thumb .placeholder img {
-    max-width: 50%;
-    max-height: 60%;
-    width: auto;
-    height: auto;
+    max-width: 50%; max-height: 60%;
+    width: auto; height: auto;
     object-fit: contain;
     opacity: 0.4;
   }
@@ -278,15 +247,9 @@
     padding: 4px 10px;
     backdrop-filter: blur(4px);
   }
-  .card-info {
-    padding: 12px 14px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .card-info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; }
   .card-avatar {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     object-fit: cover;
     flex-shrink: 0;
     border: 1.5px solid var(--border);
@@ -294,8 +257,7 @@
   .card-text { min-width: 0; flex: 1; }
   .card-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
   .card-title {
-    font-size: 12px;
-    color: var(--muted);
+    font-size: 12px; color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -303,12 +265,7 @@
   }
   .card-title.is-live { color: #94a3b8; }
 
-  .loading {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    flex: 1;
-  }
+  .loading { text-align: center; padding: 80px 20px; color: var(--muted); flex: 1; }
   .spinner {
     width: 36px; height: 36px;
     border: 3px solid var(--border);
@@ -318,7 +275,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 이벤트 페이지 */
   .events-wrap {
     padding: 20px 24px;
     max-width: 1400px;
@@ -334,19 +290,9 @@
     .events-wrap { grid-template-columns: 1fr; }
     .filter-panel { position: static !important; }
   }
-  .timeline {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    min-width: 0;
-  }
-  .timeline-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-    font-size: 13px;
-  }
+  .timeline { background: var(--surface); border: 1px solid var(--border); min-width: 0; }
+  .timeline-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
 
-  /* 필터 패널 */
   .filter-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -367,16 +313,8 @@
     margin-bottom: 10px;
   }
 
-  /* 멤버 필터: 전체 버튼 우상단 + 4*3 그리드 */
-  .filter-members-block {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .filter-members-top {
-    display: flex;
-    justify-content: flex-end;
-  }
+  .filter-members-block { display: flex; flex-direction: column; gap: 6px; }
+  .filter-members-top { display: flex; justify-content: flex-end; }
   .filter-member.all-tile {
     background: var(--surface2);
     color: var(--text);
@@ -389,17 +327,9 @@
     transition: all 0.15s;
   }
   .filter-member.all-tile:hover { border-color: var(--accent); }
-  .filter-member.all-tile.on {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-  }
+  .filter-member.all-tile.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
-  .filter-members {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
+  .filter-members { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -411,8 +341,7 @@
     padding: 0;
   }
   .filter-member img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
     display: block;
     transition: opacity 0.15s;
@@ -421,11 +350,7 @@
   .filter-member.on { border-color: var(--accent); }
   .filter-member:hover { border-color: var(--accent); }
 
-  .filter-types {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  .filter-types { display: flex; flex-direction: column; gap: 6px; }
   .filter-type {
     display: flex;
     align-items: center;
@@ -444,11 +369,7 @@
   }
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
-  .filter-type .dot {
-    width: 12px;
-    height: 12px;
-    flex-shrink: 0;
-  }
+  .filter-type .dot { width: 12px; height: 12px; flex-shrink: 0; }
   .filter-type[data-type="all"] .dot { background: #ffffff; }
   .filter-type[data-type="soop"] .dot { background: var(--filter-soop); }
   .filter-type[data-type="post"] .dot { background: var(--filter-post); }
@@ -472,8 +393,7 @@
   .event:hover { background: var(--surface2); }
   .event + .event { border-top: 1px solid var(--border); }
   .event-icon {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -488,23 +408,15 @@
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
   .event-icon.mode_change { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
   .event-icon.post { background: rgba(96,165,250,0.15); color: var(--ev-post); }
-  .event-icon.comment_recommend { background: rgba(236,72,153,0.15); color: var(--ev-comment); }
+  .event-icon.comment_recommend { background: rgba(96,165,250,0.15); color: var(--ev-post); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
-  .event-avatar {
-    width: 28px;
-    height: 28px;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
+  .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-action { color: var(--muted); }
-  .event-target {
-    color: var(--ev-comment);
-    margin-left: 4px;
-  }
+  .event-target { color: #cbd5e1; margin-left: 4px; }
   .event-mode-tag {
     display: inline-block;
     margin-left: 6px;
@@ -542,7 +454,236 @@
     opacity: 0.7;
   }
 
-  /* 모바일 */
+  /* === 통계 페이지 === */
+  .stats-wrap {
+    padding: 20px 24px;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+  }
+  .stats-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+  .stats-tab {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    padding: 6px 14px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .stats-tab:hover { color: var(--text); border-color: var(--accent); }
+  .stats-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .stats-tab img {
+    width: 18px; height: 18px;
+    object-fit: cover;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+
+  .stats-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .stats-card-header { display: flex; align-items: center; gap: 10px; }
+  .stats-card-avatar {
+    width: 40px; height: 40px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .stats-card-name { font-size: 16px; font-weight: 700; }
+  .stats-card-rows { display: flex; flex-direction: column; gap: 6px; }
+  .stats-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+  }
+  .stats-card-label { color: var(--muted); font-weight: 600; }
+  .stats-card-value { color: var(--text); font-weight: 700; }
+  .stats-card-value.accent { color: var(--accent); }
+
+  .stats-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .stats-detail-month {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+  }
+  .stats-month-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 28px; height: 28px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+  }
+  .stats-month-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-month-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.4; }
+  .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
+  .stats-detail-summary {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    align-items: center;
+  }
+  .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
+  .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
+  .stats-summary-value { font-size: 14px; font-weight: 700; }
+
+  .stats-detail-body {
+    display: grid;
+    grid-template-columns: minmax(0, 480px) 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .stats-detail-body { grid-template-columns: 1fr; } }
+
+  .calendar { background: var(--surface); border: 1px solid var(--border); padding: 12px; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .calendar-weekday {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    padding: 6px 0;
+  }
+  .calendar-weekday.sun { color: #f87171; }
+  .calendar-weekday.sat { color: #60a5fa; }
+  .calendar-day {
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 1.5px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 4px;
+    gap: 2px;
+    font-family: inherit;
+  }
+  .calendar-day:hover { border-color: var(--accent); }
+  .calendar-day.outside { opacity: 0.25; cursor: default; }
+  .calendar-day.outside:hover { border-color: transparent; }
+  .calendar-day.has-broadcast { background: rgba(97,255,236,0.18); color: var(--accent); }
+  .calendar-day.has-broadcast:hover { background: rgba(97,255,236,0.30); }
+  .calendar-day.selected { border-color: var(--accent); }
+  .calendar-day.today { box-shadow: inset 0 0 0 1.5px var(--time); }
+  .calendar-daynum { font-weight: 700; font-size: 13px; }
+  .calendar-daycount { font-size: 9px; opacity: 0.8; }
+
+  .day-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    min-height: 200px;
+  }
+  .day-detail-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-detail-empty {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .day-session {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .day-session-time {
+    font-size: 12px;
+    color: var(--time);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .day-session-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .day-session-mode {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.3px;
+    margin-right: 6px;
+  }
+  .day-session-mode.adult { background: var(--mode-adult); }
+  .day-session-mode.subscription { background: var(--mode-subscription); }
+  .day-session-mode.copyright { background: var(--mode-copyright); }
+  .day-session-mode.restricted { background: var(--muted); }
+  .day-session-mode.normal { background: var(--ev-start); }
+  .day-session-changes {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .day-session-change {
+    font-size: 11px;
+    color: #94a3b8;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .day-session-change-time { color: var(--muted); font-size: 10px; flex-shrink: 0; }
+  .day-session-change-icon {
+    flex-shrink: 0;
+    width: 14px;
+    text-align: center;
+    color: var(--ev-yellow);
+    font-weight: 700;
+  }
+
   @media (max-width: 700px) {
     body { flex-direction: column; }
     .sidebar {
@@ -562,7 +703,7 @@
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
     .main-header { padding: 16px 20px; min-height: 0; }
-    .grid, .events-wrap { padding: 16px; }
+    .grid, .events-wrap, .stats-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
   }
 </style>
@@ -580,6 +721,10 @@
       <span class="nav-icon">▤</span>
       <span>최근 이벤트</span>
     </button>
+    <button class="nav-item" data-page="stats">
+      <span class="nav-icon">◫</span>
+      <span>방송 통계</span>
+    </button>
   </div>
 </aside>
 
@@ -593,7 +738,6 @@
     </div>
   </div>
 
-  <!-- 지통실 -->
   <div class="page active" id="page-live">
     <div id="app">
       <div class="loading">
@@ -603,7 +747,6 @@
     </div>
   </div>
 
-  <!-- 이벤트 -->
   <div class="page" id="page-events">
     <div class="events-wrap">
       <div class="timeline" id="timeline">
@@ -621,24 +764,32 @@
           <div class="filter-title">종류</div>
           <div class="filter-types" id="filterTypes">
             <button class="filter-type on" data-type="all">
-              <span class="dot"></span>
-              <span>전체</span>
+              <span class="dot"></span><span>전체</span>
             </button>
             <button class="filter-type" data-type="soop">
-              <span class="dot"></span>
-              <span>숲 방송</span>
+              <span class="dot"></span><span>숲 방송</span>
             </button>
             <button class="filter-type" data-type="post">
-              <span class="dot"></span>
-              <span>숲 게시글</span>
+              <span class="dot"></span><span>숲 게시글</span>
             </button>
             <button class="filter-type" data-type="youtube">
-              <span class="dot"></span>
-              <span>유튜브 영상</span>
+              <span class="dot"></span><span>유튜브 영상</span>
             </button>
           </div>
         </div>
         <div class="filter-summary" id="filterSummary"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-stats">
+    <div class="stats-wrap">
+      <div class="stats-tabs" id="statsTabs"></div>
+      <div id="statsBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>통계 불러오는 중...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -648,21 +799,22 @@
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 
 const MEMBERS = [
-  { id: '243000',      name: '천양',   img: '01.webp' },
-  { id: 'madaomm',     name: '마다옴', img: '02.webp' },
-  { id: 'nanamoon777', name: '나나문', img: '03.webp' },
-  { id: 'imha22',      name: '임하밍', img: '04.webp' },
-  { id: 'doormomo',    name: '문모모', img: '05.webp' },
-  { id: 'kim91709',    name: '한아밍', img: '06.webp' },
-  { id: 'kappuchan',   name: '카푸',   img: '07.webp' },
-  { id: 'kyaang123',   name: '캬앙',   img: '08.webp' },
-  { id: 'wellro314',   name: '김웰로', img: '09.webp' },
-  { id: 'mocamu2',     name: '모카',   img: '10.webp' },
-  { id: 'dalta20',     name: '달타',   img: '11.webp' },
-  { id: 'baeksoon2',   name: '파니',   img: '12.webp' },
+  { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
+  { id: 'madaomm',     name: '마다옴', img: '02.webp', color: '#FFF5C3' },
+  { id: 'nanamoon777', name: '나나문', img: '03.webp', color: '#F4F6FF' },
+  { id: 'imha22',      name: '임하밍', img: '04.webp', color: '#F8DBFF' },
+  { id: 'doormomo',    name: '문모모', img: '05.webp', color: '#8D4BD6' },
+  { id: 'kim91709',    name: '한아밍', img: '06.webp', color: '#FEC0C2' },
+  { id: 'kappuchan',   name: '카푸',   img: '07.webp', color: '#FFCFB7' },
+  { id: 'kyaang123',   name: '캬앙',   img: '08.webp', color: '#EA4335' },
+  { id: 'wellro314',   name: '김웰로', img: '09.webp', color: '#BFEF90' },
+  { id: 'mocamu2',     name: '모카',   img: '10.webp', color: '#366CD8' },
+  { id: 'dalta20',     name: '달타',   img: '11.webp', color: '#FFC462' },
+  { id: 'baeksoon2',   name: '파니',   img: '12.webp', color: '#9FC5E8' },
 ];
+const MEMBER_BY_ID = {};
+MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
 
-// 모드 라벨/표시
 const MODE_LABEL = {
   normal: '일반 방송',
   adult: '19금',
@@ -685,12 +837,12 @@ const MODE_PLACEHOLDER_TEXT = {
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
-// 페이지 전환
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '방송 통계' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
 let lastEventsUpdate = null;
+let lastStatsUpdate = null;
 let currentPage = 'live';
 
 function updateHeaderCenter() {
@@ -703,6 +855,10 @@ function updateHeaderCenter() {
   } else if (currentPage === 'events') {
     el.textContent = lastEventsUpdate
       ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
+      : '';
+  } else if (currentPage === 'stats') {
+    el.textContent = lastStatsUpdate
+      ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
       : '';
   } else {
     el.textContent = '';
@@ -721,6 +877,10 @@ function switchPage(page) {
   document.getElementById('liveStatus').style.visibility =
     page === 'live' ? 'visible' : 'hidden';
   updateHeaderCenter();
+  if (page === 'stats' && !statsState.tabsInited) {
+    initStatsTabs();
+    statsState.tabsInited = true;
+  }
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -739,6 +899,7 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
+// === 시간 헬퍼 ===
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);
@@ -746,7 +907,6 @@ function formatBtime(seconds) {
   if (h > 0) return h + '시간 ' + m + '분';
   return m + '분';
 }
-
 function formatRelTime(iso) {
   const now = new Date();
   const t = new Date(iso);
@@ -756,7 +916,6 @@ function formatRelTime(iso) {
   if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
   return Math.floor(diff / 86400) + '일 전';
 }
-
 function formatAbsTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -768,69 +927,84 @@ function formatAbsTime(iso) {
   const mi = String(d.getMinutes()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
-
+function formatHHMM(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mi}`;
+}
+function formatDuration(ms) {
+  if (!ms || ms <= 0) return '0분';
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0) return `${h}시간 ${m}분`;
+  return `${m}분`;
+}
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[c]);
 }
-
 function soopProfileUrl(userId) {
   const prefix = userId.substring(0, 2);
   return `https://profile.img.sooplive.com/LOGO/${prefix}/${userId}/${userId}.jpg`;
 }
+function isoToKstDateKey(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+function ymdKey(year, month1, day) {
+  return `${year}-${String(month1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+function daysInMonth(year, month1) {
+  return new Date(year, month1, 0).getDate();
+}
 
+// === 라이브 카드 ===
 function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
   card.className = 'card ' + (info.live ? 'live' : 'offline');
   card.style.animationDelay = delay + 'ms';
-
   if (info.live) {
     card.href = 'https://play.sooplive.co.kr/' + info.id;
     card.target = '_blank';
     card.rel = 'noopener';
   }
-
   const btime = formatBtime(info.btime);
   const mode = info.mode || (info.live ? 'normal' : null);
   const isNormalLive = info.live && mode === 'normal';
   const hasThumb = info.thumb && isNormalLive;
-
   const thumbHtml = hasThumb
     ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
-
   const placeholderInner = info.live && mode && mode !== 'normal'
     ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
     : `<img src="${m.img}" alt="${m.name}">`;
-
   const modeBadge = info.live && mode && mode !== 'normal'
     ? `<span class="badge-mode ${mode}">${MODE_BADGE_LABEL[mode] || ''}</span>`
     : '';
-
   const profileUrl = soopProfileUrl(m.id);
   const avatarHtml = profileUrl
     ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
     : `<img class="card-avatar" src="${m.img}" alt="${m.name}">`;
-
   let titleText;
-  if (!info.live) {
-    titleText = '오프라인';
-  } else if (info.title) {
-    titleText = info.title;
-  } else if (mode && mode !== 'normal') {
-    titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
-  } else {
-    titleText = '방송 중';
-  }
-
+  if (!info.live) titleText = '오프라인';
+  else if (info.title) titleText = info.title;
+  else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
+  else titleText = '방송 중';
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
-      <div class="placeholder" style="display:${hasThumb ? 'none' : 'flex'}">
-        ${placeholderInner}
-      </div>
+      <div class="placeholder" style="display:${hasThumb ? 'none' : 'flex'}">${placeholderInner}</div>
       ${modeBadge}
       ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
@@ -845,40 +1019,33 @@ function buildCard(m, info, delay) {
   return card;
 }
 
+// === 이벤트 렌더 ===
 function renderEvent(e) {
   const iconMap = {
     start: '▶', end: '■',
     title: '✎', category: '#', mode_change: '◆',
-    post: '📝', comment_recommend: '👍',
+    post: '✉', comment_recommend: '↑',
     youtube: '▶'
   };
   const actionMap = {
-    start: '방송 시작',
-    end: '방송 종료',
-    title: '방제 변경',
-    category: '카테고리 변경',
-    mode_change: '방송 모드 변경',
-    post: '숲 게시글',
-    comment_recommend: '댓글 추천',
+    start: '방송 시작', end: '방송 종료',
+    title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
+    post: '숲 게시글', comment_recommend: '댓글 추천',
     youtube: '유튜브 영상',
   };
-
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
+  const memberColor = member ? member.color : '#fff';
 
-  // start/end에 모드 태그 (일반방송이 아닐 때만)
   let modeTag = '';
   if ((e.type === 'start' || e.type === 'end') && e.mode && e.mode !== 'normal') {
     const label = MODE_BADGE_LABEL[e.mode] || '';
     if (label) modeTag = `<span class="event-mode-tag ${e.mode}">${label}</span>`;
   }
-
-  // comment_recommend 대상 멤버 표시
   let targetTag = '';
   if (e.type === 'comment_recommend' && e.target_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.target_name)} 컨텐츠)</span>`;
   }
-
   let detail = '';
   if (e.type === 'start' && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
@@ -891,13 +1058,12 @@ function renderEvent(e) {
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
-
   const inner = `
     <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
     ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
     <div class="event-body">
       <div>
-        <span class="event-member">${escapeHtml(e.member_name)}</span>
+        <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
         <span class="event-action">${actionMap[e.type] || e.type}</span>
         ${targetTag}
         ${modeTag}
@@ -909,22 +1075,16 @@ function renderEvent(e) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
-
   if (e.url) {
     return `<div class="event"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
   return `<div class="event">${inner}</div>`;
 }
 
-// 필터 상태 (단일 선택)
-const filterState = {
-  member: 'all',  // 'all' | member.id
-  type: 'all',    // 'all' | 'soop' | 'post' | 'youtube'
-};
+const filterState = { member: 'all', type: 'all' };
 let allEvents = [];
 
 function initFilterUI() {
-  // 멤버 필터: 전체(우상단) + 12명 4*3
   const top = document.getElementById('filterMembersTop');
   const mc = document.getElementById('filterMembers');
   if (mc && !mc.dataset.inited) {
@@ -934,7 +1094,6 @@ function initFilterUI() {
         <img src="${m.img}" alt="${m.name}">
       </button>
     `).join('');
-
     const allBtns = [
       ...top.querySelectorAll('.filter-member'),
       ...mc.querySelectorAll('.filter-member'),
@@ -950,8 +1109,6 @@ function initFilterUI() {
     });
     mc.dataset.inited = '1';
   }
-
-  // 종류 필터
   const tc = document.getElementById('filterTypes');
   if (tc && !tc.dataset.inited) {
     tc.querySelectorAll('.filter-type').forEach(btn => {
@@ -970,22 +1127,16 @@ function initFilterUI() {
 function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
-  // 이벤트 타입 → 카테고리 매핑
-  // soop: start, end, title, category, mode_change
-  // post: post, comment_recommend (댓글 추천도 게시글 분류로)
-  // youtube: youtube
   const typeToCat = (et) => {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
     return 'soop';
   };
-
   const filtered = allEvents.filter(e => {
     if (filterState.member !== 'all' && e.member_id !== filterState.member) return false;
     if (filterState.type !== 'all' && typeToCat(e.type) !== filterState.type) return false;
     return true;
   });
-
   if (filtered.length === 0) {
     if (allEvents.length === 0) {
       tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
@@ -995,13 +1146,316 @@ function applyFilter() {
   } else {
     tl.innerHTML = filtered.map(renderEvent).join('');
   }
-
   const summary = document.getElementById('filterSummary');
-  if (summary) {
-    summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
+  if (summary) summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
+}
+
+// ==================== 통계 ====================
+const statsState = {
+  tabsInited: false,
+  data: null,
+  selectedTab: 'all',
+  viewMonth: null,
+  selectedDate: null,
+};
+
+function initStatsTabs() {
+  const tabs = document.getElementById('statsTabs');
+  if (!tabs) return;
+  tabs.innerHTML = [
+    `<button class="stats-tab active" data-tab="all">전체</button>`
+  ].concat(MEMBERS.map(m => `
+    <button class="stats-tab" data-tab="${m.id}">
+      <img src="${m.img}" alt="${m.name}">${m.name}
+    </button>
+  `)).join('');
+  tabs.querySelectorAll('.stats-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      statsState.selectedTab = btn.dataset.tab;
+      tabs.querySelectorAll('.stats-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === statsState.selectedTab);
+      });
+      if (statsState.selectedTab !== 'all') {
+        const now = new Date();
+        statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+        statsState.selectedDate = null;
+      }
+      renderStatsBody();
+    });
+  });
+  if (statsState.data) renderStatsBody();
+}
+
+function computeMonthSummary(memberStats, year, month1) {
+  const result = {
+    daysWithBroadcast: 0,
+    totalDaysInMonth: daysInMonth(year, month1),
+    totalDurationMs: 0,
+    postCount: 0,
+    youtubeCount: 0,
+    sessionsByDate: {},
+  };
+  if (!memberStats) return result;
+  const monthStart = new Date(year, month1 - 1, 1, 0, 0, 0).getTime();
+  const monthEnd = new Date(year, month1, 1, 0, 0, 0).getTime();
+  const dateSet = new Set();
+  for (const s of (memberStats.sessions || [])) {
+    const startMs = new Date(s.start).getTime();
+    if (isNaN(startMs)) continue;
+    if (startMs < monthStart || startMs >= monthEnd) continue;
+    const dateKey = isoToKstDateKey(s.start);
+    if (!dateKey) continue;
+    dateSet.add(dateKey);
+    if (!result.sessionsByDate[dateKey]) result.sessionsByDate[dateKey] = [];
+    result.sessionsByDate[dateKey].push(s);
+    if (s.end) {
+      const endMs = new Date(s.end).getTime();
+      if (!isNaN(endMs) && endMs > startMs) {
+        result.totalDurationMs += (endMs - startMs);
+      }
+    }
+  }
+  result.daysWithBroadcast = dateSet.size;
+  for (const p of (memberStats.posts || [])) {
+    const t = new Date(p.time).getTime();
+    if (!isNaN(t) && t >= monthStart && t < monthEnd) result.postCount++;
+  }
+  for (const y of (memberStats.youtube || [])) {
+    const t = new Date(y.time).getTime();
+    if (!isNaN(t) && t >= monthStart && t < monthEnd) result.youtubeCount++;
+  }
+  return result;
+}
+
+function renderStatsBody() {
+  const body = document.getElementById('statsBody');
+  if (!body) return;
+  if (!statsState.data) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
+    return;
+  }
+  if (statsState.selectedTab === 'all') {
+    renderStatsAll(body);
+  } else {
+    renderStatsMember(body, statsState.selectedTab);
   }
 }
 
+function renderStatsAll(body) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const cards = MEMBERS.map(m => {
+    const ms = statsState.data[m.id];
+    const sum = computeMonthSummary(ms, year, month);
+    return `
+      <div class="stats-card">
+        <div class="stats-card-header">
+          <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
+          <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
+        </div>
+        <div class="stats-card-rows">
+          <div class="stats-card-row">
+            <span class="stats-card-label">방송 일수</span>
+            <span class="stats-card-value accent">${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label">방송 시간</span>
+            <span class="stats-card-value">${formatDuration(sum.totalDurationMs)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label">숲 게시글</span>
+            <span class="stats-card-value">${sum.postCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label">유튜브 업로드</span>
+            <span class="stats-card-value">${sum.youtubeCount}개</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  body.innerHTML = `
+    <div style="margin-bottom: 12px; color: var(--muted); font-size: 13px;">
+      ${year}년 ${month}월 기준
+    </div>
+    <div class="stats-grid">${cards}</div>
+  `;
+}
+
+function renderStatsMember(body, memberId) {
+  const m = MEMBER_BY_ID[memberId];
+  if (!m) { body.innerHTML = ''; return; }
+  if (!statsState.viewMonth) {
+    const now = new Date();
+    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+  }
+  const { year, month } = statsState.viewMonth;
+  const ms = statsState.data[memberId];
+  const sum = computeMonthSummary(ms, year, month);
+  const now = new Date();
+  const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
+
+  let html = `
+    <div class="stats-detail-header">
+      <div class="stats-detail-month">
+        <button class="stats-month-btn" data-dir="prev">‹</button>
+        <span class="stats-month-text">${year}년 ${month}월</span>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+      </div>
+      <div class="stats-detail-summary">
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">방송 일수</span>
+          <span class="stats-summary-value" style="color: var(--accent)">${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+        </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">방송 시간</span>
+          <span class="stats-summary-value">${formatDuration(sum.totalDurationMs)}</span>
+        </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">숲 게시글</span>
+          <span class="stats-summary-value">${sum.postCount}개</span>
+        </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">유튜브 업로드</span>
+          <span class="stats-summary-value">${sum.youtubeCount}개</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-detail-body">
+      ${renderCalendar(year, month, sum.sessionsByDate)}
+      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum.sessionsByDate)}</div>
+    </div>
+  `;
+  body.innerHTML = html;
+
+  body.querySelectorAll('.stats-month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.dir;
+      let { year: y, month: mo } = statsState.viewMonth;
+      if (dir === 'prev') {
+        mo -= 1;
+        if (mo < 1) { mo = 12; y -= 1; }
+      } else {
+        mo += 1;
+        if (mo > 12) { mo = 1; y += 1; }
+      }
+      const nowD = new Date();
+      const futureCheck = new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
+      if (futureCheck) return;
+      statsState.viewMonth = { year: y, month: mo };
+      statsState.selectedDate = null;
+      renderStatsBody();
+    });
+  });
+  body.querySelectorAll('.calendar-day').forEach(btn => {
+    if (btn.classList.contains('outside')) return;
+    btn.addEventListener('click', () => {
+      const date = btn.dataset.date;
+      statsState.selectedDate = (statsState.selectedDate === date) ? null : date;
+      body.querySelectorAll('.calendar-day').forEach(d => {
+        d.classList.toggle('selected', d.dataset.date === statsState.selectedDate);
+      });
+      const dd = document.getElementById('dayDetail');
+      if (dd) dd.innerHTML = renderDayDetail(year, month, sum.sessionsByDate);
+    });
+  });
+}
+
+function renderCalendar(year, month1, sessionsByDate) {
+  const totalDays = daysInMonth(year, month1);
+  const firstDow = new Date(year, month1 - 1, 1).getDay();
+  const todayKey = isoToKstDateKey(new Date().toISOString());
+  const weekdays = ['일','월','화','수','목','금','토'];
+  let html = `<div class="calendar"><div class="calendar-grid">`;
+  weekdays.forEach((w, i) => {
+    const cls = i === 0 ? 'sun' : (i === 6 ? 'sat' : '');
+    html += `<div class="calendar-weekday ${cls}">${w}</div>`;
+  });
+  for (let i = 0; i < firstDow; i++) {
+    html += `<div class="calendar-day outside"></div>`;
+  }
+  for (let day = 1; day <= totalDays; day++) {
+    const dateKey = ymdKey(year, month1, day);
+    const sessions = sessionsByDate[dateKey] || [];
+    const has = sessions.length > 0;
+    const isToday = dateKey === todayKey;
+    const selected = statsState.selectedDate === dateKey;
+    const classes = ['calendar-day'];
+    if (has) classes.push('has-broadcast');
+    if (isToday) classes.push('today');
+    if (selected) classes.push('selected');
+    html += `<button class="${classes.join(' ')}" data-date="${dateKey}">
+      <span class="calendar-daynum">${day}</span>
+      ${has ? `<span class="calendar-daycount">${sessions.length}회</span>` : ''}
+    </button>`;
+  }
+  const totalCells = firstDow + totalDays;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < trailing; i++) {
+    html += `<div class="calendar-day outside"></div>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function renderDayDetail(year, month1, sessionsByDate) {
+  const date = statsState.selectedDate;
+  if (!date) {
+    return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 방송 기록을 볼 수 있습니다</div>`;
+  }
+  const sessions = sessionsByDate[date] || [];
+  if (sessions.length === 0) {
+    return `<div class="day-detail-title">${date}</div><div class="day-detail-empty">이 날은 방송 기록이 없어요</div>`;
+  }
+  const sorted = [...sessions].sort((a, b) => new Date(a.start) - new Date(b.start));
+  let html = `<div class="day-detail-title">${date} · ${sessions.length}회 방송</div>`;
+  for (const s of sorted) {
+    const startStr = formatHHMM(s.start);
+    const endStr = s.end ? formatHHMM(s.end) : '진행 중';
+    let durStr = '';
+    if (s.end) {
+      const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
+      durStr = ` · ${formatDuration(ms)}`;
+    }
+    const modeBadge = `<span class="day-session-mode ${s.mode || 'normal'}">${MODE_LABEL[s.mode] || '일반 방송'}</span>`;
+    let changesHtml = '';
+    if (s.changes && s.changes.length > 0) {
+      const items = s.changes.map(c => {
+        let icon, label, valHtml;
+        if (c.type === 'title') {
+          icon = '✎'; label = '방제';
+          valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
+        } else if (c.type === 'category') {
+          icon = '#'; label = '카테고리';
+          valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
+        } else if (c.type === 'mode_change') {
+          icon = '◆'; label = '방송 모드';
+          valHtml = `${MODE_LABEL[c.before] || c.before} → ${MODE_LABEL[c.after] || c.after}`;
+        } else {
+          icon = '•'; label = c.type;
+          valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
+        }
+        return `<div class="day-session-change">
+          <span class="day-session-change-time">${formatHHMM(c.time)}</span>
+          <span class="day-session-change-icon">${icon}</span>
+          <span><b>${label}</b> ${valHtml}</span>
+        </div>`;
+      }).join('');
+      changesHtml = `<div class="day-session-changes">${items}</div>`;
+    }
+    html += `
+      <div class="day-session">
+        <div class="day-session-time">${startStr} ~ ${endStr}${durStr}</div>
+        <div class="day-session-title">${modeBadge}${escapeHtml(s.title || '(방제 없음)')}</div>
+        ${changesHtml}
+      </div>
+    `;
+  }
+  return html;
+}
+
+// === 데이터 로드 ===
 async function loadEvents() {
   try {
     const res = await fetch(WORKER_URL + '/events?t=' + Date.now());
@@ -1018,33 +1472,44 @@ async function loadEvents() {
   }
 }
 
+async function loadStats() {
+  try {
+    const res = await fetch(WORKER_URL + '/stats?t=' + Date.now());
+    if (!res.ok) throw new Error('no stats');
+    const data = await res.json();
+    statsState.data = data.stats || {};
+    if (currentPage === 'stats') renderStatsBody();
+    lastStatsUpdate = new Date();
+    updateHeaderCenter();
+  } catch (e) {
+    if (currentPage === 'stats') {
+      const body = document.getElementById('statsBody');
+      if (body) body.innerHTML = '<div class="loading"><div>통계 데이터를 불러올 수 없어요</div></div>';
+    }
+  }
+}
+
 async function loadLive() {
   try {
     const res = await fetch(WORKER_URL + '/?t=' + Date.now());
     const data = await res.json();
-
     const infoMap = {};
     data.members.forEach(m => { infoMap[m.id] = m; });
-
     const sorted = [...MEMBERS].sort((a, b) => {
       const al = (infoMap[a.id] && infoMap[a.id].live) ? 1 : 0;
       const bl = (infoMap[b.id] && infoMap[b.id].live) ? 1 : 0;
       return bl - al;
     });
-
     const grid = document.createElement('div');
     grid.className = 'grid';
-
     let liveCount = 0;
     sorted.forEach((m, i) => {
       const info = infoMap[m.id] || { id: m.id, live: false };
       grid.appendChild(buildCard(m, info, i * 35));
       if (info.live) liveCount++;
     });
-
     document.getElementById('app').innerHTML = '';
     document.getElementById('app').appendChild(grid);
-
     const dot = document.getElementById('liveDot');
     const text = document.getElementById('liveText');
     if (liveCount > 0) {
@@ -1054,7 +1519,6 @@ async function loadLive() {
       dot.className = 'live-dot none';
       text.textContent = '방송 중인 멤버 없음';
     }
-
     const updated = new Date(data.updated_at);
     lastLiveUpdate = updated;
     updateHeaderCenter();
@@ -1067,9 +1531,10 @@ async function loadLive() {
 
 loadLive();
 loadEvents();
-// 라이브 1분마다, 이벤트 1분마다 갱신 (일관성)
+loadStats();
 setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 60 * 1000);
+setInterval(loadStats, 60 * 1000);
 </script>
 </body>
 </html>

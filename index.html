@@ -20,15 +20,16 @@
     --time: #fbbf24;
     --ev-start: #34d399;
     --ev-end: #f87171;
-    --ev-title: #60a5fa;
-    --ev-category: #fbbf24;
-    --ev-mode: #a78bfa;
-    --ev-post: #c084fc;
-    --ev-comment: #ec4899;
+    --ev-yellow: #fbbf24;       /* 카테고리/방제/방송모드 변경 */
+    --ev-blue: #60a5fa;          /* 게시글/댓글 추천 */
+    --ev-comment: #ec4899;       /* 댓글 추천 (대표색) */
+    --ev-post: #60a5fa;          /* 게시글 */
     --ev-youtube: #ef4444;
     --mode-adult: #ec4899;
     --mode-subscription: #f59e0b;
     --mode-copyright: #94a3b8;
+    --filter-soop: #0388FF;
+    --filter-post: #2EF5E1;
     --sidebar-w: 200px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -365,6 +366,35 @@
     letter-spacing: 1px;
     margin-bottom: 10px;
   }
+
+  /* 멤버 필터: 전체 버튼 우상단 + 4*3 그리드 */
+  .filter-members-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-members-top {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .filter-member.all-tile {
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .filter-member.all-tile:hover { border-color: var(--accent); }
+  .filter-member.all-tile.on {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
   .filter-members {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -390,31 +420,6 @@
   .filter-member:not(.on) img { opacity: 0.25; filter: grayscale(1); }
   .filter-member.on { border-color: var(--accent); }
   .filter-member:hover { border-color: var(--accent); }
-  .filter-member .label {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(0,0,0,0.75);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 4px;
-    text-align: center;
-    pointer-events: none;
-  }
-  .filter-member.all-tile {
-    background: var(--surface2);
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-  .filter-member.all-tile.on {
-    background: var(--accent);
-    color: var(--bg);
-  }
 
   .filter-types {
     display: flex;
@@ -444,10 +449,9 @@
     height: 12px;
     flex-shrink: 0;
   }
-  .filter-type[data-type="all"] .dot { background: var(--accent); }
-  .filter-type[data-type="soop"] .dot { background: var(--ev-start); }
-  .filter-type[data-type="post"] .dot { background: var(--ev-post); }
-  .filter-type[data-type="comment"] .dot { background: var(--ev-comment); }
+  .filter-type[data-type="all"] .dot { background: #ffffff; }
+  .filter-type[data-type="soop"] .dot { background: var(--filter-soop); }
+  .filter-type[data-type="post"] .dot { background: var(--filter-post); }
   .filter-type[data-type="youtube"] .dot { background: var(--ev-youtube); }
 
   .filter-summary {
@@ -480,10 +484,10 @@
   }
   .event-icon.start { background: rgba(52,211,153,0.15); color: var(--ev-start); }
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
-  .event-icon.title { background: rgba(96,165,250,0.15); color: var(--ev-title); }
-  .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-category); }
-  .event-icon.mode_change { background: rgba(167,139,250,0.15); color: var(--ev-mode); }
-  .event-icon.post { background: rgba(192,132,252,0.15); color: var(--ev-post); }
+  .event-icon.title { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
+  .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
+  .event-icon.mode_change { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
+  .event-icon.post { background: rgba(96,165,250,0.15); color: var(--ev-post); }
   .event-icon.comment_recommend { background: rgba(236,72,153,0.15); color: var(--ev-comment); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
@@ -499,7 +503,6 @@
   .event-action { color: var(--muted); }
   .event-target {
     color: var(--ev-comment);
-    font-weight: 600;
     margin-left: 4px;
   }
   .event-mode-tag {
@@ -609,7 +612,10 @@
       <div class="filter-panel">
         <div class="filter-section">
           <div class="filter-title">멤버</div>
-          <div class="filter-members" id="filterMembers"></div>
+          <div class="filter-members-block">
+            <div class="filter-members-top" id="filterMembersTop"></div>
+            <div class="filter-members" id="filterMembers"></div>
+          </div>
         </div>
         <div class="filter-section">
           <div class="filter-title">종류</div>
@@ -692,7 +698,7 @@ function updateHeaderCenter() {
   if (!el) return;
   if (currentPage === 'live') {
     el.textContent = lastLiveUpdate
-      ? '30초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준'
+      ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준'
       : '';
   } else if (currentPage === 'events') {
     el.textContent = lastEventsUpdate
@@ -843,7 +849,7 @@ function renderEvent(e) {
   const iconMap = {
     start: '▶', end: '■',
     title: '✎', category: '#', mode_change: '◆',
-    post: '글', comment_recommend: '↑',
+    post: '📝', comment_recommend: '👍',
     youtube: '▶'
   };
   const actionMap = {
@@ -867,7 +873,7 @@ function renderEvent(e) {
     if (label) modeTag = `<span class="event-mode-tag ${e.mode}">${label}</span>`;
   }
 
-  // comment_recommend는 액션 라벨에 대상 멤버 같이 표시
+  // comment_recommend 대상 멤버 표시
   let targetTag = '';
   if (e.type === 'comment_recommend' && e.target_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.target_name)} 컨텐츠)</span>`;
@@ -913,28 +919,30 @@ function renderEvent(e) {
 // 필터 상태 (단일 선택)
 const filterState = {
   member: 'all',  // 'all' | member.id
-  type: 'all',    // 'all' | 'soop' | 'post' | 'comment' | 'youtube'
+  type: 'all',    // 'all' | 'soop' | 'post' | 'youtube'
 };
 let allEvents = [];
 
 function initFilterUI() {
-  // 멤버 필터: 전체 + 12명
+  // 멤버 필터: 전체(우상단) + 12명 4*3
+  const top = document.getElementById('filterMembersTop');
   const mc = document.getElementById('filterMembers');
   if (mc && !mc.dataset.inited) {
-    const tilesHtml = [
-      `<button class="filter-member all-tile on" data-id="all" title="전체"><span>전체</span></button>`
-    ].concat(MEMBERS.map(m => `
+    top.innerHTML = `<button class="filter-member all-tile on" data-id="all" title="전체">전체</button>`;
+    mc.innerHTML = MEMBERS.map(m => `
       <button class="filter-member" data-id="${m.id}" title="${m.name}">
         <img src="${m.img}" alt="${m.name}">
-        <span class="label">${m.name}</span>
       </button>
-    `)).join('');
-    mc.innerHTML = tilesHtml;
-    mc.querySelectorAll('.filter-member').forEach(btn => {
+    `).join('');
+
+    const allBtns = [
+      ...top.querySelectorAll('.filter-member'),
+      ...mc.querySelectorAll('.filter-member'),
+    ];
+    allBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         filterState.member = btn.dataset.id;
-        // UI 갱신
-        mc.querySelectorAll('.filter-member').forEach(b => {
+        allBtns.forEach(b => {
           b.classList.toggle('on', b.dataset.id === filterState.member);
         });
         applyFilter();
@@ -943,7 +951,7 @@ function initFilterUI() {
     mc.dataset.inited = '1';
   }
 
-  // 종류 필터 (이미 HTML에 5개 있음)
+  // 종류 필터
   const tc = document.getElementById('filterTypes');
   if (tc && !tc.dataset.inited) {
     tc.querySelectorAll('.filter-type').forEach(btn => {
@@ -964,8 +972,7 @@ function applyFilter() {
   if (!tl) return;
   // 이벤트 타입 → 카테고리 매핑
   // soop: start, end, title, category, mode_change
-  // post: post
-  // comment: comment_recommend
+  // post: post, comment_recommend (댓글 추천도 게시글 분류로)
   // youtube: youtube
   const typeToCat = (et) => {
     if (et === 'post' || et === 'comment_recommend') return 'post';
@@ -1060,8 +1067,9 @@ async function loadLive() {
 
 loadLive();
 loadEvents();
-setInterval(loadLive, 30 * 1000);
-setInterval(loadEvents, 20 * 1000);
+// 라이브 1분마다, 이벤트 1분마다 갱신 (일관성)
+setInterval(loadLive, 60 * 1000);
+setInterval(loadEvents, 60 * 1000);
 </script>
 </body>
 </html>

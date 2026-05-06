@@ -162,7 +162,7 @@
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.offline .card-thumb { opacity: 0.4; }
-  .card.offline .card-name { color: var(--muted); }
+  .card.offline .card-name { color: var(--muted) !important; }
 
   .card-thumb {
     width: 100%; aspect-ratio: 16/9;
@@ -203,17 +203,6 @@
   .badge-mode.copyright { background: var(--mode-copyright); box-shadow: 0 2px 8px rgba(148,163,184,0.45); }
   .badge-mode.restricted { background: var(--muted); }
 
-  /* 방송 시간을 카드 정보 영역으로 이동 */
-  .card-btime {
-    font-size: 11px;
-    color: var(--time);
-    font-weight: 600;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
   .card-info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; }
   .card-avatar {
     width: 36px; height: 36px;
@@ -221,7 +210,29 @@
     border: 1.5px solid var(--border);
   }
   .card-text { min-width: 0; flex: 1; }
-  .card-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  /* 이름 + 방송 시간을 같은 줄에 */
+  .card-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+    min-width: 0;
+  }
+  .card-name {
+    font-size: 15px; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    min-width: 0;
+  }
+  .card-btime {
+    font-size: 11px;
+    color: var(--time);
+    font-weight: 600;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+  }
   .card-title {
     font-size: 12px; color: var(--muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -271,23 +282,30 @@
 
   .filter-members-block { display: flex; flex-direction: column; gap: 10px; }
 
+  /* 멤버 필터 전체 버튼: 이미지(Title.webp) 사용 */
   .filter-member-all {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 8px;
     background: var(--surface2);
     border: 1.5px solid var(--border);
-    cursor: pointer; font-size: 13px; font-weight: 600;
-    color: var(--muted);
+    cursor: pointer;
     transition: all 0.15s;
-    font-family: inherit; text-align: left;
+    font-family: inherit;
     width: 100%;
+    height: 40px;
+    box-sizing: border-box;
   }
-  .filter-member-all:hover { color: var(--text); border-color: var(--accent); }
-  .filter-member-all.on { border-color: var(--accent); color: var(--text); }
-  .filter-member-all .dot {
-    width: 12px; height: 12px; flex-shrink: 0;
-    background: #ffffff;
+  .filter-member-all:hover { border-color: var(--accent); }
+  .filter-member-all.on { border-color: var(--accent); }
+  .filter-member-all img {
+    max-height: 22px;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    transition: opacity 0.15s, filter 0.15s;
   }
+  .filter-member-all:not(.on) img { opacity: 0.4; filter: grayscale(0.6); }
 
   .filter-members { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .filter-member {
@@ -388,18 +406,28 @@
     max-width: 1600px; width: 100%; margin: 0 auto;
     flex: 1;
   }
-  /* 통계 탭: 가운데 정렬 + 한 줄 7개 강제 (13개면 7+6 자동) */
-  .stats-tabs {
+
+  /* 통계 탭: "전체" 우측 분리 + 멤버 12명 6+6 두 줄 */
+  .stats-tabs-wrap {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
+    gap: 8px;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 8px;
     margin: 0 auto 16px;
-    /* 7개 + 6 gap = 7*112 + 6*6 + 8*2 padding → 약 836px 한 줄 폭 */
-    max-width: 836px;
+    align-items: stretch;
+    max-width: 880px;
+  }
+  .stats-tabs-members {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .stats-tabs-side {
+    display: flex;
+    align-items: stretch;
   }
   .stats-tab {
     background: var(--surface2);
@@ -409,13 +437,13 @@
     font-size: 13px; font-weight: 700;
     font-family: inherit;
     transition: all 0.15s;
-    width: 112px;
     text-align: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     box-sizing: border-box;
+    min-height: 36px;
   }
   .stats-tab:hover { color: var(--text); border-color: var(--accent); }
   .stats-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
@@ -423,6 +451,10 @@
     width: 18px; height: 18px;
     object-fit: cover;
     flex-shrink: 0;
+  }
+  .stats-tab-all {
+    width: 70px;
+    height: 100%;
   }
 
   .stats-grid {
@@ -593,6 +625,10 @@
     .main-header { padding: 16px 20px; min-height: 0; }
     .grid, .events-wrap, .stats-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
+    .stats-tabs-wrap { flex-direction: column; }
+    .stats-tabs-side { justify-content: center; }
+    .stats-tab-all { width: 100%; min-height: 32px; }
+    .stats-tabs-members { grid-template-columns: repeat(4, 1fr); }
   }
 </style>
 </head>
@@ -644,8 +680,8 @@
         <div class="filter-section">
           <div class="filter-title">멤버</div>
           <div class="filter-members-block">
-            <button class="filter-member-all on" id="filterMemberAll">
-              <span class="dot"></span><span>전체</span>
+            <button class="filter-member-all on" id="filterMemberAll" title="전체">
+              <img src="Title.webp" alt="전체">
             </button>
             <div class="filter-members" id="filterMembers"></div>
           </div>
@@ -674,7 +710,10 @@
 
   <div class="page" id="page-stats">
     <div class="stats-wrap">
-      <div class="stats-tabs" id="statsTabs"></div>
+      <div class="stats-tabs-wrap">
+        <div class="stats-tabs-side" id="statsTabsSide"></div>
+        <div class="stats-tabs-members" id="statsTabsMembers"></div>
+      </div>
       <div id="statsBody">
         <div class="loading">
           <div class="spinner"></div>
@@ -731,7 +770,6 @@ let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let currentPage = 'live';
 
-// === 상태 변수들을 switchPage 호출 전에 미리 선언 ===
 const filterState = { member: 'all', type: 'all' };
 let allEvents = [];
 
@@ -797,7 +835,6 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// === 시간 헬퍼 ===
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);
@@ -866,7 +903,6 @@ function daysInMonth(year, month1) {
   return new Date(year, month1, 0).getDate();
 }
 
-// === 라이브 카드 ===
 function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
@@ -900,8 +936,10 @@ function buildCard(m, info, delay) {
   else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
   else titleText = '방송 중';
 
-  // 방송 시간을 카드 정보 영역(card-text 안)으로 이동
-  const btimeHtml = btime ? `<div class="card-btime"><span>⏱</span><span>${btime}</span></div>` : '';
+  // 방송 시간을 이름 우측에
+  const btimeHtml = btime ? `<span class="card-btime"><span>⏱</span><span>${btime}</span></span>` : '';
+  // 라이브일 때 멤버 색상 적용 (오프라인이면 muted)
+  const nameColorStyle = info.live ? `color: ${m.color}` : '';
 
   card.innerHTML = `
     <div class="card-thumb">
@@ -912,16 +950,17 @@ function buildCard(m, info, delay) {
     <div class="card-info">
       ${avatarHtml}
       <div class="card-text">
-        <div class="card-name">${m.name}</div>
+        <div class="card-name-row">
+          <span class="card-name" style="${nameColorStyle}">${m.name}</span>
+          ${btimeHtml}
+        </div>
         <div class="card-title ${info.live ? 'is-live' : ''}">${escapeHtml(titleText)}</div>
-        ${btimeHtml}
       </div>
     </div>
   `;
   return card;
 }
 
-// === 이벤트 렌더 ===
 function renderEvent(e) {
   const iconMap = {
     start: '▶', end: '■',
@@ -1047,22 +1086,28 @@ function applyFilter() {
   if (summary) summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
 }
 
-// ==================== 통계 ====================
-
 function initStatsTabs() {
-  const tabs = document.getElementById('statsTabs');
-  if (!tabs) return;
-  tabs.innerHTML = [
-    `<button class="stats-tab active" data-tab="all">전체</button>`
-  ].concat(MEMBERS.map(m => `
+  const memberBox = document.getElementById('statsTabsMembers');
+  const sideBox = document.getElementById('statsTabsSide');
+  if (!memberBox || !sideBox) return;
+
+  // 멤버 12명: 그리드로 6+6
+  memberBox.innerHTML = MEMBERS.map(m => `
     <button class="stats-tab" data-tab="${m.id}">
       <img src="${m.img}" alt="${m.name}"><span>${m.name}</span>
     </button>
-  `)).join('');
-  tabs.querySelectorAll('.stats-tab').forEach(btn => {
+  `).join('');
+  // 전체: 우측 분리
+  sideBox.innerHTML = `<button class="stats-tab stats-tab-all active" data-tab="all">전체</button>`;
+
+  const allTabs = [
+    ...memberBox.querySelectorAll('.stats-tab'),
+    ...sideBox.querySelectorAll('.stats-tab'),
+  ];
+  allTabs.forEach(btn => {
     btn.addEventListener('click', () => {
       statsState.selectedTab = btn.dataset.tab;
-      tabs.querySelectorAll('.stats-tab').forEach(b => {
+      allTabs.forEach(b => {
         b.classList.toggle('active', b.dataset.tab === statsState.selectedTab);
       });
       if (statsState.selectedTab !== 'all') {
@@ -1345,7 +1390,6 @@ function renderDayDetail(year, month1, sessionsByDate) {
   return html;
 }
 
-// === 데이터 로드 ===
 async function loadEvents() {
   try {
     const res = await fetch(WORKER_URL + '/events?t=' + Date.now());

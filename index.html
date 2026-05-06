@@ -202,12 +202,18 @@
   .badge-mode.subscription { background: var(--mode-subscription); box-shadow: 0 2px 8px rgba(245,158,11,0.45); }
   .badge-mode.copyright { background: var(--mode-copyright); box-shadow: 0 2px 8px rgba(148,163,184,0.45); }
   .badge-mode.restricted { background: var(--muted); }
-  .badge-time {
-    position: absolute; bottom: 10px; right: 10px;
-    background: rgba(0,0,0,0.8); color: var(--time);
-    font-size: 12px; font-weight: 600; padding: 4px 10px;
-    backdrop-filter: blur(4px);
+
+  /* 방송 시간을 카드 정보 영역으로 이동 */
+  .card-btime {
+    font-size: 11px;
+    color: var(--time);
+    font-weight: 600;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
+
   .card-info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; }
   .card-avatar {
     width: 36px; height: 36px;
@@ -265,7 +271,6 @@
 
   .filter-members-block { display: flex; flex-direction: column; gap: 10px; }
 
-  /* "전체" 버튼 - 종류 필터와 같은 스타일/사이즈 */
   .filter-member-all {
     display: flex; align-items: center; gap: 8px;
     padding: 8px 10px;
@@ -378,20 +383,23 @@
     color: var(--muted); opacity: 0.7;
   }
 
-  /* === 통계 페이지 === */
   .stats-wrap {
     padding: 20px 24px;
     max-width: 1600px; width: 100%; margin: 0 auto;
     flex: 1;
   }
-  /* 통계 탭: 가운데 정렬, 동일 폭 */
+  /* 통계 탭: 가운데 정렬 + 한 줄 7개 강제 (13개면 7+6 자동) */
   .stats-tabs {
-    display: flex; flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 8px; margin-bottom: 16px;
+    padding: 8px;
+    margin: 0 auto 16px;
+    /* 7개 + 6 gap = 7*112 + 6*6 + 8*2 padding → 약 836px 한 줄 폭 */
+    max-width: 836px;
   }
   .stats-tab {
     background: var(--surface2);
@@ -401,12 +409,13 @@
     font-size: 13px; font-weight: 700;
     font-family: inherit;
     transition: all 0.15s;
-    width: 110px;
+    width: 112px;
     text-align: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    box-sizing: border-box;
   }
   .stats-tab:hover { color: var(--text); border-color: var(--accent); }
   .stats-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
@@ -722,6 +731,18 @@ let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let currentPage = 'live';
 
+// === 상태 변수들을 switchPage 호출 전에 미리 선언 ===
+const filterState = { member: 'all', type: 'all' };
+let allEvents = [];
+
+const statsState = {
+  tabsInited: false,
+  data: null,
+  selectedTab: 'all',
+  viewMonth: null,
+  selectedDate: null,
+};
+
 function updateHeaderCenter() {
   const el = document.getElementById('headerCenter');
   if (!el) return;
@@ -878,18 +899,22 @@ function buildCard(m, info, delay) {
   else if (info.title) titleText = info.title;
   else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
   else titleText = '방송 중';
+
+  // 방송 시간을 카드 정보 영역(card-text 안)으로 이동
+  const btimeHtml = btime ? `<div class="card-btime"><span>⏱</span><span>${btime}</span></div>` : '';
+
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
       <div class="placeholder" style="display:${hasThumb ? 'none' : 'flex'}">${placeholderInner}</div>
       ${modeBadge}
-      ${btime ? `<span class="badge-time">⏱ ${btime}</span>` : ''}
     </div>
     <div class="card-info">
       ${avatarHtml}
       <div class="card-text">
         <div class="card-name">${m.name}</div>
         <div class="card-title ${info.live ? 'is-live' : ''}">${escapeHtml(titleText)}</div>
+        ${btimeHtml}
       </div>
     </div>
   `;
@@ -958,9 +983,6 @@ function renderEvent(e) {
   return `<div class="event">${inner}</div>`;
 }
 
-const filterState = { member: 'all', type: 'all' };
-let allEvents = [];
-
 function initFilterUI() {
   const allBtn = document.getElementById('filterMemberAll');
   const mc = document.getElementById('filterMembers');
@@ -1026,13 +1048,6 @@ function applyFilter() {
 }
 
 // ==================== 통계 ====================
-const statsState = {
-  tabsInited: false,
-  data: null,
-  selectedTab: 'all',
-  viewMonth: null,
-  selectedDate: null,
-};
 
 function initStatsTabs() {
   const tabs = document.getElementById('statsTabs');
@@ -1151,7 +1166,7 @@ function renderStatsAll(body) {
     `;
   }).join('');
   body.innerHTML = `
-    <div style="margin-bottom: 12px; color: var(--muted); font-size: 13px;">
+    <div style="margin-bottom: 12px; color: var(--muted); font-size: 13px; text-align: center;">
       ${year}년 ${month}월 기준
     </div>
     <div class="stats-grid">${cards}</div>

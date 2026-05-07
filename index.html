@@ -25,6 +25,7 @@
     --ev-comment: #ec4899;
     --ev-post: #60a5fa;
     --ev-youtube: #ef4444;
+    --ev-unread: #61FFEC;
     --mode-adult: #ec4899;
     --mode-subscription: #f59e0b;
     --mode-copyright: #94a3b8;
@@ -80,7 +81,7 @@
     justify-content: center;
   }
   .sidebar-logo img { max-width: 100%; max-height: 32px; height: auto; display: block; }
-  .nav-list { padding: 8px 0; display: flex; flex-direction: column; gap: 2px; }
+  .nav-list { padding: 8px 0; display: flex; flex-direction: column; gap: 2px; flex: 1; }
   .nav-item {
     display: flex; align-items: center; gap: 12px;
     padding: 11px 20px; color: var(--muted);
@@ -89,10 +90,63 @@
     width: 100%; font-family: inherit;
     border-left: 3px solid transparent;
     transition: color 0.15s, background 0.15s, border-color 0.15s;
+    position: relative;
   }
   .nav-item:hover { color: var(--text); background: var(--surface2); }
   .nav-item.active { color: var(--accent2); background: var(--surface2); border-left-color: var(--accent); }
   .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+  .nav-badge {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--ev-unread);
+    color: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* 알림 토글 (좌하단 사이드바 영역) */
+  .notify-toggle {
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .notify-toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    user-select: none;
+  }
+  .notify-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .notify-switch::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--muted);
+    top: 2px;
+    left: 2px;
+    transition: transform 0.18s, background 0.18s;
+  }
+  .notify-switch.on { border-color: var(--accent); }
+  .notify-switch.on::after { transform: translateX(16px); background: var(--accent); }
 
   .main {
     flex: 1; min-width: 0;
@@ -186,13 +240,6 @@
     color: var(--muted); letter-spacing: 0.5px;
     text-align: center;
   }
-  .badge-live {
-    position: absolute; top: 10px; left: 10px;
-    background: var(--live); color: white;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    padding: 4px 10px;
-    box-shadow: 0 2px 8px rgba(255,59,59,0.5);
-  }
   .badge-mode {
     position: absolute; top: 10px; right: 10px;
     color: white; font-size: 11px; font-weight: 700;
@@ -210,7 +257,6 @@
     border: 1.5px solid var(--border);
   }
   .card-text { min-width: 0; flex: 1; }
-  /* 이름 + 방송 시간을 같은 줄에 */
   .card-name-row {
     display: flex;
     align-items: center;
@@ -282,7 +328,6 @@
 
   .filter-members-block { display: flex; flex-direction: column; gap: 10px; }
 
-  /* 멤버 필터 전체 버튼: 이미지(Title.webp) 사용 */
   .filter-member-all {
     display: flex; align-items: center; justify-content: center;
     padding: 8px;
@@ -352,9 +397,16 @@
     display: flex; align-items: center; gap: 14px;
     padding: 14px 18px;
     transition: background 0.15s;
+    border-left: 3px solid transparent;
   }
   .event:hover { background: var(--surface2); }
   .event + .event { border-top: 1px solid var(--border); }
+  /* 안 읽은 이벤트 좌측 줄무늬 */
+  .event.unread {
+    border-left-color: var(--ev-unread);
+    background: rgba(97, 255, 236, 0.04);
+  }
+  .event.unread:hover { background: rgba(97, 255, 236, 0.07); }
   .event-icon {
     width: 32px; height: 32px;
     display: flex; align-items: center; justify-content: center;
@@ -407,7 +459,6 @@
     flex: 1;
   }
 
-  /* 통계 탭: "전체" 우측 분리 + 멤버 12명 6+6 두 줄 */
   .stats-tabs-wrap {
     display: flex;
     gap: 8px;
@@ -466,11 +517,22 @@
   @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
 
+  /* 멤버 카드 클릭 가능 */
   .stats-card {
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 16px;
     display: flex; flex-direction: column; gap: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+  }
+  .stats-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 16px rgba(97,255,236,0.15);
   }
   .stats-card-header { display: flex; align-items: center; gap: 10px; }
   .stats-card-avatar {
@@ -612,16 +674,19 @@
     .sidebar {
       width: 100%; height: auto;
       position: relative;
-      flex-direction: row; padding: 8px;
-      overflow-x: auto;
+      flex-direction: column; padding: 0;
     }
     .sidebar-logo { display: none; }
+    .nav-list { flex-direction: row; flex: none; padding: 8px; overflow-x: auto; }
     .nav-item {
       border-left: none;
       border-bottom: 3px solid transparent;
       padding: 10px 14px; white-space: nowrap;
+      width: auto;
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
+    .nav-badge { right: 6px; top: 4px; transform: none; }
+    .notify-toggle { padding: 10px 16px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     .main-header { padding: 16px 20px; min-height: 0; }
     .grid, .events-wrap, .stats-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
@@ -644,11 +709,16 @@
     <button class="nav-item" data-page="events">
       <span class="nav-icon">▤</span>
       <span>최근 이벤트</span>
+      <span class="nav-badge" id="navBadge" style="display:none">0</span>
     </button>
     <button class="nav-item" data-page="stats">
       <span class="nav-icon">◫</span>
       <span>방송 통계</span>
     </button>
+  </div>
+  <div class="notify-toggle">
+    <span class="notify-toggle-label">알림</span>
+    <button class="notify-switch" id="notifySwitch" aria-label="알림 토글" title="새 이벤트 알림"></button>
   </div>
 </aside>
 
@@ -726,6 +796,7 @@
 
 <script>
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
+const BASE_TITLE = '천타버스';
 
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
@@ -781,6 +852,105 @@ const statsState = {
   selectedDate: null,
 };
 
+// === 알림 관련 ===
+const LS_NOTIFY = 'chuntaverse_notify_enabled';
+const LS_LAST_SEEN = 'chuntaverse_last_seen_event_time';
+
+function lsGet(k, fallback) {
+  try { const v = localStorage.getItem(k); return v === null ? fallback : v; }
+  catch (e) { return fallback; }
+}
+function lsSet(k, v) {
+  try { localStorage.setItem(k, v); } catch (e) {}
+}
+
+// 처음 방문이면 현재 시각 (이전 이벤트 모두 "읽음" 처리)
+function getLastSeenTime() {
+  const v = lsGet(LS_LAST_SEEN, null);
+  if (!v) {
+    const nowIso = new Date().toISOString();
+    lsSet(LS_LAST_SEEN, nowIso);
+    return nowIso;
+  }
+  return v;
+}
+function setLastSeenToNow() {
+  lsSet(LS_LAST_SEEN, new Date().toISOString());
+}
+
+let notifyEnabled = lsGet(LS_NOTIFY, '0') === '1';
+
+function updateNotifySwitchUI() {
+  const sw = document.getElementById('notifySwitch');
+  if (!sw) return;
+  sw.classList.toggle('on', notifyEnabled);
+}
+
+function setNotifyEnabled(enabled) {
+  notifyEnabled = enabled;
+  lsSet(LS_NOTIFY, enabled ? '1' : '0');
+  updateNotifySwitchUI();
+  // OFF일 때는 제목/배지 즉시 정리
+  if (!enabled) {
+    document.title = BASE_TITLE;
+    const badge = document.getElementById('navBadge');
+    if (badge) badge.style.display = 'none';
+  } else {
+    // ON 시 즉시 갱신
+    refreshUnreadIndicator();
+  }
+}
+
+// 안 읽은 이벤트 카운트 + 제목/배지 갱신
+function refreshUnreadIndicator() {
+  if (!notifyEnabled) {
+    document.title = BASE_TITLE;
+    const badge = document.getElementById('navBadge');
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+  const lastSeen = new Date(getLastSeenTime()).getTime();
+  const unread = allEvents.filter(e => {
+    const t = new Date(e.time).getTime();
+    return !isNaN(t) && t > lastSeen;
+  });
+  const count = unread.length;
+
+  // 탭 제목
+  if (count > 0) {
+    document.title = `${BASE_TITLE} (${count})`;
+  } else {
+    document.title = BASE_TITLE;
+  }
+
+  // 사이드바 배지
+  const badge = document.getElementById('navBadge');
+  if (badge) {
+    if (count > 0) {
+      badge.style.display = '';
+      badge.textContent = count > 99 ? '99+' : count;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // 이벤트 행에 unread 클래스
+  const tl = document.getElementById('timeline');
+  if (tl) {
+    tl.querySelectorAll('.event').forEach(el => {
+      const t = parseInt(el.dataset.time || '0', 10);
+      el.classList.toggle('unread', notifyEnabled && t > lastSeen);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {});
+// 즉시 토글 UI 반영
+updateNotifySwitchUI();
+document.getElementById('notifySwitch').addEventListener('click', () => {
+  setNotifyEnabled(!notifyEnabled);
+});
+
 function updateHeaderCenter() {
   const el = document.getElementById('headerCenter');
   if (!el) return;
@@ -817,6 +987,11 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
+  // 이벤트 탭 진입 시 안 읽음 클리어
+  if (page === 'events') {
+    setLastSeenToNow();
+    refreshUnreadIndicator();
+  }
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -833,6 +1008,20 @@ switchPage(initPage);
 window.addEventListener('hashchange', () => {
   const p = (location.hash || '').replace('#', '') || 'live';
   switchPage(p);
+});
+
+// 탭 활성/포커스 시 이벤트 페이지에 있다면 안 읽음 클리어
+window.addEventListener('focus', () => {
+  if (currentPage === 'events') {
+    setLastSeenToNow();
+    refreshUnreadIndicator();
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentPage === 'events') {
+    setLastSeenToNow();
+    refreshUnreadIndicator();
+  }
 });
 
 function formatBtime(seconds) {
@@ -936,9 +1125,7 @@ function buildCard(m, info, delay) {
   else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
   else titleText = '방송 중';
 
-  // 방송 시간을 이름 우측에
   const btimeHtml = btime ? `<span class="card-btime"><span>⏱</span><span>${btime}</span></span>` : '';
-  // 라이브일 때 멤버 색상 적용 (오프라인이면 muted)
   const nameColorStyle = info.live ? `color: ${m.color}` : '';
 
   card.innerHTML = `
@@ -999,6 +1186,7 @@ function renderEvent(e) {
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
+  const eventTime = new Date(e.time).getTime() || 0;
   const inner = `
     <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
     ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
@@ -1017,9 +1205,9 @@ function renderEvent(e) {
     </div>
   `;
   if (e.url) {
-    return `<div class="event"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
+    return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
-  return `<div class="event">${inner}</div>`;
+  return `<div class="event" data-time="${eventTime}">${inner}</div>`;
 }
 
 function initFilterUI() {
@@ -1084,6 +1272,8 @@ function applyFilter() {
   }
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
+  // 안 읽음 표시 갱신
+  refreshUnreadIndicator();
 }
 
 function initStatsTabs() {
@@ -1091,13 +1281,11 @@ function initStatsTabs() {
   const sideBox = document.getElementById('statsTabsSide');
   if (!memberBox || !sideBox) return;
 
-  // 멤버 12명: 그리드로 6+6
   memberBox.innerHTML = MEMBERS.map(m => `
     <button class="stats-tab" data-tab="${m.id}">
       <img src="${m.img}" alt="${m.name}"><span>${m.name}</span>
     </button>
   `).join('');
-  // 전체: 우측 분리
   sideBox.innerHTML = `<button class="stats-tab stats-tab-all active" data-tab="all">전체</button>`;
 
   const allTabs = [
@@ -1106,19 +1294,58 @@ function initStatsTabs() {
   ];
   allTabs.forEach(btn => {
     btn.addEventListener('click', () => {
-      statsState.selectedTab = btn.dataset.tab;
-      allTabs.forEach(b => {
-        b.classList.toggle('active', b.dataset.tab === statsState.selectedTab);
-      });
-      if (statsState.selectedTab !== 'all') {
-        const now = new Date();
-        statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
-        statsState.selectedDate = null;
-      }
-      renderStatsBody();
+      selectStatsTab(btn.dataset.tab);
     });
   });
   if (statsState.data) renderStatsBody();
+}
+
+// 외부에서 호출 가능: 멤버 카드 클릭 시 사용
+function selectStatsTab(tabId) {
+  statsState.selectedTab = tabId;
+  document.querySelectorAll('.stats-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+  });
+  if (tabId !== 'all') {
+    // 가장 최근 활동(이벤트) 발생 일을 기본 선택, 없으면 오늘
+    const latestDate = findLatestActivityDate(tabId);
+    if (latestDate) {
+      const d = new Date(latestDate);
+      statsState.viewMonth = { year: d.getFullYear(), month: d.getMonth() + 1 };
+      statsState.selectedDate = isoToKstDateKey(latestDate);
+    } else {
+      const now = new Date();
+      statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+      statsState.selectedDate = null;
+    }
+  }
+  renderStatsBody();
+}
+
+// 멤버의 가장 최근 활동(방송 시작/게시글/유튜브) 시각 ISO 반환
+function findLatestActivityDate(memberId) {
+  if (!statsState.data) return null;
+  const ms = statsState.data[memberId];
+  if (!ms) return null;
+  let latest = null;
+  const candidates = [];
+  for (const s of (ms.sessions || [])) {
+    if (s.start) candidates.push(s.start);
+  }
+  for (const p of (ms.posts || [])) {
+    if (p.time) candidates.push(p.time);
+  }
+  for (const y of (ms.youtube || [])) {
+    if (y.time) candidates.push(y.time);
+  }
+  for (const t of candidates) {
+    const ms2 = new Date(t).getTime();
+    if (isNaN(ms2)) continue;
+    if (latest === null || ms2 > new Date(latest).getTime()) {
+      latest = t;
+    }
+  }
+  return latest;
 }
 
 function computeMonthSummary(memberStats, year, month1) {
@@ -1184,7 +1411,7 @@ function renderStatsAll(body) {
     const ms = statsState.data[m.id];
     const sum = computeMonthSummary(ms, year, month);
     return `
-      <div class="stats-card">
+      <button class="stats-card" data-member="${m.id}">
         <div class="stats-card-header">
           <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
@@ -1207,7 +1434,7 @@ function renderStatsAll(body) {
             <span class="stats-card-value">${sum.youtubeCount}개</span>
           </div>
         </div>
-      </div>
+      </button>
     `;
   }).join('');
   body.innerHTML = `
@@ -1216,6 +1443,12 @@ function renderStatsAll(body) {
     </div>
     <div class="stats-grid">${cards}</div>
   `;
+  body.querySelectorAll('.stats-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const memberId = card.dataset.member;
+      if (memberId) selectStatsTab(memberId);
+    });
+  });
 }
 
 function renderStatsMember(body, memberId) {
@@ -1400,6 +1633,7 @@ async function loadEvents() {
     applyFilter();
     lastEventsUpdate = new Date();
     updateHeaderCenter();
+    refreshUnreadIndicator();
   } catch (e) {
     document.getElementById('timeline').innerHTML =
       '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';

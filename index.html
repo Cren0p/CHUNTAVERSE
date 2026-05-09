@@ -115,7 +115,7 @@
     padding: 8px 20px 10px 23px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
   }
   .notify-toggle-label {
@@ -828,12 +828,12 @@
       <span class="nav-badge" id="navBadge" style="display:none">0</span>
     </button>
     <div class="notify-toggle">
-      <span class="notify-toggle-label">알림</span>
       <button class="notify-switch" id="notifySwitch" aria-label="알림 토글" title="새 이벤트 알림"></button>
+      <span class="notify-toggle-label">알림</span>
     </div>
     <button class="nav-item" data-page="stats">
       <span class="nav-icon">◫</span>
-      <span>방송 통계</span>
+      <span>통계</span>
     </button>
   </div>
 </aside>
@@ -952,7 +952,7 @@ const MODE_PLACEHOLDER_TEXT = {
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '방송 통계' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;

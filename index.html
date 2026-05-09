@@ -1106,6 +1106,10 @@ function updateHeaderCenter() {
 
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
+  // 이벤트 탭에서 떠날 때 읽음 처리
+  if (currentPage === 'events' && page !== 'events') {
+    setLastSeenToNow();
+  }
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
@@ -1120,9 +1124,9 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시 안 읽음 클리어
+  // 이벤트 탭 진입 시: 줄무늬는 유지하고, 떠날 때 읽음 처리
+  // (이벤트 탭에서 다른 탭으로 이동하거나, 페이지 떠날 때 lastSeen 갱신)
   if (page === 'events') {
-    setLastSeenToNow();
     refreshUnreadIndicator();
   }
 }
@@ -1143,17 +1147,15 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// 탭 활성/포커스 시 이벤트 페이지에 있다면 안 읽음 클리어
-window.addEventListener('focus', () => {
-  if (currentPage === 'events') {
+// 탭이 hidden 될 때 (페이지 떠남, 백그라운드) 이벤트 탭에 있었다면 읽음 처리
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && currentPage === 'events') {
     setLastSeenToNow();
-    refreshUnreadIndicator();
   }
 });
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && currentPage === 'events') {
+window.addEventListener('beforeunload', () => {
+  if (currentPage === 'events') {
     setLastSeenToNow();
-    refreshUnreadIndicator();
   }
 });
 

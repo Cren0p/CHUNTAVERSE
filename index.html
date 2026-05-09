@@ -1784,6 +1784,10 @@ function renderEvent(e) {
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend' || e.type === 'cafe_post') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
+  // end 이벤트: VOD 목록 페이지로 링크 자동 생성
+  if (e.type === 'end' && !e.url && e.member_id) {
+    e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
+  }
   const eventTime = new Date(e.time).getTime() || 0;
   const iconHtml = iconMap[e.type] || '•';
   const inner = `

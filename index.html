@@ -115,8 +115,8 @@
     padding: 8px 20px 10px 23px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 10px;
   }
   .notify-toggle-label {
     font-size: 13px;
@@ -389,6 +389,7 @@
   .filter-type[data-type="soop"] .dot { background: var(--filter-soop); }
   .filter-type[data-type="post"] .dot { background: var(--filter-post); }
   .filter-type[data-type="youtube"] .dot { background: var(--ev-youtube); }
+  .filter-type[data-type="cafe"] .dot { background: #03C75A; }
 
   .filter-summary {
     margin-top: 14px; padding-top: 12px;
@@ -427,6 +428,10 @@
     font-size: 14px; flex-shrink: 0;
     background: var(--surface2); font-weight: 700;
   }
+  .event-icon svg {
+    width: 16px; height: 16px;
+    display: block;
+  }
   .event-icon.start { background: rgba(52,211,153,0.15); color: var(--ev-start); }
   .event-icon.end { background: rgba(248,113,113,0.15); color: var(--ev-end); }
   .event-icon.title { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
@@ -435,6 +440,7 @@
   .event-icon.post { background: rgba(96,165,250,0.15); color: var(--ev-post); }
   .event-icon.comment_recommend { background: rgba(96,165,250,0.15); color: var(--ev-post); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
+  .event-icon.cafe_post { background: rgba(3,199,90,0.15); color: #03C75A; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
@@ -645,6 +651,7 @@
   }
   .calendar-day-dot.post { background: var(--filter-post); }
   .calendar-day-dot.youtube { background: var(--ev-youtube); }
+  .calendar-day-dot.cafe { background: #03C75A; }
   /* 게시글/유튜브'만' 있는 날은 살짝 어두운 배경 */
   .calendar-day.has-activity:not(.has-broadcast) {
     background: rgba(46, 245, 225, 0.06);
@@ -688,9 +695,11 @@
     font-weight: 700;
     background: var(--surface);
   }
+  .day-kind-icon svg { width: 11px; height: 11px; display: block; }
   .day-kind-icon.broadcast { color: var(--ev-start); background: rgba(52,211,153,0.15); }
   .day-kind-icon.post { color: var(--ev-post); background: rgba(96,165,250,0.15); }
   .day-kind-icon.youtube { color: var(--ev-youtube); background: rgba(239,68,68,0.15); }
+  .day-kind-icon.cafe { color: #03C75A; background: rgba(3,199,90,0.15); }
   .day-session-row-head {
     display: flex;
     align-items: center;
@@ -887,6 +896,9 @@
             <button class="filter-type" data-type="youtube">
               <span class="dot"></span><span>유튜브 영상</span>
             </button>
+            <button class="filter-type" data-type="cafe">
+              <span class="dot"></span><span>네이버 카페</span>
+            </button>
           </div>
         </div>
         <div class="filter-summary" id="filterSummary"></div>
@@ -915,7 +927,7 @@ const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
 // 통계 시작월: 이 시점 이전 데이터는 없음
 const STATS_START_YEAR = 2026;
-const STATS_START_MONTH = 5;
+const STATS_START_MONTH = 4;
 
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
@@ -951,6 +963,19 @@ const MODE_PLACEHOLDER_TEXT = {
 };
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
+
+// === SVG 아이콘 헬퍼 ===
+// currentColor를 사용해 CSS color로 색상 제어
+const SVG_ICONS = {
+  // 무한대 (방송 시작/종료 공용)
+  infinity: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c-2.667 0-4.667 8-7.334 8-2.057 0-3.844-1.79-3.844-4 0-2.21 1.787-4 3.844-4 2.667 0 4.667 8 7.334 8 2.058 0 3.822-1.79 3.822-4 0-2.21-1.764-4-3.822-4z"/></svg>`,
+  // 게시판 (3줄 박스, 숲 게시글)
+  board: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>`,
+  // 따봉 (댓글 추천)
+  thumbsup: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zm0 0V7a3 3 0 0 1 3-3l3 6v10H8.5a2 2 0 0 1-1.95-1.5L5 13m2-2h11.4a2 2 0 0 1 2 2.27l-1 6a2 2 0 0 1-2 1.73H13"/></svg>`,
+  // 커피잔 (네이버 카페)
+  coffee: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h12a3 3 0 0 1 0 6h-1"/><path d="M3 9v8a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9"/><line x1="6" y1="3" x2="6" y2="6"/><line x1="10" y1="3" x2="10" y2="6"/></svg>`,
+};
 
 const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
@@ -1106,11 +1131,6 @@ function updateHeaderCenter() {
 
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
-  // 이벤트 탭에서 떠날 때 읽음 처리 + 즉시 UI 반영
-  if (currentPage === 'events' && page !== 'events') {
-    setLastSeenToNow();
-    refreshUnreadIndicator();
-  }
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
@@ -1125,8 +1145,9 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시 줄무늬 표시 (lastSeen 유지)
+  // 이벤트 탭 진입 시 안 읽음 클리어
   if (page === 'events') {
+    setLastSeenToNow();
     refreshUnreadIndicator();
   }
 }
@@ -1147,19 +1168,20 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// 탭이 hidden 될 때 (백그라운드, 페이지 떠남) 이벤트 탭이면 읽음 처리
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && currentPage === 'events') {
+// 탭 활성/포커스 시 이벤트 페이지에 있다면 안 읽음 클리어
+window.addEventListener('focus', () => {
+  if (currentPage === 'events') {
     setLastSeenToNow();
     refreshUnreadIndicator();
   }
 });
-window.addEventListener('beforeunload', () => {
-  if (currentPage === 'events') {
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentPage === 'events') {
     setLastSeenToNow();
+    refreshUnreadIndicator();
   }
 });
-  
+
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);
@@ -1285,17 +1307,22 @@ function buildCard(m, info, delay) {
 }
 
 function renderEvent(e) {
+  // 이벤트 타입별 아이콘 (SVG 우선, 없으면 텍스트 심볼)
   const iconMap = {
-    start: '▶', end: '■',
+    start: SVG_ICONS.infinity,
+    end: SVG_ICONS.infinity,
     title: '✎', category: '#', mode_change: '◆',
-    post: '✉', comment_recommend: '↑',
-    youtube: '▶'
+    post: SVG_ICONS.board,
+    comment_recommend: SVG_ICONS.thumbsup,
+    youtube: '▶',
+    cafe_post: SVG_ICONS.coffee,
   };
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
     title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
     post: '숲 게시글', comment_recommend: '댓글 추천',
     youtube: '유튜브 영상',
+    cafe_post: '네이버 카페',
   };
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
@@ -1310,6 +1337,10 @@ function renderEvent(e) {
   if (e.type === 'comment_recommend' && e.target_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.target_name)} 컨텐츠)</span>`;
   }
+  // 카페명 표시 (cafe_post)
+  if (e.type === 'cafe_post' && e.cafe_name) {
+    targetTag = `<span class="event-target">(${escapeHtml(e.cafe_name)})</span>`;
+  }
   let detail = '';
   if (e.type === 'start' && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
@@ -1319,12 +1350,13 @@ function renderEvent(e) {
     const beforeLabel = MODE_LABEL[e.before] || e.before;
     const afterLabel = MODE_LABEL[e.after] || e.after;
     detail = `<div class="event-detail">${escapeHtml(beforeLabel)} → ${escapeHtml(afterLabel)}</div>`;
-  } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend') && e.title) {
+  } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend' || e.type === 'cafe_post') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
   const eventTime = new Date(e.time).getTime() || 0;
+  const iconHtml = iconMap[e.type] || '•';
   const inner = `
-    <div class="event-icon ${e.type}">${iconMap[e.type] || '•'}</div>
+    <div class="event-icon ${e.type}">${iconHtml}</div>
     ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
     <div class="event-body">
       <div>
@@ -1390,6 +1422,7 @@ function applyFilter() {
   const typeToCat = (et) => {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
+    if (et === 'cafe_post') return 'cafe';
     return 'soop';
   };
   const filtered = allEvents.filter(e => {
@@ -1476,7 +1509,7 @@ function findLatestActivityDate(memberId) {
   }
   if (latestBroadcast) return latestBroadcast;
 
-  // 2순위: 게시글/유튜브 중 가장 최근
+  // 2순위: 게시글/유튜브/카페 중 가장 최근
   let latest = null;
   const candidates = [];
   for (const p of (ms.posts || [])) {
@@ -1484,6 +1517,9 @@ function findLatestActivityDate(memberId) {
   }
   for (const y of (ms.youtube || [])) {
     if (y.time) candidates.push(y.time);
+  }
+  for (const c of (ms.cafe || [])) {
+    if (c.time) candidates.push(c.time);
   }
   for (const t of candidates) {
     const ms2 = new Date(t).getTime();
@@ -1502,9 +1538,11 @@ function computeMonthSummary(memberStats, year, month1) {
     totalDurationMs: 0,
     postCount: 0,
     youtubeCount: 0,
+    cafeCount: 0,
     sessionsByDate: {},
     postsByDate: {},
     youtubeByDate: {},
+    cafeByDate: {},
   };
   if (!memberStats) return result;
   const monthStart = new Date(year, month1 - 1, 1, 0, 0, 0).getTime();
@@ -1546,6 +1584,17 @@ function computeMonthSummary(memberStats, year, month1) {
       if (dateKey) {
         if (!result.youtubeByDate[dateKey]) result.youtubeByDate[dateKey] = [];
         result.youtubeByDate[dateKey].push(y);
+      }
+    }
+  }
+  for (const c of (memberStats.cafe || [])) {
+    const t = new Date(c.time).getTime();
+    if (!isNaN(t) && t >= monthStart && t < monthEnd) {
+      result.cafeCount++;
+      const dateKey = isoToKstDateKey(c.time);
+      if (dateKey) {
+        if (!result.cafeByDate[dateKey]) result.cafeByDate[dateKey] = [];
+        result.cafeByDate[dateKey].push(c);
       }
     }
   }
@@ -1595,6 +1644,10 @@ function renderStatsAll(body) {
           <div class="stats-card-row">
             <span class="stats-card-label">유튜브 업로드</span>
             <span class="stats-card-value">${sum.youtubeCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label">카페 게시글</span>
+            <span class="stats-card-value">${sum.cafeCount}개</span>
           </div>
         </div>
       </button>
@@ -1652,6 +1705,10 @@ function renderStatsMember(body, memberId) {
           <span class="stats-summary-label">유튜브 업로드</span>
           <span class="stats-summary-value">${sum.youtubeCount}개</span>
         </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">카페 게시글</span>
+          <span class="stats-summary-value">${sum.cafeCount}개</span>
+        </div>
       </div>
     </div>
     <div class="stats-detail-body">
@@ -1700,6 +1757,7 @@ function renderCalendar(year, month1, sum) {
   const sessionsByDate = sum.sessionsByDate || {};
   const postsByDate = sum.postsByDate || {};
   const youtubeByDate = sum.youtubeByDate || {};
+  const cafeByDate = sum.cafeByDate || {};
   const totalDays = daysInMonth(year, month1);
   const firstDow = new Date(year, month1 - 1, 1).getDay();
   const todayKey = isoToKstDateKey(new Date().toISOString());
@@ -1717,10 +1775,12 @@ function renderCalendar(year, month1, sum) {
     const sessions = sessionsByDate[dateKey] || [];
     const posts = postsByDate[dateKey] || [];
     const youtubes = youtubeByDate[dateKey] || [];
+    const cafes = cafeByDate[dateKey] || [];
     const hasBroadcast = sessions.length > 0;
     const hasPost = posts.length > 0;
     const hasYoutube = youtubes.length > 0;
-    const hasActivity = hasBroadcast || hasPost || hasYoutube;
+    const hasCafe = cafes.length > 0;
+    const hasActivity = hasBroadcast || hasPost || hasYoutube || hasCafe;
     const isToday = dateKey === todayKey;
     const selected = statsState.selectedDate === dateKey;
     const classes = ['calendar-day'];
@@ -1732,10 +1792,11 @@ function renderCalendar(year, month1, sum) {
     let bottomLine = '';
     if (hasBroadcast) {
       bottomLine = `<span class="calendar-daycount">${sessions.length}회</span>`;
-    } else if (hasPost || hasYoutube) {
+    } else if (hasPost || hasYoutube || hasCafe) {
       const dots = [];
       if (hasPost) dots.push('<span class="calendar-day-dot post" title="게시글"></span>');
       if (hasYoutube) dots.push('<span class="calendar-day-dot youtube" title="유튜브"></span>');
+      if (hasCafe) dots.push('<span class="calendar-day-dot cafe" title="카페"></span>');
       bottomLine = `<div class="calendar-day-dots">${dots.join('')}</div>`;
     }
 
@@ -1757,6 +1818,7 @@ function renderDayDetail(year, month1, sum) {
   const sessionsByDate = sum.sessionsByDate || {};
   const postsByDate = sum.postsByDate || {};
   const youtubeByDate = sum.youtubeByDate || {};
+  const cafeByDate = sum.cafeByDate || {};
   const date = statsState.selectedDate;
   if (!date) {
     return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>`;
@@ -1764,8 +1826,9 @@ function renderDayDetail(year, month1, sum) {
   const sessions = sessionsByDate[date] || [];
   const posts = postsByDate[date] || [];
   const youtubes = youtubeByDate[date] || [];
+  const cafes = cafeByDate[date] || [];
 
-  const totalActivities = sessions.length + posts.length + youtubes.length;
+  const totalActivities = sessions.length + posts.length + youtubes.length + cafes.length;
   if (totalActivities === 0) {
     return `<div class="day-detail-title">${date}</div><div class="day-detail-empty">이 날은 활동 기록이 없어요</div>`;
   }
@@ -1775,11 +1838,12 @@ function renderDayDetail(year, month1, sum) {
   if (sessions.length > 0) summaryParts.push(`방송 ${sessions.length}회`);
   if (posts.length > 0) summaryParts.push(`게시글 ${posts.length}개`);
   if (youtubes.length > 0) summaryParts.push(`유튜브 ${youtubes.length}개`);
+  if (cafes.length > 0) summaryParts.push(`카페 ${cafes.length}개`);
   let html = `<div class="day-detail-title">${date} · ${summaryParts.join(' · ')}</div>`;
 
   // 모든 항목을 시간순 통합 정렬
   // - 방송 세션: 시작 시각 기준 (한 덩어리로 유지)
-  // - 게시글/유튜브: 작성 시각 기준
+  // - 게시글/유튜브/카페: 작성 시각 기준
   const items = [];
   for (const s of sessions) {
     const t = new Date(s.start).getTime();
@@ -1792,6 +1856,10 @@ function renderDayDetail(year, month1, sum) {
   for (const y of youtubes) {
     const t = new Date(y.time).getTime();
     if (!isNaN(t)) items.push({ kind: 'youtube', time: t, data: y });
+  }
+  for (const c of cafes) {
+    const t = new Date(c.time).getTime();
+    if (!isNaN(t)) items.push({ kind: 'cafe', time: t, data: c });
   }
   items.sort((a, b) => a.time - b.time);
 
@@ -1866,6 +1934,21 @@ function renderDayDetail(year, month1, sum) {
       `;
       if (y.url) {
         html += `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>`;
+      } else {
+        html += `<div class="day-item">${inner}</div>`;
+      }
+    } else if (item.kind === 'cafe') {
+      const c = item.data;
+      const timeStr = formatHHMM(c.time);
+      const titleEsc = escapeHtml(c.title || '(제목 없음)');
+      const cafeNameEsc = escapeHtml(c.cafe_name || '');
+      const inner = `
+        <span class="day-kind-icon cafe" title="네이버 카페">${SVG_ICONS.coffee}</span>
+        <span class="day-item-time">${timeStr}</span>
+        <span class="day-item-title">${cafeNameEsc ? `[${cafeNameEsc}] ` : ''}${titleEsc}</span>
+      `;
+      if (c.url) {
+        html += `<a class="day-item" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${inner}</a>`;
       } else {
         html += `<div class="day-item">${inner}</div>`;
       }

@@ -94,7 +94,15 @@
   }
   .nav-item:hover { color: var(--text); background: var(--surface2); }
   .nav-item.active { color: var(--accent2); background: var(--surface2); border-left-color: var(--accent); }
-  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-icon svg { width: 16px; height: 16px; display: block; }
   .nav-badge {
     position: absolute;
     right: 16px;
@@ -109,14 +117,43 @@
     text-align: center;
     line-height: 1.2;
   }
+  /* 사이드바 라이브 배지 (생방송 메뉴 우측) */
+  .nav-live-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    background: var(--surface2);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+  .nav-live-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--muted);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .nav-live-badge.on {
+    color: var(--text);
+    background: rgba(255,59,59,0.12);
+  }
+  .nav-live-badge.on .nav-live-dot {
+    background: var(--live);
+    box-shadow: 0 0 6px var(--live-glow);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
 
   /* 알림 토글 (사이드바 메뉴 사이) */
   .notify-toggle {
     padding: 8px 20px 10px 23px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 8px;
   }
   .notify-toggle-label {
     font-size: 13px;
@@ -438,7 +475,7 @@
   .event-icon.category { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
   .event-icon.mode_change { background: rgba(251,191,36,0.15); color: var(--ev-yellow); }
   .event-icon.post { background: rgba(52,211,153,0.15); color: var(--ev-post); }
-  .event-icon.start { background: rgba(52,211,153,0.15); color: var(--ev-start); }
+  .event-icon.comment_recommend { background: rgba(52,211,153,0.15); color: var(--ev-post); }
   .event-icon.youtube { background: rgba(239,68,68,0.15); color: var(--ev-youtube); }
   .event-icon.cafe_post { background: rgba(3,199,90,0.15); color: #03C75A; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
@@ -789,6 +826,95 @@
     color: var(--ev-yellow); font-weight: 700;
   }
 
+  /* === 관련 링크 탭 === */
+  .links-wrap {
+    padding: 20px 24px;
+    max-width: 1600px; width: 100%; margin: 0 auto;
+    flex: 1;
+  }
+  .links-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .links-section-title {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .links-table-wrap {
+    overflow-x: auto;
+  }
+  .links-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 720px;
+  }
+  .links-table th, .links-table td {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 8px;
+    text-align: center;
+    vertical-align: top;
+  }
+  .links-table th:last-child, .links-table td:last-child { border-right: none; }
+  .links-table tr:last-child td { border-bottom: none; }
+  .links-table th {
+    background: var(--surface2);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 6px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .links-th-avatar {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    margin: 0 auto 4px;
+    display: block;
+    border: 1.5px solid var(--border);
+  }
+  .links-th-name { display: block; font-size: 12px; font-weight: 700; }
+  .links-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+  }
+  .link-btn {
+    display: block;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.15s;
+    line-height: 1.3;
+    word-break: keep-all;
+  }
+  .link-btn:hover {
+    background: rgba(97,255,236,0.10);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .link-empty {
+    color: var(--muted);
+    font-size: 11px;
+    opacity: 0.4;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
   @media (max-width: 700px) {
     body { flex-direction: column; }
     .sidebar {
@@ -828,11 +954,15 @@
   <div class="sidebar-logo"><img src="Title.webp" alt="CHUNTAVERSE"></div>
   <div class="nav-list">
     <button class="nav-item" data-page="live">
-      <span class="nav-icon">●</span>
+      <span class="nav-icon" id="navLiveIcon"></span>
       <span>생방송</span>
+      <span class="nav-live-badge off" id="navLiveBadge">
+        <span class="nav-live-dot" id="navLiveDot"></span>
+        <span class="nav-live-count" id="navLiveCount">0</span>
+      </span>
     </button>
     <button class="nav-item" data-page="events">
-      <span class="nav-icon">▤</span>
+      <span class="nav-icon" id="navEventsIcon"></span>
       <span>최근 이벤트</span>
       <span class="nav-badge" id="navBadge" style="display:none">0</span>
     </button>
@@ -841,8 +971,12 @@
       <button class="notify-switch" id="notifySwitch" aria-label="알림 토글" title="새 이벤트 알림"></button>
     </div>
     <button class="nav-item" data-page="stats">
-      <span class="nav-icon">◫</span>
+      <span class="nav-icon" id="navStatsIcon"></span>
       <span>통계</span>
+    </button>
+    <button class="nav-item" data-page="links">
+      <span class="nav-icon" id="navLinksIcon"></span>
+      <span>관련 링크</span>
     </button>
   </div>
 </aside>
@@ -851,10 +985,6 @@
   <div class="main-header">
     <div class="page-title" id="pageTitle">생방송</div>
     <div class="header-center" id="headerCenter"></div>
-    <div class="live-status" id="liveStatus">
-      <span class="live-dot none" id="liveDot"></span>
-      <span id="liveText">불러오는 중...</span>
-    </div>
   </div>
 
   <div class="page active" id="page-live">
@@ -920,6 +1050,10 @@
       </div>
     </div>
   </div>
+
+  <div class="page" id="page-links">
+    <div class="links-wrap" id="linksBody"></div>
+  </div>
 </main>
 
 <script>
@@ -927,7 +1061,7 @@ const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
 // 통계 시작월: 이 시점 이전 데이터는 없음
 const STATS_START_YEAR = 2026;
-const STATS_START_MONTH = 4;
+const STATS_START_MONTH = 5;
 
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
@@ -945,6 +1079,211 @@ const MEMBERS = [
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
+
+// === 멤버별 관련 링크 ===
+// common: 공통 항목 (방송국/유튜브/팬카페/나무위키)
+// extra: 일부 멤버만 가지는 항목 (label, url 쌍)
+// ogq: 이모티콘 (label, url 쌍, label은 "이름 - 숲" 또는 "이름 - 네이버" 형태)
+const MEMBER_LINKS = {
+  '243000': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/243000',
+      유튜브: 'https://www.youtube.com/@CY_youtube',
+      팬카페: 'https://cafe.naver.com/cyhistory',
+      나무위키: 'https://namu.wiki/w/%EC%B2%9C%EC%96%91',
+    },
+    extra: [
+      { label: '인스타그램', url: 'https://www.instagram.com/chunyang_94/' },
+      { label: 'X', url: 'https://x.com/chunyangkr' },
+      { label: '디스코드', url: 'https://discord.com/invite/rH2j9sh' },
+    ],
+    ogq: [
+      { label: '처니티콘 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61de7e80d0979' },
+      { label: '처니티콘 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/61de7e80d0979' },
+    ],
+  },
+  'madaomm': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/madaomm',
+      유튜브: 'https://www.youtube.com/@MADAOMM',
+      팬카페: 'https://cafe.naver.com/madaomm',
+      나무위키: 'https://namu.wiki/w/%EB%A7%88%EB%8B%A4%EC%98%B4',
+    },
+    extra: [
+      { label: '인스타그램', url: 'https://www.instagram.com/madaom_m' },
+      { label: 'X', url: 'https://x.com/DAOMM_MA' },
+      { label: '디스코드', url: 'https://discord.com/invite/4h9ZHm5fBZ' },
+      { label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1mJiPbZrF29wUAA5lS4R-IZ-4Ehs6UbagssUFPe8j1X4/edit?gid=653664162#gid=653664162' },
+    ],
+    ogq: [
+      { label: '마다옴왔다옴!~ - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61b680bcd4122' },
+      { label: '마다옴왔다옴!~ - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/61b680bcd4122' },
+    ],
+  },
+  'nanamoon777': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/nanamoon777',
+      유튜브: 'https://www.youtube.com/@nanamoon777',
+      팬카페: 'https://cafe.naver.com/nanamoonswicked',
+      나무위키: 'https://namu.wiki/w/%EB%82%98%EB%82%98%EB%AC%B8',
+    },
+    extra: [
+      { label: 'X', url: 'https://x.com/nanamoon_7' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' },
+    ],
+    ogq: [],
+  },
+  'imha22': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/imha22',
+      유튜브: 'https://www.youtube.com/@imha_',
+      팬카페: 'https://cafe.naver.com/imhaming',
+      나무위키: 'https://namu.wiki/w/%EC%9E%84%ED%95%98%EB%B0%8D',
+    },
+    extra: [
+      { label: '게임 유튜브', url: 'https://www.youtube.com/@imha_LIVE' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=787086' },
+      { label: '팬사이트', url: 'https://imhaming-3e1aa792.base44.app/' },
+    ],
+    ogq: [],
+  },
+  'doormomo': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/doormomo',
+      유튜브: 'https://www.youtube.com/@momo_vlyz',
+      팬카페: 'https://cafe.naver.com/vlyz',
+      나무위키: 'https://namu.wiki/w/%EB%AC%B8%EB%AA%A8%EB%AA%A8',
+    },
+    extra: [
+      { label: '인스타그램', url: 'https://www.instagram.com/momoric__/' },
+      { label: 'X', url: 'https://x.com/door_momo' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' },
+      { label: '노래책', url: 'https://meloming.com/channel/momovlyz' },
+    ],
+    ogq: [
+      { label: '모모티콘 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6439ef4bd4035' },
+      { label: '모모티콘 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/6439ef4bd4035' },
+      { label: '곰탕이는 음흉해 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=620f7334d5a21' },
+      { label: '곰탕이는 음흉해 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/620f7334d5a21' },
+    ],
+  },
+  'kim91709': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/kim91709',
+      유튜브: 'https://www.youtube.com/@hanahming',
+      팬카페: 'https://cafe.naver.com/ahdododo',
+      나무위키: 'https://namu.wiki/w/%ED%95%9C%EC%95%84%EB%B0%8D',
+    },
+    extra: [
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kim91709' },
+    ],
+    ogq: [],
+  },
+  'kappuchan': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/kappuchan',
+      유튜브: 'https://www.youtube.com/@kappuchannel',
+      팬카페: 'https://cafe.naver.com/kappuchan',
+      나무위키: 'https://namu.wiki/w/%EC%B9%B4%ED%91%B8(%EC%9D%B8%ED%84%B0%EB%84%B7%20%EB%B0%A9%EC%86%A1%EC%9D%B8)',
+    },
+    extra: [
+      { label: 'X', url: 'https://x.com/kappuchannel' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kappuchannel' },
+      { label: '일정표', url: 'https://calendar.google.com/calendar/u/0/embed?src=kappuchannel@gmail.com&ctz=Asia/Seoul' },
+      { label: '노래책', url: 'https://www.songstudio.live/songbook/platform/@%EC%B9%B4%ED%91%B8kappu' },
+    ],
+    ogq: [
+      { label: '카푸가 와써요라 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=629565bef3c8a' },
+      { label: '카푸가 와써요라 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/629565bef3c8a' },
+      { label: '귀여운 늑대 울푸의 하루 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=615472aa15096' },
+      { label: '귀여운 늑대 울푸의 하루 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/615472aa15096' },
+      { label: '귀여운 늑대 울푸의 하루 2 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63260c9f8aa7f' },
+      { label: '귀여운 늑대 울푸의 하루 2 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/63260c9f8aa7f' },
+    ],
+  },
+  'kyaang123': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/kyaang123',
+      유튜브: 'https://www.youtube.com/@kyaang',
+      팬카페: 'https://cafe.naver.com/dopaminefancafe',
+      나무위키: 'https://namu.wiki/w/%EC%BA%AC%EC%95%99',
+    },
+    extra: [
+      { label: '인스타그램', url: 'https://www.instagram.com/kya_ang/' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kyaang' },
+      { label: '팬사이트', url: 'https://kyaang.com/' },
+    ],
+    ogq: [
+      { label: '캬앙의 일상 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=62b3038b83eed' },
+      { label: '캬앙의 일상 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/62b3038b83eed' },
+    ],
+  },
+  'wellro314': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/wellro314',
+      유튜브: 'https://www.youtube.com/@WELLRO_',
+      팬카페: 'https://cafe.naver.com/gurondan',
+      나무위키: 'https://namu.wiki/w/%EA%B9%80%EC%9B%B0%EB%A1%9C',
+    },
+    extra: [
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=679293' },
+      { label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' },
+    ],
+    ogq: [
+      { label: '웰로티콘 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/62f3e9f462bb2' },
+    ],
+  },
+  'mocamu2': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/mocamu2',
+      유튜브: 'https://www.youtube.com/@mocamu2',
+      팬카페: 'https://cafe.naver.com/sandboxidol',
+      나무위키: 'https://namu.wiki/w/%EB%AA%A8%EC%B9%B4:b',
+    },
+    extra: [
+      { label: 'X', url: 'https://x.com/moca_good' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' },
+      { label: '노래책', url: 'https://meloming.com/channel/moca/musicbook' },
+    ],
+    ogq: [
+      { label: '유아렐콘1 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee102355552' },
+      { label: '유아렐콘1 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee102355552' },
+      { label: '유아렐콘2 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee117dcc29f' },
+      { label: '유아렐콘2 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee117dcc29f' },
+    ],
+  },
+  'dalta20': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/dalta20',
+      유튜브: 'https://www.youtube.com/@Dalta20',
+      팬카페: 'https://cafe.naver.com/restormy',
+      나무위키: 'https://namu.wiki/w/%EB%8B%AC%ED%83%80',
+    },
+    extra: [
+      { label: 'X', url: 'https://x.com/Dalta20_' },
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dalta20_' },
+    ],
+    ogq: [
+      { label: '달달하이! 난 꿀즙이 - 네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
+      { label: '달달하이! 난 꿀즙이 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/644df30193953' },
+    ],
+  },
+  'baeksoon2': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/baeksoon2',
+      유튜브: 'https://www.youtube.com/@pani22222',
+      팬카페: 'https://cafe.naver.com/godok0311?iframe_url=/MyCafeIntro.nhn%3Fclubid=31133029',
+      나무위키: 'https://namu.wiki/w/%ED%8C%8C%EB%8B%88_',
+    },
+    extra: [
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dokgopani' },
+      { label: '노래책', url: 'https://docs.google.com/document/d/1stslb_GAnVcNAq_sQvYfw4GyLkd9QNnNIPR8F5Dj-XA/edit?tab=t.0#heading=h.4r8fp7nst7tu' },
+    ],
+    ogq: [
+      { label: '파니티콘 - 숲', url: 'https://ogqmarket.sooplive.com/emoticon/63adcae3ef502' },
+    ],
+  },
+};
 
 const MODE_LABEL = {
   normal: '일반 방송',
@@ -975,9 +1314,18 @@ const SVG_ICONS = {
   thumbsup: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zm0 0V7a3 3 0 0 1 3-3l3 6v10H8.5a2 2 0 0 1-1.95-1.5L5 13m2-2h11.4a2 2 0 0 1 2 2.27l-1 6a2 2 0 0 1-2 1.73H13"/></svg>`,
   // 커피잔 (네이버 카페)
   coffee: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h12a3 3 0 0 1 0 6h-1"/><path d="M3 9v8a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9"/><line x1="6" y1="3" x2="6" y2="6"/><line x1="10" y1="3" x2="10" y2="6"/></svg>`,
+  // 사이드바 메뉴용
+  // 생방송 (방송 안테나)
+  broadcast: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49"/><path d="M7.76 16.24a6 6 0 0 1 0-8.49"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>`,
+  // 시계 (최근 이벤트)
+  clock: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`,
+  // 막대 그래프 (통계)
+  chart: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="14" width="3" height="6"/></svg>`,
+  // 링크 (관련 링크 탭)
+  link: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
 };
 
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', links: '관련 링크' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -1109,6 +1457,20 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
   setNotifyEnabled(!notifyEnabled);
 });
 
+// 사이드바 SVG 아이콘 주입
+(() => {
+  const map = {
+    navLiveIcon: SVG_ICONS.broadcast,
+    navEventsIcon: SVG_ICONS.clock,
+    navStatsIcon: SVG_ICONS.chart,
+    navLinksIcon: SVG_ICONS.link,
+  };
+  for (const [id, html] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+})();
+
 function updateHeaderCenter() {
   const el = document.getElementById('headerCenter');
   if (!el) return;
@@ -1131,6 +1493,11 @@ function updateHeaderCenter() {
 
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
+  // 이벤트 탭에서 떠날 때 읽음 처리 + 즉시 UI 반영
+  if (currentPage === 'events' && page !== 'events') {
+    setLastSeenToNow();
+    refreshUnreadIndicator();
+  }
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
@@ -1138,16 +1505,13 @@ function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
-  document.getElementById('liveStatus').style.visibility =
-    page === 'live' ? 'visible' : 'hidden';
   updateHeaderCenter();
   if (page === 'stats' && !statsState.tabsInited) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시 안 읽음 클리어
+  // 이벤트 탭 진입 시 줄무늬 표시 (lastSeen 유지)
   if (page === 'events') {
-    setLastSeenToNow();
     refreshUnreadIndicator();
   }
 }
@@ -1168,17 +1532,16 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// 탭 활성/포커스 시 이벤트 페이지에 있다면 안 읽음 클리어
-window.addEventListener('focus', () => {
-  if (currentPage === 'events') {
+// 탭이 hidden 될 때 (백그라운드, 페이지 떠남) 이벤트 탭이면 읽음 처리
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && currentPage === 'events') {
     setLastSeenToNow();
     refreshUnreadIndicator();
   }
 });
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && currentPage === 'events') {
+window.addEventListener('beforeunload', () => {
+  if (currentPage === 'events') {
     setLastSeenToNow();
-    refreshUnreadIndicator();
   }
 });
 
@@ -2013,14 +2376,13 @@ async function loadLive() {
     });
     document.getElementById('app').innerHTML = '';
     document.getElementById('app').appendChild(grid);
-    const dot = document.getElementById('liveDot');
-    const text = document.getElementById('liveText');
-    if (liveCount > 0) {
-      dot.className = 'live-dot';
-      text.textContent = liveCount + '명 방송 중';
-    } else {
-      dot.className = 'live-dot none';
-      text.textContent = '방송 중인 멤버 없음';
+    // 사이드바 라이브 배지 갱신
+    const liveBadge = document.getElementById('navLiveBadge');
+    const liveCountEl = document.getElementById('navLiveCount');
+    if (liveBadge && liveCountEl) {
+      liveCountEl.textContent = liveCount;
+      liveBadge.classList.toggle('on', liveCount > 0);
+      liveBadge.classList.toggle('off', liveCount === 0);
     }
     const updated = new Date(data.updated_at);
     lastLiveUpdate = updated;
@@ -2031,6 +2393,92 @@ async function loadLive() {
     console.error(e);
   }
 }
+
+// === 관련 링크 탭 렌더링 ===
+function renderLinks() {
+  const body = document.getElementById('linksBody');
+  if (!body) return;
+
+  // 멤버 헤더 (12열)
+  const memberHeader = MEMBERS.map(m => `
+    <th>
+      <img class="links-th-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">
+      <span class="links-th-name" style="color: ${m.color}">${escapeHtml(m.name)}</span>
+    </th>
+  `).join('');
+
+  // 그룹 1: 공통 항목 (방송국/유튜브/팬카페/나무위키 - 한 행씩)
+  const commonItems = ['방송국', '유튜브', '팬카페', '나무위키'];
+  const commonRows = commonItems.map(item => {
+    const cells = MEMBERS.map(m => {
+      const links = MEMBER_LINKS[m.id];
+      const url = links && links.common ? links.common[item] : null;
+      if (url) {
+        return `<td><a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener">${item}</a></td>`;
+      }
+      return `<td><div class="link-empty">-</div></td>`;
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+
+  // 그룹 2: 추가 링크 — 멤버별 가변 → 멤버당 1셀(여러 링크 적층)
+  const extraCells = MEMBERS.map(m => {
+    const links = MEMBER_LINKS[m.id];
+    const extras = (links && links.extra) || [];
+    if (extras.length === 0) {
+      return `<td><div class="link-empty">-</div></td>`;
+    }
+    const btns = extras.map(e =>
+      `<a class="link-btn" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${escapeHtml(e.label)}</a>`
+    ).join('');
+    return `<td><div class="links-cell">${btns}</div></td>`;
+  }).join('');
+
+  // 그룹 3: OGQ — 멤버별 가변
+  const ogqCells = MEMBERS.map(m => {
+    const links = MEMBER_LINKS[m.id];
+    const ogq = (links && links.ogq) || [];
+    if (ogq.length === 0) {
+      return `<td><div class="link-empty">-</div></td>`;
+    }
+    const btns = ogq.map(e =>
+      `<a class="link-btn" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${escapeHtml(e.label)}</a>`
+    ).join('');
+    return `<td><div class="links-cell">${btns}</div></td>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="links-section">
+      <div class="links-section-title">기본 링크</div>
+      <div class="links-table-wrap">
+        <table class="links-table">
+          <thead><tr>${memberHeader}</tr></thead>
+          <tbody>${commonRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="links-section">
+      <div class="links-section-title">추가 링크</div>
+      <div class="links-table-wrap">
+        <table class="links-table">
+          <thead><tr>${memberHeader}</tr></thead>
+          <tbody><tr>${extraCells}</tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="links-section">
+      <div class="links-section-title">이모티콘</div>
+      <div class="links-table-wrap">
+        <table class="links-table">
+          <thead><tr>${memberHeader}</tr></thead>
+          <tbody><tr>${ogqCells}</tr></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+renderLinks();
 
 loadLive();
 loadEvents();

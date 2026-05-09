@@ -1106,9 +1106,10 @@ function updateHeaderCenter() {
 
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
-  // 이벤트 탭에서 떠날 때 읽음 처리
+  // 이벤트 탭에서 떠날 때 읽음 처리 + 즉시 UI 반영
   if (currentPage === 'events' && page !== 'events') {
     setLastSeenToNow();
+    refreshUnreadIndicator();
   }
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(b => {
@@ -1124,8 +1125,7 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시: 줄무늬는 유지하고, 떠날 때 읽음 처리
-  // (이벤트 탭에서 다른 탭으로 이동하거나, 페이지 떠날 때 lastSeen 갱신)
+  // 이벤트 탭 진입 시 줄무늬 표시 (lastSeen 유지)
   if (page === 'events') {
     refreshUnreadIndicator();
   }
@@ -1147,10 +1147,11 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// 탭이 hidden 될 때 (페이지 떠남, 백그라운드) 이벤트 탭에 있었다면 읽음 처리
+// 탭이 hidden 될 때 (백그라운드, 페이지 떠남) 이벤트 탭이면 읽음 처리
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && currentPage === 'events') {
     setLastSeenToNow();
+    refreshUnreadIndicator();
   }
 });
 window.addEventListener('beforeunload', () => {
@@ -1158,7 +1159,7 @@ window.addEventListener('beforeunload', () => {
     setLastSeenToNow();
   }
 });
-
+  
 function formatBtime(seconds) {
   if (!seconds || seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);

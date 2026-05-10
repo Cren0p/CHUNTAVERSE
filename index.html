@@ -35,6 +35,7 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { min-height: 100vh; }
+  html { scrollbar-gutter: stable; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -921,6 +922,7 @@
     font-weight: 600;
     word-break: keep-all;
     overflow-wrap: break-word;
+    text-wrap: balance;
   }
   .ogq-platform {
     display: block;
@@ -1044,10 +1046,10 @@
               <span class="dot"></span><span>숲 게시글</span>
             </button>
             <button class="filter-type" data-type="youtube">
-              <span class="dot"></span><span>유튜브 영상</span>
+              <span class="dot"></span><span>유튜브 업로드</span>
             </button>
             <button class="filter-type" data-type="cafe">
-              <span class="dot"></span><span>네이버 카페</span>
+              <span class="dot"></span><span>카페 게시글</span>
             </button>
           </div>
         </div>
@@ -1572,9 +1574,9 @@ function sendBrowserNotification(ev) {
     case 'comment_recommend':
       body = `${memberName} 댓글 추천 — ${ev.target_name || ''} 컨텐츠`; break;
     case 'youtube':
-      body = `${memberName} 유튜브 — ${ev.title || ''}`; break;
+      body = `${memberName} 유튜브 업로드 — ${ev.title || ''}`; break;
     case 'cafe_post':
-      body = `${memberName} 카페 글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
+      body = `${memberName} 카페 게시글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
     default:
       body = `${memberName} ${ev.type}`;
   }
@@ -1940,8 +1942,8 @@ function renderEvent(e) {
     start: '방송 시작', end: '방송 종료',
     title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
     post: '숲 게시글', comment_recommend: '댓글 추천',
-    youtube: '유튜브 영상',
-    cafe_post: '네이버 카페',
+    youtube: '유튜브 업로드',
+    cafe_post: '카페 게시글',
   };
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';

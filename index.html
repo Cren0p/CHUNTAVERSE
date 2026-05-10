@@ -1424,13 +1424,49 @@ const filterState = {
 };
 let allEvents = [];
 
+// statsState.data 구조: { 'YYYY-MM': { memberId: monthStatsObj, ... } }
+// - 이번 달은 매번 fresh, 지난 달은 localStorage 영구 캐시
 const statsState = {
   tabsInited: false,
-  data: null,
+  data: {},          // 월별 캐시: { 'YYYY-MM': { mid: msData } }
+  loadingMonths: new Set(), // 진행 중인 fetch
   selectedTab: 'all',
   viewMonth: null,
   selectedDate: null,
 };
+const LS_STATS_PREFIX = 'chuntaverse_stats_v2_'; // 'chuntaverse_stats_v2_2026-04' 형태
+
+function isCurrentMonth(yyyymm) {
+  const now = new Date();
+  const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  return yyyymm === cur;
+}
+
+function lsGetMonthCache(yyyymm) {
+  try {
+    const v = localStorage.getItem(LS_STATS_PREFIX + yyyymm);
+    if (v === null) return null;
+    return JSON.parse(v);
+  } catch (e) { return null; }
+}
+function lsSetMonthCache(yyyymm, data) {
+  try { localStorage.setItem(LS_STATS_PREFIX + yyyymm, JSON.stringify(data)); } catch (e) {}
+}
+
+// 현재 viewMonth 기준 yyyymm 문자열
+function currentViewYm() {
+  if (!statsState.viewMonth) return null;
+  const { year, month } = statsState.viewMonth;
+  return `${year}-${String(month).padStart(2, '0')}`;
+}
+// viewMonth 기준 멤버 stats 가져오기
+function getMemberStatsForView(memberId) {
+  const ym = currentViewYm();
+  if (!ym) return null;
+  const monthData = statsState.data[ym];
+  if (!monthData) return null;
+  return monthData[memberId] || null;
+}
 
 // === 알림 관련 ===
 const LS_NOTIFY = 'chuntaverse_notify_enabled';
@@ -2202,8 +2238,7 @@ function selectStatsTab(tabId) {
 
 // 멤버의 가장 최근 방송 시작일 우선, 없으면 가장 최근 활동일
 function findLatestActivityDate(memberId) {
-  if (!statsState.data) return null;
-  const ms = statsState.data[memberId];
+  const ms = getMemberStatsForView(memberId);
   if (!ms) return null;
 
   // 1순위: 가장 최근 방송
@@ -2313,7 +2348,22 @@ function computeMonthSummary(memberStats, year, month1) {
 function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
-  if (!statsState.data) {
+  // viewMonth 미설정 시 이번 달
+  if (!statsState.viewMonth) {
+    const now = new Date();
+    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+  }
+  const ym = currentViewYm();
+  // 그 월 데이터가 캐시에 없으면 비동기 로드 후 재렌더
+  if (ym && !statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
+    loadStatsMonth(ym).then(() => {
+      if (currentPage === 'stats') renderStatsBody();
+    });
+    return;
+  }
+  // 로딩 중
+  if (statsState.loadingMonths.has(ym)) {
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
     return;
   }
@@ -2336,7 +2386,7 @@ function renderStatsAll(body) {
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
 
   const cards = MEMBERS.map(m => {
-    const ms = statsState.data[m.id];
+    const ms = getMemberStatsForView(m.id);
     const sum = computeMonthSummary(ms, year, month);
     return `
       <button class="stats-card" data-member="${m.id}">
@@ -2415,7 +2465,7 @@ function renderStatsMember(body, memberId) {
     statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
   }
   const { year, month } = statsState.viewMonth;
-  const ms = statsState.data[memberId];
+  const ms = getMemberStatsForView(memberId);
   const sum = computeMonthSummary(ms, year, month);
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
@@ -2717,12 +2767,44 @@ async function loadEvents() {
   }
 }
 
+// 특정 월 데이터를 불러옴. 지난 달은 localStorage 캐시 우선.
+// 이번 달은 매번 fresh fetch.
+async function loadStatsMonth(yyyymm) {
+  if (!yyyymm) return;
+  // 지난 달이면 캐시 시도
+  if (!isCurrentMonth(yyyymm)) {
+    const cached = lsGetMonthCache(yyyymm);
+    if (cached) {
+      statsState.data[yyyymm] = cached;
+      return;
+    }
+  }
+  // 동시 요청 방지
+  if (statsState.loadingMonths.has(yyyymm)) return;
+  statsState.loadingMonths.add(yyyymm);
+  try {
+    const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}&t=${Date.now()}`);
+    if (!res.ok) throw new Error('stats fetch failed');
+    const data = await res.json();
+    const monthData = data.stats || {};
+    statsState.data[yyyymm] = monthData;
+    // 지난 달이면 localStorage에 영구 캐시
+    if (!isCurrentMonth(yyyymm)) {
+      lsSetMonthCache(yyyymm, monthData);
+    }
+  } catch (e) {
+    // 무시: 다음 시도에 다시
+  } finally {
+    statsState.loadingMonths.delete(yyyymm);
+  }
+}
+
+// 1분마다 호출되는 자동 갱신: 이번 달만 fresh
 async function loadStats() {
   try {
-    const res = await fetch(WORKER_URL + '/stats?t=' + Date.now());
-    if (!res.ok) throw new Error('no stats');
-    const data = await res.json();
-    statsState.data = data.stats || {};
+    const now = new Date();
+    const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    await loadStatsMonth(cur);
     if (currentPage === 'stats') renderStatsBody();
     lastStatsUpdate = new Date();
     updateHeaderCenter();

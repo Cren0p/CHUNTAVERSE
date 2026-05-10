@@ -198,26 +198,32 @@
     background: linear-gradient(180deg, rgba(97,255,236,0.05) 0%, transparent 100%);
     display: flex; align-items: center; gap: 16px;
     min-height: 56px;
+    position: relative;
   }
-  .page-title { font-size: 18px; font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
+  .page-title {
+    font-size: 18px; font-weight: 700; letter-spacing: 1px;
+    flex-shrink: 0;
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
   .header-center {
     flex: 1; text-align: center; color: var(--muted);
     font-size: 12px; min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .header-center-line {
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%;
   }
-  .live-status {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 7px 16px; font-size: 13px;
+  .header-disclaimer {
+    font-size: 11px;
+    opacity: 0.75;
   }
-  .live-dot {
-    width: 8px; height: 8px;
-    background: var(--live);
-    box-shadow: 0 0 6px var(--live-glow);
-    animation: pulse 1.8s ease-in-out infinite;
-  }
-  .live-dot.none { background: var(--muted); box-shadow: none; animation: none; }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
@@ -229,8 +235,8 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px; padding: 24px 32px;
-    max-width: 1600px; width: 100%; margin: 0 auto;
+    gap: 15px; padding: 22px 30px;
+    max-width: 1520px; width: 100%; margin: 0 auto;
     flex: 1;
   }
   @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
@@ -359,37 +365,29 @@
     margin-top: 20px; padding-top: 20px;
     border-top: 1px solid var(--border);
   }
+  .filter-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
   .filter-title {
     font-size: 12px; font-weight: 700;
     color: var(--muted); letter-spacing: 1px;
-    margin-bottom: 10px;
   }
-
-  .filter-members-block { display: flex; flex-direction: column; gap: 10px; }
-
-  .filter-member-all {
-    display: flex; align-items: center; justify-content: center;
-    padding: 8px;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
+  .filter-toggle-all {
+    background: transparent;
+    border: none;
+    color: var(--accent);
     cursor: pointer;
-    transition: all 0.15s;
     font-family: inherit;
-    width: 100%;
-    height: 40px;
-    box-sizing: border-box;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
-  .filter-member-all:hover { border-color: var(--accent); }
-  .filter-member-all.on { border-color: var(--accent); }
-  .filter-member-all img {
-    max-height: 22px;
-    max-width: 100%;
-    width: auto;
-    height: auto;
-    display: block;
-    transition: opacity 0.15s, filter 0.15s;
-  }
-  .filter-member-all:not(.on) img { opacity: 0.4; filter: grayscale(0.6); }
+  .filter-toggle-all:hover { opacity: 0.7; }
 
   .filter-members { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .filter-member {
@@ -422,7 +420,6 @@
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
   .filter-type .dot { width: 12px; height: 12px; flex-shrink: 0; }
-  .filter-type[data-type="all"] .dot { background: #ffffff; }
   .filter-type[data-type="soop"] .dot { background: var(--filter-soop); }
   .filter-type[data-type="post"] .dot { background: var(--filter-post); }
   .filter-type[data-type="youtube"] .dot { background: var(--ev-youtube); }
@@ -480,6 +477,8 @@
   .event-icon.cafe_post { background: rgba(3,199,90,0.15); color: #03C75A; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
+  .event.clickable-internal { cursor: pointer; }
+  .event.clickable-internal:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
@@ -877,10 +876,10 @@
     border-right: none;
   }
   .links-th-avatar {
-    width: 28px;
-    height: 28px;
+    width: 56px;
+    height: 56px;
     object-fit: cover;
-    margin: 0 auto 4px;
+    margin: 0 auto 6px;
     display: block;
     border: 1.5px solid var(--border);
   }
@@ -1026,20 +1025,18 @@
       </div>
       <div class="filter-panel">
         <div class="filter-section">
-          <div class="filter-title">멤버</div>
-          <div class="filter-members-block">
-            <button class="filter-member-all on" id="filterMemberAll" title="전체">
-              <img src="Title.webp" alt="전체">
-            </button>
-            <div class="filter-members" id="filterMembers"></div>
+          <div class="filter-title-row">
+            <span class="filter-title">멤버</span>
+            <button class="filter-toggle-all" id="filterMemberToggleAll">모두 해제</button>
           </div>
+          <div class="filter-members" id="filterMembers"></div>
         </div>
         <div class="filter-section">
-          <div class="filter-title">종류</div>
+          <div class="filter-title-row">
+            <span class="filter-title">종류</span>
+            <button class="filter-toggle-all" id="filterTypeToggleAll">모두 해제</button>
+          </div>
           <div class="filter-types" id="filterTypes">
-            <button class="filter-type on" data-type="all">
-              <span class="dot"></span><span>전체</span>
-            </button>
             <button class="filter-type" data-type="soop">
               <span class="dot"></span><span>숲 방송</span>
             </button>
@@ -1401,7 +1398,28 @@ let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let currentPage = 'live';
 
-const filterState = { member: 'all', type: 'all' };
+// 필터 상태: 다중 선택. 빈 Set이면 "아무것도 선택 안 함" → 표시 0개.
+// 모든 카테고리 = 멤버 12명 모두 + 종류 모두 선택된 상태
+const ALL_TYPE_KEYS = ['soop', 'post', 'youtube', 'cafe'];
+const LS_FILTER_MEMBERS = 'chuntaverse_filter_members';
+const LS_FILTER_TYPES = 'chuntaverse_filter_types';
+
+function lsGetSet(key, defaultArr) {
+  try {
+    const v = localStorage.getItem(key);
+    if (v === null) return new Set(defaultArr);
+    const arr = JSON.parse(v);
+    return new Set(Array.isArray(arr) ? arr : defaultArr);
+  } catch (e) { return new Set(defaultArr); }
+}
+function lsSetSet(key, set) {
+  try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
+}
+
+const filterState = {
+  members: lsGetSet(LS_FILTER_MEMBERS, MEMBERS.map(m => m.id)),
+  types: lsGetSet(LS_FILTER_TYPES, ALL_TYPE_KEYS),
+};
 let allEvents = [];
 
 const statsState = {
@@ -1439,6 +1457,13 @@ function setLastSeenToNow() {
 }
 
 let notifyEnabled = lsGet(LS_NOTIFY, '0') === '1';
+// 마지막 본 이벤트들의 ID 집합 (새로 들어온 것 차분 추적용)
+let lastSeenEventKeys = new Set();
+let lastSeenEventKeysReady = false;
+// 탭 제목 깜빡임 상태
+let titleFlashTimer = null;
+let titleFlashOn = false;
+let pendingFlashCount = 0;
 
 function updateNotifySwitchUI() {
   const sw = document.getElementById('notifySwitch');
@@ -1446,29 +1471,186 @@ function updateNotifySwitchUI() {
   sw.classList.toggle('on', notifyEnabled);
 }
 
-function setNotifyEnabled(enabled) {
+async function setNotifyEnabled(enabled) {
+  if (enabled) {
+    // 브라우저 알림 권한 요청
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        try {
+          const result = await Notification.requestPermission();
+          if (result !== 'granted') {
+            // 권한 거부됨 → 토글 OFF 유지
+            notifyEnabled = false;
+            lsSet(LS_NOTIFY, '0');
+            updateNotifySwitchUI();
+            alert('브라우저 알림 권한이 거부되어 알림을 받을 수 없어요.\n브라우저 설정에서 알림 권한을 허용한 후 다시 시도해주세요.');
+            return;
+          }
+        } catch (e) {}
+      } else if (Notification.permission === 'denied') {
+        notifyEnabled = false;
+        lsSet(LS_NOTIFY, '0');
+        updateNotifySwitchUI();
+        alert('브라우저 알림 권한이 차단되어 있어요.\n브라우저 주소창 좌측 자물쇠 아이콘 → 알림 허용 후 다시 시도해주세요.');
+        return;
+      }
+    } else {
+      alert('이 브라우저는 알림 기능을 지원하지 않아요.');
+      return;
+    }
+  } else {
+    // OFF 시 깜빡임 정지
+    stopTitleFlash();
+  }
   notifyEnabled = enabled;
   lsSet(LS_NOTIFY, enabled ? '1' : '0');
   updateNotifySwitchUI();
-  // OFF일 때는 제목/배지 즉시 정리
-  if (!enabled) {
-    document.title = BASE_TITLE;
-    const badge = document.getElementById('navBadge');
-    if (badge) badge.style.display = 'none';
+}
+
+// === 탭 제목 깜빡임 ===
+function startTitleFlash(count) {
+  pendingFlashCount = count;
+  if (titleFlashTimer) return; // 이미 작동 중이면 카운트만 갱신
+  titleFlashTimer = setInterval(() => {
+    titleFlashOn = !titleFlashOn;
+    updateTabTitle();
+  }, 1500);
+}
+function stopTitleFlash() {
+  if (titleFlashTimer) {
+    clearInterval(titleFlashTimer);
+    titleFlashTimer = null;
+  }
+  titleFlashOn = false;
+  pendingFlashCount = 0;
+  updateTabTitle();
+}
+function updateTabTitle() {
+  // 안 읽음 카운트 (NEW 표시 기반, 항상 작동)
+  const lastSeen = new Date(getLastSeenTime()).getTime();
+  const unreadCount = allEvents.filter(e => {
+    const t = new Date(e.time).getTime();
+    return !isNaN(t) && t > lastSeen;
+  }).length;
+
+  let title;
+  if (titleFlashTimer && titleFlashOn && pendingFlashCount > 0) {
+    title = `🔴 새 이벤트 ${pendingFlashCount}건`;
+  } else if (unreadCount > 0) {
+    title = `${BASE_TITLE} (${unreadCount})`;
   } else {
-    // ON 시 즉시 갱신
-    refreshUnreadIndicator();
+    title = BASE_TITLE;
+  }
+  document.title = title;
+}
+
+// === 브라우저 알림 발송 ===
+function sendBrowserNotification(ev) {
+  if (!notifyEnabled) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible' && currentPage === 'events') {
+    // 사용자가 이미 이벤트 탭 보고 있으면 OS 알림은 안 띄움
+    return;
+  }
+
+  const memberName = ev.member_name || '';
+  let body = '';
+  switch (ev.type) {
+    case 'start':
+      body = `${memberName} 방송 시작${ev.title ? ' — ' + ev.title : ''}`; break;
+    case 'end':
+      body = `${memberName} 방송 종료`; break;
+    case 'title':
+      body = `${memberName} 방제 변경 — ${ev.after || ''}`; break;
+    case 'category':
+      body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
+    case 'mode_change':
+      body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
+    case 'post':
+      body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
+    case 'comment_recommend':
+      body = `${memberName} 댓글 추천 — ${ev.target_name || ''} 컨텐츠`; break;
+    case 'youtube':
+      body = `${memberName} 유튜브 — ${ev.title || ''}`; break;
+    case 'cafe_post':
+      body = `${memberName} 카페 글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
+    default:
+      body = `${memberName} ${ev.type}`;
+  }
+
+  try {
+    const noti = new Notification(BASE_TITLE, {
+      body,
+      icon: 'Favicon.webp',
+      tag: `${ev.type}-${ev.member_id}-${ev.time}`,
+      // requireInteraction: false (자동으로 사라지게)
+    });
+    noti.onclick = () => {
+      window.focus();
+      history.replaceState(null, '', '#events');
+      switchPage('events');
+      noti.close();
+    };
+    // 5초 후 자동 닫기
+    setTimeout(() => { try { noti.close(); } catch (e) {} }, 5000);
+  } catch (e) {}
+}
+
+// 새 이벤트가 들어왔는지 확인하고 알림 발송 (필터 적용)
+function processNewEventsForNotification(events) {
+  if (!events || events.length === 0) {
+    lastSeenEventKeys = new Set();
+    lastSeenEventKeysReady = true;
+    return;
+  }
+
+  const typeToCat = (et) => {
+    if (et === 'post' || et === 'comment_recommend') return 'post';
+    if (et === 'youtube') return 'youtube';
+    if (et === 'cafe_post') return 'cafe';
+    return 'soop';
+  };
+  const eventKey = (e) => `${e.type}|${e.member_id}|${e.time}|${e.url || ''}|${e.after || ''}`;
+
+  // 첫 로드는 알림 발송 안 함 (현재 events를 baseline으로 저장)
+  if (!lastSeenEventKeysReady) {
+    lastSeenEventKeys = new Set(events.map(eventKey));
+    lastSeenEventKeysReady = true;
+    return;
+  }
+
+  // 새로 들어온 이벤트 찾기
+  const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)));
+  // 키 갱신
+  lastSeenEventKeys = new Set(events.map(eventKey));
+
+  if (newOnes.length === 0) return;
+
+  // 필터 적용 — 사용자가 보는 필터 = 알림 받는 필터
+  const filtered = newOnes.filter(e => {
+    if (!filterState.members.has(e.member_id)) return false;
+    if (!filterState.types.has(typeToCat(e.type))) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) return;
+
+  // 알림 토글 ON일 때만 브라우저 알림 + 탭 제목 깜빡임
+  if (notifyEnabled) {
+    // 사용자가 이벤트 탭 + 활성화되어 있으면 깜빡임/OS 알림 모두 생략
+    const userIsViewingEvents = (document.visibilityState === 'visible' && currentPage === 'events');
+    if (!userIsViewingEvents) {
+      // 개별 OS 알림
+      filtered.forEach(ev => sendBrowserNotification(ev));
+      // 탭 제목 깜빡임 시작
+      startTitleFlash(filtered.length);
+    }
   }
 }
 
-// 안 읽은 이벤트 카운트 + 제목/배지 갱신
+// NEW 표시는 항상 작동 (notifyEnabled 무관)
 function refreshUnreadIndicator() {
-  if (!notifyEnabled) {
-    document.title = BASE_TITLE;
-    const badge = document.getElementById('navBadge');
-    if (badge) badge.style.display = 'none';
-    return;
-  }
   const lastSeen = new Date(getLastSeenTime()).getTime();
   const unread = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
@@ -1476,12 +1658,8 @@ function refreshUnreadIndicator() {
   });
   const count = unread.length;
 
-  // 탭 제목
-  if (count > 0) {
-    document.title = `${BASE_TITLE} (${count})`;
-  } else {
-    document.title = BASE_TITLE;
-  }
+  // 탭 제목 (깜빡임 작동 중이 아닐 때만 갱신)
+  updateTabTitle();
 
   // 사이드바 배지
   const badge = document.getElementById('navBadge');
@@ -1499,7 +1677,7 @@ function refreshUnreadIndicator() {
   if (tl) {
     tl.querySelectorAll('.event').forEach(el => {
       const t = parseInt(el.dataset.time || '0', 10);
-      const isUnread = notifyEnabled && t > lastSeen;
+      const isUnread = t > lastSeen;
       el.classList.toggle('unread', isUnread);
       // 기존 NEW 배지 제거
       const oldBadge = el.querySelector('.event-new-badge');
@@ -1508,10 +1686,10 @@ function refreshUnreadIndicator() {
       if (isUnread) {
         const timeEl = el.querySelector('.event-time');
         if (timeEl) {
-          const badge = document.createElement('span');
-          badge.className = 'event-new-badge';
-          badge.textContent = 'NEW';
-          timeEl.parentNode.insertBefore(badge, timeEl);
+          const badgeEl = document.createElement('span');
+          badgeEl.className = 'event-new-badge';
+          badgeEl.textContent = 'NEW';
+          timeEl.parentNode.insertBefore(badgeEl, timeEl);
         }
       }
     });
@@ -1542,21 +1720,24 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
 function updateHeaderCenter() {
   const el = document.getElementById('headerCenter');
   if (!el) return;
+  let topLine = '';
   if (currentPage === 'live') {
-    el.textContent = lastLiveUpdate
+    topLine = lastLiveUpdate
       ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준'
       : '';
   } else if (currentPage === 'events') {
-    el.textContent = lastEventsUpdate
+    topLine = lastEventsUpdate
       ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
       : '';
   } else if (currentPage === 'stats') {
-    el.textContent = lastStatsUpdate
+    topLine = lastStatsUpdate
       ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
       : '';
-  } else {
-    el.textContent = '';
   }
+  el.innerHTML = `
+    ${topLine ? `<div class="header-center-line">${topLine}</div>` : ''}
+    <div class="header-center-line header-disclaimer">비공식 팬사이트입니다.</div>
+  `;
 }
 
 function switchPage(page) {
@@ -1578,8 +1759,9 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시 줄무늬 표시 (lastSeen 유지)
+  // 이벤트 탭 진입 시 깜빡임 정지 + 줄무늬 표시 (lastSeen 유지)
   if (page === 'events') {
+    stopTitleFlash();
     refreshUnreadIndicator();
   }
 }
@@ -1602,6 +1784,12 @@ window.addEventListener('hashchange', () => {
 
 // 탭이 hidden 될 때 (백그라운드, 페이지 떠남) 이벤트 탭이면 읽음 처리
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    // 탭이 보이는 상태로 돌아오면 깜빡임 정지 (이벤트 탭이든 아니든)
+    if (currentPage === 'events') {
+      stopTitleFlash();
+    }
+  }
   if (document.visibilityState === 'hidden' && currentPage === 'events') {
     setLastSeenToNow();
     refreshUnreadIndicator();
@@ -1784,7 +1972,7 @@ function renderEvent(e) {
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend' || e.type === 'cafe_post') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
-  // end 이벤트: VOD 목록 페이지로 링크 자동 생성
+  // end 이벤트: 멤버 VOD 목록 URL 자동 생성
   if (e.type === 'end' && !e.url && e.member_id) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
   }
@@ -1807,6 +1995,10 @@ function renderEvent(e) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
+  // start 이벤트: 사이트 내 생방송 탭으로 이동 (외부 링크 아님)
+  if (e.type === 'start') {
+    return `<div class="event clickable-internal" data-time="${eventTime}" data-nav="live">${inner}</div>`;
+  }
   if (e.url) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
@@ -1814,7 +2006,7 @@ function renderEvent(e) {
 }
 
 function initFilterUI() {
-  const allBtn = document.getElementById('filterMemberAll');
+  // 멤버 12개 사진 버튼
   const mc = document.getElementById('filterMembers');
   if (mc && !mc.dataset.inited) {
     mc.innerHTML = MEMBERS.map(m => `
@@ -1822,33 +2014,98 @@ function initFilterUI() {
         <img src="${m.img}" alt="${m.name}">
       </button>
     `).join('');
-    const setSelected = (id) => {
-      filterState.member = id;
-      allBtn.classList.toggle('on', id === 'all');
-      mc.querySelectorAll('.filter-member').forEach(b => {
-        b.classList.toggle('on', b.dataset.id === id);
-      });
-      applyFilter();
-    };
-    allBtn.addEventListener('click', () => setSelected('all'));
     mc.querySelectorAll('.filter-member').forEach(btn => {
-      btn.addEventListener('click', () => setSelected(btn.dataset.id));
+      const id = btn.dataset.id;
+      // 초기 on/off 반영
+      btn.classList.toggle('on', filterState.members.has(id));
+      btn.addEventListener('click', () => {
+        if (filterState.members.has(id)) filterState.members.delete(id);
+        else filterState.members.add(id);
+        btn.classList.toggle('on', filterState.members.has(id));
+        lsSetSet(LS_FILTER_MEMBERS, filterState.members);
+        updateMemberAllToggle();
+        applyFilter();
+      });
     });
     mc.dataset.inited = '1';
   }
+
+  // 멤버 - 모두 선택/해제 텍스트 토글
+  const mAll = document.getElementById('filterMemberToggleAll');
+  if (mAll && !mAll.dataset.inited) {
+    mAll.addEventListener('click', () => {
+      const allSelected = filterState.members.size === MEMBERS.length;
+      if (allSelected) {
+        filterState.members = new Set();
+      } else {
+        filterState.members = new Set(MEMBERS.map(m => m.id));
+      }
+      lsSetSet(LS_FILTER_MEMBERS, filterState.members);
+      // UI 갱신
+      mc.querySelectorAll('.filter-member').forEach(b => {
+        b.classList.toggle('on', filterState.members.has(b.dataset.id));
+      });
+      updateMemberAllToggle();
+      applyFilter();
+    });
+    mAll.dataset.inited = '1';
+  }
+  updateMemberAllToggle();
+
+  // 종류 버튼 (data-type: soop/post/youtube/cafe)
   const tc = document.getElementById('filterTypes');
   if (tc && !tc.dataset.inited) {
     tc.querySelectorAll('.filter-type').forEach(btn => {
+      const type = btn.dataset.type;
+      // "all" 데이터 타입은 더 이상 안 씀 (있다면 무시)
+      if (type === 'all') return;
+      btn.classList.toggle('on', filterState.types.has(type));
       btn.addEventListener('click', () => {
-        filterState.type = btn.dataset.type;
-        tc.querySelectorAll('.filter-type').forEach(b => {
-          b.classList.toggle('on', b.dataset.type === filterState.type);
-        });
+        if (filterState.types.has(type)) filterState.types.delete(type);
+        else filterState.types.add(type);
+        btn.classList.toggle('on', filterState.types.has(type));
+        lsSetSet(LS_FILTER_TYPES, filterState.types);
+        updateTypeAllToggle();
         applyFilter();
       });
     });
     tc.dataset.inited = '1';
   }
+
+  const tAll = document.getElementById('filterTypeToggleAll');
+  if (tAll && !tAll.dataset.inited) {
+    tAll.addEventListener('click', () => {
+      const allSelected = filterState.types.size === ALL_TYPE_KEYS.length;
+      if (allSelected) {
+        filterState.types = new Set();
+      } else {
+        filterState.types = new Set(ALL_TYPE_KEYS);
+      }
+      lsSetSet(LS_FILTER_TYPES, filterState.types);
+      tc.querySelectorAll('.filter-type').forEach(b => {
+        const t = b.dataset.type;
+        if (t === 'all') return;
+        b.classList.toggle('on', filterState.types.has(t));
+      });
+      updateTypeAllToggle();
+      applyFilter();
+    });
+    tAll.dataset.inited = '1';
+  }
+  updateTypeAllToggle();
+}
+
+function updateMemberAllToggle() {
+  const el = document.getElementById('filterMemberToggleAll');
+  if (!el) return;
+  const allSelected = filterState.members.size === MEMBERS.length;
+  el.textContent = allSelected ? '모두 해제' : '모두 선택';
+}
+function updateTypeAllToggle() {
+  const el = document.getElementById('filterTypeToggleAll');
+  if (!el) return;
+  const allSelected = filterState.types.size === ALL_TYPE_KEYS.length;
+  el.textContent = allSelected ? '모두 해제' : '모두 선택';
 }
 
 function applyFilter() {
@@ -1861,8 +2118,8 @@ function applyFilter() {
     return 'soop';
   };
   const filtered = allEvents.filter(e => {
-    if (filterState.member !== 'all' && e.member_id !== filterState.member) return false;
-    if (filterState.type !== 'all' && typeToCat(e.type) !== filterState.type) return false;
+    if (!filterState.members.has(e.member_id)) return false;
+    if (!filterState.types.has(typeToCat(e.type))) return false;
     return true;
   });
   if (filtered.length === 0) {
@@ -1875,7 +2132,22 @@ function applyFilter() {
     tl.innerHTML = filtered.map(renderEvent).join('');
   }
   const summary = document.getElementById('filterSummary');
-  if (summary) summary.textContent = `${filtered.length} / ${allEvents.length}개 표시 중`;
+  if (summary) {
+    summary.textContent = '선택된 멤버/종류만 알림됩니다.';
+  }
+  // 클릭 위임 — start 이벤트 내부 라우팅
+  if (!tl.dataset.clickInit) {
+    tl.addEventListener('click', (ev) => {
+      const el = ev.target.closest('.event.clickable-internal');
+      if (!el) return;
+      const nav = el.dataset.nav;
+      if (nav) {
+        history.replaceState(null, '', '#' + nav);
+        switchPage(nav);
+      }
+    });
+    tl.dataset.clickInit = '1';
+  }
   // 안 읽음 표시 갱신
   refreshUnreadIndicator();
 }
@@ -2051,9 +2323,16 @@ function renderStatsBody() {
 }
 
 function renderStatsAll(body) {
+  // viewMonth 없으면 이번달로 초기화
+  if (!statsState.viewMonth) {
+    const now = new Date();
+    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+  }
+  const { year, month } = statsState.viewMonth;
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
+  const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
+
   const cards = MEMBERS.map(m => {
     const ms = statsState.data[m.id];
     const sum = computeMonthSummary(ms, year, month);
@@ -2089,11 +2368,35 @@ function renderStatsAll(body) {
     `;
   }).join('');
   body.innerHTML = `
-    <div style="margin-bottom: 12px; color: var(--muted); font-size: 13px; text-align: center;">
-      ${year}년 ${month}월 기준
+    <div class="stats-detail-header" style="justify-content: center;">
+      <div class="stats-detail-month">
+        <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
+        <span class="stats-month-text">${year}년 ${month}월</span>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+      </div>
     </div>
     <div class="stats-grid">${cards}</div>
   `;
+  // 월 이동 버튼
+  body.querySelectorAll('.stats-month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.dir;
+      let { year: y, month: mo } = statsState.viewMonth;
+      if (dir === 'prev') {
+        mo -= 1;
+        if (mo < 1) { mo = 12; y -= 1; }
+        if (y < STATS_START_YEAR || (y === STATS_START_YEAR && mo < STATS_START_MONTH)) return;
+      } else {
+        mo += 1;
+        if (mo > 12) { mo = 1; y += 1; }
+      }
+      const nowD = new Date();
+      const futureCheck = new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
+      if (futureCheck) return;
+      statsState.viewMonth = { year: y, month: mo };
+      renderStatsBody();
+    });
+  });
   body.querySelectorAll('.stats-card').forEach(card => {
     card.addEventListener('click', () => {
       const memberId = card.dataset.member;
@@ -2399,6 +2702,8 @@ async function loadEvents() {
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
     allEvents = data.events || [];
+    // 신규 이벤트 차분 → 알림 발송 (필터 적용)
+    processNewEventsForNotification(allEvents);
     initFilterUI();
     applyFilter();
     lastEventsUpdate = new Date();

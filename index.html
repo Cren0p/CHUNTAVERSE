@@ -2845,8 +2845,9 @@ async function loadLive() {
       liveBadge.classList.toggle('on', liveCount > 0);
       liveBadge.classList.toggle('off', liveCount === 0);
     }
-    const updated = new Date(data.updated_at);
-    lastLiveUpdate = updated;
+    // 사이트는 매분 fetch하므로 클라이언트 측 시각 사용
+    // (worker의 updated_at은 변경 있을 때만 갱신되어 멈춰 보일 수 있음)
+    lastLiveUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {
     document.getElementById('app').innerHTML =

@@ -1535,13 +1535,14 @@ function updateTabTitle() {
     return !isNaN(t) && t > lastSeen;
   }).length;
 
+  // 베이스 제목: "천타버스" 또는 "천타버스 (N)"
+  const base = unreadCount > 0 ? `${BASE_TITLE} (${unreadCount})` : BASE_TITLE;
+  // 깜빡임 중일 때만 뒤에 NEW 마커 토글
   let title;
   if (titleFlashTimer && titleFlashOn && pendingFlashCount > 0) {
-    title = `🔴 새 이벤트 ${pendingFlashCount}건`;
-  } else if (unreadCount > 0) {
-    title = `${BASE_TITLE} (${unreadCount})`;
+    title = `${base} NEW 🔴`;
   } else {
-    title = BASE_TITLE;
+    title = base;
   }
   document.title = title;
 }
@@ -1586,7 +1587,6 @@ function sendBrowserNotification(ev) {
       body,
       icon: 'Favicon.webp',
       tag: `${ev.type}-${ev.member_id}-${ev.time}`,
-      // requireInteraction: false (자동으로 사라지게)
     });
     noti.onclick = () => {
       window.focus();

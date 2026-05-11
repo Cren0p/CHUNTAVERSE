@@ -1429,7 +1429,9 @@ const SVG_ICONS = {
   x: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
   // 디스코드
   discord: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,
-  // 팬심 — 하트
+  // 팬심 — F 글자 (브랜드 로고)
+  fancimF: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M6 3h12v3h-9v5h8v3h-8v7H6z"/></svg>`,
+  // 팬심 — 하트 (대체용)
   heart: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
   // 네이버 N
   naver: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/></svg>`,
@@ -2925,14 +2927,19 @@ function renderLinks() {
     cafe: '#03C75A',      // 네이버 카페: 초록
     namuwiki: '#27a567',  // 나무위키: 초록
     instagram: '#E1306C', // 인스타그램: 분홍
-    x: '#000000',         // X: 검정
+    x: '#ffffff',         // X: 흰색 (검정 배경)
     discord: '#5865F2',   // 디스코드: 보라
-    fancim: '#ec4899',    // 팬심: 빨강/핑크
+    fancim: '#ffffff',    // 팬심: 흰색 (검정 배경)
     calendar: '#4285F4',  // 일정표 (구글캘린더): 파랑
     music: '#fbbf24',     // 노래책: 노랑
     site: '#9ca3af',      // 팬사이트: 회색
     naverOgq: '#03C75A',  // 네이버 OGQ: 초록
     soopOgq: '#60a5fa',   // 숲 OGQ: 파랑
+  };
+  // 일부 아이콘은 검정 배경에 흰 아이콘으로 표시 (X, 팬심 브랜드 스타일)
+  const ICON_BG = {
+    x: '#000000',
+    fancim: '#000000',
   };
 
   // 헬퍼: 빈 셀
@@ -2944,8 +2951,12 @@ function renderLinks() {
     if (!url) return emptyCell;
     const icon = ICON_FOR[kind] || '';
     const color = COLORS[kind] || 'var(--text)';
+    const bg = ICON_BG[kind];
+    const iconStyle = bg
+      ? `color: ${color}; background: ${bg}; padding: 2px;`
+      : `color: ${color};`;
     return `<td><a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener">
-      <span class="link-icon" style="color: ${color}">${icon}</span>
+      <span class="link-icon" style="${iconStyle}">${icon}</span>
       <span class="link-label">${escapeHtml(label)}</span>
     </a></td>`;
   }
@@ -2957,8 +2968,12 @@ function renderLinks() {
     const btns = items.map(it => {
       const icon = ICON_FOR[it.kind] || '';
       const color = COLORS[it.kind] || 'var(--text)';
+      const bg = ICON_BG[it.kind];
+      const iconStyle = bg
+        ? `color: ${color}; background: ${bg}; padding: 2px;`
+        : `color: ${color};`;
       return `<a class="link-btn" href="${escapeHtml(it.url)}" target="_blank" rel="noopener">
-        <span class="link-icon" style="color: ${color}">${icon}</span>
+        <span class="link-icon" style="${iconStyle}">${icon}</span>
         <span class="link-label">${escapeHtml(it.label)}</span>
       </a>`;
     }).join('');
@@ -2974,7 +2989,7 @@ function renderLinks() {
     instagram: SVG_ICONS.instagram,
     x: SVG_ICONS.x,
     discord: SVG_ICONS.discord,
-    fancim: SVG_ICONS.heart,
+    fancim: SVG_ICONS.fancimF,
     calendar: SVG_ICONS.calendar,
     music: SVG_ICONS.music,
     site: SVG_ICONS.externalLink,

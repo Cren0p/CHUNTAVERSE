@@ -261,11 +261,11 @@
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
-  @keyframes highlightPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(97,255,236,0.7); border-color: var(--accent); }
-    50%  { box-shadow: 0 0 0 8px rgba(97,255,236,0.25); border-color: var(--accent2); }
-    100% { box-shadow: 0 0 0 0 rgba(97,255,236,0); border-color: var(--accent); }
-  }
+@keyframes highlightPulse {
+  0%   { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(97,255,236,1), 0 0 32px rgba(97,255,236,0.7); }
+  65%  { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(97,255,236,0.8), 0 0 24px rgba(97,255,236,0.4); }
+  100% { border-color: var(--accent); box-shadow: 0 0 0 0 rgba(97,255,236,0); }
+}
   .card.highlight-pulse { animation: highlightPulse 1.2s ease-out forwards; }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
@@ -2251,28 +2251,24 @@ function applyFilter() {
         const memberId = el.dataset.member;
 if (memberId) {
   setTimeout(() => {
-    // 타깃 외 카드: fadeIn 건너뜀 + 호버 비활성화
     document.querySelectorAll('.card').forEach(c => {
       c.style.animation = 'none';
       c.style.opacity = '1';
-      c.style.pointerEvents = 'none'; // 마우스 hover 차단
+      c.style.pointerEvents = 'none';
     });
-
     const card = document.querySelector(`.card[data-member="${memberId}"]`);
     if (card) {
-      // 타깃 카드: 인라인 animation 제거해야 클래스 애니메이션이 작동
       card.style.animation = '';
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       card.classList.add('highlight-pulse');
-
       setTimeout(() => {
         card.classList.remove('highlight-pulse');
         document.querySelectorAll('.card').forEach(c => {
           c.style.pointerEvents = '';
         });
-      }, 1400);
+      }, 2000);
     }
-  }, 50); // rAF 대신 50ms: 탭 전환 후 DOM 페인트 보장
+  }, 50);
 }
       }
     });

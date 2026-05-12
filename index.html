@@ -118,7 +118,6 @@
     text-align: center;
     line-height: 1.2;
   }
-  /* 사이드바 라이브 배지 (생방송 메뉴 우측) */
   .nav-live-badge {
     margin-left: auto;
     display: inline-flex;
@@ -148,7 +147,6 @@
     animation: pulse 1.8s ease-in-out infinite;
   }
 
-  /* 알림 토글 (사이드바 메뉴 사이) */
   .notify-toggle {
     padding: 8px 20px 10px 23px;
     display: flex;
@@ -258,18 +256,29 @@
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* 이벤트 탭에서 생방송 탭으로 이동 시 fadeIn 차단 */
+  #page-live.skip-animation .card {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
-@keyframes highlightPop {
-  0%   { transform: scale(1.22) translateY(-6px); border-color: var(--accent); box-shadow: 0 20px 48px rgba(97,255,236,0.55); }
-  100% { transform: scale(1) translateY(0); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
-}
-.card.highlight-pulse {
-  animation: highlightPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  position: relative;
-  z-index: 10;
-}
+
+  @keyframes highlightPop {
+    0%   { transform: scale(1.18) translateY(-8px); box-shadow: 0 24px 56px rgba(97,255,236,0.6); border-color: var(--accent); z-index: 20; }
+    70%  { transform: scale(1.04) translateY(-2px); box-shadow: 0 12px 32px rgba(97,255,236,0.3); border-color: var(--accent); }
+    100% { transform: scale(1) translateY(0); box-shadow: 0 8px 24px rgba(97,255,236,0.18); border-color: var(--accent); }
+  }
+  .card.highlight-pulse {
+    animation: highlightPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    opacity: 1 !important;
+    position: relative;
+    z-index: 10;
+  }
+
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
 
@@ -449,7 +458,6 @@
   }
   .event:hover { background: var(--surface2); }
   .event + .event { border-top: 1px solid var(--border); }
-  /* 안 읽은 이벤트 좌측 줄무늬 + 우측 NEW 배지 */
   .event.unread {
     border-left-color: var(--ev-unread);
     background: rgba(97, 255, 236, 0.10);
@@ -583,7 +591,6 @@
   @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
 
-  /* 멤버 카드 클릭 가능 */
   .stats-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -685,7 +692,6 @@
   .calendar-day.today { box-shadow: inset 0 0 0 1.5px var(--time); }
   .calendar-daynum { font-weight: 700; font-size: 13px; }
   .calendar-daycount { font-size: 9px; opacity: 0.8; }
-  /* 게시글/유튜브 표시용 점 (방송 없는 날에도 활동 여부 표시) */
   .calendar-day-dots {
     display: flex;
     gap: 3px;
@@ -700,7 +706,6 @@
   .calendar-day-dot.post { background: var(--filter-post); }
   .calendar-day-dot.youtube { background: var(--ev-youtube); }
   .calendar-day-dot.cafe { background: #03C75A; }
-  /* 게시글/유튜브'만' 있는 날은 살짝 어두운 배경 */
   .calendar-day.has-activity:not(.has-broadcast) {
     background: rgba(46, 245, 225, 0.06);
   }
@@ -708,7 +713,6 @@
     background: rgba(46, 245, 225, 0.12);
   }
 
-  /* 일별 상세 섹션 (방송/게시글/유튜브) */
   .day-section + .day-section {
     margin-top: 14px;
     padding-top: 12px;
@@ -731,7 +735,6 @@
   }
   .day-section-title.post .icon { color: var(--ev-post); }
   .day-section-title.youtube .icon { color: var(--ev-youtube); }
-  /* 종류 아이콘 (시간순 통합 정렬용) */
   .day-kind-icon {
     width: 18px;
     height: 18px;
@@ -876,7 +879,6 @@
     top: 0;
     z-index: 2;
   }
-  /* 그룹 구분 행 */
   .links-group-row td {
     padding: 10px 16px;
     text-align: left;
@@ -940,9 +942,7 @@
     border-color: var(--accent);
     color: var(--accent);
   }
-  /* hover 시 아이콘 색도 accent로 */
   .link-btn:hover .link-icon { color: var(--accent) !important; }
-  /* OGQ 버튼: 이름 + 플랫폼 두 줄 */
   .link-btn.ogq-btn {
     display: flex;
     flex-direction: column;
@@ -1122,7 +1122,6 @@
 <script>
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
-// 통계 시작월: 이 시점 이전 데이터는 없음
 const STATS_START_YEAR = 2026;
 const STATS_START_MONTH = 5;
 
@@ -1143,11 +1142,6 @@ const MEMBERS = [
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
 
-// === 멤버별 관련 링크 ===
-// common: 공통 항목 (방송국 / 유튜브1 / 유튜브2 / 팬카페 / 나무위키)
-//   - youtube2: 보조 유튜브 채널 (셀 텍스트는 채널 정체성)
-// instagram, x, discordOrFancim, etc: 추가 링크 행별 데이터
-// ogq: OGQ 이모티콘 (label, url; label은 이모티콘 이름 + 플랫폼 분리하여 표기)
 const MEMBER_LINKS = {
   '243000': {
     common: {
@@ -1159,9 +1153,7 @@ const MEMBER_LINKS = {
     },
     instagram: 'https://www.instagram.com/chunyang_94/',
     x: 'https://x.com/chunyangkr',
-    discordOrFancim: [
-      { label: '디스코드', url: 'https://discord.com/invite/rH2j9sh' },
-    ],
+    discordOrFancim: [{ label: '디스코드', url: 'https://discord.com/invite/rH2j9sh' }],
     etc: [],
     ogq: [
       { name: '처니티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61de7e80d0979' },
@@ -1178,12 +1170,8 @@ const MEMBER_LINKS = {
     },
     instagram: 'https://www.instagram.com/madaom_m',
     x: 'https://x.com/DAOMM_MA',
-    discordOrFancim: [
-      { label: '디스코드', url: 'https://discord.com/invite/4h9ZHm5fBZ' },
-    ],
-    etc: [
-      { label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1mJiPbZrF29wUAA5lS4R-IZ-4Ehs6UbagssUFPe8j1X4/edit?gid=653664162#gid=653664162' },
-    ],
+    discordOrFancim: [{ label: '디스코드', url: 'https://discord.com/invite/4h9ZHm5fBZ' }],
+    etc: [{ label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1mJiPbZrF29wUAA5lS4R-IZ-4Ehs6UbagssUFPe8j1X4/edit?gid=653664162#gid=653664162' }],
     ogq: [
       { name: '마다옴왔다옴!~', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61b680bcd4122' },
       { name: '마다옴왔다옴!~', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/61b680bcd4122' },
@@ -1199,9 +1187,7 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: 'https://x.com/nanamoon_7',
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' }],
     etc: [],
     ogq: [],
   },
@@ -1215,12 +1201,8 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: null,
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=787086' },
-    ],
-    etc: [
-      { label: '팬사이트', url: 'https://imhaming-3e1aa792.base44.app/' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=787086' }],
+    etc: [{ label: '팬사이트', url: 'https://imhaming-3e1aa792.base44.app/' }],
     ogq: [],
   },
   'doormomo': {
@@ -1233,12 +1215,8 @@ const MEMBER_LINKS = {
     },
     instagram: 'https://www.instagram.com/momoric__/',
     x: 'https://x.com/door_momo',
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' },
-    ],
-    etc: [
-      { label: '노래책', url: 'https://meloming.com/channel/momovlyz' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' }],
+    etc: [{ label: '노래책', url: 'https://meloming.com/channel/momovlyz' }],
     ogq: [
       { name: '모모티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6439ef4bd4035' },
       { name: '모모티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6439ef4bd4035' },
@@ -1256,9 +1234,7 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: null,
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kim91709' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kim91709' }],
     etc: [],
     ogq: [],
   },
@@ -1272,9 +1248,7 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: 'https://x.com/kappuchannel',
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kappuchannel' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kappuchannel' }],
     etc: [
       { label: '일정표', url: 'https://calendar.google.com/calendar/u/0/embed?src=kappuchannel@gmail.com&ctz=Asia/Seoul' },
       { label: '노래책', url: 'https://www.songstudio.live/songbook/platform/@%EC%B9%B4%ED%91%B8kappu' },
@@ -1298,12 +1272,8 @@ const MEMBER_LINKS = {
     },
     instagram: 'https://www.instagram.com/kya_ang/',
     x: null,
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kyaang' },
-    ],
-    etc: [
-      { label: '팬사이트', url: 'https://kyaang.com/' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kyaang' }],
+    etc: [{ label: '팬사이트', url: 'https://kyaang.com/' }],
     ogq: [
       { name: '캬앙의 일상', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=62b3038b83eed' },
       { name: '캬앙의 일상', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62b3038b83eed' },
@@ -1319,15 +1289,9 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: null,
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=679293' },
-    ],
-    etc: [
-      { label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' },
-    ],
-    ogq: [
-      { name: '웰로티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62f3e9f462bb2' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=679293' }],
+    etc: [{ label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' }],
+    ogq: [{ name: '웰로티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62f3e9f462bb2' }],
   },
   'mocamu2': {
     common: {
@@ -1339,12 +1303,8 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: 'https://x.com/moca_good',
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' },
-    ],
-    etc: [
-      { label: '노래책', url: 'https://meloming.com/channel/moca/musicbook' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' }],
+    etc: [{ label: '노래책', url: 'https://meloming.com/channel/moca/musicbook' }],
     ogq: [
       { name: '유아렐콘1', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee102355552' },
       { name: '유아렐콘1', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee102355552' },
@@ -1362,9 +1322,7 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: 'https://x.com/Dalta20_',
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dalta20_' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dalta20_' }],
     etc: [],
     ogq: [
       { name: '달달하이! 난 꿀즙이', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
@@ -1381,28 +1339,18 @@ const MEMBER_LINKS = {
     },
     instagram: null,
     x: null,
-    discordOrFancim: [
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dokgopani' },
-    ],
-    etc: [
-      { label: '노래책', url: 'https://docs.google.com/document/d/1stslb_GAnVcNAq_sQvYfw4GyLkd9QNnNIPR8F5Dj-XA/edit?tab=t.0#heading=h.4r8fp7nst7tu' },
-    ],
-    ogq: [
-      { name: '파니티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63adcae3ef502' },
-    ],
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dokgopani' }],
+    etc: [{ label: '노래책', url: 'https://docs.google.com/document/d/1stslb_GAnVcNAq_sQvYfw4GyLkd9QNnNIPR8F5Dj-XA/edit?tab=t.0#heading=h.4r8fp7nst7tu' }],
+    ogq: [{ name: '파니티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63adcae3ef502' }],
   },
 };
 
 const MODE_LABEL = {
-  normal: '일반 방송',
-  adult: '19금',
-  subscription: '구독플러스',
-  copyright: '저작권',
-  restricted: '제한 방송',
+  normal: '일반 방송', adult: '19금',
+  subscription: '구독플러스', copyright: '저작권', restricted: '제한 방송',
 };
 const MODE_BADGE_LABEL = {
-  adult: '19+', subscription: '구독플러스',
-  copyright: '저작권', restricted: '제한',
+  adult: '19+', subscription: '구독플러스', copyright: '저작권', restricted: '제한',
 };
 const MODE_PLACEHOLDER_TEXT = {
   adult: '19금 방송', subscription: '구독플러스 전용 방송',
@@ -1411,50 +1359,27 @@ const MODE_PLACEHOLDER_TEXT = {
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
-// === SVG 아이콘 헬퍼 ===
-// currentColor를 사용해 CSS color로 색상 제어
 const SVG_ICONS = {
-  // 무한대 (방송 시작/종료 공용)
   infinity: `<svg viewBox="0 5 24 14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><circle cx="7" cy="12" r="5"/><circle cx="17" cy="12" r="5"/></svg>`,
-  // 게시글
   board: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>`,
-  // 따봉 (댓글 추천)
   thumbsup: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>`,
-  // 커피잔 (네이버 카페)
   coffee: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v2"/><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/></svg>`,
-  // 사이드바 메뉴용
-  // 생방송 (방송 안테나)
   broadcast: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49"/><path d="M7.76 16.24a6 6 0 0 1 0-8.49"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>`,
-  // 시계 (최근 이벤트)
   clock: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`,
-  // 막대 그래프 (통계)
   chart: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="14" width="3" height="6"/></svg>`,
-  // 카테고리 변경 — 해시태그
   tag: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>`,
   diamond: `<svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" stroke="none"><path d="M12 2L22 12L12 22L2 12z"/></svg>`,
   link: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
-  // 관련 링크 탭용 추가 아이콘
-  // 유튜브 ▶
   youtube: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>`,
-  // 나무위키 — 책 (위키/백과사전 컨셉)
   book: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5a2.5 2.5 0 0 0 0 5H20"/><path d="M4 4.5v15A2.5 2.5 0 0 0 6.5 22"/></svg>`,
-  // 인스타그램 — 카메라 사각형
   instagram: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>`,
-  // X — 글자 모양
   x: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-  // 디스코드
   discord: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,
-  // 팬심 — F 글자 (브랜드 로고)
   fancimF: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M6 3h12v3h-9v5h8v3h-8v7H6z"/></svg>`,
-  // 팬심 — 하트 (대체용)
   heart: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
-  // 네이버 N
   naver: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/></svg>`,
-  // 일반 외부 링크
   externalLink: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="9"/></svg>`,
-  // 일정표 — 달력
   calendar: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-  // 노래책 — 음표
   music: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
 };
 
@@ -1466,8 +1391,6 @@ let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let currentPage = 'live';
 
-// 필터 상태: 다중 선택. 빈 Set이면 "아무것도 선택 안 함" → 표시 0개.
-// 모든 카테고리 = 멤버 12명 모두 + 종류 모두 선택된 상태
 const ALL_TYPE_KEYS = ['soop', 'post', 'youtube', 'cafe'];
 const LS_FILTER_MEMBERS = 'chuntaverse_filter_members';
 const LS_FILTER_TYPES = 'chuntaverse_filter_types';
@@ -1490,17 +1413,15 @@ const filterState = {
 };
 let allEvents = [];
 
-// statsState.data 구조: { 'YYYY-MM': { memberId: monthStatsObj, ... } }
-// - 이번 달은 매번 fresh, 지난 달은 localStorage 영구 캐시
 const statsState = {
   tabsInited: false,
-  data: {},          // 월별 캐시: { 'YYYY-MM': { mid: msData } }
-  loadingMonths: new Set(), // 진행 중인 fetch
+  data: {},
+  loadingMonths: new Set(),
   selectedTab: 'all',
   viewMonth: null,
   selectedDate: null,
 };
-const LS_STATS_PREFIX = 'chuntaverse_stats_v2_'; // 'chuntaverse_stats_v2_2026-04' 형태
+const LS_STATS_PREFIX = 'chuntaverse_stats_v2_';
 
 function isCurrentMonth(yyyymm) {
   const now = new Date();
@@ -1519,13 +1440,11 @@ function lsSetMonthCache(yyyymm, data) {
   try { localStorage.setItem(LS_STATS_PREFIX + yyyymm, JSON.stringify(data)); } catch (e) {}
 }
 
-// 현재 viewMonth 기준 yyyymm 문자열
 function currentViewYm() {
   if (!statsState.viewMonth) return null;
   const { year, month } = statsState.viewMonth;
   return `${year}-${String(month).padStart(2, '0')}`;
 }
-// viewMonth 기준 멤버 stats 가져오기
 function getMemberStatsForView(memberId) {
   const ym = currentViewYm();
   if (!ym) return null;
@@ -1534,7 +1453,6 @@ function getMemberStatsForView(memberId) {
   return monthData[memberId] || null;
 }
 
-// === 알림 관련 ===
 const LS_NOTIFY = 'chuntaverse_notify_enabled';
 const LS_LAST_SEEN = 'chuntaverse_last_seen_event_time';
 
@@ -1546,7 +1464,6 @@ function lsSet(k, v) {
   try { localStorage.setItem(k, v); } catch (e) {}
 }
 
-// 처음 방문이면 현재 시각 (이전 이벤트 모두 "읽음" 처리)
 function getLastSeenTime() {
   const v = lsGet(LS_LAST_SEEN, null);
   if (!v) {
@@ -1561,10 +1478,8 @@ function setLastSeenToNow() {
 }
 
 let notifyEnabled = lsGet(LS_NOTIFY, '0') === '1';
-// 마지막 본 이벤트들의 ID 집합 (새로 들어온 것 차분 추적용)
 let lastSeenEventKeys = new Set();
 let lastSeenEventKeysReady = false;
-// 탭 제목 깜빡임 상태
 let titleFlashTimer = null;
 let titleFlashOn = false;
 let pendingFlashCount = 0;
@@ -1577,13 +1492,11 @@ function updateNotifySwitchUI() {
 
 async function setNotifyEnabled(enabled) {
   if (enabled) {
-    // 브라우저 알림 권한 요청
     if ('Notification' in window) {
       if (Notification.permission === 'default') {
         try {
           const result = await Notification.requestPermission();
           if (result !== 'granted') {
-            // 권한 거부됨 → 토글 OFF 유지
             notifyEnabled = false;
             lsSet(LS_NOTIFY, '0');
             updateNotifySwitchUI();
@@ -1603,7 +1516,6 @@ async function setNotifyEnabled(enabled) {
       return;
     }
   } else {
-    // OFF 시 깜빡임 정지
     stopTitleFlash();
   }
   notifyEnabled = enabled;
@@ -1611,10 +1523,9 @@ async function setNotifyEnabled(enabled) {
   updateNotifySwitchUI();
 }
 
-// === 탭 제목 깜빡임 ===
 function startTitleFlash(count) {
   pendingFlashCount = count;
-  if (titleFlashTimer) return; // 이미 작동 중이면 카운트만 갱신
+  if (titleFlashTimer) return;
   titleFlashTimer = setInterval(() => {
     titleFlashOn = !titleFlashOn;
     updateTabTitle();
@@ -1630,64 +1541,39 @@ function stopTitleFlash() {
   updateTabTitle();
 }
 function updateTabTitle() {
-  // 안 읽음 카운트 (NEW 표시 기반, 항상 작동)
   const lastSeen = new Date(getLastSeenTime()).getTime();
   const unreadCount = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
     return !isNaN(t) && t > lastSeen;
   }).length;
-
-  // 베이스 제목: "천타버스" 또는 "천타버스 (N)"
   const base = unreadCount > 0 ? `${BASE_TITLE} (${unreadCount})` : BASE_TITLE;
-  // 깜빡임 중일 때만 뒤에 NEW 마커 토글
-  let title;
-  if (titleFlashTimer && titleFlashOn && pendingFlashCount > 0) {
-    title = `${base} NEW ◆`;
-  } else {
-    title = base;
-  }
-  document.title = title;
+  document.title = (titleFlashTimer && titleFlashOn && pendingFlashCount > 0)
+    ? `${base} NEW ◆` : base;
 }
 
-// === 브라우저 알림 발송 ===
 function sendBrowserNotification(ev) {
   if (!notifyEnabled) return;
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
-  if (document.visibilityState === 'visible' && currentPage === 'events') {
-    // 사용자가 이미 이벤트 탭 보고 있으면 OS 알림은 안 띄움
-    return;
-  }
+  if (document.visibilityState === 'visible' && currentPage === 'events') return;
 
   const memberName = ev.member_name || '';
   let body = '';
   switch (ev.type) {
-    case 'start':
-      body = `${memberName} 방송 시작${ev.title ? ' — ' + ev.title : ''}`; break;
-    case 'end':
-      body = `${memberName} 방송 종료`; break;
-    case 'title':
-      body = `${memberName} 방제 변경 — ${ev.after || ''}`; break;
-    case 'category':
-      body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
-    case 'mode_change':
-      body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
-    case 'post':
-      body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
-    case 'comment_recommend':
-      body = `${memberName} 댓글 추천 — ${ev.target_name || ''} 컨텐츠`; break;
-    case 'youtube':
-      body = `${memberName} 유튜브 업로드 — ${ev.title || ''}`; break;
-    case 'cafe_post':
-      body = `${memberName} 카페 게시글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
-    default:
-      body = `${memberName} ${ev.type}`;
+    case 'start':      body = `${memberName} 방송 시작${ev.title ? ' — ' + ev.title : ''}`; break;
+    case 'end':        body = `${memberName} 방송 종료`; break;
+    case 'title':      body = `${memberName} 방제 변경 — ${ev.after || ''}`; break;
+    case 'category':   body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
+    case 'mode_change':body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
+    case 'post':       body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
+    case 'comment_recommend': body = `${memberName} 댓글 추천 — ${ev.target_name || ''} 컨텐츠`; break;
+    case 'youtube':    body = `${memberName} 유튜브 업로드 — ${ev.title || ''}`; break;
+    case 'cafe_post':  body = `${memberName} 카페 게시글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
+    default:           body = `${memberName} ${ev.type}`;
   }
-
   try {
     const noti = new Notification(BASE_TITLE, {
-      body,
-      icon: 'Favicon.webp',
+      body, icon: 'Favicon.webp',
       tag: `${ev.type}-${ev.member_id}-${ev.time}`,
     });
     noti.onclick = () => {
@@ -1696,19 +1582,16 @@ function sendBrowserNotification(ev) {
       switchPage('events');
       noti.close();
     };
-    // 5초 후 자동 닫기
     setTimeout(() => { try { noti.close(); } catch (e) {} }, 5000);
   } catch (e) {}
 }
 
-// 새 이벤트가 들어왔는지 확인하고 알림 발송 (필터 적용)
 function processNewEventsForNotification(events) {
   if (!events || events.length === 0) {
     lastSeenEventKeys = new Set();
     lastSeenEventKeysReady = true;
     return;
   }
-
   const typeToCat = (et) => {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
@@ -1716,44 +1599,29 @@ function processNewEventsForNotification(events) {
     return 'soop';
   };
   const eventKey = (e) => `${e.type}|${e.member_id}|${e.time}|${e.url || ''}|${e.after || ''}`;
-
-  // 첫 로드는 알림 발송 안 함 (현재 events를 baseline으로 저장)
   if (!lastSeenEventKeysReady) {
     lastSeenEventKeys = new Set(events.map(eventKey));
     lastSeenEventKeysReady = true;
     return;
   }
-
-  // 새로 들어온 이벤트 찾기
   const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)));
-  // 키 갱신
   lastSeenEventKeys = new Set(events.map(eventKey));
-
   if (newOnes.length === 0) return;
-
-  // 필터 적용 — 사용자가 보는 필터 = 알림 받는 필터
   const filtered = newOnes.filter(e => {
     if (!filterState.members.has(e.member_id)) return false;
     if (!filterState.types.has(typeToCat(e.type))) return false;
     return true;
   });
-
   if (filtered.length === 0) return;
-
-  // 알림 토글 ON일 때만 브라우저 알림 + 탭 제목 깜빡임
   if (notifyEnabled) {
-    // 사용자가 이벤트 탭 + 활성화되어 있으면 깜빡임/OS 알림 모두 생략
     const userIsViewingEvents = (document.visibilityState === 'visible' && currentPage === 'events');
     if (!userIsViewingEvents) {
-      // 개별 OS 알림
       filtered.forEach(ev => sendBrowserNotification(ev));
-      // 탭 제목 깜빡임 시작
       startTitleFlash(filtered.length);
     }
   }
 }
 
-// NEW 표시는 항상 작동 (notifyEnabled 무관)
 function refreshUnreadIndicator() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
   const unread = allEvents.filter(e => {
@@ -1761,11 +1629,7 @@ function refreshUnreadIndicator() {
     return !isNaN(t) && t > lastSeen;
   });
   const count = unread.length;
-
-  // 탭 제목 (깜빡임 작동 중이 아닐 때만 갱신)
   updateTabTitle();
-
-  // 사이드바 배지
   const badge = document.getElementById('navBadge');
   if (badge) {
     if (count > 0) {
@@ -1775,18 +1639,14 @@ function refreshUnreadIndicator() {
       badge.style.display = 'none';
     }
   }
-
-  // 이벤트 행에 unread 클래스 + NEW 배지
   const tl = document.getElementById('timeline');
   if (tl) {
     tl.querySelectorAll('.event').forEach(el => {
       const t = parseInt(el.dataset.time || '0', 10);
       const isUnread = t > lastSeen;
       el.classList.toggle('unread', isUnread);
-      // 기존 NEW 배지 제거
       const oldBadge = el.querySelector('.event-new-badge');
       if (oldBadge) oldBadge.remove();
-      // unread면 NEW 배지 삽입 (event-time 앞에)
       if (isUnread) {
         const timeEl = el.querySelector('.event-time');
         if (timeEl) {
@@ -1801,13 +1661,11 @@ function refreshUnreadIndicator() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {});
-// 즉시 토글 UI 반영
 updateNotifySwitchUI();
 document.getElementById('notifySwitch').addEventListener('click', () => {
   setNotifyEnabled(!notifyEnabled);
 });
 
-// 사이드바 SVG 아이콘 주입
 (() => {
   const map = {
     navLiveIcon: SVG_ICONS.broadcast,
@@ -1826,17 +1684,11 @@ function updateHeaderCenter() {
   if (!el) return;
   let topLine = '';
   if (currentPage === 'live') {
-    topLine = lastLiveUpdate
-      ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준'
-      : '';
+    topLine = lastLiveUpdate ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'events') {
-    topLine = lastEventsUpdate
-      ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
-      : '';
+    topLine = lastEventsUpdate ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'stats') {
-    topLine = lastStatsUpdate
-      ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준'
-      : '';
+    topLine = lastStatsUpdate ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   }
   el.innerHTML = `
     ${topLine ? `<div class="header-center-line">${topLine}</div>` : ''}
@@ -1846,7 +1698,6 @@ function updateHeaderCenter() {
 
 function switchPage(page) {
   if (!VALID_PAGES.includes(page)) page = 'live';
-  // 이벤트 탭에서 떠날 때 읽음 처리 + 즉시 UI 반영
   if (currentPage === 'events' && page !== 'events') {
     setLastSeenToNow();
     refreshUnreadIndicator();
@@ -1863,7 +1714,6 @@ function switchPage(page) {
     initStatsTabs();
     statsState.tabsInited = true;
   }
-  // 이벤트 탭 진입 시 깜빡임 정지 + 줄무늬 표시 (lastSeen 유지)
   if (page === 'events') {
     stopTitleFlash();
     refreshUnreadIndicator();
@@ -1886,13 +1736,9 @@ window.addEventListener('hashchange', () => {
   switchPage(p);
 });
 
-// 탭이 hidden 될 때 (백그라운드, 페이지 떠남) 이벤트 탭이면 읽음 처리
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    // 탭이 보이는 상태로 돌아오면 깜빡임 정지 (이벤트 탭이든 아니든)
-    if (currentPage === 'events') {
-      stopTitleFlash();
-    }
+    if (currentPage === 'events') stopTitleFlash();
   }
   if (document.visibilityState === 'hidden' && currentPage === 'events') {
     setLastSeenToNow();
@@ -1900,9 +1746,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 window.addEventListener('beforeunload', () => {
-  if (currentPage === 'events') {
-    setLastSeenToNow();
-  }
+  if (currentPage === 'events') setLastSeenToNow();
 });
 
 function formatBtime(seconds) {
@@ -1936,9 +1780,7 @@ function formatHHMM(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mi}`;
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function formatDuration(ms) {
   if (!ms || ms <= 0) return '0분';
@@ -1949,9 +1791,7 @@ function formatDuration(ms) {
   return `${m}분`;
 }
 function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[c]);
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
 function soopProfileUrl(userId) {
   const prefix = userId.substring(0, 2);
@@ -1961,10 +1801,7 @@ function isoToKstDateKey(iso) {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return null;
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function ymdKey(year, month1, day) {
   return `${year}-${String(month1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -1989,14 +1826,12 @@ function buildCard(m, info, delay) {
   const isNormalLive = info.live && mode === 'normal';
   const hasThumb = info.thumb && isNormalLive;
   const thumbHtml = hasThumb
-    ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-    : '';
+    ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
   const placeholderInner = info.live && mode && mode !== 'normal'
     ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
     : `<img src="${m.img}" alt="${m.name}">`;
   const modeBadge = info.live && mode && mode !== 'normal'
-    ? `<span class="badge-mode ${mode}">${MODE_BADGE_LABEL[mode] || ''}</span>`
-    : '';
+    ? `<span class="badge-mode ${mode}">${MODE_BADGE_LABEL[mode] || ''}</span>` : '';
   const profileUrl = soopProfileUrl(m.id);
   const avatarHtml = profileUrl
     ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
@@ -2006,10 +1841,8 @@ function buildCard(m, info, delay) {
   else if (info.title) titleText = info.title;
   else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
   else titleText = '방송 중';
-
   const btimeHtml = btime ? `<span class="card-btime"><span>⏱</span><span>${btime}</span></span>` : '';
   const nameColorStyle = info.live ? `color: ${m.color}` : '';
-
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
@@ -2031,27 +1864,21 @@ function buildCard(m, info, delay) {
 }
 
 function renderEvent(e) {
-  // 이벤트 타입별 아이콘 (SVG 우선, 없으면 텍스트 심볼)
   const iconMap = {
-    start: SVG_ICONS.infinity,
-    end: SVG_ICONS.infinity,
+    start: SVG_ICONS.infinity, end: SVG_ICONS.infinity,
     title: '✎', category: SVG_ICONS.tag, mode_change: SVG_ICONS.diamond,
-    post: SVG_ICONS.board,
-    comment_recommend: SVG_ICONS.thumbsup,
-    youtube: SVG_ICONS.youtube,
-    cafe_post: SVG_ICONS.coffee,
+    post: SVG_ICONS.board, comment_recommend: SVG_ICONS.thumbsup,
+    youtube: SVG_ICONS.youtube, cafe_post: SVG_ICONS.coffee,
   };
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
     title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
     post: '숲 게시글', comment_recommend: '댓글 추천',
-    youtube: '유튜브 업로드',
-    cafe_post: '카페 게시글',
+    youtube: '유튜브 업로드', cafe_post: '카페 게시글',
   };
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
   const memberColor = member ? member.color : '#fff';
-
   let modeTag = '';
   if ((e.type === 'start' || e.type === 'end') && e.mode && e.mode !== 'normal') {
     const label = MODE_BADGE_LABEL[e.mode] || '';
@@ -2061,7 +1888,6 @@ function renderEvent(e) {
   if (e.type === 'comment_recommend' && e.target_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.target_name)} 컨텐츠)</span>`;
   }
-  // 카페명 표시 (cafe_post)
   if (e.type === 'cafe_post' && e.cafe_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.cafe_name)})</span>`;
   }
@@ -2071,13 +1897,10 @@ function renderEvent(e) {
   } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
   } else if (e.type === 'mode_change') {
-    const beforeLabel = MODE_LABEL[e.before] || e.before;
-    const afterLabel = MODE_LABEL[e.after] || e.after;
-    detail = `<div class="event-detail">${escapeHtml(beforeLabel)} → ${escapeHtml(afterLabel)}</div>`;
+    detail = `<div class="event-detail">${escapeHtml(MODE_LABEL[e.before] || e.before)} → ${escapeHtml(MODE_LABEL[e.after] || e.after)}</div>`;
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend' || e.type === 'cafe_post') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   }
-  // end 이벤트: 멤버 VOD 목록 URL 자동 생성
   if (e.type === 'end' && !e.url && e.member_id) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
   }
@@ -2090,8 +1913,7 @@ function renderEvent(e) {
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
         <span class="event-action">${actionMap[e.type] || e.type}</span>
-        ${targetTag}
-        ${modeTag}
+        ${targetTag}${modeTag}
       </div>
       ${detail}
     </div>
@@ -2100,7 +1922,6 @@ function renderEvent(e) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
-  // start, title, category, mode_change: 생방송 탭으로 이동 + 멤버 강조
   const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
   if (LIVE_NAV_TYPES.has(e.type)) {
     return `<div class="event clickable-internal" data-time="${eventTime}" data-nav="live" data-member="${e.member_id || ''}">${inner}</div>`;
@@ -2112,7 +1933,6 @@ function renderEvent(e) {
 }
 
 function initFilterUI() {
-  // 멤버 12개 사진 버튼
   const mc = document.getElementById('filterMembers');
   if (mc && !mc.dataset.inited) {
     mc.innerHTML = MEMBERS.map(m => `
@@ -2122,7 +1942,6 @@ function initFilterUI() {
     `).join('');
     mc.querySelectorAll('.filter-member').forEach(btn => {
       const id = btn.dataset.id;
-      // 초기 on/off 반영
       btn.classList.toggle('on', filterState.members.has(id));
       btn.addEventListener('click', () => {
         if (filterState.members.has(id)) filterState.members.delete(id);
@@ -2135,19 +1954,12 @@ function initFilterUI() {
     });
     mc.dataset.inited = '1';
   }
-
-  // 멤버 - 모두 선택/해제 텍스트 토글
   const mAll = document.getElementById('filterMemberToggleAll');
   if (mAll && !mAll.dataset.inited) {
     mAll.addEventListener('click', () => {
       const allSelected = filterState.members.size === MEMBERS.length;
-      if (allSelected) {
-        filterState.members = new Set();
-      } else {
-        filterState.members = new Set(MEMBERS.map(m => m.id));
-      }
+      filterState.members = allSelected ? new Set() : new Set(MEMBERS.map(m => m.id));
       lsSetSet(LS_FILTER_MEMBERS, filterState.members);
-      // UI 갱신
       mc.querySelectorAll('.filter-member').forEach(b => {
         b.classList.toggle('on', filterState.members.has(b.dataset.id));
       });
@@ -2157,13 +1969,10 @@ function initFilterUI() {
     mAll.dataset.inited = '1';
   }
   updateMemberAllToggle();
-
-  // 종류 버튼 (data-type: soop/post/youtube/cafe)
   const tc = document.getElementById('filterTypes');
   if (tc && !tc.dataset.inited) {
     tc.querySelectorAll('.filter-type').forEach(btn => {
       const type = btn.dataset.type;
-      // "all" 데이터 타입은 더 이상 안 씀 (있다면 무시)
       if (type === 'all') return;
       btn.classList.toggle('on', filterState.types.has(type));
       btn.addEventListener('click', () => {
@@ -2177,16 +1986,11 @@ function initFilterUI() {
     });
     tc.dataset.inited = '1';
   }
-
   const tAll = document.getElementById('filterTypeToggleAll');
   if (tAll && !tAll.dataset.inited) {
     tAll.addEventListener('click', () => {
       const allSelected = filterState.types.size === ALL_TYPE_KEYS.length;
-      if (allSelected) {
-        filterState.types = new Set();
-      } else {
-        filterState.types = new Set(ALL_TYPE_KEYS);
-      }
+      filterState.types = allSelected ? new Set() : new Set(ALL_TYPE_KEYS);
       lsSetSet(LS_FILTER_TYPES, filterState.types);
       tc.querySelectorAll('.filter-type').forEach(b => {
         const t = b.dataset.type;
@@ -2204,14 +2008,12 @@ function initFilterUI() {
 function updateMemberAllToggle() {
   const el = document.getElementById('filterMemberToggleAll');
   if (!el) return;
-  const allSelected = filterState.members.size === MEMBERS.length;
-  el.textContent = allSelected ? '모두 해제' : '모두 선택';
+  el.textContent = filterState.members.size === MEMBERS.length ? '모두 해제' : '모두 선택';
 }
 function updateTypeAllToggle() {
   const el = document.getElementById('filterTypeToggleAll');
   if (!el) return;
-  const allSelected = filterState.types.size === ALL_TYPE_KEYS.length;
-  el.textContent = allSelected ? '모두 해제' : '모두 선택';
+  el.textContent = filterState.types.size === ALL_TYPE_KEYS.length ? '모두 해제' : '모두 선택';
 }
 
 function applyFilter() {
@@ -2229,60 +2031,49 @@ function applyFilter() {
     return true;
   });
   if (filtered.length === 0) {
-    if (allEvents.length === 0) {
-      tl.innerHTML = '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>';
-    } else {
-      tl.innerHTML = '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
-    }
+    tl.innerHTML = allEvents.length === 0
+      ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
+      : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
   } else {
     tl.innerHTML = filtered.map(renderEvent).join('');
   }
   const summary = document.getElementById('filterSummary');
-  if (summary) {
-    summary.textContent = '선택된 멤버/종류만 알림됩니다.';
-  }
-  // 클릭 위임 — start 이벤트 내부 라우팅
+  if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
+
   if (!tl.dataset.clickInit) {
     tl.addEventListener('click', (ev) => {
       const el = ev.target.closest('.event.clickable-internal');
       if (!el) return;
       const nav = el.dataset.nav;
-      if (nav) {
-        history.replaceState(null, '', '#' + nav);
-        switchPage(nav);
-        // 해당 멤버 카드 강조
-        const memberId = el.dataset.member;
-if (memberId) {
-  requestAnimationFrame(() => {
-    // 1st rAF: 모든 카드 fadeIn 즉시 완료
-    document.querySelectorAll('.card').forEach(c => {
-      c.style.animation = 'none';
-      c.style.opacity = '1';
-      c.style.pointerEvents = 'none';
-    });
-    requestAnimationFrame(() => {
-      // 2nd rAF: 페인트 후 타깃 카드에만 팝 애니메이션
-      const card = document.querySelector(`.card[data-member="${memberId}"]`);
-      if (card) {
-        card.style.animation = '';
-        card.style.opacity = '';
-        card.scrollIntoView({ behavior: 'instant', block: 'center' });
-        card.classList.add('highlight-pulse');
-        setTimeout(() => {
-          card.classList.remove('highlight-pulse');
-          document.querySelectorAll('.card').forEach(c => {
-            c.style.pointerEvents = '';
-          });
-        }, 800);
-      }
-    });
-  });
-}
+      if (!nav) return;
+      const memberId = el.dataset.member;
+      const livePage = document.getElementById('page-live');
+
+      // ★ 핵심: switchPage 호출 전에 먼저 skip-animation 클래스를 붙여서
+      //    페이지가 보이는 순간 카드가 이미 완성 상태(opacity:1)로 렌더링되게 함
+      if (livePage) livePage.classList.add('skip-animation');
+
+      history.replaceState(null, '', '#' + nav);
+      switchPage(nav);
+
+      if (memberId) {
+        const card = document.querySelector(`.card[data-member="${memberId}"]`);
+        if (card) {
+          card.scrollIntoView({ behavior: 'instant', block: 'center' });
+          card.classList.add('highlight-pulse');
+          setTimeout(() => {
+            card.classList.remove('highlight-pulse');
+            if (livePage) livePage.classList.remove('skip-animation');
+          }, 900);
+        } else {
+          if (livePage) livePage.classList.remove('skip-animation');
+        }
+      } else {
+        if (livePage) livePage.classList.remove('skip-animation');
       }
     });
     tl.dataset.clickInit = '1';
   }
-  // 안 읽음 표시 갱신
   refreshUnreadIndicator();
 }
 
@@ -2290,34 +2081,25 @@ function initStatsTabs() {
   const memberBox = document.getElementById('statsTabsMembers');
   const sideBox = document.getElementById('statsTabsSide');
   if (!memberBox || !sideBox) return;
-
   memberBox.innerHTML = MEMBERS.map(m => `
     <button class="stats-tab" data-tab="${m.id}">
       <img src="${m.img}" alt="${m.name}"><span>${m.name}</span>
     </button>
   `).join('');
   sideBox.innerHTML = `<button class="stats-tab stats-tab-all active" data-tab="all">전체</button>`;
-
-  const allTabs = [
-    ...memberBox.querySelectorAll('.stats-tab'),
-    ...sideBox.querySelectorAll('.stats-tab'),
-  ];
+  const allTabs = [...memberBox.querySelectorAll('.stats-tab'), ...sideBox.querySelectorAll('.stats-tab')];
   allTabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectStatsTab(btn.dataset.tab);
-    });
+    btn.addEventListener('click', () => selectStatsTab(btn.dataset.tab));
   });
   if (statsState.data) renderStatsBody();
 }
 
-// 외부에서 호출 가능: 멤버 카드 클릭 시 사용
 function selectStatsTab(tabId) {
   statsState.selectedTab = tabId;
   document.querySelectorAll('.stats-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tabId);
   });
   if (tabId !== 'all') {
-    // 가장 최근 활동(이벤트) 발생 일을 기본 선택, 없으면 오늘
     const latestDate = findLatestActivityDate(tabId);
     if (latestDate) {
       const d = new Date(latestDate);
@@ -2332,57 +2114,36 @@ function selectStatsTab(tabId) {
   renderStatsBody();
 }
 
-// 멤버의 가장 최근 방송 시작일 우선, 없으면 가장 최근 활동일
 function findLatestActivityDate(memberId) {
   const ms = getMemberStatsForView(memberId);
   if (!ms) return null;
-
-  // 1순위: 가장 최근 방송
   let latestBroadcast = null;
   for (const s of (ms.sessions || [])) {
     if (!s.start) continue;
     const t = new Date(s.start).getTime();
     if (isNaN(t)) continue;
-    if (latestBroadcast === null || t > new Date(latestBroadcast).getTime()) {
-      latestBroadcast = s.start;
-    }
+    if (latestBroadcast === null || t > new Date(latestBroadcast).getTime()) latestBroadcast = s.start;
   }
   if (latestBroadcast) return latestBroadcast;
-
-  // 2순위: 게시글/유튜브/카페 중 가장 최근
   let latest = null;
-  const candidates = [];
-  for (const p of (ms.posts || [])) {
-    if (p.time) candidates.push(p.time);
-  }
-  for (const y of (ms.youtube || [])) {
-    if (y.time) candidates.push(y.time);
-  }
-  for (const c of (ms.cafe || [])) {
-    if (c.time) candidates.push(c.time);
-  }
+  const candidates = [
+    ...(ms.posts || []).map(p => p.time),
+    ...(ms.youtube || []).map(y => y.time),
+    ...(ms.cafe || []).map(c => c.time),
+  ];
   for (const t of candidates) {
     const ms2 = new Date(t).getTime();
     if (isNaN(ms2)) continue;
-    if (latest === null || ms2 > new Date(latest).getTime()) {
-      latest = t;
-    }
+    if (latest === null || ms2 > new Date(latest).getTime()) latest = t;
   }
   return latest;
 }
 
 function computeMonthSummary(memberStats, year, month1) {
   const result = {
-    daysWithBroadcast: 0,
-    totalDaysInMonth: daysInMonth(year, month1),
-    totalDurationMs: 0,
-    postCount: 0,
-    youtubeCount: 0,
-    cafeCount: 0,
-    sessionsByDate: {},
-    postsByDate: {},
-    youtubeByDate: {},
-    cafeByDate: {},
+    daysWithBroadcast: 0, totalDaysInMonth: daysInMonth(year, month1),
+    totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0,
+    sessionsByDate: {}, postsByDate: {}, youtubeByDate: {}, cafeByDate: {},
   };
   if (!memberStats) return result;
   const monthStart = new Date(year, month1 - 1, 1, 0, 0, 0).getTime();
@@ -2390,8 +2151,7 @@ function computeMonthSummary(memberStats, year, month1) {
   const dateSet = new Set();
   for (const s of (memberStats.sessions || [])) {
     const startMs = new Date(s.start).getTime();
-    if (isNaN(startMs)) continue;
-    if (startMs < monthStart || startMs >= monthEnd) continue;
+    if (isNaN(startMs) || startMs < monthStart || startMs >= monthEnd) continue;
     const dateKey = isoToKstDateKey(s.start);
     if (!dateKey) continue;
     dateSet.add(dateKey);
@@ -2399,9 +2159,7 @@ function computeMonthSummary(memberStats, year, month1) {
     result.sessionsByDate[dateKey].push(s);
     if (s.end) {
       const endMs = new Date(s.end).getTime();
-      if (!isNaN(endMs) && endMs > startMs) {
-        result.totalDurationMs += (endMs - startMs);
-      }
+      if (!isNaN(endMs) && endMs > startMs) result.totalDurationMs += (endMs - startMs);
     }
   }
   result.daysWithBroadcast = dateSet.size;
@@ -2444,34 +2202,25 @@ function computeMonthSummary(memberStats, year, month1) {
 function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
-  // viewMonth 미설정 시 이번 달
   if (!statsState.viewMonth) {
     const now = new Date();
     statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
   }
   const ym = currentViewYm();
-  // 그 월 데이터가 캐시에 없으면 비동기 로드 후 재렌더
   if (ym && !statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-    loadStatsMonth(ym).then(() => {
-      if (currentPage === 'stats') renderStatsBody();
-    });
+    loadStatsMonth(ym).then(() => { if (currentPage === 'stats') renderStatsBody(); });
     return;
   }
-  // 로딩 중
   if (statsState.loadingMonths.has(ym)) {
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
     return;
   }
-  if (statsState.selectedTab === 'all') {
-    renderStatsAll(body);
-  } else {
-    renderStatsMember(body, statsState.selectedTab);
-  }
+  if (statsState.selectedTab === 'all') renderStatsAll(body);
+  else renderStatsMember(body, statsState.selectedTab);
 }
 
 function renderStatsAll(body) {
-  // viewMonth 없으면 이번달로 초기화
   if (!statsState.viewMonth) {
     const now = new Date();
     statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
@@ -2480,7 +2229,6 @@ function renderStatsAll(body) {
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
-
   const cards = MEMBERS.map(m => {
     const ms = getMemberStatsForView(m.id);
     const sum = computeMonthSummary(ms, year, month);
@@ -2525,22 +2273,18 @@ function renderStatsAll(body) {
     </div>
     <div class="stats-grid">${cards}</div>
   `;
-  // 월 이동 버튼
   body.querySelectorAll('.stats-month-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const dir = btn.dataset.dir;
       let { year: y, month: mo } = statsState.viewMonth;
       if (dir === 'prev') {
-        mo -= 1;
-        if (mo < 1) { mo = 12; y -= 1; }
+        mo -= 1; if (mo < 1) { mo = 12; y -= 1; }
         if (y < STATS_START_YEAR || (y === STATS_START_YEAR && mo < STATS_START_MONTH)) return;
       } else {
-        mo += 1;
-        if (mo > 12) { mo = 1; y += 1; }
+        mo += 1; if (mo > 12) { mo = 1; y += 1; }
       }
       const nowD = new Date();
-      const futureCheck = new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
-      if (futureCheck) return;
+      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime()) return;
       statsState.viewMonth = { year: y, month: mo };
       renderStatsBody();
     });
@@ -2566,8 +2310,7 @@ function renderStatsMember(body, memberId) {
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
-
-  let html = `
+  body.innerHTML = `
     <div class="stats-detail-header">
       <div class="stats-detail-month">
         <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
@@ -2602,24 +2345,18 @@ function renderStatsMember(body, memberId) {
       <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum)}</div>
     </div>
   `;
-  body.innerHTML = html;
-
   body.querySelectorAll('.stats-month-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const dir = btn.dataset.dir;
       let { year: y, month: mo } = statsState.viewMonth;
       if (dir === 'prev') {
-        mo -= 1;
-        if (mo < 1) { mo = 12; y -= 1; }
-        // 시작월 이전 차단
+        mo -= 1; if (mo < 1) { mo = 12; y -= 1; }
         if (y < STATS_START_YEAR || (y === STATS_START_YEAR && mo < STATS_START_MONTH)) return;
       } else {
-        mo += 1;
-        if (mo > 12) { mo = 1; y += 1; }
+        mo += 1; if (mo > 12) { mo = 1; y += 1; }
       }
       const nowD = new Date();
-      const futureCheck = new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
-      if (futureCheck) return;
+      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime()) return;
       statsState.viewMonth = { year: y, month: mo };
       statsState.selectedDate = null;
       renderStatsBody();
@@ -2640,22 +2377,16 @@ function renderStatsMember(body, memberId) {
 }
 
 function renderCalendar(year, month1, sum) {
-  const sessionsByDate = sum.sessionsByDate || {};
-  const postsByDate = sum.postsByDate || {};
-  const youtubeByDate = sum.youtubeByDate || {};
-  const cafeByDate = sum.cafeByDate || {};
+  const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
   const totalDays = daysInMonth(year, month1);
   const firstDow = new Date(year, month1 - 1, 1).getDay();
   const todayKey = isoToKstDateKey(new Date().toISOString());
   const weekdays = ['일','월','화','수','목','금','토'];
   let html = `<div class="calendar"><div class="calendar-grid">`;
   weekdays.forEach((w, i) => {
-    const cls = i === 0 ? 'sun' : (i === 6 ? 'sat' : '');
-    html += `<div class="calendar-weekday ${cls}">${w}</div>`;
+    html += `<div class="calendar-weekday ${i===0?'sun':i===6?'sat':''}">${w}</div>`;
   });
-  for (let i = 0; i < firstDow; i++) {
-    html += `<div class="calendar-day outside"></div>`;
-  }
+  for (let i = 0; i < firstDow; i++) html += `<div class="calendar-day outside"></div>`;
   for (let day = 1; day <= totalDays; day++) {
     const dateKey = ymdKey(year, month1, day);
     const sessions = sessionsByDate[dateKey] || [];
@@ -2667,69 +2398,45 @@ function renderCalendar(year, month1, sum) {
     const hasYoutube = youtubes.length > 0;
     const hasCafe = cafes.length > 0;
     const hasActivity = hasBroadcast || hasPost || hasYoutube || hasCafe;
-    const isToday = dateKey === todayKey;
-    const selected = statsState.selectedDate === dateKey;
     const classes = ['calendar-day'];
     if (hasBroadcast) classes.push('has-broadcast');
     if (hasActivity) classes.push('has-activity');
-    if (isToday) classes.push('today');
-    if (selected) classes.push('selected');
-
+    if (dateKey === todayKey) classes.push('today');
+    if (statsState.selectedDate === dateKey) classes.push('selected');
     let bottomLine = '';
     if (hasBroadcast) {
       bottomLine = `<span class="calendar-daycount">${sessions.length}회</span>`;
     } else if (hasPost || hasYoutube || hasCafe) {
       const dots = [];
-      if (hasPost) dots.push('<span class="calendar-day-dot post" title="게시글"></span>');
-      if (hasYoutube) dots.push('<span class="calendar-day-dot youtube" title="유튜브"></span>');
-      if (hasCafe) dots.push('<span class="calendar-day-dot cafe" title="카페"></span>');
+      if (hasPost) dots.push('<span class="calendar-day-dot post"></span>');
+      if (hasYoutube) dots.push('<span class="calendar-day-dot youtube"></span>');
+      if (hasCafe) dots.push('<span class="calendar-day-dot cafe"></span>');
       bottomLine = `<div class="calendar-day-dots">${dots.join('')}</div>`;
     }
-
-    html += `<button class="${classes.join(' ')}" data-date="${dateKey}">
-      <span class="calendar-daynum">${day}</span>
-      ${bottomLine}
-    </button>`;
+    html += `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="calendar-daynum">${day}</span>${bottomLine}</button>`;
   }
-  const totalCells = firstDow + totalDays;
-  const trailing = (7 - (totalCells % 7)) % 7;
-  for (let i = 0; i < trailing; i++) {
-    html += `<div class="calendar-day outside"></div>`;
-  }
+  const trailing = (7 - ((firstDow + totalDays) % 7)) % 7;
+  for (let i = 0; i < trailing; i++) html += `<div class="calendar-day outside"></div>`;
   html += `</div></div>`;
   return html;
 }
 
 function renderDayDetail(year, month1, sum) {
-  const sessionsByDate = sum.sessionsByDate || {};
-  const postsByDate = sum.postsByDate || {};
-  const youtubeByDate = sum.youtubeByDate || {};
-  const cafeByDate = sum.cafeByDate || {};
+  const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
   const date = statsState.selectedDate;
-  if (!date) {
-    return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>`;
-  }
+  if (!date) return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>`;
   const sessions = sessionsByDate[date] || [];
   const posts = postsByDate[date] || [];
   const youtubes = youtubeByDate[date] || [];
   const cafes = cafeByDate[date] || [];
-
   const totalActivities = sessions.length + posts.length + youtubes.length + cafes.length;
-  if (totalActivities === 0) {
-    return `<div class="day-detail-title">${date}</div><div class="day-detail-empty">이 날은 활동 기록이 없어요</div>`;
-  }
-
-  // 헤더 (요약)
+  if (totalActivities === 0) return `<div class="day-detail-title">${date}</div><div class="day-detail-empty">이 날은 활동 기록이 없어요</div>`;
   const summaryParts = [];
   if (sessions.length > 0) summaryParts.push(`방송 ${sessions.length}회`);
   if (posts.length > 0) summaryParts.push(`게시글 ${posts.length}개`);
   if (youtubes.length > 0) summaryParts.push(`유튜브 ${youtubes.length}개`);
   if (cafes.length > 0) summaryParts.push(`카페 ${cafes.length}개`);
   let html = `<div class="day-detail-title">${date} · ${summaryParts.join(' · ')}</div>`;
-
-  // 모든 항목을 시간순 통합 정렬
-  // - 방송 세션: 시작 시각 기준 (한 덩어리로 유지)
-  // - 게시글/유튜브/카페: 작성 시각 기준
   const items = [];
   for (const s of sessions) {
     const t = new Date(s.start).getTime();
@@ -2748,7 +2455,6 @@ function renderDayDetail(year, month1, sum) {
     if (!isNaN(t)) items.push({ kind: 'cafe', time: t, data: c });
   }
   items.sort((a, b) => a.time - b.time);
-
   for (const item of items) {
     if (item.kind === 'session') {
       const s = item.data;
@@ -2762,85 +2468,31 @@ function renderDayDetail(year, month1, sum) {
       const modeBadge = `<span class="day-session-mode ${s.mode || 'normal'}">${MODE_LABEL[s.mode] || '일반 방송'}</span>`;
       let changesHtml = '';
       if (s.changes && s.changes.length > 0) {
-        const changeItems = s.changes.map(c => {
+        changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
           let icon, label, valHtml;
-          if (c.type === 'title') {
-            icon = '✎'; label = '방제';
-            valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
-          } else if (c.type === 'category') {
-            icon = SVG_ICONS.tag; label = '카테고리';
-            valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
-          } else if (c.type === 'mode_change') {
-            icon = SVG_ICONS.diamond; label = '방송 모드';
-            valHtml = `${MODE_LABEL[c.before] || c.before} → ${MODE_LABEL[c.after] || c.after}`;
-          } else {
-            icon = '•'; label = c.type;
-            valHtml = `${escapeHtml(c.before || '')} → ${escapeHtml(c.after || '')}`;
-          }
-          return `<div class="day-session-change">
-            <span class="day-session-change-time">${formatHHMM(c.time)}</span>
-            <span class="day-session-change-icon">${icon}</span>
-            <span><b>${label}</b> ${valHtml}</span>
-          </div>`;
-        }).join('');
-        changesHtml = `<div class="day-session-changes">${changeItems}</div>`;
+          if (c.type === 'title') { icon = '✎'; label = '방제'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          else if (c.type === 'mode_change') { icon = SVG_ICONS.diamond; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
+          else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
+        }).join('')}</div>`;
       }
-      html += `
-        <div class="day-session">
-          <div class="day-session-row-head">
-            <span class="day-kind-icon broadcast" title="방송">${SVG_ICONS.infinity}</span>
-            <span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span>
-          </div>
-          <div class="day-session-title">${modeBadge}${escapeHtml(s.title || '(방제 없음)')}</div>
-          ${changesHtml}
-        </div>
-      `;
+      html += `<div class="day-session"><div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.infinity}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span></div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'(방제 없음)')}</div>${changesHtml}</div>`;
     } else if (item.kind === 'post') {
       const p = item.data;
-      const timeStr = formatHHMM(p.time);
-      const titleEsc = escapeHtml(p.title || '(제목 없음)');
-      const inner = `
-        <span class="day-kind-icon post" title="숲 게시글">${SVG_ICONS.board}</span>
-        <span class="day-item-time">${timeStr}</span>
-        <span class="day-item-title">${titleEsc}</span>
-      `;
-      if (p.url) {
-        html += `<a class="day-item" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${inner}</a>`;
-      } else {
-        html += `<div class="day-item">${inner}</div>`;
-      }
+      const inner = `<span class="day-kind-icon post">${SVG_ICONS.board}</span><span class="day-item-time">${formatHHMM(p.time)}</span><span class="day-item-title">${escapeHtml(p.title||'(제목 없음)')}</span>`;
+      html += p.url ? `<a class="day-item" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
     } else if (item.kind === 'youtube') {
       const y = item.data;
-      const timeStr = formatHHMM(y.time);
-      const titleEsc = escapeHtml(y.title || '(제목 없음)');
-      const inner = `
-        <span class="day-kind-icon youtube" title="유튜브">${SVG_ICONS.youtube}</span>
-        <span class="day-item-time">${timeStr}</span>
-        <span class="day-item-title">${titleEsc}</span>
-      `;
-      if (y.url) {
-        html += `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>`;
-      } else {
-        html += `<div class="day-item">${inner}</div>`;
-      }
+      const inner = `<span class="day-kind-icon youtube">${SVG_ICONS.youtube}</span><span class="day-item-time">${formatHHMM(y.time)}</span><span class="day-item-title">${escapeHtml(y.title||'(제목 없음)')}</span>`;
+      html += y.url ? `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
     } else if (item.kind === 'cafe') {
       const c = item.data;
-      const timeStr = formatHHMM(c.time);
-      const titleEsc = escapeHtml(c.title || '(제목 없음)');
       const cafeNameEsc = escapeHtml(c.cafe_name || '');
-      const inner = `
-        <span class="day-kind-icon cafe" title="네이버 카페">${SVG_ICONS.coffee}</span>
-        <span class="day-item-time">${timeStr}</span>
-        <span class="day-item-title">${cafeNameEsc ? `[${cafeNameEsc}] ` : ''}${titleEsc}</span>
-      `;
-      if (c.url) {
-        html += `<a class="day-item" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${inner}</a>`;
-      } else {
-        html += `<div class="day-item">${inner}</div>`;
-      }
+      const inner = `<span class="day-kind-icon cafe">${SVG_ICONS.coffee}</span><span class="day-item-time">${formatHHMM(c.time)}</span><span class="day-item-title">${cafeNameEsc ? `[${cafeNameEsc}] ` : ''}${escapeHtml(c.title||'(제목 없음)')}</span>`;
+      html += c.url ? `<a class="day-item" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
     }
   }
-
   return html;
 }
 
@@ -2850,7 +2502,6 @@ async function loadEvents() {
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
     allEvents = data.events || [];
-    // 신규 이벤트 차분 → 알림 발송 (필터 적용)
     processNewEventsForNotification(allEvents);
     initFilterUI();
     applyFilter();
@@ -2863,19 +2514,12 @@ async function loadEvents() {
   }
 }
 
-// 특정 월 데이터를 불러옴. 지난 달은 localStorage 캐시 우선.
-// 이번 달은 매번 fresh fetch.
 async function loadStatsMonth(yyyymm) {
   if (!yyyymm) return;
-  // 지난 달이면 캐시 시도
   if (!isCurrentMonth(yyyymm)) {
     const cached = lsGetMonthCache(yyyymm);
-    if (cached) {
-      statsState.data[yyyymm] = cached;
-      return;
-    }
+    if (cached) { statsState.data[yyyymm] = cached; return; }
   }
-  // 동시 요청 방지
   if (statsState.loadingMonths.has(yyyymm)) return;
   statsState.loadingMonths.add(yyyymm);
   try {
@@ -2884,18 +2528,13 @@ async function loadStatsMonth(yyyymm) {
     const data = await res.json();
     const monthData = data.stats || {};
     statsState.data[yyyymm] = monthData;
-    // 지난 달이면 localStorage에 영구 캐시
-    if (!isCurrentMonth(yyyymm)) {
-      lsSetMonthCache(yyyymm, monthData);
-    }
+    if (!isCurrentMonth(yyyymm)) lsSetMonthCache(yyyymm, monthData);
   } catch (e) {
-    // 무시: 다음 시도에 다시
   } finally {
     statsState.loadingMonths.delete(yyyymm);
   }
 }
 
-// 1분마다 호출되는 자동 갱신: 이번 달만 fresh
 async function loadStats() {
   try {
     const now = new Date();
@@ -2933,7 +2572,6 @@ async function loadLive() {
     });
     document.getElementById('app').innerHTML = '';
     document.getElementById('app').appendChild(grid);
-    // 사이드바 라이브 배지 갱신
     const liveBadge = document.getElementById('navLiveBadge');
     const liveCountEl = document.getElementById('navLiveCount');
     if (liveBadge && liveCountEl) {
@@ -2941,8 +2579,6 @@ async function loadLive() {
       liveBadge.classList.toggle('on', liveCount > 0);
       liveBadge.classList.toggle('off', liveCount === 0);
     }
-    // 사이트는 매분 fetch하므로 클라이언트 측 시각 사용
-    // (worker의 updated_at은 변경 있을 때만 갱신되어 멈춰 보일 수 있음)
     lastLiveUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {
@@ -2952,97 +2588,49 @@ async function loadLive() {
   }
 }
 
-// === 관련 링크 탭 렌더링 ===
 function renderLinks() {
   const body = document.getElementById('linksBody');
   if (!body) return;
-
-  // 멤버 헤더 (12열, 한 번만)
   const memberHeader = MEMBERS.map(m => `
     <th>
       <img class="links-th-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">
       <span class="links-th-name" style="color: ${m.color}">${escapeHtml(m.name)}</span>
     </th>
   `).join('');
-
-  // 색상 매핑 (브랜드 색 또는 직관적)
   const COLORS = {
-    soop: '#60a5fa',      // 숲: 파랑
-    youtube: '#ef4444',   // 유튜브: 빨강
-    cafe: '#03C75A',      // 네이버 카페: 초록
-    namuwiki: '#27a567',  // 나무위키: 초록
-    instagram: '#E1306C', // 인스타그램: 분홍
-    x: '#ffffff',         // X: 흰색 (검정 배경)
-    discord: '#5865F2',   // 디스코드: 보라
-    fancim: '#ffffff',    // 팬심: 흰색 (검정 배경)
-    calendar: '#4285F4',  // 일정표 (구글캘린더): 파랑
-    music: '#fbbf24',     // 노래책: 노랑
-    site: '#9ca3af',      // 팬사이트: 회색
-    naverOgq: '#03C75A',  // 네이버 OGQ: 초록
-    soopOgq: '#60a5fa',   // 숲 OGQ: 파랑
+    soop:'#60a5fa', youtube:'#ef4444', cafe:'#03C75A', namuwiki:'#27a567',
+    instagram:'#E1306C', x:'#ffffff', discord:'#5865F2', fancim:'#ffffff',
+    calendar:'#4285F4', music:'#fbbf24', site:'#9ca3af',
+    naverOgq:'#03C75A', soopOgq:'#60a5fa',
   };
-  // 일부 아이콘은 검정 배경에 흰 아이콘으로 표시 (X, 팬심 브랜드 스타일)
-  const ICON_BG = {
-    x: '#000000',
-    fancim: '#000000',
-  };
-
-  // 헬퍼: 빈 셀
+  const ICON_BG = { x:'#000000', fancim:'#000000' };
   const emptyCell = `<td><div class="link-empty">-</div></td>`;
-
-  // 헬퍼: 아이콘 + 라벨 링크 셀
-  // kind에 따라 SVG와 색을 자동 적용
+  const ICON_FOR = {
+    soop: SVG_ICONS.infinity, youtube: SVG_ICONS.youtube, cafe: SVG_ICONS.coffee,
+    namuwiki: SVG_ICONS.book, instagram: SVG_ICONS.instagram, x: SVG_ICONS.x,
+    discord: SVG_ICONS.discord, fancim: SVG_ICONS.fancimF, calendar: SVG_ICONS.calendar,
+    music: SVG_ICONS.music, site: SVG_ICONS.externalLink,
+    naverOgq: SVG_ICONS.naver, soopOgq: SVG_ICONS.infinity,
+  };
   function iconLinkCell(kind, label, url) {
     if (!url) return emptyCell;
     const icon = ICON_FOR[kind] || '';
     const color = COLORS[kind] || 'var(--text)';
     const bg = ICON_BG[kind];
-    const iconStyle = bg
-      ? `color: ${color}; background: ${bg}; padding: 2px;`
-      : `color: ${color};`;
-    return `<td><a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener">
-      <span class="link-icon" style="${iconStyle}">${icon}</span>
-      <span class="link-label">${escapeHtml(label)}</span>
-    </a></td>`;
+    const iconStyle = bg ? `color: ${color}; background: ${bg}; padding: 2px;` : `color: ${color};`;
+    return `<td><a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener"><span class="link-icon" style="${iconStyle}">${icon}</span><span class="link-label">${escapeHtml(label)}</span></a></td>`;
   }
-
-  // 헬퍼: 여러 링크 적층 셀 (각 항목에 kind 지정)
-  // items: [{ kind, label, url }, ...]
   function multiIconLinkCell(items) {
     if (!items || items.length === 0) return emptyCell;
     const btns = items.map(it => {
       const icon = ICON_FOR[it.kind] || '';
       const color = COLORS[it.kind] || 'var(--text)';
       const bg = ICON_BG[it.kind];
-      const iconStyle = bg
-        ? `color: ${color}; background: ${bg}; padding: 2px;`
-        : `color: ${color};`;
-      return `<a class="link-btn" href="${escapeHtml(it.url)}" target="_blank" rel="noopener">
-        <span class="link-icon" style="${iconStyle}">${icon}</span>
-        <span class="link-label">${escapeHtml(it.label)}</span>
-      </a>`;
+      const iconStyle = bg ? `color: ${color}; background: ${bg}; padding: 2px;` : `color: ${color};`;
+      return `<a class="link-btn" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="link-icon" style="${iconStyle}">${icon}</span><span class="link-label">${escapeHtml(it.label)}</span></a>`;
     }).join('');
     return `<td><div class="links-cell">${btns}</div></td>`;
   }
-
-  // kind → SVG_ICONS 키 매핑
-  const ICON_FOR = {
-    soop: SVG_ICONS.infinity,
-    youtube: SVG_ICONS.youtube,
-    cafe: SVG_ICONS.coffee,
-    namuwiki: SVG_ICONS.book,
-    instagram: SVG_ICONS.instagram,
-    x: SVG_ICONS.x,
-    discord: SVG_ICONS.discord,
-    fancim: SVG_ICONS.fancimF,
-    calendar: SVG_ICONS.calendar,
-    music: SVG_ICONS.music,
-    site: SVG_ICONS.externalLink,
-    naverOgq: SVG_ICONS.naver,
-    soopOgq: SVG_ICONS.infinity,
-  };
-
-  // 추가 항목 라벨에 따라 kind 추정 (extra/etc 데이터에 kind 명시 안 됨)
   function inferKindFromLabel(label) {
     if (label === '인스타그램') return 'instagram';
     if (label === 'X') return 'x';
@@ -3053,75 +2641,38 @@ function renderLinks() {
     if (label === '팬사이트') return 'site';
     return 'site';
   }
-
-  // ── 행 빌더들 ──
-
-  // 방송국 (숲)
   const rowBangsong = MEMBERS.map(m => {
-    const links = MEMBER_LINKS[m.id];
-    const url = links?.common?.['방송국'];
+    const url = MEMBER_LINKS[m.id]?.common?.['방송국'];
     return iconLinkCell('soop', '방송국', typeof url === 'string' ? url : url?.url);
   }).join('');
-
-  // 유튜브 (메인 + 보조)
   const rowYoutube = MEMBERS.map(m => {
     const links = MEMBER_LINKS[m.id];
     if (!links || !links.common) return emptyCell;
     const items = [];
     const yt = links.common['유튜브'];
-    if (yt) {
-      const label = typeof yt === 'string' ? '유튜브' : (yt.label || '유튜브');
-      const url = typeof yt === 'string' ? yt : yt.url;
-      items.push({ kind: 'youtube', label, url });
-    }
+    if (yt) items.push({ kind: 'youtube', label: typeof yt === 'string' ? '유튜브' : (yt.label||'유튜브'), url: typeof yt === 'string' ? yt : yt.url });
     const yt2 = links.common['유튜브2'];
-    if (yt2) {
-      const label = typeof yt2 === 'string' ? '유튜브' : (yt2.label || '유튜브');
-      const url = typeof yt2 === 'string' ? yt2 : yt2.url;
-      items.push({ kind: 'youtube', label, url });
-    }
+    if (yt2) items.push({ kind: 'youtube', label: typeof yt2 === 'string' ? '유튜브' : (yt2.label||'유튜브'), url: typeof yt2 === 'string' ? yt2 : yt2.url });
     return multiIconLinkCell(items);
   }).join('');
-
-  // 팬카페
   const rowFancafe = MEMBERS.map(m => {
     const url = MEMBER_LINKS[m.id]?.common?.['팬카페'];
     return iconLinkCell('cafe', '팬카페', typeof url === 'string' ? url : url?.url);
   }).join('');
-
-  // 나무위키
   const rowNamu = MEMBERS.map(m => {
     const url = MEMBER_LINKS[m.id]?.common?.['나무위키'];
     return iconLinkCell('namuwiki', '나무위키', typeof url === 'string' ? url : url?.url);
   }).join('');
-
-  // 추가 링크 행들
-  const rowInsta = MEMBERS.map(m => {
-    const url = MEMBER_LINKS[m.id]?.instagram;
-    return iconLinkCell('instagram', '인스타그램', url);
-  }).join('');
-  const rowX = MEMBERS.map(m => {
-    const url = MEMBER_LINKS[m.id]?.x;
-    return iconLinkCell('x', 'X', url);
-  }).join('');
+  const rowInsta = MEMBERS.map(m => iconLinkCell('instagram', '인스타그램', MEMBER_LINKS[m.id]?.instagram)).join('');
+  const rowX = MEMBERS.map(m => iconLinkCell('x', 'X', MEMBER_LINKS[m.id]?.x)).join('');
   const rowDiscordOrFancim = MEMBERS.map(m => {
-    const items = (MEMBER_LINKS[m.id]?.discordOrFancim || []).map(it => ({
-      kind: inferKindFromLabel(it.label),
-      label: it.label,
-      url: it.url,
-    }));
+    const items = (MEMBER_LINKS[m.id]?.discordOrFancim || []).map(it => ({ kind: inferKindFromLabel(it.label), label: it.label, url: it.url }));
     return multiIconLinkCell(items);
   }).join('');
   const rowEtc = MEMBERS.map(m => {
-    const items = (MEMBER_LINKS[m.id]?.etc || []).map(it => ({
-      kind: inferKindFromLabel(it.label),
-      label: it.label,
-      url: it.url,
-    }));
+    const items = (MEMBER_LINKS[m.id]?.etc || []).map(it => ({ kind: inferKindFromLabel(it.label), label: it.label, url: it.url }));
     return multiIconLinkCell(items);
   }).join('');
-
-  // OGQ 이모티콘 행 (이름 + 플랫폼; 플랫폼에 따라 아이콘/색)
   const rowOgq = MEMBERS.map(m => {
     const ogq = MEMBER_LINKS[m.id]?.ogq || [];
     if (ogq.length === 0) return emptyCell;
@@ -3129,17 +2680,10 @@ function renderLinks() {
       const platformKind = o.platform === '네이버' ? 'naverOgq' : 'soopOgq';
       const icon = ICON_FOR[platformKind];
       const color = COLORS[platformKind];
-      return `<a class="link-btn ogq-btn" href="${escapeHtml(o.url)}" target="_blank" rel="noopener">
-        <span class="ogq-name">${escapeHtml(o.name)}</span>
-        <span class="ogq-platform">
-          <span class="link-icon" style="color: ${color}">${icon}</span>
-          ${escapeHtml(o.platform)}
-        </span>
-      </a>`;
+      return `<a class="link-btn ogq-btn" href="${escapeHtml(o.url)}" target="_blank" rel="noopener"><span class="ogq-name">${escapeHtml(o.name)}</span><span class="ogq-platform"><span class="link-icon" style="color: ${color}">${icon}</span>${escapeHtml(o.platform)}</span></a>`;
     }).join('');
     return `<td><div class="links-cell">${btns}</div></td>`;
   }).join('');
-
   body.innerHTML = `
     <div class="links-section">
       <div class="links-table-wrap">
@@ -3163,7 +2707,6 @@ function renderLinks() {
 }
 
 renderLinks();
-
 loadLive();
 loadEvents();
 loadStats();

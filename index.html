@@ -261,12 +261,15 @@
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
-@keyframes highlightPulse {
-  0%   { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(97,255,236,1), 0 0 32px rgba(97,255,236,0.7); }
-  65%  { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(97,255,236,0.8), 0 0 24px rgba(97,255,236,0.4); }
-  100% { border-color: var(--accent); box-shadow: 0 0 0 0 rgba(97,255,236,0); }
+@keyframes highlightPop {
+  0%   { transform: scale(1.22) translateY(-6px); border-color: var(--accent); box-shadow: 0 20px 48px rgba(97,255,236,0.55); }
+  100% { transform: scale(1) translateY(0); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
 }
-  .card.highlight-pulse { animation: highlightPulse 1.2s ease-out forwards; }
+.card.highlight-pulse {
+  animation: highlightPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  position: relative;
+  z-index: 10;
+}
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
 
@@ -2250,25 +2253,30 @@ function applyFilter() {
         // 해당 멤버 카드 강조
         const memberId = el.dataset.member;
 if (memberId) {
-  setTimeout(() => {
+  requestAnimationFrame(() => {
+    // 1st rAF: 모든 카드 fadeIn 즉시 완료
     document.querySelectorAll('.card').forEach(c => {
       c.style.animation = 'none';
       c.style.opacity = '1';
       c.style.pointerEvents = 'none';
     });
-    const card = document.querySelector(`.card[data-member="${memberId}"]`);
-    if (card) {
-      card.style.animation = '';
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.classList.add('highlight-pulse');
-      setTimeout(() => {
-        card.classList.remove('highlight-pulse');
-        document.querySelectorAll('.card').forEach(c => {
-          c.style.pointerEvents = '';
-        });
-      }, 2000);
-    }
-  }, 50);
+    requestAnimationFrame(() => {
+      // 2nd rAF: 페인트 후 타깃 카드에만 팝 애니메이션
+      const card = document.querySelector(`.card[data-member="${memberId}"]`);
+      if (card) {
+        card.style.animation = '';
+        card.style.opacity = '';
+        card.scrollIntoView({ behavior: 'instant', block: 'center' });
+        card.classList.add('highlight-pulse');
+        setTimeout(() => {
+          card.classList.remove('highlight-pulse');
+          document.querySelectorAll('.card').forEach(c => {
+            c.style.pointerEvents = '';
+          });
+        }, 800);
+      }
+    });
+  });
 }
       }
     });

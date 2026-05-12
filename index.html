@@ -2249,23 +2249,31 @@ function applyFilter() {
         switchPage(nav);
         // 해당 멤버 카드 강조
         const memberId = el.dataset.member;
-        if (memberId) {
-          requestAnimationFrame(() => {
-            // fadeIn 애니메이션 즉시 완료 (display 전환 후 재실행되는 것 건너뜀)
-            document.querySelectorAll('.card').forEach(c => {
-              c.style.animation = 'none';
-              c.style.opacity = '1';
-            });
-            const card = document.querySelector(`.card[data-member="${memberId}"]`);
-            if (card) {
-              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              setTimeout(() => {
-                card.classList.add('highlight-pulse');
-                setTimeout(() => card.classList.remove('highlight-pulse'), 1200);
-              }, 150);
-            }
-          });
-        }
+if (memberId) {
+  setTimeout(() => {
+    // 타깃 외 카드: fadeIn 건너뜀 + 호버 비활성화
+    document.querySelectorAll('.card').forEach(c => {
+      c.style.animation = 'none';
+      c.style.opacity = '1';
+      c.style.pointerEvents = 'none'; // 마우스 hover 차단
+    });
+
+    const card = document.querySelector(`.card[data-member="${memberId}"]`);
+    if (card) {
+      // 타깃 카드: 인라인 animation 제거해야 클래스 애니메이션이 작동
+      card.style.animation = '';
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight-pulse');
+
+      setTimeout(() => {
+        card.classList.remove('highlight-pulse');
+        document.querySelectorAll('.card').forEach(c => {
+          c.style.pointerEvents = '';
+        });
+      }, 1400);
+    }
+  }, 50); // rAF 대신 50ms: 탭 전환 후 DOM 페인트 보장
+}
       }
     });
     tl.dataset.clickInit = '1';

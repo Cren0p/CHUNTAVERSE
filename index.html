@@ -2251,11 +2251,18 @@ function applyFilter() {
         const memberId = el.dataset.member;
         if (memberId) {
           requestAnimationFrame(() => {
+            // fadeIn 애니메이션 즉시 완료 (display 전환 후 재실행되는 것 건너뜀)
+            document.querySelectorAll('.card').forEach(c => {
+              c.style.animation = 'none';
+              c.style.opacity = '1';
+            });
             const card = document.querySelector(`.card[data-member="${memberId}"]`);
             if (card) {
-              card.classList.add('highlight-pulse');
-              card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              setTimeout(() => card.classList.remove('highlight-pulse'), 1200);
+              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => {
+                card.classList.add('highlight-pulse');
+                setTimeout(() => card.classList.remove('highlight-pulse'), 1200);
+              }, 150);
             }
           });
         }

@@ -261,6 +261,12 @@
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
+  @keyframes highlightPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(97,255,236,0.7); border-color: var(--accent); }
+    50%  { box-shadow: 0 0 0 8px rgba(97,255,236,0.25); border-color: var(--accent2); }
+    100% { box-shadow: 0 0 0 0 rgba(97,255,236,0); border-color: var(--accent); }
+  }
+  .card.highlight-pulse { animation: highlightPulse 1.2s ease-out forwards; }
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
 
@@ -604,7 +610,9 @@
     display: flex; justify-content: space-between;
     align-items: baseline; font-size: 13px;
   }
-  .stats-card-label { color: var(--muted); font-weight: 600; }
+  .stats-card-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .stats-row-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
+  .stats-row-icon svg { width: 11px; height: 11px; display: block; }
   .stats-card-value { color: var(--text); font-weight: 700; }
   .stats-card-value.accent { color: var(--accent); }
 
@@ -1404,7 +1412,7 @@ function findMember(id) { return MEMBERS.find(m => m.id === id); }
 // currentColor를 사용해 CSS color로 색상 제어
 const SVG_ICONS = {
   // 무한대 (방송 시작/종료 공용)
-  infinity: `<svg viewBox="1 7 22 10" width="24" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12 C12 9.79 14.24 8 17 8 C19.76 8 22 9.79 22 12 C22 14.21 19.76 16 17 16 C14.24 16 12 14.21 12 12 C12 14.21 9.76 16 7 16 C4.24 16 2 14.21 2 12 C2 9.79 4.24 8 7 8 C9.76 8 12 9.79 12 12 Z"/></svg>`,
+  infinity: `<svg viewBox="2 6 20 12" width="24" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9 A5 5 0 1 0 12 15"/><path d="M12 15 A5 5 0 1 0 12 9"/></svg>`,
   // 게시판 (3줄 박스, 숲 게시글)
   board: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>`,
   // 따봉 (댓글 추천)
@@ -1966,6 +1974,7 @@ function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
   card.className = 'card ' + (info.live ? 'live' : 'offline');
+  card.dataset.member = info.id;
   card.style.animationDelay = delay + 'ms';
   if (info.live) {
     card.href = 'https://play.sooplive.co.kr/' + info.id;
@@ -2088,9 +2097,10 @@ function renderEvent(e) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
-  // start 이벤트: 사이트 내 생방송 탭으로 이동 (외부 링크 아님)
-  if (e.type === 'start') {
-    return `<div class="event clickable-internal" data-time="${eventTime}" data-nav="live">${inner}</div>`;
+  // start, title, category, mode_change: 생방송 탭으로 이동 + 멤버 강조
+  const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
+  if (LIVE_NAV_TYPES.has(e.type)) {
+    return `<div class="event clickable-internal" data-time="${eventTime}" data-nav="live" data-member="${e.member_id || ''}">${inner}</div>`;
   }
   if (e.url) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
@@ -2237,6 +2247,18 @@ function applyFilter() {
       if (nav) {
         history.replaceState(null, '', '#' + nav);
         switchPage(nav);
+        // 해당 멤버 카드 강조
+        const memberId = el.dataset.member;
+        if (memberId) {
+          requestAnimationFrame(() => {
+            const card = document.querySelector(`.card[data-member="${memberId}"]`);
+            if (card) {
+              card.classList.add('highlight-pulse');
+              card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              setTimeout(() => card.classList.remove('highlight-pulse'), 1200);
+            }
+          });
+        }
       }
     });
     tl.dataset.clickInit = '1';
@@ -2451,23 +2473,23 @@ function renderStatsAll(body) {
         </div>
         <div class="stats-card-rows">
           <div class="stats-card-row">
-            <span class="stats-card-label">방송 일수</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 일수</span>
             <span class="stats-card-value accent">${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label">방송 시간</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>
             <span class="stats-card-value">${formatDuration(sum.totalDurationMs)}</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label">숲 게시글</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
             <span class="stats-card-value">${sum.postCount}개</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label">유튜브 업로드</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
             <span class="stats-card-value">${sum.youtubeCount}개</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label">카페 게시글</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
             <span class="stats-card-value">${sum.cafeCount}개</span>
           </div>
         </div>

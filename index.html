@@ -257,27 +257,11 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* 이벤트 탭에서 생방송 탭으로 이동 시 fadeIn 차단 */
-  #page-live.skip-animation .card {
-    animation: none !important;
-    opacity: 1 !important;
-  }
 
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
   .card.live { border-color: var(--accent); }
   .card.live:hover { border-color: var(--accent2); box-shadow: 0 8px 24px rgba(97,255,236,0.18); }
 
-  @keyframes highlightPop {
-    0%   { transform: scale(1.18) translateY(-8px); box-shadow: 0 24px 56px rgba(97,255,236,0.6); border-color: var(--accent); z-index: 20; }
-    70%  { transform: scale(1.04) translateY(-2px); box-shadow: 0 12px 32px rgba(97,255,236,0.3); border-color: var(--accent); }
-    100% { transform: scale(1) translateY(0); box-shadow: 0 8px 24px rgba(97,255,236,0.18); border-color: var(--accent); }
-  }
-  .card.highlight-pulse {
-    animation: highlightPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-    opacity: 1 !important;
-    position: relative;
-    z-index: 10;
-  }
 
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
@@ -495,8 +479,6 @@
   .event-icon.cafe_post { background: rgba(3,199,90,0.15); color: #03C75A; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
-  .event.clickable-internal { cursor: pointer; }
-  .event.clickable-internal:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
@@ -1924,7 +1906,8 @@ function renderEvent(e) {
   `;
   const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
   if (LIVE_NAV_TYPES.has(e.type)) {
-    return `<div class="event clickable-internal" data-time="${eventTime}" data-nav="live" data-member="${e.member_id || ''}">${inner}</div>`;
+    const liveUrl = `https://play.sooplive.co.kr/${e.member_id}`;
+    return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
   if (e.url) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
@@ -2040,40 +2023,7 @@ function applyFilter() {
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
 
-  if (!tl.dataset.clickInit) {
-    tl.addEventListener('click', (ev) => {
-      const el = ev.target.closest('.event.clickable-internal');
-      if (!el) return;
-      const nav = el.dataset.nav;
-      if (!nav) return;
-      const memberId = el.dataset.member;
-      const livePage = document.getElementById('page-live');
-
-      // ★ 핵심: switchPage 호출 전에 먼저 skip-animation 클래스를 붙여서
-      //    페이지가 보이는 순간 카드가 이미 완성 상태(opacity:1)로 렌더링되게 함
-      if (livePage) livePage.classList.add('skip-animation');
-
-      history.replaceState(null, '', '#' + nav);
-      switchPage(nav);
-
-      if (memberId) {
-        const card = document.querySelector(`.card[data-member="${memberId}"]`);
-        if (card) {
-          card.scrollIntoView({ behavior: 'instant', block: 'center' });
-          card.classList.add('highlight-pulse');
-          setTimeout(() => {
-            card.classList.remove('highlight-pulse');
-            if (livePage) livePage.classList.remove('skip-animation');
-          }, 900);
-        } else {
-          if (livePage) livePage.classList.remove('skip-animation');
-        }
-      } else {
-        if (livePage) livePage.classList.remove('skip-animation');
-      }
-    });
-    tl.dataset.clickInit = '1';
-  }
+  tl.dataset.clickInit = '1';
   refreshUnreadIndicator();
 }
 

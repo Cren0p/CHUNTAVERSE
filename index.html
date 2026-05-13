@@ -790,6 +790,11 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     padding: 10px 12px; margin-bottom: 8px;
+    display: block; text-decoration: none; color: inherit;
+    cursor: pointer;
+  }
+  .day-session:hover {
+    border-color: var(--accent);
   }
   .day-session-time {
     font-size: 12px; color: var(--time);
@@ -2292,7 +2297,7 @@ function renderStatsMember(body, memberId) {
     </div>
     <div class="stats-detail-body">
       ${renderCalendar(year, month, sum)}
-      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum)}</div>
+      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
     </div>
   `;
   body.querySelectorAll('.stats-month-btn').forEach(btn => {
@@ -2321,7 +2326,7 @@ function renderStatsMember(body, memberId) {
         d.classList.toggle('selected', d.dataset.date === statsState.selectedDate);
       });
       const dd = document.getElementById('dayDetail');
-      if (dd) dd.innerHTML = renderDayDetail(year, month, sum);
+      if (dd) dd.innerHTML = renderDayDetail(year, month, sum, memberId);
     });
   });
 }
@@ -2371,7 +2376,7 @@ function renderCalendar(year, month1, sum) {
   return html;
 }
 
-function renderDayDetail(year, month1, sum) {
+function renderDayDetail(year, month1, sum, memberId) {
   const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
   const date = statsState.selectedDate;
   if (!date) return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>`;
@@ -2427,7 +2432,13 @@ function renderDayDetail(year, month1, sum) {
           return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
         }).join('')}</div>`;
       }
-      html += `<div class="day-session"><div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.infinity}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span></div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'(방제 없음)')}</div>${changesHtml}</div>`;
+      const sessionUrl = s.end
+        ? `https://www.sooplive.com/station/${memberId}/vod`
+        : `https://play.sooplive.co.kr/${memberId}`;
+      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.infinity}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span></div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'(방제 없음)')}</div>${changesHtml}`;
+      html += memberId
+        ? `<a class="day-session" href="${escapeHtml(sessionUrl)}" target="_blank" rel="noopener">${sessionInner}</a>`
+        : `<div class="day-session">${sessionInner}</div>`;
     } else if (item.kind === 'post') {
       const p = item.data;
       const inner = `<span class="day-kind-icon post">${SVG_ICONS.board}</span><span class="day-item-time">${formatHHMM(p.time)}</span><span class="day-item-title">${escapeHtml(p.title||'(제목 없음)')}</span>`;
@@ -2448,7 +2459,7 @@ function renderDayDetail(year, month1, sum) {
 
 async function loadEvents() {
   try {
-    const res = await fetch(WORKER_URL + '/events');
+    const res = await fetch(WORKER_URL + '/events?t=' + Date.now());
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
     allEvents = data.events || [];
@@ -2473,7 +2484,7 @@ async function loadStatsMonth(yyyymm) {
   if (statsState.loadingMonths.has(yyyymm)) return;
   statsState.loadingMonths.add(yyyymm);
   try {
-    const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}`);
+    const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}&t=${Date.now()}`);
     if (!res.ok) throw new Error('stats fetch failed');
     const data = await res.json();
     const monthData = data.stats || {};
@@ -2503,7 +2514,7 @@ async function loadStats() {
 
 async function loadLive() {
   try {
-    const res = await fetch(WORKER_URL + '/');
+    const res = await fetch(WORKER_URL + '/?t=' + Date.now());
     const data = await res.json();
     const infoMap = {};
     data.members.forEach(m => { infoMap[m.id] = m; });

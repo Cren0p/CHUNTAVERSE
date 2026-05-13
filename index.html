@@ -2448,7 +2448,7 @@ function renderDayDetail(year, month1, sum) {
 
 async function loadEvents() {
   try {
-    const res = await fetch(WORKER_URL + '/events?t=' + Date.now());
+    const res = await fetch(WORKER_URL + '/events');
     if (!res.ok) throw new Error('no events');
     const data = await res.json();
     allEvents = data.events || [];
@@ -2473,7 +2473,7 @@ async function loadStatsMonth(yyyymm) {
   if (statsState.loadingMonths.has(yyyymm)) return;
   statsState.loadingMonths.add(yyyymm);
   try {
-    const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}&t=${Date.now()}`);
+    const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}`);
     if (!res.ok) throw new Error('stats fetch failed');
     const data = await res.json();
     const monthData = data.stats || {};
@@ -2503,7 +2503,7 @@ async function loadStats() {
 
 async function loadLive() {
   try {
-    const res = await fetch(WORKER_URL + '/?t=' + Date.now());
+    const res = await fetch(WORKER_URL + '/');
     const data = await res.json();
     const infoMap = {};
     data.members.forEach(m => { infoMap[m.id] = m; });

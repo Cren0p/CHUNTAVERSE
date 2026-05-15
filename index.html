@@ -1136,7 +1136,7 @@ const MEMBER_LINKS = {
     instagram: 'https://www.instagram.com/chunyang_94/',
     x: 'https://x.com/chunyangkr',
     discordOrFancim: [{ label: '디스코드', url: 'https://discord.com/invite/rH2j9sh' }],
-    etc: [],
+    etc: [{ label: '캘린더', url: 'https://docs.google.com/spreadsheets/d/18_LACDzXtEHQrOPrXiYVUThbTfzmyx7gLj1SGSuN8Hw/edit?usp=drivesdk' }],
     ogq: [
       { name: '처니티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61de7e80d0979' },
       { name: '처니티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/61de7e80d0979' },
@@ -1606,18 +1606,9 @@ function processNewEventsForNotification(events) {
 
 function refreshUnreadIndicator() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
-  const _typeToCat = (et) => {
-    if (et === 'post' || et === 'comment_recommend') return 'post';
-    if (et === 'youtube') return 'youtube';
-    if (et === 'cafe_post') return 'cafe';
-    return 'soop';
-  };
   const unread = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
-    if (isNaN(t) || t <= lastSeen) return false;
-    if (!filterState.members.has(e.member_id)) return false;
-    if (!filterState.types.has(_typeToCat(e.type))) return false;
-    return true;
+    return !isNaN(t) && t > lastSeen;
   });
   const count = unread.length;
   updateTabTitle();
@@ -2596,6 +2587,7 @@ function renderLinks() {
     if (label === '디스코드') return 'discord';
     if (label === '팬심') return 'fancim';
     if (label === '일정표') return 'calendar';
+    if (label === '캘린더') return 'calendar';
     if (label === '노래책') return 'music';
     if (label === '팬사이트') return 'site';
     return 'site';

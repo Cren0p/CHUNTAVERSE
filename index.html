@@ -2075,7 +2075,8 @@ function applyFilter() {
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
       : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
   } else {
-    tl.innerHTML = filtered.map(renderEvent).join('');
+    const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
+    tl.innerHTML = sorted.map(renderEvent).join('');
   }
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';

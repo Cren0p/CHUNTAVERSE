@@ -423,9 +423,9 @@
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
   .filter-type .filter-icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .filter-type[data-type="soop"] .filter-icon { color: var(--filter-soop); }
+  .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
-  .filter-type[data-type="post"] .filter-icon { color: var(--filter-post); }
+  .filter-type[data-type="post"] .filter-icon { color: var(--ev-post); }
   .filter-type[data-type="youtube"] .filter-icon { color: var(--ev-youtube); }
   .filter-type[data-type="cafe"] .filter-icon { color: #03C75A; }
 
@@ -481,9 +481,6 @@
   .event-icon.chat { background: rgba(167,139,250,0.15); color: #a78bfa; }
   .event-icon.chat_emoticon { background: rgba(167,139,250,0.15); color: #a78bfa; }
   .event-icon.donation { background: rgba(167,139,250,0.15); color: #a78bfa; }
-  .event-icon.subscribe { background: rgba(167,139,250,0.15); color: #a78bfa; }
-  .event-icon.chat_enter { background: rgba(167,139,250,0.15); color: #a78bfa; }
-  .event-icon.chat_exit { background: rgba(167,139,250,0.15); color: #a78bfa; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
@@ -1362,7 +1359,10 @@ const SVG_ICONS = {
   clock: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`,
   chart: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="14" width="3" height="6"/></svg>`,
   tag: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>`,
-  diamond: `<svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" stroke="none"><path d="M12 2L22 12L12 22L2 12z"/></svg>`,
+  pencil: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
+  rotate: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>`,
+  chatBubble: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  starBalloon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/><polygon points="12,5 13.5,8.5 17,8.8 14.5,11.2 15.3,14.7 12,12.8 8.7,14.7 9.5,11.2 7,8.8 10.5,8.5" fill="currentColor" stroke="none"/></svg>`,
   link: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
   youtube: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>`,
   book: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5a2.5 2.5 0 0 0 0 5H20"/><path d="M4 4.5v15A2.5 2.5 0 0 0 6.5 22"/></svg>`,
@@ -1540,7 +1540,7 @@ function updateTabTitle() {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
     if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'subscribe' || et === 'chat_enter' || et === 'chat_exit') return 'chat';
+    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
     return 'soop';
   };
   const unreadCount = allEvents.filter(e => {
@@ -1609,7 +1609,7 @@ function processNewEventsForNotification(events) {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
     if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'subscribe' || et === 'chat_enter' || et === 'chat_exit') return 'chat';
+    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
     return 'soop';
   };
   const eventKey = (e) => `${e.type}|${e.member_id}|${e.time}|${e.url || ''}|${e.after || ''}`;
@@ -1645,7 +1645,7 @@ function refreshUnreadIndicator() {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
     if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'subscribe' || et === 'chat_enter' || et === 'chat_exit') return 'chat';
+    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
     return 'soop';
   };
   const unread = allEvents.filter(e => {
@@ -1896,21 +1896,19 @@ function buildCard(m, info, delay) {
 function renderEvent(e) {
   const iconMap = {
     start: SVG_ICONS.infinity, end: SVG_ICONS.infinity,
-    title: '✎', category: SVG_ICONS.tag, mode_change: SVG_ICONS.diamond,
+    title: SVG_ICONS.pencil, category: SVG_ICONS.tag, mode_change: SVG_ICONS.rotate,
     post: SVG_ICONS.board, comment_recommend: SVG_ICONS.thumbsup,
     youtube: SVG_ICONS.youtube, cafe_post: SVG_ICONS.coffee,
-    chat: SVG_ICONS.broadcast, chat_emoticon: SVG_ICONS.broadcast,
-    donation: SVG_ICONS.broadcast, subscribe: SVG_ICONS.broadcast,
-    chat_enter: SVG_ICONS.broadcast, chat_exit: SVG_ICONS.broadcast,
+    chat: SVG_ICONS.chatBubble, chat_emoticon: SVG_ICONS.chatBubble,
+    donation: SVG_ICONS.starBalloon,
   };
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
     title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
     post: '숲 게시글', comment_recommend: '댓글 추천',
     youtube: '유튜브 업로드', cafe_post: '카페 게시글',
-    chat: '채팅', chat_emoticon: '이모티콘 채팅',
-    donation: '별풍선 후원', subscribe: '구독',
-    chat_enter: '방송 입장', chat_exit: '방송 퇴장',
+    chat: '채팅', chat_emoticon: '채팅',
+    donation: '후원',
   };
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
@@ -1927,7 +1925,7 @@ function renderEvent(e) {
   if (e.type === 'cafe_post' && e.cafe_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.cafe_name)})</span>`;
   }
-  if (['chat', 'chat_emoticon', 'donation', 'subscribe', 'chat_enter', 'chat_exit'].includes(e.type) && e.channel_name) {
+  if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.channel_name)} 방송)</span>`;
   }
   let detail = '';
@@ -1941,10 +1939,10 @@ function renderEvent(e) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   } else if (e.type === 'chat' && e.message) {
     detail = `<div class="event-detail">${escapeHtml(e.message)}</div>`;
+  } else if (e.type === 'chat_emoticon') {
+    detail = `<div class="event-detail">(이모티콘)</div>`;
   } else if (e.type === 'donation' && e.amount) {
     detail = `<div class="event-detail">별풍선 ${e.amount}개</div>`;
-  } else if (e.type === 'subscribe' && e.months) {
-    detail = `<div class="event-detail">${e.months}개월째 구독</div>`;
   }
   if (e.type === 'end' && !e.url && e.member_id) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
@@ -2019,7 +2017,7 @@ function initFilterUI() {
   if (tc && !tc.dataset.inited) {
     const filterIconMap = {
       soop: SVG_ICONS.infinity,
-      chat: SVG_ICONS.broadcast,
+      chat: SVG_ICONS.chatBubble,
       post: SVG_ICONS.board,
       youtube: SVG_ICONS.youtube,
       cafe: SVG_ICONS.coffee,
@@ -2078,7 +2076,7 @@ function applyFilter() {
     if (et === 'post' || et === 'comment_recommend') return 'post';
     if (et === 'youtube') return 'youtube';
     if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'subscribe' || et === 'chat_enter' || et === 'chat_exit') return 'chat';
+    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
     return 'soop';
   };
   const filtered = allEvents.filter(e => {
@@ -2499,7 +2497,7 @@ function renderDayDetail(year, month1, sum, memberId) {
           let icon, label, valHtml;
           if (c.type === 'title') { icon = '✎'; label = '방제'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
-          else if (c.type === 'mode_change') { icon = SVG_ICONS.diamond; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
+          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
           else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
         }).join('')}</div>`;

@@ -1554,6 +1554,12 @@ function updateTabTitle() {
     return memberMatch;
   }).length;
   const base = unreadCount > 0 ? `${BASE_TITLE} (${unreadCount})` : BASE_TITLE;
+  if (unreadCount === 0 && titleFlashTimer) {
+    clearInterval(titleFlashTimer);
+    titleFlashTimer = null;
+    titleFlashOn = false;
+    pendingFlashCount = 0;
+  }
   document.title = (titleFlashTimer && titleFlashOn && pendingFlashCount > 0)
     ? `${base} NEW ◆` : base;
 }

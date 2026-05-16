@@ -1536,9 +1536,22 @@ function stopTitleFlash() {
 }
 function updateTabTitle() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
+  const _typeToCat = (et) => {
+    if (et === 'post' || et === 'comment_recommend') return 'post';
+    if (et === 'youtube') return 'youtube';
+    if (et === 'cafe_post') return 'cafe';
+    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'subscribe' || et === 'chat_enter' || et === 'chat_exit') return 'chat';
+    return 'soop';
+  };
   const unreadCount = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
-    return !isNaN(t) && t > lastSeen;
+    if (isNaN(t) || t <= lastSeen) return false;
+    const cat = _typeToCat(e.type);
+    if (!filterState.types.has(cat)) return false;
+    const memberMatch = filterState.members.has(e.member_id);
+    const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
+    if (cat === 'chat') return memberMatch || channelMatch;
+    return memberMatch;
   }).length;
   const base = unreadCount > 0 ? `${BASE_TITLE} (${unreadCount})` : BASE_TITLE;
   document.title = (titleFlashTimer && titleFlashOn && pendingFlashCount > 0)

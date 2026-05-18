@@ -407,6 +407,7 @@
     transition: opacity 0.15s;
   }
   .filter-member:not(.on) img { opacity: 0.25; filter: grayscale(1); }
+  .filter-member:not(.on) { border-color: transparent; }
   .filter-member.on { border-color: var(--accent); }
   .filter-member:hover { border-color: var(--accent); }
 
@@ -422,8 +423,8 @@
   }
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
-  .filter-type:not(.on) { opacity: 0.35; filter: grayscale(1); }
-  .filter-type:not(.on):hover { opacity: 0.6; filter: grayscale(0.5); }
+  .filter-type:not(.on) { opacity: 0.35; }
+  .filter-type:not(.on):hover { opacity: 0.6; }
   .filter-type .filter-icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
@@ -1904,11 +1905,13 @@ function buildCard(m, info, delay) {
 }
 
 function getBroadcastElapsed(e, allEvents) {
-  const targets = ['title', 'category', 'mode_change', 'end'];
+  const targets = ['title', 'category', 'mode_change', 'end', 'chat', 'chat_emoticon', 'donation'];
   if (!targets.includes(e.type)) return '';
   const evTime = new Date(e.time).getTime();
+  const isChat = ['chat', 'chat_emoticon', 'donation'].includes(e.type);
+  const targetMemberId = isChat ? e.channel_id : e.member_id;
   const startEv = allEvents.find(ev =>
-    ev.type === 'start' && ev.member_id === e.member_id && new Date(ev.time).getTime() <= evTime
+    ev.type === 'start' && ev.member_id === targetMemberId && new Date(ev.time).getTime() <= evTime
   );
   if (!startEv) return '';
   const diff = Math.floor((evTime - new Date(startEv.time).getTime()) / 1000);

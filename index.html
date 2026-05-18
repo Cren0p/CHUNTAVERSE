@@ -422,7 +422,8 @@
   }
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
-  .filter-type:active { opacity: 0.6; }
+  .filter-type:not(.on) { opacity: 0.35; filter: grayscale(1); }
+  .filter-type:not(.on):hover { opacity: 0.6; filter: grayscale(0.5); }
   .filter-type .filter-icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }

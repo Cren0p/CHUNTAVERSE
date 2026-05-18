@@ -1933,7 +1933,9 @@ function renderEvent(e) {
     targetTag = `<span class="event-target">(${escapeHtml(e.cafe_name)})</span>`;
   }
   if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_name) {
-    targetTag = `<span class="event-target">(${escapeHtml(e.channel_name)} 방송)</span>`;
+    const channelMember = MEMBERS.find(m => m.id === e.channel_id);
+    const channelColor = channelMember ? channelMember.color : '#cbd5e1';
+    targetTag = `<span class="event-target">(<span style="color: ${channelColor}">${escapeHtml(e.channel_name)}</span> 방송)</span>`;
   }
   let detail = '';
   if (e.type === 'start' && e.title) {

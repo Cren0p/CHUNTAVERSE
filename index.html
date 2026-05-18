@@ -1583,7 +1583,7 @@ function sendBrowserNotification(ev) {
     case 'category':   body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
     case 'mode_change':body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
     case 'post':       body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
-    case 'comment_recommend': body = `${memberName} 댓글 추천 — ${ev.target_name || ''} 컨텐츠`; break;
+    case 'comment_recommend': body = `${memberName} 좋아요 요청 — ${ev.target_name || ''} 컨텐츠`; break;
     case 'youtube':    body = `${memberName} 유튜브 업로드 — ${ev.title || ''}`; break;
     case 'cafe_post':  body = `${memberName} 카페 게시글 [${ev.cafe_name || ''}] — ${ev.title || ''}`; break;
     case 'chat':       body = `${memberName} 채팅 (${ev.channel_name || ''}) — ${ev.message || ''}`; break;
@@ -1912,7 +1912,7 @@ function renderEvent(e) {
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
     title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
-    post: '숲 게시글', comment_recommend: '댓글 추천',
+    post: '숲 게시글', comment_recommend: '좋아요 요청',
     youtube: '유튜브 업로드', cafe_post: '카페 게시글',
     chat: '채팅', chat_emoticon: '채팅',
     donation: '후원',
@@ -2041,14 +2041,17 @@ function initFilterUI() {
       const iconEl = btn.querySelector('.filter-icon');
       if (iconEl && filterIconMap[type]) iconEl.innerHTML = filterIconMap[type];
       btn.classList.toggle('on', filterState.types.has(type));
-      btn.addEventListener('click', () => {
+      const toggleFilter = (e) => {
+        e.preventDefault();
         if (filterState.types.has(type)) filterState.types.delete(type);
         else filterState.types.add(type);
         btn.classList.toggle('on', filterState.types.has(type));
         lsSetSet(LS_FILTER_TYPES, filterState.types);
         updateTypeAllToggle();
         applyFilter();
-      });
+      };
+      btn.addEventListener('touchstart', toggleFilter, { passive: false });
+      btn.addEventListener('click', (e) => { if (e.detail !== 0) return; toggleFilter(e); });
     });
     tc.dataset.inited = '1';
   }
@@ -2518,7 +2521,7 @@ function renderDayDetail(year, month1, sum, memberId) {
       const sessionUrl = s.end
         ? `https://www.sooplive.com/station/${memberId}/vod`
         : `https://play.sooplive.co.kr/${memberId}`;
-      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.infinity}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span></div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'(방제 없음)')}</div>${changesHtml}`;
+      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.infinity}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span></div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${changesHtml}`;
       html += memberId
         ? `<a class="day-session" href="${escapeHtml(sessionUrl)}" target="_blank" rel="noopener">${sessionInner}</a>`
         : `<div class="day-session">${sessionInner}</div>`;

@@ -1977,6 +1977,10 @@ function renderEvent(e) {
     const liveUrl = `https://play.sooplive.co.kr/${e.member_id}`;
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
+  if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_id) {
+    const liveUrl = `https://play.sooplive.co.kr/${e.channel_id}`;
+    return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
+  }
   if (e.url) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }

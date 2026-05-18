@@ -422,6 +422,7 @@
   }
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
+  .filter-type:active { opacity: 0.6; }
   .filter-type .filter-icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
@@ -2041,17 +2042,14 @@ function initFilterUI() {
       const iconEl = btn.querySelector('.filter-icon');
       if (iconEl && filterIconMap[type]) iconEl.innerHTML = filterIconMap[type];
       btn.classList.toggle('on', filterState.types.has(type));
-      const toggleFilter = (e) => {
-        e.preventDefault();
+      btn.addEventListener('click', () => {
         if (filterState.types.has(type)) filterState.types.delete(type);
         else filterState.types.add(type);
         btn.classList.toggle('on', filterState.types.has(type));
         lsSetSet(LS_FILTER_TYPES, filterState.types);
         updateTypeAllToggle();
         applyFilter();
-      };
-      btn.addEventListener('touchstart', toggleFilter, { passive: false });
-      btn.addEventListener('click', (e) => { if (e.detail !== 0) return; toggleFilter(e); });
+      });
     });
     tc.dataset.inited = '1';
   }

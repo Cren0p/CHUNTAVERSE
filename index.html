@@ -488,6 +488,7 @@
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
   .event-body { flex: 1; min-width: 0; font-size: 14px; }
   .event-member { font-weight: 700; margin-right: 6px; }
+  .event-elapsed { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   .event-action { color: var(--muted); }
   .event-target { color: #cbd5e1; margin-left: 4px; }
   .event-mode-tag {
@@ -1581,7 +1582,7 @@ function sendBrowserNotification(ev) {
   switch (ev.type) {
     case 'start':      body = `${memberName} 방송 시작${ev.title ? ' — ' + ev.title : ''}`; break;
     case 'end':        body = `${memberName} 방송 종료`; break;
-    case 'title':      body = `${memberName} 방제 변경 — ${ev.after || ''}`; break;
+    case 'title':      body = `${memberName} 방송 제목 변경 — ${ev.after || ''}`; break;
     case 'category':   body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
     case 'mode_change':body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
     case 'post':       body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
@@ -1902,7 +1903,22 @@ function buildCard(m, info, delay) {
   return card;
 }
 
-function renderEvent(e) {
+function getBroadcastElapsed(e, allEvents) {
+  const targets = ['title', 'category', 'mode_change', 'end'];
+  if (!targets.includes(e.type)) return '';
+  const evTime = new Date(e.time).getTime();
+  const startEv = allEvents.find(ev =>
+    ev.type === 'start' && ev.member_id === e.member_id && new Date(ev.time).getTime() <= evTime
+  );
+  if (!startEv) return '';
+  const diff = Math.floor((evTime - new Date(startEv.time).getTime()) / 1000);
+  if (diff < 60) return `${diff}초`;
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  return h > 0 ? `${h}시간 ${m}분` : `${m}분`;
+}
+
+function renderEvent(e, allEvents) {
   const iconMap = {
     start: SVG_ICONS.infinity, end: SVG_ICONS.infinity,
     title: SVG_ICONS.pencil, category: SVG_ICONS.tag, mode_change: SVG_ICONS.rotate,
@@ -1913,7 +1929,7 @@ function renderEvent(e) {
   };
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
-    title: '방제 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
+    title: '방송 제목 변경', category: '카테고리 변경', mode_change: '방송 모드 변경',
     post: '숲 게시글', comment_recommend: '좋아요 요청',
     youtube: '유튜브 업로드', cafe_post: '카페 게시글',
     chat: '채팅', chat_emoticon: '채팅',
@@ -1966,7 +1982,7 @@ function renderEvent(e) {
     <div class="event-body">
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
-        <span class="event-action">${actionMap[e.type] || e.type}</span>
+        <span class="event-action">${actionMap[e.type] || e.type}${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
         ${targetTag}${modeTag}
       </div>
       ${detail}
@@ -2108,7 +2124,7 @@ function applyFilter() {
       : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
   } else {
     const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
-    tl.innerHTML = sorted.map(renderEvent).join('');
+    tl.innerHTML = sorted.map(e => renderEvent(e, sorted)).join('');
   }
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
@@ -2510,7 +2526,7 @@ function renderDayDetail(year, month1, sum, memberId) {
       if (s.changes && s.changes.length > 0) {
         changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
           let icon, label, valHtml;
-          if (c.type === 'title') { icon = '✎'; label = '방제'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          if (c.type === 'title') { icon = '✎'; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
           else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }

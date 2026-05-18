@@ -26,9 +26,9 @@
     --ev-post: #34d399;
     --ev-youtube: #ef4444;
     --ev-unread: #61FFEC;
-    --mode-adult: #ec4899;
+    --mode-adult: #f87171;
     --mode-subscription: #f59e0b;
-    --mode-copyright: #94a3b8;
+    --mode-copyright: #cbd5e1;
     --filter-soop: #0388FF;
     --filter-post: #2EF5E1;
     --sidebar-w: 200px;
@@ -290,13 +290,14 @@
   }
   .badge-mode {
     position: absolute; top: 10px; right: 10px;
-    color: white; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px; padding: 4px 10px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; padding: 3px 8px;
+    background: transparent; border: 1.5px solid currentColor;
   }
-  .badge-mode.adult { background: var(--mode-adult); box-shadow: 0 2px 8px rgba(236,72,153,0.45); }
-  .badge-mode.subscription { background: var(--mode-subscription); box-shadow: 0 2px 8px rgba(245,158,11,0.45); }
-  .badge-mode.copyright { background: var(--mode-copyright); box-shadow: 0 2px 8px rgba(148,163,184,0.45); }
-  .badge-mode.restricted { background: var(--muted); }
+  .badge-mode.adult { color: var(--mode-adult); }
+  .badge-mode.subscription { color: var(--mode-subscription); }
+  .badge-mode.copyright { color: var(--mode-copyright); }
+  .badge-mode.restricted { color: var(--muted); }
 
   .card-info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; }
   .card-avatar {
@@ -487,21 +488,22 @@
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
-  .event-body { flex: 1; min-width: 0; font-size: 14px; }
+  .event-body { flex: 1; min-width: 0; font-size: 14px; min-height: 38px; display: flex; flex-direction: column; justify-content: center; }
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-elapsed { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   .event-action { color: var(--muted); }
   .event-target { color: #cbd5e1; margin-left: 4px; }
   .event-mode-tag {
-    display: inline-block; margin-left: 6px;
-    padding: 1px 7px; font-size: 11px;
-    font-weight: 600; color: white;
-    letter-spacing: 0.3px; vertical-align: 1px;
+    display: inline-block; margin-left: 0;
+    padding: 1px 6px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.3px;
+    background: transparent; border: 1.5px solid currentColor;
+    vertical-align: 1px;
   }
-  .event-mode-tag.adult { background: var(--mode-adult); }
-  .event-mode-tag.subscription { background: var(--mode-subscription); }
-  .event-mode-tag.copyright { background: var(--mode-copyright); }
-  .event-mode-tag.restricted { background: var(--muted); }
+  .event-mode-tag.adult { color: var(--mode-adult); }
+  .event-mode-tag.subscription { color: var(--mode-subscription); }
+  .event-mode-tag.copyright { color: var(--mode-copyright); }
+  .event-mode-tag.restricted { color: var(--muted); }
   .event-detail {
     color: #94a3b8; font-size: 12px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -809,14 +811,14 @@
   .day-session-mode {
     display: inline-block;
     padding: 1px 6px; font-size: 10px;
-    font-weight: 600; color: white;
-    letter-spacing: 0.3px; margin-right: 6px;
+    font-weight: 700; letter-spacing: 0.3px; margin-right: 6px;
+    background: transparent; border: 1.5px solid currentColor;
   }
-  .day-session-mode.adult { background: var(--mode-adult); }
-  .day-session-mode.subscription { background: var(--mode-subscription); }
-  .day-session-mode.copyright { background: var(--mode-copyright); }
-  .day-session-mode.restricted { background: var(--muted); }
-  .day-session-mode.normal { background: var(--ev-start); }
+  .day-session-mode.adult { color: var(--mode-adult); }
+  .day-session-mode.subscription { color: var(--mode-subscription); }
+  .day-session-mode.copyright { color: var(--mode-copyright); }
+  .day-session-mode.restricted { color: var(--muted); }
+  .day-session-mode.normal { color: var(--ev-start); }
   .day-session-changes {
     margin-top: 8px; padding-top: 6px;
     border-top: 1px dashed var(--border);
@@ -1349,7 +1351,7 @@ const MODE_LABEL = {
   subscription: '구독플러스', copyright: '저작권', restricted: '제한 방송',
 };
 const MODE_BADGE_LABEL = {
-  adult: '19+', subscription: '구독플러스', copyright: '저작권', restricted: '제한',
+  adult: '19+', subscription: '구독+', copyright: '저작권', restricted: '제한',
 };
 const MODE_PLACEHOLDER_TEXT = {
   adult: '19금 방송', subscription: '구독플러스 전용 방송',
@@ -1959,8 +1961,17 @@ function renderEvent(e, allEvents) {
     targetTag = `<span class="event-target">(<span style="color: ${channelColor}">${escapeHtml(e.channel_name)}</span> 방송)</span>`;
   }
   let detail = '';
-  if (e.type === 'start' && e.title) {
-    detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
+  if (e.type === 'start') {
+    const titleText = e.title ? escapeHtml(e.title) : '';
+    detail = `<div class="event-detail">${modeTag}${modeTag && titleText ? ' ' : ''}${titleText}</div>`;
+  } else if (e.type === 'end') {
+    const evTime = new Date(e.time).getTime();
+    const lastTitleEv = (allEvents || []).find(ev =>
+      ev.member_id === e.member_id && (ev.type === 'title' || ev.type === 'start') && new Date(ev.time).getTime() <= evTime
+    );
+    const lastTitle = lastTitleEv ? (lastTitleEv.type === 'title' ? lastTitleEv.after : lastTitleEv.title) : '';
+    const titleText2 = lastTitle ? escapeHtml(lastTitle) : '';
+    detail = `<div class="event-detail">${modeTag}${modeTag && titleText2 ? ' ' : ''}${titleText2}</div>`;
   } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
   } else if (e.type === 'mode_change') {
@@ -1986,7 +1997,7 @@ function renderEvent(e, allEvents) {
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
         <span class="event-action">${actionMap[e.type] || e.type}${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
-        ${targetTag}${modeTag}
+        ${targetTag}
       </div>
       ${detail}
     </div>

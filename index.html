@@ -1671,7 +1671,7 @@ function refreshUnreadIndicator() {
   if (badge) {
     if (count > 0) {
       badge.style.display = '';
-      badge.textContent = count > 99 ? '99+' : count;
+      badge.textContent = count;
     } else {
       badge.style.display = 'none';
     }

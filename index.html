@@ -2296,9 +2296,44 @@ function renderStatsAll(body) {
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
-  const cards = MEMBERS.map(m => {
+
+  // 전체 멤버 summary 미리 계산
+  const allSums = {};
+  MEMBERS.forEach(m => {
     const ms = getMemberStatsForView(m.id);
-    const sum = computeMonthSummary(ms, year, month);
+    allSums[m.id] = computeMonthSummary(ms, year, month);
+  });
+
+  // 항목별 순위 계산 (공동 허용, 0이면 메달 없음)
+  const MEDAL_KEYS = [
+    { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
+    { key: 'totalDurationMs',   get: s => s.totalDurationMs },
+    { key: 'postCount',         get: s => s.postCount },
+    { key: 'youtubeCount',      get: s => s.youtubeCount },
+    { key: 'cafeCount',         get: s => s.cafeCount },
+  ];
+  const MEDALS = ['🥇', '🥈', '🥉'];
+  // medals[memberId][key] = medal emoji or ''
+  const medals = {};
+  MEMBERS.forEach(m => { medals[m.id] = {}; });
+  MEDAL_KEYS.forEach(({ key, get }) => {
+    const vals = MEMBERS.map(m => ({ id: m.id, v: get(allSums[m.id]) }));
+    const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
+    let rank = 0;
+    sorted.forEach(v => {
+      const medal = v > 0 ? (MEDALS[rank] || '') : '';
+      vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
+      if (v > 0) rank++;
+    });
+  });
+  // 전역 공유 (개별탭에서 사용)
+  statsState.medals = medals;
+  statsState.allSums = allSums;
+
+  const cards = MEMBERS.map(m => {
+    const sum = allSums[m.id];
+    const md = medals[m.id];
+    const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
     return `
       <button class="stats-card" data-member="${m.id}">
         <div class="stats-card-header">
@@ -2308,23 +2343,23 @@ function renderStatsAll(body) {
         <div class="stats-card-rows">
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 일수</span>
-            <span class="stats-card-value accent">${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+            <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
           </div>
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>
-            <span class="stats-card-value">${formatDuration(sum.totalDurationMs)}</span>
+            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
           </div>
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-            <span class="stats-card-value">${sum.postCount}개</span>
+            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
           </div>
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-            <span class="stats-card-value">${sum.youtubeCount}개</span>
+            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
           </div>
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-            <span class="stats-card-value">${sum.cafeCount}개</span>
+            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
           </div>
         </div>
       </button>
@@ -2385,26 +2420,31 @@ function renderStatsMember(body, memberId) {
         <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
       </div>
       <div class="stats-detail-summary">
+        ${(() => {
+          const md = (statsState.medals && statsState.medals[memberId]) || {};
+          const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+          return `
         <div class="stats-summary-item">
           <span class="stats-summary-label">방송 일수</span>
-          <span class="stats-summary-value" style="color: var(--accent)">${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+          <span class="stats-summary-value" style="color: var(--accent)">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
         </div>
         <div class="stats-summary-item">
           <span class="stats-summary-label">방송 시간</span>
-          <span class="stats-summary-value">${formatDuration(sum.totalDurationMs)}</span>
+          <span class="stats-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
         </div>
         <div class="stats-summary-item">
           <span class="stats-summary-label">숲 게시글</span>
-          <span class="stats-summary-value">${sum.postCount}개</span>
+          <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
         </div>
         <div class="stats-summary-item">
           <span class="stats-summary-label">유튜브 업로드</span>
-          <span class="stats-summary-value">${sum.youtubeCount}개</span>
+          <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
         </div>
         <div class="stats-summary-item">
           <span class="stats-summary-label">카페 게시글</span>
-          <span class="stats-summary-value">${sum.cafeCount}개</span>
-        </div>
+          <span class="stats-summary-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+        </div>`;
+        })()}
       </div>
     </div>
     <div class="stats-detail-body">

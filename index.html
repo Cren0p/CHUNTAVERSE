@@ -223,6 +223,27 @@
     font-size: 11px;
     opacity: 0.75;
   }
+  .header-yt-btn {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(96,165,250,0.12);
+    border: 1px solid rgba(96,165,250,0.4);
+    color: #93c5fd;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .header-yt-btn:hover { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.7); }
+  .header-yt-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
@@ -1048,6 +1069,10 @@
   <div class="main-header">
     <div class="page-title" id="pageTitle">생방송</div>
     <div class="header-center" id="headerCenter"></div>
+    <a class="header-yt-btn" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+      <span>천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span>
+    </a>
   </div>
 
   <div class="page active" id="page-live">

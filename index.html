@@ -1150,6 +1150,7 @@ const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
 const STATS_START_YEAR = 2026;
 const STATS_START_MONTH = 5;
+const STATS_ALL_START_MONTH = 1; // 월간 전체탭은 1월부터
 
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
@@ -2296,10 +2297,16 @@ function computeMonthSummary(memberStats, year, month1) {
       }
     }
   }
+  // seed 데이터 합산 (서비스 시작 전 수동 입력 데이터)
+  if (memberStats.seed) {
+    result.totalDurationMs    += memberStats.seed.broadcastMs || 0;
+    result.daysWithBroadcast  += memberStats.seed.sessions    || 0;
+    result.postCount          += memberStats.seed.posts       || 0;
+    result.youtubeCount       += memberStats.seed.youtube     || 0;
+    result.cafeCount          += memberStats.seed.cafe        || 0;
+  }
   return result;
 }
-
-function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
   if (!statsState.viewMonth) {
@@ -2467,9 +2474,7 @@ function renderStatsAll(body) {
   const { year, month } = statsState.viewMonth;
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
-  const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
-
-  // 전체 멤버 summary 미리 계산
+  const isStartMonth = (year === STATS_START_YEAR && month === STATS_ALL_START_MONTH);
   const allSums = {};
   MEMBERS.forEach(m => {
     const ms = getMemberStatsForView(m.id);
@@ -2553,7 +2558,7 @@ function renderStatsAll(body) {
       let { year: y, month: mo } = statsState.viewMonth;
       if (dir === 'prev') {
         mo -= 1; if (mo < 1) { mo = 12; y -= 1; }
-        if (y < STATS_START_YEAR || (y === STATS_START_YEAR && mo < STATS_START_MONTH)) return;
+        if (y < STATS_START_YEAR || (y === STATS_START_YEAR && mo < STATS_ALL_START_MONTH)) return;
       } else {
         mo += 1; if (mo > 12) { mo = 1; y += 1; }
       }
@@ -2584,10 +2589,41 @@ function renderStatsMember(body, memberId) {
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
+
+  // medals가 없으면 이 달 전체 멤버 기준으로 계산
+  if (!statsState.medals || !statsState.medals[memberId]) {
+    const allSums = {};
+    MEMBERS.forEach(m => {
+      const mms = (() => { const ym2 = currentViewYm(); return ym2 && statsState.data[ym2] ? statsState.data[ym2][m.id] : null; })();
+      allSums[m.id] = computeMonthSummary(mms, year, month);
+    });
+    const MEDAL_KEYS2 = [
+      { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
+      { key: 'totalDurationMs',   get: s => s.totalDurationMs },
+      { key: 'postCount',         get: s => s.postCount },
+      { key: 'youtubeCount',      get: s => s.youtubeCount },
+      { key: 'cafeCount',         get: s => s.cafeCount },
+    ];
+    const MEDALS2 = ['🥇','🥈','🥉'];
+    const medals2 = {};
+    MEMBERS.forEach(m => { medals2[m.id] = {}; });
+    MEDAL_KEYS2.forEach(({ key, get }) => {
+      const vals = MEMBERS.map(m => ({ id: m.id, v: get(allSums[m.id]) }));
+      const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
+      let rank = 0;
+      sorted.forEach(v => {
+        const medal = v > 0 ? (MEDALS2[rank] || '') : '';
+        vals.filter(x => x.v === v).forEach(x => { medals2[x.id][key] = medal; });
+        if (v > 0) rank++;
+      });
+    });
+    statsState.medals = medals2;
+    statsState.allSums = allSums;
+  }
   body.innerHTML = `
     <div class="stats-detail-body">
       <div>
-        <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px;">
+        <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px; min-height:38px;">
           <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
           <span class="stats-month-text">${year}년 ${month}월</span>
           <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
@@ -2595,7 +2631,7 @@ function renderStatsMember(body, memberId) {
         ${renderCalendar(year, month, sum)}
       </div>
       <div>
-        <div class="stats-detail-summary" style="margin-bottom:8px; flex-wrap:wrap;">
+        <div class="stats-detail-summary" style="margin-bottom:8px; flex-wrap:wrap; min-height:38px; align-items:center;">
           ${(() => {
             const md = (statsState.medals && statsState.medals[memberId]) || {};
             const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';

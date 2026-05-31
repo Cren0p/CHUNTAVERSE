@@ -1444,7 +1444,9 @@ const statsState = {
   data: {},
   loadingMonths: new Set(),
   selectedTab: 'all',
+  viewMode: 'monthly',
   viewMonth: null,
+  viewYear: null,
   selectedDate: null,
 };
 const LS_STATS_PREFIX = 'chuntaverse_stats_v2_';
@@ -2178,10 +2180,16 @@ function initStatsTabs() {
       <img src="${m.img}" alt="${m.name}"><span>${m.name}</span>
     </button>
   `).join('');
-  sideBox.innerHTML = `<button class="stats-tab stats-tab-all active" data-tab="all">전체</button>`;
+  sideBox.innerHTML = `
+    <button class="stats-tab stats-tab-all" data-tab="annual" data-mode="annual">연간</button>
+    <button class="stats-tab stats-tab-all active" data-tab="all" data-mode="monthly">월간</button>
+  `;
   const allTabs = [...memberBox.querySelectorAll('.stats-tab'), ...sideBox.querySelectorAll('.stats-tab')];
   allTabs.forEach(btn => {
-    btn.addEventListener('click', () => selectStatsTab(btn.dataset.tab));
+    btn.addEventListener('click', () => {
+      if (btn.dataset.mode) statsState.viewMode = btn.dataset.mode;
+      selectStatsTab(btn.dataset.tab);
+    });
   });
   if (statsState.data) renderStatsBody();
 }
@@ -2308,8 +2316,132 @@ function renderStatsBody() {
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
     return;
   }
+  if (statsState.viewMode === 'annual') { renderStatsAnnual(body); return; }
   if (statsState.selectedTab === 'all') renderStatsAll(body);
   else renderStatsMember(body, statsState.selectedTab);
+}
+
+function renderStatsAnnual(body) {
+  const now = new Date();
+  if (!statsState.viewYear) statsState.viewYear = now.getFullYear();
+  const year = statsState.viewYear;
+  const isCurrentYear = (year === now.getFullYear());
+  const isStartYear = (year === STATS_START_YEAR);
+
+  // 해당 연도의 모든 월 stats 합산
+  const annualSums = {};
+  MEMBERS.forEach(m => {
+    annualSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0 };
+  });
+  for (let mo = 1; mo <= 12; mo++) {
+    const ym = `${year}-${String(mo).padStart(2,'0')}`;
+    MEMBERS.forEach(m => {
+      const ms = statsState.data[ym]?.[m.id];
+      if (!ms) return;
+      const monthStart = new Date(year, mo - 1, 1).getTime();
+      const monthEnd = new Date(year, mo, 1).getTime();
+      // 자동 수집 데이터
+      annualSums[m.id].sessions += (ms.sessions || []).filter(s => {
+        const t = new Date(s.start).getTime();
+        return !isNaN(t) && t >= monthStart && t < monthEnd;
+      }).length;
+      (ms.sessions || []).forEach(s => {
+        const t = new Date(s.start).getTime();
+        if (isNaN(t) || t < monthStart || t >= monthEnd) return;
+        if (s.end) {
+          const e = new Date(s.end).getTime();
+          if (!isNaN(e) && e > t) annualSums[m.id].totalDurationMs += (e - t);
+        }
+      });
+      annualSums[m.id].postCount    += (ms.posts   || []).filter(p => { const t = new Date(p.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
+      annualSums[m.id].youtubeCount += (ms.youtube || []).filter(y => { const t = new Date(y.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
+      annualSums[m.id].cafeCount    += (ms.cafe    || []).filter(c => { const t = new Date(c.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
+      // seed 데이터 합산
+      if (ms.seed) {
+        annualSums[m.id].sessions        += ms.seed.sessions    || 0;
+        annualSums[m.id].totalDurationMs += ms.seed.broadcastMs || 0;
+        annualSums[m.id].postCount       += ms.seed.posts       || 0;
+        annualSums[m.id].youtubeCount    += ms.seed.youtube     || 0;
+        annualSums[m.id].cafeCount       += ms.seed.cafe        || 0;
+      }
+    });
+  }
+
+  // 순위 계산
+  const MEDAL_KEYS = [
+    { key: 'sessions',       get: s => s.sessions },
+    { key: 'totalDurationMs',get: s => s.totalDurationMs },
+    { key: 'postCount',      get: s => s.postCount },
+    { key: 'youtubeCount',   get: s => s.youtubeCount },
+    { key: 'cafeCount',      get: s => s.cafeCount },
+  ];
+  const MEDALS = ['🥇','🥈','🥉'];
+  const medals = {};
+  MEMBERS.forEach(m => { medals[m.id] = {}; });
+  MEDAL_KEYS.forEach(({ key, get }) => {
+    const vals = MEMBERS.map(m => ({ id: m.id, v: get(annualSums[m.id]) }));
+    const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
+    let rank = 0;
+    sorted.forEach(v => {
+      const medal = v > 0 ? (MEDALS[rank] || '') : '';
+      vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
+      if (v > 0) rank++;
+    });
+  });
+
+  const cards = MEMBERS.map(m => {
+    const sum = annualSums[m.id];
+    const md = medals[m.id];
+    const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+    return `
+      <div class="stats-card">
+        <div class="stats-card-header">
+          <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
+          <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
+        </div>
+        <div class="stats-card-rows">
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 횟수</span>
+            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}회</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>
+            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
+            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
+            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
+            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="stats-detail-header" style="justify-content:center;">
+      <div class="stats-detail-month">
+        <button class="stats-month-btn" data-dir="prev" ${isStartYear ? 'disabled' : ''}>‹</button>
+        <span class="stats-month-text">${year}년</span>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentYear ? 'disabled' : ''}>›</button>
+      </div>
+    </div>
+    <div class="stats-grid">${cards}</div>
+  `;
+  body.querySelectorAll('.stats-month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.dir;
+      statsState.viewYear = (statsState.viewYear || now.getFullYear()) + (dir === 'prev' ? -1 : 1);
+      renderStatsBody();
+    });
+  });
 }
 
 function renderStatsAll(body) {
@@ -2438,43 +2570,45 @@ function renderStatsMember(body, memberId) {
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
   body.innerHTML = `
-    <div class="stats-detail-header">
-      <div class="stats-detail-month">
-        <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
-        <span class="stats-month-text">${year}년 ${month}월</span>
-        <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
-      </div>
-      <div class="stats-detail-summary">
-        ${(() => {
-          const md = (statsState.medals && statsState.medals[memberId]) || {};
-          const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
-          return `
-        <div class="stats-summary-item">
-          <span class="stats-summary-label">방송 일수</span>
-          <span class="stats-summary-value" style="color: var(--accent)">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
-        </div>
-        <div class="stats-summary-item">
-          <span class="stats-summary-label">방송 시간</span>
-          <span class="stats-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-        </div>
-        <div class="stats-summary-item">
-          <span class="stats-summary-label">숲 게시글</span>
-          <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
-        </div>
-        <div class="stats-summary-item">
-          <span class="stats-summary-label">유튜브 업로드</span>
-          <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-        </div>
-        <div class="stats-summary-item">
-          <span class="stats-summary-label">카페 게시글</span>
-          <span class="stats-summary-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-        </div>`;
-        })()}
-      </div>
-    </div>
     <div class="stats-detail-body">
-      ${renderCalendar(year, month, sum)}
-      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
+      <div>
+        <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px;">
+          <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
+          <span class="stats-month-text">${year}년 ${month}월</span>
+          <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+        </div>
+        ${renderCalendar(year, month, sum)}
+      </div>
+      <div>
+        <div class="stats-detail-summary" style="margin-bottom:8px; flex-wrap:wrap;">
+          ${(() => {
+            const md = (statsState.medals && statsState.medals[memberId]) || {};
+            const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+            return `
+          <div class="stats-summary-item">
+            <span class="stats-summary-label">방송 일수</span>
+            <span class="stats-summary-value" style="color: var(--accent)">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+          </div>
+          <div class="stats-summary-item">
+            <span class="stats-summary-label">방송 시간</span>
+            <span class="stats-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+          </div>
+          <div class="stats-summary-item">
+            <span class="stats-summary-label">숲 게시글</span>
+            <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
+          </div>
+          <div class="stats-summary-item">
+            <span class="stats-summary-label">유튜브 업로드</span>
+            <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
+          </div>
+          <div class="stats-summary-item">
+            <span class="stats-summary-label">카페 게시글</span>
+            <span class="stats-summary-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          </div>`;
+          })()}
+        </div>
+        <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
+      </div>
     </div>
   `;
   body.querySelectorAll('.stats-month-btn').forEach(btn => {

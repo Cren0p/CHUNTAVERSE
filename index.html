@@ -649,7 +649,6 @@
     border: 1px solid var(--border);
     padding: 6px 12px;
     box-sizing: border-box;
-    height: 42px;
   }
   .stats-month-btn {
     background: var(--surface2);
@@ -668,7 +667,6 @@
     border: 1px solid var(--border);
     align-items: center;
     box-sizing: border-box;
-    height: 42px;
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
@@ -1454,7 +1452,7 @@ const statsState = {
   viewYear: null,
   selectedDate: null,
 };
-const LS_STATS_PREFIX = 'chuntaverse_stats_v2_';
+const LS_STATS_PREFIX = 'chuntaverse_stats_v3_';
 
 function isCurrentMonth(yyyymm) {
   const now = new Date();
@@ -1897,8 +1895,9 @@ function buildCard(m, info, delay) {
   const mode = info.mode || (info.live ? 'normal' : null);
   const isNormalLive = info.live && mode === 'normal';
   const hasThumb = info.thumb && isNormalLive;
+  const thumbTs = Math.floor(Date.now() / 60000);
   const thumbHtml = hasThumb
-    ? `<img src="${info.thumb}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
+    ? `<img src="${info.thumb}?t=${thumbTs}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
   const placeholderInner = info.live && mode && mode !== 'normal'
     ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
     : `<img src="${m.img}" alt="${m.name}">`;
@@ -2422,7 +2421,7 @@ function renderStatsAnnual(body) {
     const md = medals[m.id];
     const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
     return `
-      <div class="stats-card">
+      <button class="stats-card" data-member="${m.id}">
         <div class="stats-card-header">
           <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
@@ -2449,7 +2448,7 @@ function renderStatsAnnual(body) {
             <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
           </div>
         </div>
-      </div>
+      </button>
     `;
   }).join('');
 
@@ -2468,6 +2467,15 @@ function renderStatsAnnual(body) {
       const dir = btn.dataset.dir;
       statsState.viewYear = (statsState.viewYear || now.getFullYear()) + (dir === 'prev' ? -1 : 1);
       renderStatsBody();
+    });
+  });
+  body.querySelectorAll('.stats-card[data-member]').forEach(card => {
+    card.addEventListener('click', () => {
+      const memberId = card.dataset.member;
+      if (memberId) {
+        statsState.viewMode = 'monthly';
+        selectStatsTab(memberId);
+      }
     });
   });
 }
@@ -2596,8 +2604,8 @@ function renderStatsMember(body, memberId) {
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
 
-  // medals가 없으면 이 달 전체 멤버 기준으로 계산
-  if (!statsState.medals || !statsState.medals[memberId]) {
+  // medals가 없거나 이 멤버 메달이 비어있으면 재계산
+  if (!statsState.medals || Object.keys(statsState.medals[memberId] || {}).length === 0) {
     const allSums = {};
     MEMBERS.forEach(m => {
       const mms = (() => { const ym2 = currentViewYm(); return ym2 && statsState.data[ym2] ? statsState.data[ym2][m.id] : null; })();

@@ -648,6 +648,8 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 6px 12px;
+    box-sizing: border-box;
+    height: 42px;
   }
   .stats-month-btn {
     background: var(--surface2);
@@ -661,10 +663,12 @@
   .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
   .stats-detail-summary {
     display: flex; flex: 1; flex-wrap: wrap; gap: 16px;
-    padding: 8px 16px;
+    padding: 6px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     align-items: center;
+    box-sizing: border-box;
+    height: 42px;
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
@@ -2625,7 +2629,7 @@ function renderStatsMember(body, memberId) {
   body.innerHTML = `
     <div class="stats-detail-body">
       <div>
-        <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px; min-height:38px;">
+        <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px;">
           <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
           <span class="stats-month-text">${year}년 ${month}월</span>
           <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
@@ -2633,7 +2637,7 @@ function renderStatsMember(body, memberId) {
         ${renderCalendar(year, month, sum)}
       </div>
       <div>
-        <div class="stats-detail-summary" style="margin-bottom:8px; flex-wrap:wrap; min-height:38px; align-items:center;">
+        <div class="stats-detail-summary" style="margin-bottom:8px; flex-wrap:wrap; align-items:center;">
           ${(() => {
             const md = (statsState.medals && statsState.medals[memberId]) || {};
             const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
@@ -2678,6 +2682,7 @@ function renderStatsMember(body, memberId) {
       if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime()) return;
       statsState.viewMonth = { year: y, month: mo };
       statsState.selectedDate = null;
+      statsState.medals = null;
       renderStatsBody();
     });
   });

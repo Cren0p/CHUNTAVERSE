@@ -669,11 +669,12 @@
   .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
   .stats-detail-summary {
     display: flex; flex: 1; flex-wrap: wrap; gap: 16px;
-    padding: 6px 16px;
+    padding: 0 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     align-items: center;
     box-sizing: border-box;
+    height: 36px;
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
@@ -814,17 +815,23 @@
   .day-detail {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 16px; min-height: 200px;
+    padding: 16px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
   }
   .day-detail-title {
     font-size: 14px; font-weight: 700;
     color: var(--accent);
     margin-bottom: 12px; padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
   .day-detail-empty {
-    text-align: center; padding: 40px 0;
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
     color: var(--muted); font-size: 13px;
+    text-align: center; line-height: 1.6;
   }
   .day-session {
     background: var(--surface2);

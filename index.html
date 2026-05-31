@@ -2307,6 +2307,8 @@ function computeMonthSummary(memberStats, year, month1) {
   }
   return result;
 }
+
+function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
   if (!statsState.viewMonth) {

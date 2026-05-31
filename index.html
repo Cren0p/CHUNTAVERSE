@@ -644,21 +644,28 @@
     margin-bottom: 16px; flex-wrap: wrap;
   }
   .stats-detail-month {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 4px;
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 6px 12px;
+    padding: 0 8px;
     box-sizing: border-box;
+    height: 36px;
+    justify-content: center;
   }
   .stats-month-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
+    background: none;
+    border: none;
+    color: var(--muted);
     width: 28px; height: 28px;
-    cursor: pointer; font-family: inherit; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    padding: 0;
   }
-  .stats-month-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .stats-month-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.4; }
+  .stats-month-btn svg { display: block; }
+  .stats-month-btn:hover { color: var(--accent); }
+  .stats-month-btn:disabled { color: var(--border); cursor: not-allowed; }
   .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
   .stats-detail-summary {
     display: flex; flex: 1; flex-wrap: wrap; gap: 16px;
@@ -2455,9 +2462,9 @@ function renderStatsAnnual(body) {
   body.innerHTML = `
     <div class="stats-detail-header" style="justify-content:center;">
       <div class="stats-detail-month">
-        <button class="stats-month-btn" data-dir="prev" ${isStartYear ? 'disabled' : ''}>‹</button>
+        <button class="stats-month-btn" data-dir="prev" ${isStartYear ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span class="stats-month-text">${year}년</span>
-        <button class="stats-month-btn" data-dir="next" ${isCurrentYear ? 'disabled' : ''}>›</button>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentYear ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
     <div class="stats-grid">${cards}</div>
@@ -2559,9 +2566,9 @@ function renderStatsAll(body) {
   body.innerHTML = `
     <div class="stats-detail-header" style="justify-content: center;">
       <div class="stats-detail-month">
-        <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
+        <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span class="stats-month-text">${year}년 ${month}월</span>
-        <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
     <div class="stats-grid">${cards}</div>
@@ -2638,9 +2645,9 @@ function renderStatsMember(body, memberId) {
     <div class="stats-detail-body">
       <div>
         <div class="stats-detail-month" style="justify-content:center; margin-bottom:8px;">
-          <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}>‹</button>
+          <button class="stats-month-btn" data-dir="prev" ${isStartMonth ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
           <span class="stats-month-text">${year}년 ${month}월</span>
-          <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+          <button class="stats-month-btn" data-dir="next" ${isCurrentMonth ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
         ${renderCalendar(year, month, sum)}
       </div>

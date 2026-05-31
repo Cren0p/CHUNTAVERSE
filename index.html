@@ -2328,6 +2328,21 @@ function renderStatsAnnual(body) {
   const isCurrentYear = (year === now.getFullYear());
   const isStartYear = (year === STATS_START_YEAR);
 
+  // 해당 연도 모든 월이 로드됐는지 확인, 없으면 로드 후 재렌더
+  const maxMonth = isCurrentYear ? now.getMonth() + 1 : 12;
+  const monthsToLoad = [];
+  for (let mo = 1; mo <= maxMonth; mo++) {
+    const ym = `${year}-${String(mo).padStart(2,'0')}`;
+    if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) monthsToLoad.push(ym);
+  }
+  if (monthsToLoad.length > 0) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>연간 통계 불러오는 중...</div></div>';
+    Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
+      if (currentPage === 'stats') renderStatsBody();
+    });
+    return;
+  }
+
   // 해당 연도의 모든 월 stats 합산
   const annualSums = {};
   MEMBERS.forEach(m => {

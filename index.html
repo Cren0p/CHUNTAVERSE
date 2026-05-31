@@ -2221,6 +2221,7 @@ function initStatsTabs() {
 
 function selectStatsTab(tabId) {
   statsState.selectedTab = tabId;
+  if (tabId !== 'all' && tabId !== 'annual') statsState.viewMode = 'monthly';
   document.querySelectorAll('.stats-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tabId);
   });
@@ -2449,8 +2450,8 @@ function renderStatsAnnual(body) {
         </div>
         <div class="stats-card-rows">
           <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 횟수</span>
-            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}회</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 일수</span>
+            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
           </div>
           <div class="stats-card-row">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>

@@ -1067,7 +1067,7 @@
 <body>
 
 <aside class="sidebar">
-  <div class="sidebar-logo"><img src="Title.webp" alt="CHUNTAVERSE"></div>
+  <div class="sidebar-logo"><img id="siteLogoImg" src="Title.webp" alt="CHUNTAVERSE"></div>
   <div class="nav-list">
     <button class="nav-item" data-page="live">
       <span class="nav-icon" id="navLiveIcon"></span>
@@ -1183,6 +1183,31 @@ const BASE_TITLE = '천타버스';
 const STATS_START_YEAR = 2026;
 const STATS_START_MONTH = 5;
 const STATS_ALL_START_MONTH = 1; // 월간 전체탭은 1월부터
+
+// 생일 로고 교체 (KST 기준)
+(function() {
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const m = kst.getUTCMonth() + 1;
+  const d = kst.getUTCDate();
+  const birthdays = [
+    { month: 1,  day: 8,  file: 'MOONMOMO.webp' },
+    { month: 1,  day: 22, file: 'KAPPU.webp' },
+    { month: 3,  day: 11, file: 'PANI.webp' },
+    { month: 6,  day: 22, file: 'CHUNYANG.webp' },
+    { month: 6,  day: 29, file: 'MOCA.webp' },
+    { month: 7,  day: 27, file: 'NANAMOON.webp' },
+    { month: 8,  day: 8,  file: 'KYAANG.webp' },
+    { month: 8,  day: 20, file: 'DALTA.webp' },
+    { month: 12, day: 7,  file: 'WELLRO.webp' },
+    { month: 12, day: 8,  file: 'MADAOMM.webp' },
+    { month: 12, day: 31, file: 'IMHAMING.webp' },
+  ];
+  const today = birthdays.find(b => b.month === m && b.day === d);
+  if (today) {
+    const img = document.getElementById('siteLogoImg');
+    if (img) img.src = today.file;
+  }
+})();
 
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: '01.webp', color: '#43EAF6' },
@@ -1367,7 +1392,7 @@ const MEMBER_LINKS = {
     instagram: null,
     x: 'https://x.com/Dalta20_',
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dalta20_' }],
-    etc: [],
+    etc: [{ label: '일정표', url: 'https://signalcalendar.vercel.app/#dalta' }],
     ogq: [
       { name: '달달하이! 난 꿀즙이', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
       { name: '달달하이! 난 꿀즙이', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/644df30193953' },

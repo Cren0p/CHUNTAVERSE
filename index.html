@@ -1266,6 +1266,8 @@
     transition: border-color 0.15s, box-shadow 0.15s;
     display: flex;
     flex-direction: column;
+    text-decoration: none;
+    color: inherit;
   }
   .banner-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(97,255,236,0.12); }
   .banner-card-img {
@@ -1790,6 +1792,14 @@ const filterState = {
 let allEvents = [];
 let eventSortAsc = false;
 
+function typeToCat(et) {
+  if (et === 'post' || et === 'comment_recommend') return 'post';
+  if (et === 'youtube') return 'youtube';
+  if (et === 'cafe_post') return 'cafe';
+  if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
+  return 'soop';
+}
+
 const statsState = {
   tabsInited: false,
   data: {},
@@ -1975,17 +1985,10 @@ function stopTitleFlash() {
 }
 function updateTabTitle() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
-  const _typeToCat = (et) => {
-    if (et === 'post' || et === 'comment_recommend') return 'post';
-    if (et === 'youtube') return 'youtube';
-    if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
-    return 'soop';
-  };
   const unreadCount = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
     if (isNaN(t) || t <= lastSeen) return false;
-    const cat = _typeToCat(e.type);
+    const cat = typeToCat(e.type);
     if (!filterState.types.has(cat)) return false;
     const memberMatch = filterState.members.has(e.member_id);
     const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
@@ -2047,13 +2050,6 @@ function processNewEventsForNotification(events) {
     lastSeenEventKeysReady = true;
     return;
   }
-  const typeToCat = (et) => {
-    if (et === 'post' || et === 'comment_recommend') return 'post';
-    if (et === 'youtube') return 'youtube';
-    if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
-    return 'soop';
-  };
   const eventKey = (e) => `${e.type}|${e.member_id}|${e.time}|${e.url || ''}|${e.after || ''}`;
   if (!lastSeenEventKeysReady) {
     lastSeenEventKeys = new Set(events.map(eventKey));
@@ -2083,17 +2079,10 @@ function processNewEventsForNotification(events) {
 
 function refreshUnreadIndicator() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
-  const _typeToCat = (et) => {
-    if (et === 'post' || et === 'comment_recommend') return 'post';
-    if (et === 'youtube') return 'youtube';
-    if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
-    return 'soop';
-  };
   const unread = allEvents.filter(e => {
     const t = new Date(e.time).getTime();
     if (isNaN(t) || t <= lastSeen) return false;
-    const cat = _typeToCat(e.type);
+    const cat = typeToCat(e.type);
     if (!filterState.types.has(cat)) return false;
     const memberMatch = filterState.members.has(e.member_id);
     const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
@@ -2555,13 +2544,6 @@ function updateTypeAllToggle() {
 function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
-  const typeToCat = (et) => {
-    if (et === 'post' || et === 'comment_recommend') return 'post';
-    if (et === 'youtube') return 'youtube';
-    if (et === 'cafe_post') return 'cafe';
-    if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
-    return 'soop';
-  };
   const filtered = allEvents.filter(e => {
     const cat = typeToCat(e.type);
     if (!filterState.types.has(cat)) return false;
@@ -3623,15 +3605,16 @@ function renderBanners() {
       return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
     }).join('');
     const imgTag = `<img src="${b.url}" alt="${b.date?.display || ''}" loading="lazy">`;
-    const imgHtml = b.link ? `<a href="${escapeHtml(b.link)}" target="_blank" rel="noopener">${imgTag}</a>` : imgTag;
+    const cardTag = b.link ? 'a' : 'div';
+    const cardAttrs = b.link ? ` href="${escapeHtml(b.link)}" target="_blank" rel="noopener"` : '';
     return `
-      <div class="banner-card">
-        <div class="banner-card-img">${imgHtml}</div>
+      <${cardTag} class="banner-card"${cardAttrs}>
+        <div class="banner-card-img">${imgTag}</div>
         <div class="banner-card-info">
           <span class="banner-card-date">${b.date?.display || ''}</span>
           <div class="banner-card-members">${memberImgs}</div>
         </div>
-      </div>
+      </${cardTag}>
     `;
   }).join('');
 

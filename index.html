@@ -551,6 +551,32 @@
     display: block; font-size: 10px;
     color: var(--muted); opacity: 0.7;
   }
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sort-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sort-toggle:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
 
   .stats-wrap {
     padding: 20px 24px;
@@ -1101,6 +1127,34 @@
   }
   .chem-arrow-row .chem-count { color: var(--text); font-weight: 700; }
   .chem-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
+  .chem-group-section {
+    grid-column: 1 / -1;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .chem-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .chem-group-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1100px) { .chem-group-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .chem-group-grid { grid-template-columns: 1fr; } }
+  .chem-group-members {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
   @media (max-width: 700px) {
     body { flex-direction: column; }
@@ -1570,6 +1624,7 @@ const filterState = {
   types: lsGetSet(LS_FILTER_TYPES, ALL_TYPE_KEYS),
 };
 let allEvents = [];
+let eventSortAsc = false;
 
 const statsState = {
   tabsInited: false,
@@ -2293,14 +2348,23 @@ function applyFilter() {
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
   });
+  const sortLabel = eventSortAsc ? '오래된순' : '최신순';
+  const arrowSvg = eventSortAsc
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 12 19"/><polyline points="5 12 12 19 19 12"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 19 12 5"/><polyline points="5 12 12 5 19 12"/></svg>';
+  const headerHtml = `<div class="timeline-header"><button class="sort-toggle" id="sortToggleBtn">${arrowSvg}<span>${sortLabel}</span></button></div>`;
   if (filtered.length === 0) {
-    tl.innerHTML = allEvents.length === 0
+    tl.innerHTML = headerHtml + (allEvents.length === 0
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
-      : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>';
+      : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없어요</div>');
   } else {
-    const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
-    tl.innerHTML = sorted.map(e => renderEvent(e, sorted)).join('');
+    const sorted = [...filtered].sort((a, b) => eventSortAsc
+      ? new Date(a.time) - new Date(b.time)
+      : new Date(b.time) - new Date(a.time));
+    tl.innerHTML = headerHtml + sorted.map(e => renderEvent(e, sorted)).join('');
   }
+  const sortBtn = document.getElementById('sortToggleBtn');
+  if (sortBtn) sortBtn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
 
@@ -3273,6 +3337,23 @@ const CHEM_NAMES = {
   'wellro314:baeksoon2': '북해빙궁',
 };
 
+const CHEM_GROUPS = [
+  { members: ['nanamoon777', 'kappuchan', 'baeksoon2'], name: 'ISTP즈' },
+  { members: ['243000', 'doormomo', 'wellro314'], name: 'INTP즈' },
+  { members: ['243000', 'madaomm', 'nanamoon777'], name: '우짱단' },
+  { members: ['243000', 'madaomm', 'dalta20'], name: '금뚝즈 · 천양키즈 · 한남더헬' },
+  { members: ['243000', 'nanamoon777', 'imha22'], name: '햇라인' },
+  { members: ['madaomm', 'wellro314', 'dalta20'], name: '타이조쿠단' },
+  { members: ['doormomo', 'mocamu2', 'baeksoon2'], name: 'DP' },
+  { members: ['wellro314', 'imha22', 'baeksoon2'], name: '바보123' },
+  { members: ['243000', 'kyaang123', 'dalta20'], name: '디스팸치' },
+  { members: ['243000', 'imha22', 'baeksoon2'], name: '빙차차' },
+  { members: ['243000', 'mocamu2', 'dalta20'], name: '꼭따라이' },
+  { members: ['243000', 'madaomm', 'nanamoon777', 'kyaang123'], name: '부어제약' },
+  { members: ['madaomm', 'doormomo', 'mocamu2', 'dalta20'], name: '썩겜동' },
+  { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
+];
+
 async function loadChemistry() {
   try {
     const res = await fetch(WORKER_URL + '/chat-counts');
@@ -3332,7 +3413,23 @@ function renderChemistry() {
   `).join('');
 
   body.innerHTML = `
-    <div class="chem-grid">${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}</div>
+    <div class="chem-grid">
+      <div class="chem-group-section" style="margin-top:0;padding-top:0;border-top:none"><div class="chem-group-title">2인 케미</div></div>
+      ${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}
+      ${[3, 4].map(n => {
+        const groups = CHEM_GROUPS.filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)));
+        if (groups.length === 0) return '';
+        const groupCards = groups.map(g => {
+          const membersHtml = g.members.map(id => {
+            const m = MEMBER_BY_ID[id];
+            if (!m) return '';
+            return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
+          }).join('');
+          return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members">${membersHtml}</div></div></div>`;
+        }).join('');
+        return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groupCards}</div></div>`;
+      }).join('')}
+    </div>
     <div class="filter-panel">
       <div class="filter-section">
         <div class="filter-title-row">
@@ -3342,7 +3439,7 @@ function renderChemistry() {
         <div class="filter-members" id="chemFilterMembers">${memberBtns}</div>
       </div>
       <div class="filter-summary" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center">
-        ${filtered.length}개 케미 표시 중 (전체 ${pairs.length}개)
+        ${filtered.length}개 페어 / ${CHEM_GROUPS.filter(g => g.members.length === 3 && g.members.some(id => chemFilterMembers.has(id))).length}개 3인 / ${CHEM_GROUPS.filter(g => g.members.length === 4 && g.members.some(id => chemFilterMembers.has(id))).length}개 4인 표시 중
       </div>
     </div>
   `;

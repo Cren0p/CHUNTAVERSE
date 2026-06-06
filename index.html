@@ -1278,6 +1278,7 @@
     flex-wrap: wrap;
     flex-shrink: 0;
     justify-content: flex-end;
+    max-width: 132px;
   }
   .content-card-members img {
     width: 20px; height: 20px;
@@ -1378,13 +1379,14 @@
   }
   .banner-card-members {
     display: flex;
-    gap: 4px;
+    gap: 2px;
     flex-wrap: wrap;
-    flex: 1;
+    flex-shrink: 0;
     justify-content: flex-end;
+    max-width: 132px;
   }
   .banner-card-members img {
-    width: 24px; height: 24px;
+    width: 20px; height: 20px;
     object-fit: cover;
     border: 1px solid var(--border);
   }
@@ -1928,6 +1930,7 @@ const CHEM_NAMES = {
   'imha22:dalta20': '개찐마단',
   'doormomo:kappuchan': null,
   'doormomo:kyaang123': '두세븐 일레븐',
+  'doormomo:wellro314': '추방즈',
   'doormomo:mocamu2': '검뚝즈',
   'doormomo:dalta20': '감바쓰야',
   'kappuchan:kyaang123': '킹듁즈',
@@ -1953,6 +1956,10 @@ const CHEM_GROUPS = [
   { members: ['243000', 'madaomm', 'nanamoon777', 'kyaang123'], name: '부어제약' },
   { members: ['madaomm', 'doormomo', 'mocamu2', 'dalta20'], name: '썩겜동' },
   { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
+  { members: ['madaomm', 'kappuchan', 'wellro314'], name: '찌질즈' },
+  { members: ['nanamoon777', 'doormomo', 'mocamu2', 'kappuchan'], name: '나나문모모카푸' },
+  { members: ['nanamoon777', 'imha22', 'doormomo', 'kyaang123', 'wellro314', 'dalta20'], name: '블발즈' },
+  { members: ['243000', 'madaomm', 'nanamoon777', 'imha22', 'kyaang123', 'wellro314', 'mocamu2', 'baeksoon2'], name: '돌발즈' },
 ];
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
@@ -3893,7 +3900,7 @@ function renderChemistry() {
     <div class="chem-grid">
       <div class="chem-group-section" style="margin-top:0;padding-top:0;border-top:none"><div class="chem-group-title">2인 케미</div></div>
       ${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}
-      ${[3, 4].map(n => {
+      ${[...new Set(CHEM_GROUPS.map(g => g.members.length))].sort((a, b) => a - b).map(n => {
         const groups = CHEM_GROUPS.filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)));
         if (groups.length === 0) return '';
         const groupCards = groups.map(g => {

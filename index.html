@@ -3727,7 +3727,7 @@ function renderBanners() {
         <div class="banner-card-img">${imgTag}</div>
         <div class="banner-card-info">
           <span class="banner-card-date">${b.date?.display || ''}</span>
-          <div class="banner-card-members">${memberImgs}</div>
+          <div class="banner-card-members"${membersRowStyle(b.members.length)}>${memberImgs}</div>
         </div>
       </${cardTag}>
     `;
@@ -3737,6 +3737,12 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
+}
+
+function membersRowStyle(count) {
+  if (count >= 7 && count <= 8) return ' style="max-width:86px"';
+  if (count >= 9 && count <= 10) return ' style="max-width:108px"';
+  return '';
 }
 
 function parseContentDate(url) {
@@ -3821,7 +3827,7 @@ function renderContent() {
             <span class="content-card-title">${escapeHtml(c.title || '')}</span>
             <span class="content-card-date">${c.date?.display || ''}</span>
           </div>
-          <div class="content-card-members">${memberImgs}</div>
+          <div class="content-card-members"${membersRowStyle(c.members.length)}>${memberImgs}</div>
         </div>
       </${cardTag}>
     `;

@@ -527,7 +527,7 @@
   .event-target { color: #cbd5e1; margin-left: 4px; }
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
-    margin-left: 0;
+    margin-left: 0; margin-right: 6px;
     padding: 2px 6px 3px; font-size: 11px;
     font-weight: 700; letter-spacing: 0.3px;
     background: transparent; border: 1.5px solid currentColor;
@@ -1264,10 +1264,23 @@
     border: 1px solid var(--border);
     overflow: hidden;
     transition: border-color 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
   }
   .banner-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(97,255,236,0.12); }
-  .banner-card img {
-    width: 100%;
+  .banner-card-img {
+    flex: 1;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+  .banner-card-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     display: block;
   }
   .banner-card-info {
@@ -1356,13 +1369,13 @@
       <span class="nav-icon" id="navChemistryIcon"></span>
       <span>케미</span>
     </button>
-    <button class="nav-item" data-page="links">
-      <span class="nav-icon" id="navLinksIcon"></span>
-      <span>관련 링크</span>
-    </button>
     <button class="nav-item" data-page="banner">
       <span class="nav-icon" id="navBannerIcon"></span>
       <span>현수막</span>
+    </button>
+    <button class="nav-item" data-page="links">
+      <span class="nav-icon" id="navLinksIcon"></span>
+      <span>관련 링크</span>
     </button>
   </div>
 </aside>
@@ -3565,8 +3578,9 @@ async function loadBanners() {
     const rows = parseCSV(csv);
     bannerData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
       const url = r[0];
-      const members = r.slice(1).filter(c => c.length > 0);
-      return { url, members, date: parseBannerDate(url) };
+      const link = (r[1] || '').trim();
+      const members = r.slice(2).filter(c => c.length > 0);
+      return { url, link, members, date: parseBannerDate(url) };
     });
     bannerData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_BANNER_CACHE, JSON.stringify(bannerData));
@@ -3608,9 +3622,11 @@ function renderBanners() {
       const m = MEMBERS.find(x => x.name === name);
       return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
     }).join('');
+    const imgTag = `<img src="${b.url}" alt="${b.date?.display || ''}" loading="lazy">`;
+    const imgHtml = b.link ? `<a href="${escapeHtml(b.link)}" target="_blank" rel="noopener">${imgTag}</a>` : imgTag;
     return `
       <div class="banner-card">
-        <img src="${b.url}" alt="${b.date?.display || ''}" loading="lazy">
+        <div class="banner-card-img">${imgHtml}</div>
         <div class="banner-card-info">
           <span class="banner-card-date">${b.date?.display || ''}</span>
           <div class="banner-card-members">${memberImgs}</div>

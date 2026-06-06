@@ -1687,6 +1687,56 @@ const statsState = {
 };
 const LS_STATS_PREFIX = 'chuntaverse_stats_v6_';
 
+let chemCounts = {};
+let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
+const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
+
+const CHEM_NAMES = {
+  '243000:madaomm': '정규군',
+  '243000:nanamoon777': '천양 다이노스',
+  '243000:doormomo': '천보국 · 처니 생제르망',
+  '243000:kyaang123': null,
+  '243000:wellro314': '노이즈',
+  '243000:dalta20': '달아이스',
+  'madaomm:nanamoon777': '아재개그즈',
+  'madaomm:doormomo': '요정즈',
+  'madaomm:kappuchan': '천치원 동기',
+  'madaomm:kyaang123': '조동아리',
+  'madaomm:dalta20': '엉엉즈 · INFP즈',
+  'nanamoon777:doormomo': '나나문모모',
+  'nanamoon777:kyaang123': '흰뚝즈',
+  'nanamoon777:mocamu2': '맏막즈',
+  'imha22:baeksoon2': '00즈',
+  'imha22:dalta20': '개찐마단',
+  'doormomo:kappuchan': null,
+  'doormomo:kyaang123': '두세븐 일레븐',
+  'doormomo:mocamu2': '검뚝즈',
+  'doormomo:dalta20': '감바쓰야',
+  'kappuchan:kyaang123': '킹듁즈',
+  'kappuchan:wellro314': '비정규직',
+  'kappuchan:baeksoon2': '페이지',
+  'kyaang123:mocamu2': 'ENTP즈',
+  'wellro314:mocamu2': '버인협회 · 픽크타2',
+  'wellro314:baeksoon2': '북해빙궁',
+};
+
+const CHEM_GROUPS = [
+  { members: ['nanamoon777', 'kappuchan', 'baeksoon2'], name: 'ISTP즈' },
+  { members: ['243000', 'doormomo', 'wellro314'], name: 'INTP즈' },
+  { members: ['243000', 'madaomm', 'nanamoon777'], name: '우짱단' },
+  { members: ['243000', 'madaomm', 'dalta20'], name: '금뚝즈 · 천양키즈 · 한남더헬' },
+  { members: ['243000', 'nanamoon777', 'imha22'], name: '햇라인' },
+  { members: ['madaomm', 'wellro314', 'dalta20'], name: '타이조쿠단' },
+  { members: ['doormomo', 'mocamu2', 'baeksoon2'], name: 'DP' },
+  { members: ['wellro314', 'imha22', 'baeksoon2'], name: '바보123' },
+  { members: ['243000', 'kyaang123', 'dalta20'], name: '디스팸치' },
+  { members: ['243000', 'imha22', 'baeksoon2'], name: '빙차차' },
+  { members: ['243000', 'mocamu2', 'dalta20'], name: '꼭따라이' },
+  { members: ['243000', 'madaomm', 'nanamoon777', 'kyaang123'], name: '부어제약' },
+  { members: ['madaomm', 'doormomo', 'mocamu2', 'dalta20'], name: '썩겜동' },
+  { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
+];
+
 function isCurrentMonth(yyyymm) {
   const now = new Date();
   const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -3353,57 +3403,6 @@ setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 60 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
-
-let chemCounts = {};
-let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
-
-const CHEM_NAMES = {
-  '243000:madaomm': '정규군',
-  '243000:nanamoon777': '천양 다이노스',
-  '243000:doormomo': '천보국 · 처니 생제르망',
-  '243000:kyaang123': null,
-  '243000:wellro314': '노이즈',
-  '243000:dalta20': '달아이스',
-  'madaomm:nanamoon777': '아재개그즈',
-  'madaomm:doormomo': '요정즈',
-  'madaomm:kappuchan': '천치원 동기',
-  'madaomm:kyaang123': '조동아리',
-  'madaomm:dalta20': '엉엉즈 · INFP즈',
-  'nanamoon777:doormomo': '나나문모모',
-  'nanamoon777:kyaang123': '흰뚝즈',
-  'nanamoon777:mocamu2': '맏막즈',
-  'imha22:baeksoon2': '00즈',
-  'imha22:dalta20': '개찐마단',
-  'doormomo:kappuchan': null,
-  'doormomo:kyaang123': '두세븐 일레븐',
-  'doormomo:mocamu2': '검뚝즈',
-  'doormomo:dalta20': '감바쓰야',
-  'kappuchan:kyaang123': '킹듁즈',
-  'kappuchan:wellro314': '비정규직',
-  'kappuchan:baeksoon2': '페이지',
-  'kyaang123:mocamu2': 'ENTP즈',
-  'wellro314:mocamu2': '버인협회 · 픽크타2',
-  'wellro314:baeksoon2': '북해빙궁',
-};
-
-const CHEM_GROUPS = [
-  { members: ['nanamoon777', 'kappuchan', 'baeksoon2'], name: 'ISTP즈' },
-  { members: ['243000', 'doormomo', 'wellro314'], name: 'INTP즈' },
-  { members: ['243000', 'madaomm', 'nanamoon777'], name: '우짱단' },
-  { members: ['243000', 'madaomm', 'dalta20'], name: '금뚝즈 · 천양키즈 · 한남더헬' },
-  { members: ['243000', 'nanamoon777', 'imha22'], name: '햇라인' },
-  { members: ['madaomm', 'wellro314', 'dalta20'], name: '타이조쿠단' },
-  { members: ['doormomo', 'mocamu2', 'baeksoon2'], name: 'DP' },
-  { members: ['wellro314', 'imha22', 'baeksoon2'], name: '바보123' },
-  { members: ['243000', 'kyaang123', 'dalta20'], name: '디스팸치' },
-  { members: ['243000', 'imha22', 'baeksoon2'], name: '빙차차' },
-  { members: ['243000', 'mocamu2', 'dalta20'], name: '꼭따라이' },
-  { members: ['243000', 'madaomm', 'nanamoon777', 'kyaang123'], name: '부어제약' },
-  { members: ['madaomm', 'doormomo', 'mocamu2', 'dalta20'], name: '썩겜동' },
-  { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
-];
-
-const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
 
 async function loadChemistry() {
   try {

@@ -630,8 +630,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 6px 6px 14px;
-    box-sizing: border-box;
   }
   .stats-tab-all span {
     position: absolute;
@@ -642,6 +640,7 @@
     font-size: 10px;
     font-weight: 700;
     color: var(--muted);
+    text-shadow: 0 0 4px var(--bg), 0 0 4px var(--bg);
     transition: color 0.15s;
   }
   .stats-tab-all.active span { color: var(--accent); }
@@ -1215,12 +1214,12 @@
       flex-direction: column; padding: 0;
     }
     .sidebar-logo { display: none; }
-    .nav-list { flex-direction: row; flex: none; padding: 8px; overflow-x: auto; align-items: center; }
+    .nav-list { flex-direction: row; flex: none; padding: 8px; flex-wrap: wrap; align-items: center; }
     .nav-item {
       border-left: none;
       border-bottom: 3px solid transparent;
       padding: 10px 14px; white-space: nowrap;
-      width: auto;
+      width: auto; flex-shrink: 0;
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
     .nav-badge { right: 6px; top: 4px; transform: none; }

@@ -585,26 +585,20 @@
   }
 
   .stats-tabs-wrap {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 8px;
     margin: 0 auto 16px;
-    align-items: stretch;
     max-width: 880px;
   }
   .stats-tabs-side {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
+    display: contents;
   }
   .stats-tabs-members {
-    display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
+    display: contents;
   }
   .stats-tab {
     position: relative;
@@ -1099,6 +1093,7 @@
     padding: 8px;
     align-items: stretch;
     max-width: 880px;
+    margin: 0 auto;
   }
   .chem-filter-members {
     display: grid;
@@ -1238,9 +1233,8 @@
     .main-header { padding: 16px 20px; min-height: 0; }
     .grid, .events-wrap, .stats-wrap, .chem-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
-    .stats-tabs-wrap { flex-wrap: wrap; }
-    .stats-tabs-side { width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    .stats-tabs-members { grid-template-columns: repeat(6, 1fr); }
+    .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
+    .stats-tabs-members, .stats-tabs-side { display: contents; }
   }
 </style>
 </head>

@@ -3303,7 +3303,7 @@ loadChemistry();
 setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 60 * 1000);
 setInterval(loadStats, 60 * 1000);
-setInterval(loadChemistry, 5 * 60 * 1000);
+setInterval(loadChemistry, 60 * 1000);
 
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
@@ -3354,11 +3354,20 @@ const CHEM_GROUPS = [
   { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
 ];
 
+const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
+
 async function loadChemistry() {
   try {
+    if (Object.keys(chemCounts).length === 0) {
+      const cached = lsGet(LS_CHEM_CACHE, null);
+      if (cached) {
+        try { chemCounts = JSON.parse(cached); if (currentPage === 'chemistry') renderChemistry(); } catch (e) {}
+      }
+    }
     const res = await fetch(WORKER_URL + '/chat-counts');
     if (!res.ok) throw new Error('no data');
     chemCounts = await res.json();
+    lsSet(LS_CHEM_CACHE, JSON.stringify(chemCounts));
     if (currentPage === 'chemistry') renderChemistry();
   } catch (e) {}
 }

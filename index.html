@@ -586,7 +586,7 @@
 
   .stats-tabs-wrap {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 8px;
@@ -594,44 +594,63 @@
     align-items: stretch;
     max-width: 880px;
   }
+  .stats-tabs-side {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
   .stats-tabs-members {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(11, 1fr);
     gap: 6px;
     flex: 1;
     min-width: 0;
   }
-  .stats-tabs-side {
-    display: flex;
-    align-items: stretch;
-  }
   .stats-tab {
+    position: relative;
+    aspect-ratio: 1;
     background: var(--surface2);
-    border: 1.5px solid var(--border);
-    padding: 6px 8px;
-    color: var(--muted); cursor: pointer;
-    font-size: 13px; font-weight: 700;
-    font-family: inherit;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    overflow: hidden;
     transition: all 0.15s;
-    text-align: center;
-    display: inline-flex;
+    padding: 0;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .stats-tab img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.15s, filter 0.15s;
+  }
+  .stats-tab:not(.active) img { opacity: 0.25; filter: grayscale(1); }
+  .stats-tab:not(.active) { border-color: transparent; }
+  .stats-tab.active { border-color: var(--accent); }
+  .stats-tab:hover { border-color: var(--accent); }
+  .stats-tab-all {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    box-sizing: border-box;
-    min-height: 36px;
+    gap: 2px;
+    padding: 4px;
   }
-  .stats-tab:hover { color: var(--text); border-color: var(--accent); }
-  .stats-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .stats-tab img {
-    width: 18px; height: 18px;
-    object-fit: cover;
-    flex-shrink: 0;
+  .stats-tab-all img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
   }
-  .stats-tab-all {
-    width: 70px;
-    height: 100%;
+  .stats-tab-all:not(.active) img { opacity: 0.4; filter: grayscale(1); }
+  .stats-tab-all span {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color 0.15s;
   }
+  .stats-tab-all.active span { color: var(--accent); }
 
   .stats-grid {
     display: grid;
@@ -1069,12 +1088,46 @@
     padding: 20px 24px;
     max-width: 1400px; width: 100%; margin: 0 auto;
     flex: 1;
-    display: grid; grid-template-columns: 1fr 280px;
-    gap: 20px; align-items: start;
+    display: flex; flex-direction: column;
+    gap: 16px;
   }
-  @media (max-width: 900px) {
-    .chem-wrap { grid-template-columns: 1fr; }
-    .chem-wrap .filter-panel { position: static !important; }
+  .chem-filter-bar {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px;
+    align-items: stretch;
+  }
+  .chem-filter-members {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .chem-filter-bar .filter-member {
+    aspect-ratio: 1;
+  }
+  .chem-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .chem-filter-toggle:hover { border-color: var(--accent); }
+  @media (max-width: 700px) {
+    .chem-filter-members { grid-template-columns: repeat(6, 1fr); }
   }
   .chem-grid {
     display: grid;
@@ -1182,10 +1235,10 @@
     .main-header { padding: 16px 20px; min-height: 0; }
     .grid, .events-wrap, .stats-wrap, .chem-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
-    .stats-tabs-wrap { flex-direction: column; }
-    .stats-tabs-side { justify-content: center; }
-    .stats-tab-all { width: 100%; min-height: 32px; }
-    .stats-tabs-members { grid-template-columns: repeat(4, 1fr); }
+    .stats-tabs-wrap { flex-wrap: wrap; }
+    .stats-tabs-side { width: 100%; justify-content: center; }
+    .stats-tab-all { flex: 1; }
+    .stats-tabs-members { grid-template-columns: repeat(6, 1fr); }
   }
 </style>
 </head>
@@ -2377,13 +2430,13 @@ function initStatsTabs() {
   const sideBox = document.getElementById('statsTabsSide');
   if (!memberBox || !sideBox) return;
   memberBox.innerHTML = MEMBERS.map(m => `
-    <button class="stats-tab" data-tab="${m.id}">
-      <img src="${m.img}" alt="${m.name}"><span>${m.name}</span>
+    <button class="stats-tab" data-tab="${m.id}" title="${m.name}">
+      <img src="${m.img}" alt="${m.name}">
     </button>
   `).join('');
   sideBox.innerHTML = `
-    <button class="stats-tab stats-tab-all" data-tab="annual" data-mode="annual">연간</button>
-    <button class="stats-tab stats-tab-all active" data-tab="all" data-mode="monthly">월간</button>
+    <button class="stats-tab stats-tab-all" data-tab="annual" data-mode="annual"><img src="Favicon.webp" alt="연간"><span>연간</span></button>
+    <button class="stats-tab stats-tab-all active" data-tab="all" data-mode="monthly"><img src="Favicon.webp" alt="월간"><span>월간</span></button>
   `;
   const allTabs = [...memberBox.querySelectorAll('.stats-tab'), ...sideBox.querySelectorAll('.stats-tab')];
   allTabs.forEach(btn => {
@@ -3422,6 +3475,10 @@ function renderChemistry() {
   `).join('');
 
   body.innerHTML = `
+    <div class="chem-filter-bar">
+      <div class="chem-filter-members" id="chemFilterMembers">${memberBtns}</div>
+      <button class="chem-filter-toggle" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
+    </div>
     <div class="chem-grid">
       <div class="chem-group-section" style="margin-top:0;padding-top:0;border-top:none"><div class="chem-group-title">2인 케미</div></div>
       ${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}
@@ -3438,18 +3495,6 @@ function renderChemistry() {
         }).join('');
         return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groupCards}</div></div>`;
       }).join('')}
-    </div>
-    <div class="filter-panel">
-      <div class="filter-section">
-        <div class="filter-title-row">
-          <span class="filter-title">멤버</span>
-          <button class="filter-toggle-all" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
-        </div>
-        <div class="filter-members" id="chemFilterMembers">${memberBtns}</div>
-      </div>
-      <div class="filter-summary" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center">
-        ${filtered.length}개 페어 / ${CHEM_GROUPS.filter(g => g.members.length === 3 && g.members.some(id => chemFilterMembers.has(id))).length}개 3인 / ${CHEM_GROUPS.filter(g => g.members.length === 4 && g.members.some(id => chemFilterMembers.has(id))).length}개 4인 표시 중
-      </div>
     </div>
   `;
 

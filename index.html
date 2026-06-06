@@ -1206,6 +1206,95 @@
   }
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
+  /* === 현수막 탭 === */
+  .banner-wrap {
+    padding: 20px 24px;
+    max-width: 1400px; width: 100%; margin: 0 auto;
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 16px;
+  }
+  .banner-ranking {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .banner-rank-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .banner-rank-img {
+    width: 48px; height: 48px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+  }
+  .banner-rank-item.top .banner-rank-img {
+    border-color: var(--accent);
+  }
+  .banner-rank-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .banner-rank-name {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .banner-rank-medal {
+    font-size: 14px;
+    line-height: 1;
+  }
+  .banner-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1100px) { .banner-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .banner-grid { grid-template-columns: 1fr; } }
+  .banner-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .banner-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(97,255,236,0.12); }
+  .banner-card img {
+    width: 100%;
+    display: block;
+  }
+  .banner-card-info {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .banner-card-date {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .banner-card-members {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .banner-card-members img {
+    width: 24px; height: 24px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
+
   @media (max-width: 700px) {
     body { flex-direction: column; }
     .sidebar {
@@ -1270,6 +1359,10 @@
     <button class="nav-item" data-page="links">
       <span class="nav-icon" id="navLinksIcon"></span>
       <span>관련 링크</span>
+    </button>
+    <button class="nav-item" data-page="banner">
+      <span class="nav-icon" id="navBannerIcon"></span>
+      <span>현수막</span>
     </button>
   </div>
 </aside>
@@ -1360,6 +1453,15 @@
 
   <div class="page" id="page-links">
     <div class="links-wrap" id="linksBody"></div>
+  </div>
+
+  <div class="page" id="page-banner">
+    <div class="banner-wrap" id="bannerBody">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>현수막 데이터 불러오는 중...</div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -1641,9 +1743,10 @@ const SVG_ICONS = {
   trendingUp: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
   usersAvg: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`,
   chemistry: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  image: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
 };
 
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', links: '관련 링크' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', links: '관련 링크', banner: '현수막' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -1735,6 +1838,10 @@ const CHEM_GROUPS = [
   { members: ['madaomm', 'doormomo', 'mocamu2', 'dalta20'], name: '썩겜동' },
   { members: ['243000', 'doormomo', 'wellro314', 'baeksoon2'], name: '썩&썩' },
 ];
+
+const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
+const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
+let bannerData = [];
 
 function isCurrentMonth(yyyymm) {
   const now = new Date();
@@ -2025,6 +2132,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
     navStatsIcon: SVG_ICONS.chart,
     navChemistryIcon: SVG_ICONS.chemistry,
     navLinksIcon: SVG_ICONS.link,
+    navBannerIcon: SVG_ICONS.image,
   };
   for (const [id, html] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -2073,6 +2181,9 @@ function switchPage(page) {
   }
   if (page === 'chemistry') {
     renderChemistry();
+  }
+  if (page === 'banner') {
+    renderBanners();
   }
 }
 
@@ -3398,10 +3509,121 @@ loadLive();
 loadEvents();
 loadStats();
 loadChemistry();
+loadBanners();
 setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 60 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const row = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"' && line[i+1] === '"') { current += '"'; i++; }
+        else if (ch === '"') inQuotes = false;
+        else current += ch;
+      } else {
+        if (ch === '"') inQuotes = true;
+        else if (ch === ',') { row.push(current.trim()); current = ''; }
+        else current += ch;
+      }
+    }
+    row.push(current.trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseBannerDate(url) {
+  const match = url.match(/(\d{6})\.webp/);
+  if (!match) return null;
+  const s = match[1];
+  const yy = parseInt(s.substring(0, 2));
+  const mm = s.substring(2, 4);
+  const dd = s.substring(4, 6);
+  return { sort: s, display: `20${yy}.${mm}.${dd}` };
+}
+
+async function loadBanners() {
+  try {
+    if (bannerData.length === 0) {
+      const cached = lsGet(LS_BANNER_CACHE, null);
+      if (cached) {
+        try { bannerData = JSON.parse(cached); if (currentPage === 'banner') renderBanners(); } catch (e) {}
+      }
+    }
+    const res = await fetch(BANNER_SHEET_URL);
+    if (!res.ok) throw new Error('no data');
+    const csv = await res.text();
+    const rows = parseCSV(csv);
+    bannerData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
+      const url = r[0];
+      const members = r.slice(1).filter(c => c.length > 0);
+      return { url, members, date: parseBannerDate(url) };
+    });
+    bannerData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
+    lsSet(LS_BANNER_CACHE, JSON.stringify(bannerData));
+    if (currentPage === 'banner') renderBanners();
+  } catch (e) {}
+}
+
+function renderBanners() {
+  const body = document.getElementById('bannerBody');
+  if (!body) return;
+  if (bannerData.length === 0) {
+    body.innerHTML = '<div class="loading"><div>현수막 데이터가 없어요</div></div>';
+    return;
+  }
+
+  const counts = {};
+  MEMBERS.forEach(m => { counts[m.name] = 0; });
+  bannerData.forEach(b => b.members.forEach(name => { if (counts[name] !== undefined) counts[name]++; }));
+  const ranked = MEMBERS.map(m => ({ ...m, count: counts[m.name] || 0 })).sort((a, b) => b.count - a.count);
+  const MEDALS = ['🥇','🥈','🥉'];
+  let medalIdx = 0;
+  let prevCount = -1;
+  ranked.forEach(r => {
+    if (r.count > 0 && r.count !== prevCount) { r.medal = MEDALS[medalIdx] || ''; medalIdx++; prevCount = r.count; }
+    else if (r.count > 0) { r.medal = MEDALS[medalIdx - 1] || ''; }
+    else { r.medal = ''; }
+  });
+
+  const rankHtml = ranked.map(r => `
+    <div class="banner-rank-item ${r.medal ? 'top' : ''}">
+      ${r.medal ? `<span class="banner-rank-medal">${r.medal}</span>` : ''}
+      <img class="banner-rank-img" src="${r.img}" alt="${escapeHtml(r.name)}">
+      <span class="banner-rank-count" style="color:${r.color}">${r.count}회</span>
+    </div>
+  `).join('');
+
+  const cardsHtml = bannerData.map(b => {
+    const memberImgs = b.members.map(name => {
+      const m = MEMBERS.find(x => x.name === name);
+      return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
+    }).join('');
+    return `
+      <div class="banner-card">
+        <img src="${b.url}" alt="${b.date?.display || ''}" loading="lazy">
+        <div class="banner-card-info">
+          <span class="banner-card-date">${b.date?.display || ''}</span>
+          <div class="banner-card-members">${memberImgs}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="banner-ranking">${rankHtml}</div>
+    <div class="banner-grid">${cardsHtml}</div>
+  `;
+}
 
 async function loadChemistry() {
   try {

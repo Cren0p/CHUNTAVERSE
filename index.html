@@ -323,6 +323,8 @@
     font-size: 11px; font-weight: 700;
     letter-spacing: 0.5px; padding: 3px 8px;
     background: transparent; border: 1.5px solid currentColor;
+    display: inline-flex; align-items: center; justify-content: center;
+    line-height: 1;
   }
   .badge-mode.adult { color: var(--mode-adult); }
   .badge-mode.subscription { color: var(--mode-subscription); }
@@ -524,11 +526,12 @@
   .event-action { color: var(--muted); }
   .event-target { color: #cbd5e1; margin-left: 4px; }
   .event-mode-tag {
-    display: inline-block; margin-left: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 0;
     padding: 1px 6px; font-size: 11px;
     font-weight: 700; letter-spacing: 0.3px;
     background: transparent; border: 1.5px solid currentColor;
-    vertical-align: 1px;
+    line-height: 1; vertical-align: middle;
   }
   .event-mode-tag.adult { color: var(--mode-adult); }
   .event-mode-tag.subscription { color: var(--mode-subscription); }
@@ -606,11 +609,10 @@
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
-  @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
 
   .stats-card {
@@ -637,15 +639,20 @@
     flex-shrink: 0;
   }
   .stats-card-name { font-size: 16px; font-weight: 700; }
-  .stats-card-rows { display: flex; flex-direction: column; gap: 6px; }
+  .stats-card-rows { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0; }
+  .stats-card-col { display: flex; flex-direction: column; gap: 6px; }
+  .stats-card-col:first-child { padding-right: 12px; }
+  .stats-card-col:last-child { padding-left: 12px; }
+  .stats-card-sep { background: var(--border); }
   .stats-card-row {
     display: flex; justify-content: space-between;
     align-items: baseline; font-size: 13px;
+    white-space: nowrap;
   }
   .stats-card-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
   .stats-row-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
   .stats-row-icon svg { width: 11px; height: 11px; display: block; }
-  .stats-card-value { color: var(--text); font-weight: 700; }
+  .stats-card-value { color: var(--text); font-weight: 700; flex-shrink: 0; }
   .stats-card-value.accent { color: var(--accent); }
 
   .stats-detail-header {
@@ -1031,6 +1038,70 @@
     text-align: center;
   }
 
+  /* === 케미 탭 === */
+  .chem-wrap {
+    padding: 20px 24px;
+    max-width: 1400px; width: 100%; margin: 0 auto;
+    flex: 1;
+    display: grid; grid-template-columns: 1fr 280px;
+    gap: 20px; align-items: start;
+  }
+  @media (max-width: 900px) {
+    .chem-wrap { grid-template-columns: 1fr; }
+    .chem-wrap .filter-panel { position: static !important; }
+  }
+  .chem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1100px) { .chem-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .chem-grid { grid-template-columns: 1fr; } }
+  .chem-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .chem-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(97,255,236,0.12); }
+  .chem-name {
+    font-size: 13px; font-weight: 700;
+    text-align: center; margin-bottom: 12px;
+    color: var(--text);
+  }
+  .chem-body {
+    display: flex; align-items: center;
+    gap: 10px; justify-content: center;
+  }
+  .chem-member {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    min-width: 0;
+  }
+  .chem-member img {
+    width: 48px; height: 48px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+  }
+  .chem-member-name {
+    font-size: 11px; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 60px;
+    text-align: center;
+  }
+  .chem-arrows {
+    display: flex; flex-direction: column;
+    gap: 4px; align-items: center;
+    flex-shrink: 0;
+  }
+  .chem-arrow-row {
+    display: flex; align-items: center;
+    gap: 4px; font-size: 12px; font-weight: 600;
+    color: var(--muted);
+  }
+  .chem-arrow-row .chem-count { color: var(--text); font-weight: 700; }
+  .chem-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
+
   @media (max-width: 700px) {
     body { flex-direction: column; }
     .sidebar {
@@ -1055,7 +1126,7 @@
       flex-shrink: 0;
     }
     .main-header { padding: 16px 20px; min-height: 0; }
-    .grid, .events-wrap, .stats-wrap { padding: 16px; }
+    .grid, .events-wrap, .stats-wrap, .chem-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
     .stats-tabs-wrap { flex-direction: column; }
     .stats-tabs-side { justify-content: center; }
@@ -1089,6 +1160,10 @@
     <button class="nav-item" data-page="stats">
       <span class="nav-icon" id="navStatsIcon"></span>
       <span>통계</span>
+    </button>
+    <button class="nav-item" data-page="chemistry">
+      <span class="nav-icon" id="navChemistryIcon"></span>
+      <span>케미</span>
     </button>
     <button class="nav-item" data-page="links">
       <span class="nav-icon" id="navLinksIcon"></span>
@@ -1144,11 +1219,11 @@
             <button class="filter-type" data-type="post">
               <span class="filter-icon post"></span><span>숲 게시글</span>
             </button>
-            <button class="filter-type" data-type="youtube">
-              <span class="filter-icon youtube"></span><span>유튜브 업로드</span>
-            </button>
             <button class="filter-type" data-type="cafe">
               <span class="filter-icon cafe"></span><span>카페 게시글</span>
+            </button>
+            <button class="filter-type" data-type="youtube">
+              <span class="filter-icon youtube"></span><span>유튜브 업로드</span>
             </button>
           </div>
         </div>
@@ -1168,6 +1243,15 @@
           <div class="spinner"></div>
           <div>통계 불러오는 중...</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-chemistry">
+    <div class="chem-wrap" id="chemistryBody">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>케미 데이터 불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -1450,9 +1534,10 @@ const SVG_ICONS = {
   externalLink: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
   calendar: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
   music: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  chemistry: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
 };
 
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', links: '관련 링크' };
+const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', links: '관련 링크' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -1781,6 +1866,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
     navLiveIcon: SVG_ICONS.broadcast,
     navEventsIcon: SVG_ICONS.clock,
     navStatsIcon: SVG_ICONS.chart,
+    navChemistryIcon: SVG_ICONS.chemistry,
     navLinksIcon: SVG_ICONS.link,
   };
   for (const [id, html] of Object.entries(map)) {
@@ -1827,6 +1913,9 @@ function switchPage(page) {
   if (page === 'events') {
     stopTitleFlash();
     refreshUnreadIndicator();
+  }
+  if (page === 'chemistry') {
+    renderChemistry();
   }
 }
 
@@ -2288,6 +2377,7 @@ function computeMonthSummary(memberStats, year, month1) {
   const result = {
     daysWithBroadcast: 0, totalDaysInMonth: daysInMonth(year, month1),
     totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0,
+    viewerPeak: 0, viewerSum: 0, viewerCount: 0,
     sessionsByDate: {}, postsByDate: {}, youtubeByDate: {}, cafeByDate: {},
   };
   if (!memberStats) return result;
@@ -2306,6 +2396,9 @@ function computeMonthSummary(memberStats, year, month1) {
       const endMs = new Date(s.end).getTime();
       if (!isNaN(endMs) && endMs > startMs) result.totalDurationMs += (endMs - startMs);
     }
+    if (s.viewer_peak && s.viewer_peak > result.viewerPeak) result.viewerPeak = s.viewer_peak;
+    if (s.viewer_sum) result.viewerSum += s.viewer_sum;
+    if (s.viewer_count) result.viewerCount += s.viewer_count;
   }
   result.daysWithBroadcast = dateSet.size;
   for (const p of (memberStats.posts || [])) {
@@ -2348,6 +2441,13 @@ function computeMonthSummary(memberStats, year, month1) {
     result.postCount          += memberStats.seed.posts       || 0;
     result.youtubeCount       += memberStats.seed.youtube     || 0;
     result.cafeCount          += memberStats.seed.cafe        || 0;
+    if (memberStats.seed.viewerPeak && memberStats.seed.viewerPeak > result.viewerPeak) result.viewerPeak = memberStats.seed.viewerPeak;
+    if (memberStats.seed.viewerSum) result.viewerSum += memberStats.seed.viewerSum;
+    if (memberStats.seed.viewerCount) result.viewerCount += memberStats.seed.viewerCount;
+    if (memberStats.seed.viewerAvg && !memberStats.seed.viewerSum && result.viewerCount === 0) {
+      result.viewerSum = memberStats.seed.viewerAvg;
+      result.viewerCount = 1;
+    }
   }
   return result;
 }
@@ -2399,7 +2499,7 @@ function renderStatsAnnual(body) {
   // 해당 연도의 모든 월 stats 합산
   const annualSums = {};
   MEMBERS.forEach(m => {
-    annualSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0 };
+    annualSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0, viewerPeak: 0, viewerSum: 0, viewerCount: 0 };
   });
   for (let mo = 1; mo <= 12; mo++) {
     const ym = `${year}-${String(mo).padStart(2,'0')}`;
@@ -2420,6 +2520,9 @@ function renderStatsAnnual(body) {
           const e = new Date(s.end).getTime();
           if (!isNaN(e) && e > t) annualSums[m.id].totalDurationMs += (e - t);
         }
+        if (s.viewer_peak && s.viewer_peak > annualSums[m.id].viewerPeak) annualSums[m.id].viewerPeak = s.viewer_peak;
+        if (s.viewer_sum) annualSums[m.id].viewerSum += s.viewer_sum;
+        if (s.viewer_count) annualSums[m.id].viewerCount += s.viewer_count;
       });
       annualSums[m.id].postCount    += (ms.posts   || []).filter(p => { const t = new Date(p.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
       annualSums[m.id].youtubeCount += (ms.youtube || []).filter(y => { const t = new Date(y.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
@@ -2431,9 +2534,14 @@ function renderStatsAnnual(body) {
         annualSums[m.id].postCount       += ms.seed.posts       || 0;
         annualSums[m.id].youtubeCount    += ms.seed.youtube     || 0;
         annualSums[m.id].cafeCount       += ms.seed.cafe        || 0;
+        if (ms.seed.viewerPeak && ms.seed.viewerPeak > annualSums[m.id].viewerPeak) annualSums[m.id].viewerPeak = ms.seed.viewerPeak;
+        if (ms.seed.viewerSum) annualSums[m.id].viewerSum += ms.seed.viewerSum;
+        if (ms.seed.viewerCount) annualSums[m.id].viewerCount += ms.seed.viewerCount;
+        if (ms.seed.viewerAvg && !ms.seed.viewerSum) { annualSums[m.id].viewerSum += ms.seed.viewerAvg; annualSums[m.id].viewerCount += 1; }
       }
     });
   }
+
 
   // 순위 계산
   const MEDAL_KEYS = [
@@ -2468,25 +2576,41 @@ function renderStatsAnnual(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 일수</span>
-            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
+          <div class="stats-card-col" style="flex-direction:row;align-items:center;gap:8px">
+            <span class="stats-row-icon" style="color:var(--ev-start);flex-shrink:0">${SVG_ICONS.infinity}</span>
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+              <div class="stats-card-row">
+                <span class="stats-card-label">방송 일수</span>
+                <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">방송 시간</span>
+                <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">최고 시청자</span>
+                <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">평균 시청자</span>
+                <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
+              </div>
+            </div>
           </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>
-            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          <div class="stats-card-sep"></div>
+          <div class="stats-card-col">
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
+              <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
+              <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
+              <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
+            </div>
           </div>
         </div>
       </button>
@@ -2573,25 +2697,41 @@ function renderStatsAll(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 일수</span>
-            <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+          <div class="stats-card-col" style="flex-direction:row;align-items:center;gap:8px">
+            <span class="stats-row-icon" style="color:var(--ev-start);flex-shrink:0">${SVG_ICONS.infinity}</span>
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+              <div class="stats-card-row">
+                <span class="stats-card-label">방송 일수</span>
+                <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">방송 시간</span>
+                <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">최고 시청자</span>
+                <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+              </div>
+              <div class="stats-card-row">
+                <span class="stats-card-label">평균 시청자</span>
+                <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
+              </div>
+            </div>
           </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.infinity}</span>방송 시간</span>
-            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-          </div>
-          <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          <div class="stats-card-sep"></div>
+          <div class="stats-card-col">
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
+              <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
+              <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
+              <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
+            </div>
           </div>
         </div>
       </button>
@@ -2696,16 +2836,24 @@ function renderStatsMember(body, memberId) {
           <span class="stats-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
         </div>
         <div class="stats-summary-item">
+          <span class="stats-summary-label">최고 시청자</span>
+          <span class="stats-summary-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+        </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">평균 시청자</span>
+          <span class="stats-summary-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
+        </div>
+        <div class="stats-summary-item">
           <span class="stats-summary-label">숲 게시글</span>
           <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
         </div>
         <div class="stats-summary-item">
-          <span class="stats-summary-label">유튜브 업로드</span>
-          <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-        </div>
-        <div class="stats-summary-item">
           <span class="stats-summary-label">카페 게시글</span>
           <span class="stats-summary-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+        </div>
+        <div class="stats-summary-item">
+          <span class="stats-summary-label">유튜브 업로드</span>
+          <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
         </div>`;
         })()}
       </div>
@@ -3089,9 +3237,131 @@ renderLinks();
 loadLive();
 loadEvents();
 loadStats();
+loadChemistry();
 setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 60 * 1000);
 setInterval(loadStats, 60 * 1000);
+setInterval(loadChemistry, 5 * 60 * 1000);
+
+let chemCounts = {};
+let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
+
+const CHEM_NAMES = {
+  '243000:madaomm': '정규군',
+  '243000:nanamoon777': '천양 다이노스',
+  '243000:doormomo': '천보국 · 처니 생제르망',
+  '243000:kyaang123': null,
+  '243000:wellro314': '노이즈',
+  '243000:dalta20': '달아이스',
+  'madaomm:nanamoon777': '아재개그즈',
+  'madaomm:doormomo': '요정즈',
+  'madaomm:kappuchan': '천치원 동기',
+  'madaomm:kyaang123': '조동아리',
+  'madaomm:dalta20': '엉엉즈 · INFP즈',
+  'nanamoon777:doormomo': '나나문모모',
+  'nanamoon777:kyaang123': '흰뚝즈',
+  'nanamoon777:mocamu2': '맏막즈',
+  'imha22:baeksoon2': '00즈',
+  'imha22:dalta20': '개찐마단',
+  'doormomo:kappuchan': null,
+  'doormomo:kyaang123': '두세븐 일레븐',
+  'doormomo:mocamu2': '검뚝즈',
+  'doormomo:dalta20': '감바쓰야',
+  'kappuchan:kyaang123': '킹듁즈',
+  'kappuchan:wellro314': '비정규직',
+  'kappuchan:baeksoon2': '페이지',
+  'kyaang123:mocamu2': 'ENTP즈',
+  'wellro314:mocamu2': '버인협회 · 픽크타2',
+  'wellro314:baeksoon2': '북해빙궁',
+};
+
+async function loadChemistry() {
+  try {
+    const res = await fetch(WORKER_URL + '/chat-counts');
+    if (!res.ok) throw new Error('no data');
+    chemCounts = await res.json();
+    if (currentPage === 'chemistry') renderChemistry();
+  } catch (e) {}
+}
+
+function renderChemistry() {
+  const body = document.getElementById('chemistryBody');
+  if (!body) return;
+
+  const pairs = [];
+  for (let i = 0; i < MEMBERS.length; i++) {
+    for (let j = i + 1; j < MEMBERS.length; j++) {
+      const m1 = MEMBERS[i], m2 = MEMBERS[j];
+      const c1 = chemCounts[`${m1.id}:${m2.id}`] || 0;
+      const c2 = chemCounts[`${m2.id}:${m1.id}`] || 0;
+      pairs.push({ m1, m2, c1, c2, total: c1 + c2 });
+    }
+  }
+  pairs.sort((a, b) => b.total - a.total);
+
+  const filtered = pairs.filter(p => chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id));
+
+  const cards = filtered.map(p => {
+    const chemKey = `${p.m1.id}:${p.m2.id}`;
+    const customName = CHEM_NAMES[chemKey];
+    const displayName = customName || `${escapeHtml(p.m1.name)} × ${escapeHtml(p.m2.name)}`;
+    return `
+    <div class="chem-card">
+      <div class="chem-name">${customName ? escapeHtml(customName) : displayName}</div>
+      <div class="chem-body">
+        <div class="chem-member">
+          <img src="${p.m1.img}" alt="${escapeHtml(p.m1.name)}">
+          <span class="chem-member-name" style="color:${p.m1.color}">${escapeHtml(p.m1.name)}</span>
+        </div>
+        <div class="chem-arrows">
+          <div class="chem-arrow-row"><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
+          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span></div>
+        </div>
+        <div class="chem-member">
+          <img src="${p.m2.img}" alt="${escapeHtml(p.m2.name)}">
+          <span class="chem-member-name" style="color:${p.m2.color}">${escapeHtml(p.m2.name)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  }).join('');
+
+  const allOn = chemFilterMembers.size === MEMBERS.length;
+  const memberBtns = MEMBERS.map(m => `
+    <button class="filter-member ${chemFilterMembers.has(m.id) ? 'on' : ''}" data-id="${m.id}">
+      <img src="${m.img}" alt="${escapeHtml(m.name)}">
+    </button>
+  `).join('');
+
+  body.innerHTML = `
+    <div class="chem-grid">${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}</div>
+    <div class="filter-panel">
+      <div class="filter-section">
+        <div class="filter-title-row">
+          <span class="filter-title">멤버</span>
+          <button class="filter-toggle-all" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
+        </div>
+        <div class="filter-members" id="chemFilterMembers">${memberBtns}</div>
+      </div>
+      <div class="filter-summary" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center">
+        ${filtered.length}개 케미 표시 중 (전체 ${pairs.length}개)
+      </div>
+    </div>
+  `;
+
+  body.querySelectorAll('#chemFilterMembers .filter-member').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if (chemFilterMembers.has(id)) chemFilterMembers.delete(id); else chemFilterMembers.add(id);
+      renderChemistry();
+    });
+  });
+  const toggleBtn = document.getElementById('chemFilterToggle');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
+    if (chemFilterMembers.size === MEMBERS.length) chemFilterMembers.clear(); else MEMBERS.forEach(m => chemFilterMembers.add(m.id));
+    renderChemistry();
+  });
+}
 </script>
 </body>
 </html>

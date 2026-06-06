@@ -528,10 +528,10 @@
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: 0;
-    padding: 1px 6px; font-size: 11px;
+    padding: 2px 6px 3px; font-size: 11px;
     font-weight: 700; letter-spacing: 0.3px;
     background: transparent; border: 1.5px solid currentColor;
-    line-height: 1; vertical-align: middle;
+    line-height: 1; vertical-align: 1px;
   }
   .event-mode-tag.adult { color: var(--mode-adult); }
   .event-mode-tag.subscription { color: var(--mode-subscription); }
@@ -646,7 +646,7 @@
   .stats-card-sep { background: var(--border); }
   .stats-card-row {
     display: flex; justify-content: space-between;
-    align-items: baseline; font-size: 13px;
+    align-items: center; font-size: 13px;
     white-space: nowrap;
   }
   .stats-card-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
@@ -1534,6 +1534,10 @@ const SVG_ICONS = {
   externalLink: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
   calendar: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
   music: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  calendarDays: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  clockTime: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  trendingUp: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+  usersAvg: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`,
   chemistry: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
 };
 
@@ -2576,25 +2580,22 @@ function renderStatsAnnual(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-col" style="flex-direction:row;align-items:center;gap:8px">
-            <span class="stats-row-icon" style="color:var(--ev-start);flex-shrink:0">${SVG_ICONS.infinity}</span>
-            <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
-              <div class="stats-card-row">
-                <span class="stats-card-label">방송 일수</span>
-                <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">방송 시간</span>
-                <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">최고 시청자</span>
-                <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">평균 시청자</span>
-                <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-              </div>
+          <div class="stats-card-col">
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendarDays}</span>방송 일수</span>
+              <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
+              <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.trendingUp}</span>최고 시청자</span>
+              <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.usersAvg}</span>평균 시청자</span>
+              <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
             </div>
           </div>
           <div class="stats-card-sep"></div>
@@ -2697,25 +2698,22 @@ function renderStatsAll(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-col" style="flex-direction:row;align-items:center;gap:8px">
-            <span class="stats-row-icon" style="color:var(--ev-start);flex-shrink:0">${SVG_ICONS.infinity}</span>
-            <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
-              <div class="stats-card-row">
-                <span class="stats-card-label">방송 일수</span>
-                <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">방송 시간</span>
-                <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">최고 시청자</span>
-                <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-              </div>
-              <div class="stats-card-row">
-                <span class="stats-card-label">평균 시청자</span>
-                <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-              </div>
+          <div class="stats-card-col">
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendarDays}</span>방송 일수</span>
+              <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
+              <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.trendingUp}</span>최고 시청자</span>
+              <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+            </div>
+            <div class="stats-card-row">
+              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.usersAvg}</span>평균 시청자</span>
+              <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
             </div>
           </div>
           <div class="stats-card-sep"></div>

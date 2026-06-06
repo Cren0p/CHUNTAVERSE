@@ -1203,6 +1203,12 @@
     gap: 6px;
     flex-wrap: wrap;
   }
+  .chem-group-members.large {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: center;
+    gap: 8px 12px;
+  }
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
   /* === 컨텐츠 탭 === */
@@ -3909,7 +3915,7 @@ function renderChemistry() {
             if (!m) return '';
             return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
           }).join('');
-          return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members">${membersHtml}</div></div></div>`;
+          return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : ''}">${membersHtml}</div></div></div>`;
         }).join('');
         return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groupCards}</div></div>`;
       }).join('')}

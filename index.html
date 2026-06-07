@@ -1496,7 +1496,7 @@
 
   .members-profile {
     display: flex; flex-direction: column; gap: 16px;
-    max-width: 560px;
+    max-width: 720px;
     margin: 0 auto;
   }
   .members-profile-header {
@@ -1585,7 +1585,7 @@
   }
   .members-info-value {
     font-size: 14px; color: var(--text); font-weight: 700;
-    text-align: right;
+    text-align: right; white-space: nowrap;
   }
 
   @media (max-width: 700px) {
@@ -2069,7 +2069,7 @@ const SVG_ICONS = {
   image: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
   film: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,3 6,21 20,12" fill="currentColor" stroke="currentColor"/></svg>`,
   flag: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="2" x2="4" y2="22"/><path d="M4 4h16l-3 5 3 5H4"/></svg>`,
-  people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
 };
 
 const PAGE_TITLES = { members: '구성원', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };

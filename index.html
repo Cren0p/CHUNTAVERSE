@@ -1495,36 +1495,9 @@
   }
 
   .members-profile {
-    display: flex; flex-direction: column; gap: 20px;
-  }
-  .members-profile-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 20px;
-  }
-  @media (max-width: 900px) {
-    .members-profile-layout {
-      grid-template-columns: 200px 1fr;
-    }
-  }
-  @media (max-width: 600px) {
-    .members-profile-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-  .members-profile-full-img {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .members-profile-full-img img {
-    width: 100%; height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: top;
-  }
-  .members-profile-right {
     display: flex; flex-direction: column; gap: 16px;
+    max-width: 560px;
+    margin: 0 auto;
   }
   .members-profile-header {
     background: var(--surface);
@@ -4326,7 +4299,6 @@ function renderMembersProfile(body, memberId) {
   if (!m) { body.innerHTML = '<div class="loading"><div>멤버 정보를 찾을 수 없어요</div></div>'; return; }
   const bd = MEMBER_BIRTHDAYS[memberId];
   const info = MEMBER_INFO[memberId];
-  const fullImg = MEMBER_FULL_IMG[memberId];
   const links = MEMBER_LINKS[memberId];
 
   let quickHtml = '';
@@ -4374,17 +4346,10 @@ function renderMembersProfile(body, memberId) {
     infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${basicHtml}${interviewHtml}</div></div>`;
   }
 
-  const fullImgHtml = fullImg ? `<div class="members-profile-full-img"><img src="${fullImg}" alt="${escapeHtml(m.name)}"></div>` : '';
-
   body.innerHTML = `
     <div class="members-profile">
-      <div class="members-profile-layout">
-        ${fullImgHtml}
-        <div class="members-profile-right">
-          ${headerHtml}
-          ${infoHtml}
-        </div>
-      </div>
+      ${headerHtml}
+      ${infoHtml}
     </div>
   `;
 

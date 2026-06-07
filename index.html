@@ -1485,12 +1485,12 @@
   .members-crew-intro-img {
     max-width: 380px;
     width: 100%;
-    margin: 0 auto 20px;
+    margin: 0 auto 32px;
     display: block;
   }
   .members-crew-intro p {
-    font-size: 14px; color: var(--muted);
-    line-height: 1.8; max-width: 600px;
+    font-size: 15px; color: var(--muted);
+    line-height: 1.8; max-width: 720px;
     margin: 0 auto;
   }
 
@@ -1607,11 +1607,11 @@
     .members-info-row:nth-child(even) { padding-left: 0; }
   }
   .members-info-label {
-    font-size: 12px; color: var(--muted); font-weight: 600;
+    font-size: 13px; color: var(--muted); font-weight: 600;
     flex-shrink: 0;
   }
   .members-info-value {
-    font-size: 13px; color: var(--text); font-weight: 700;
+    font-size: 14px; color: var(--text); font-weight: 700;
     text-align: right;
   }
 
@@ -2247,6 +2247,36 @@ const MEMBER_INFO = {
   'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', voteCount: '657표', voteRate: '54.2%' },
   'baeksoon2': { engName: 'PANI', fanName: '쿠쿠단', age: '2000년생', height: '162cm', mbti: 'ISTP', group: '없음', firstStream: '2024년 1월 15일', voteCount: '510표', voteRate: '42%' },
 };
+
+function calcAge(memberId, ageStr) {
+  if (!ageStr) return '';
+  if (ageStr === '비공개') return '비공개';
+  if (ageStr === '700살') return '700세';
+  const match = ageStr.match(/^(\d{4})년생$/);
+  if (!match) return ageStr;
+  const birthYear = parseInt(match[1]);
+  const bd = MEMBER_BIRTHDAYS[memberId];
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const cy = kst.getUTCFullYear(), cm = kst.getUTCMonth() + 1, cd = kst.getUTCDate();
+  let age = cy - birthYear;
+  if (bd && (cm < bd.month || (cm === bd.month && cd < bd.day))) age--;
+  return `${age}세 (${ageStr})`;
+}
+
+function calcDaysSince(dateStr) {
+  if (!dateStr) return '';
+  const match = dateStr.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일$/);
+  if (!match) return dateStr;
+  const startDate = new Date(Date.UTC(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3])));
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const today = new Date(Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()));
+  const diffDays = Math.floor((today - startDate) / 86400000);
+  if (diffDays < 0) return dateStr;
+  const years = Math.floor(diffDays / 365);
+  const remain = diffDays % 365;
+  const dPlus = years > 0 ? `D+${years}년 ${remain}일` : `D+${diffDays}일`;
+  return `${dateStr} (${dPlus})`;
+}
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
@@ -4285,7 +4315,7 @@ function renderMembersCrew(body) {
     <div class="members-crew">
       <div class="members-crew-intro">
         <img class="members-crew-intro-img" src="CHUNTAVERSE.webp" alt="CHUNTAVERSE">
-        <p>천타버스는 원래 천양님이 크루 콘텐츠에 참가하기 위해 결성한 '위장 크루'로 시작했으나<br>지속적인 합방과 다채로운 자체 콘텐츠를 통해<br>이제는 그 누구도 대체할 수 없는 독보적인 매력을 뽐내는 버추얼 크루로 당당히 성장해 나가는 중입니다.</p>
+        <p>천타버스는 원래 천양님이 크루 콘텐츠에 참가하기 위해 결성한 '위장 크루'로 시작했으나<br><br>지속적인 합방과 다채로운 자체 콘텐츠를 통해<br><br>이제는 그 누구도 대체할 수 없는 독보적인 매력을 뽐내는 버추얼 크루로 당당히 성장해 나가는 중입니다.</p>
       </div>
     </div>
   `;
@@ -4326,19 +4356,22 @@ function renderMembersProfile(body, memberId) {
   let infoHtml = '';
   if (info) {
     const skip = v => !v || v.includes('해당없음') || v.includes('알려져있지');
-    const rows = [
-      ['나이', info.age],
+    const basicRows = [
+      ['나이', calcAge(memberId, info.age)],
       ['생일', bd ? bd.display : ''],
       ['키', info.height],
       ['MBTI', info.mbti],
       ['팬네임', info.fanName],
       ['다른 소속', info.group],
-      ['첫 방송일', info.firstStream],
+      ['첫 방송일', calcDaysSince(info.firstStream)],
+    ].filter(r => !skip(r[1]));
+    const interviewRows = [
       ['면접 득표수', info.voteCount],
       ['면접 득표율', info.voteRate],
     ].filter(r => !skip(r[1]));
-    const rowsHtml = rows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
-    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${rowsHtml}</div></div>`;
+    const basicHtml = basicRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    const interviewHtml = interviewRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${basicHtml}${interviewHtml}</div></div>`;
   }
 
   const fullImgHtml = fullImg ? `<div class="members-profile-full-img"><img src="${fullImg}" alt="${escapeHtml(m.name)}"></div>` : '';

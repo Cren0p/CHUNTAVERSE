@@ -1400,6 +1400,203 @@
     border: 1px solid var(--border);
   }
 
+  /* === 구성원 탭 === */
+  .members-wrap {
+    padding: 20px 24px;
+    max-width: 1600px; width: 100%; margin: 0 auto;
+    flex: 1;
+  }
+  .members-tabs-wrap {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px;
+    margin: 0 auto 16px;
+    max-width: 800px;
+  }
+  .members-tab {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.15s;
+    padding: 0;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .members-tab img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: opacity 0.15s, filter 0.15s;
+  }
+  .members-tab:not(.active) img { opacity: 0.25; filter: grayscale(1); }
+  .members-tab:not(.active) { border-color: transparent; }
+  .members-tab.active { border-color: var(--accent); }
+  .members-tab:hover { border-color: var(--accent); }
+  .members-tab-crew {
+    position: relative;
+  }
+  .members-tab-crew img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .members-tab-crew span {
+    position: absolute;
+    bottom: 3px; left: 4px;
+    text-align: left;
+    font-size: 11px; font-weight: 700;
+    color: var(--muted);
+    text-shadow: 0 0 4px var(--bg), 0 0 4px var(--bg);
+    transition: color 0.15s;
+  }
+  .members-tab-crew.active span { color: #fff; }
+
+  .members-crew {
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .members-crew-intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    text-align: center;
+  }
+  .members-crew-intro-img {
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto 20px;
+    display: block;
+  }
+  .members-crew-intro p {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.8; max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .members-profile {
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .members-profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .members-profile-layout {
+      grid-template-columns: 200px 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .members-profile-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  .members-profile-full-img {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+  }
+  .members-profile-full-img img {
+    width: 100%; display: block;
+  }
+  .members-profile-right {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .members-profile-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .members-profile-avatar {
+    width: 72px; height: 72px;
+    object-fit: cover;
+    border: 3px solid var(--border);
+    flex-shrink: 0;
+  }
+  .members-profile-info { display: flex; flex-direction: column; gap: 4px; }
+  .members-profile-name { font-size: 22px; font-weight: 800; }
+  .members-profile-eng {
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    letter-spacing: 1.5px; opacity: 0.7;
+  }
+  .members-profile-quick {
+    margin-left: auto;
+    display: flex; gap: 6px;
+    flex-shrink: 0;
+  }
+  .members-quick-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .members-quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(97,255,236,0.08);
+  }
+  .members-quick-btn.quick-soop:hover { border-color: #0388FF; color: #0388FF; background: rgba(3,136,255,0.10); }
+  .members-quick-btn.quick-youtube:hover { border-color: #FF0000; color: #FF0000; background: rgba(255,0,0,0.10); }
+  .members-quick-btn.quick-naver:hover { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
+  .members-quick-btn svg { width: 16px; height: 16px; display: block; }
+  .members-profile-id {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+    opacity: 0.5;
+  }
+  .members-info-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+  .members-info-title {
+    font-size: 12px; font-weight: 700;
+    color: var(--muted); letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .members-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  @media (max-width: 500px) { .members-info-grid { grid-template-columns: 1fr; } }
+  .members-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30,39,64,0.5);
+    gap: 8px;
+  }
+  .members-info-row:nth-child(odd) { padding-right: 16px; }
+  .members-info-row:nth-child(even) { padding-left: 16px; }
+  @media (max-width: 500px) {
+    .members-info-row:nth-child(odd) { padding-right: 0; }
+    .members-info-row:nth-child(even) { padding-left: 0; }
+  }
+  .members-info-label {
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    flex-shrink: 0;
+  }
+  .members-info-value {
+    font-size: 13px; color: var(--text); font-weight: 700;
+    text-align: right;
+  }
+
   @media (max-width: 700px) {
     body { flex-direction: column; }
     .sidebar {
@@ -1424,9 +1621,10 @@
       flex-shrink: 0;
     }
     .main-header { padding: 16px 20px; min-height: 0; }
-    .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap { padding: 16px; }
+    .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
+    .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
   }
 </style>
@@ -1436,6 +1634,10 @@
 <aside class="sidebar">
   <div class="sidebar-logo"><img id="siteLogoImg" src="Title.webp" alt="CHUNTAVERSE"></div>
   <div class="nav-list">
+    <button class="nav-item" data-page="members">
+      <span class="nav-icon" id="navMembersIcon"></span>
+      <span>구성원</span>
+    </button>
     <button class="nav-item" data-page="live">
       <span class="nav-icon" id="navLiveIcon"></span>
       <span>생방송</span>
@@ -1484,6 +1686,18 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
       <span>천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span>
     </a>
+  </div>
+
+  <div class="page" id="page-members">
+    <div class="members-wrap">
+      <div class="members-tabs-wrap" id="membersTabsWrap"></div>
+      <div id="membersBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>구성원 정보를 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="page active" id="page-live">
@@ -1864,9 +2078,10 @@ const SVG_ICONS = {
   image: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
   film: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,3 6,21 20,12" fill="currentColor" stroke="currentColor"/></svg>`,
   flag: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="2" x2="4" y2="22"/><path d="M4 4h16l-3 5 3 5H4"/></svg>`,
+  people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
 };
 
-const PAGE_TITLES = { live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };
+const PAGE_TITLES = { members: '구성원', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -1974,6 +2189,46 @@ const CHEM_GROUPS = [
   { members: ['nanamoon777', 'imha22', 'doormomo', 'kyaang123', 'wellro314', 'dalta20'], name: '블발즈' },
   { members: ['243000', 'madaomm', 'nanamoon777', 'imha22', 'kyaang123', 'wellro314', 'mocamu2', 'baeksoon2'], name: '돌발즈' },
 ];
+
+const membersState = {
+  tabsInited: false,
+  selectedTab: 'crew',
+};
+
+const MEMBER_BIRTHDAYS = {
+  'doormomo': { month: 1, day: 8, display: '1월 8일' },
+  'kappuchan': { month: 1, day: 22, display: '1월 22일' },
+  'baeksoon2': { month: 3, day: 11, display: '3월 11일' },
+  '243000': { month: 6, day: 22, display: '6월 22일' },
+  'mocamu2': { month: 6, day: 29, display: '6월 29일' },
+  'nanamoon777': { month: 7, day: 27, display: '7월 27일' },
+  'kyaang123': { month: 8, day: 8, display: '8월 8일' },
+  'dalta20': { month: 8, day: 20, display: '8월 20일' },
+  'wellro314': { month: 12, day: 7, display: '12월 7일' },
+  'madaomm': { month: 12, day: 8, display: '12월 8일' },
+  'imha22': { month: 12, day: 31, display: '12월 31일' },
+};
+
+const MEMBER_FULL_IMG = {
+  '243000': 'members/001.webp', 'madaomm': 'members/002.webp', 'nanamoon777': 'members/003.webp',
+  'imha22': 'members/004.webp', 'doormomo': 'members/005.webp', 'kappuchan': 'members/007.webp',
+  'kyaang123': 'members/008.webp', 'wellro314': 'members/009.webp', 'mocamu2': 'members/010.webp',
+  'dalta20': 'members/011.webp', 'baeksoon2': 'members/012.webp',
+};
+
+const MEMBER_INFO = {
+  '243000': { engName: 'CHUNYANG', fanName: '블롭단', age: '1994년생', height: '178cm', mbti: 'INTP', group: '패러블엔터테인먼트', firstStream: '알려져있지 않음', voteCount: '수장이라 해당없음', voteRate: '수장이라 해당없음' },
+  'madaomm': { engName: 'MADAOMM', fanName: '당고단', age: '1998년생', height: '152cm', mbti: 'INFP', group: '맏쎄이', firstStream: '2021년 7월 3일', voteCount: '내정이라 해당없음', voteRate: '내정이라 해당없음' },
+  'nanamoon777': { engName: 'NANAMOON', fanName: '제냥이', age: '700살', height: '155.8cm', mbti: 'ISTP', group: '아카이브 스튜디오', firstStream: '2023년 1월 23일', voteCount: '894표', voteRate: '73.7%' },
+  'imha22': { engName: 'IMHAMING', fanName: '고구밍', age: '2000년생', height: '168cm', mbti: 'ISFP', group: '없음', firstStream: '2022년 3월 28일', voteCount: '583표', voteRate: '48.1%' },
+  'doormomo': { engName: 'MOONMOMO', fanName: '곰탕이', age: '1998년생', height: '153cm', mbti: 'INTP', group: '블리즈', firstStream: '2023년 11월 25일', voteCount: '777표', voteRate: '64.1%' },
+  'kappuchan': { engName: 'KAPPU', fanName: '울푸단', age: '비공개', height: '비공개', mbti: 'ISTP', group: '없음', firstStream: '2023년 11월 18일', voteCount: '313표', voteRate: '25.8%' },
+  'kyaang123': { engName: 'KYAANG', fanName: '마늘', age: '1997년생', height: '159cm', mbti: 'ENTP', group: '도파민', firstStream: '2022년 10월 10일', voteCount: '740표', voteRate: '61%' },
+  'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '1998년생', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', voteCount: '604표', voteRate: '49.8%' },
+  'mocamu2': { engName: 'MOCA', fanName: '초코', age: '2003년생', height: '155.1cm', mbti: 'ENTP', group: 'UR:L', firstStream: '2024년 7월 9일', voteCount: '808표', voteRate: '66.6%' },
+  'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', voteCount: '657표', voteRate: '54.2%' },
+  'baeksoon2': { engName: 'PANI', fanName: '쿠쿠단', age: '2000년생', height: '162cm', mbti: 'ISTP', group: '없음', firstStream: '2024년 1월 15일', voteCount: '510표', voteRate: '42%' },
+};
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
@@ -2246,6 +2501,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
 
 (() => {
   const map = {
+    navMembersIcon: SVG_ICONS.people,
     navLiveIcon: SVG_ICONS.broadcast,
     navEventsIcon: SVG_ICONS.clock,
     navStatsIcon: SVG_ICONS.chart,
@@ -2276,6 +2532,8 @@ function updateHeaderCenter() {
     topLine = lastContentUpdate ? '열람 시 자동 갱신 · ' + lastContentUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'banner') {
     topLine = lastBannerUpdate ? '열람 시 자동 갱신 · ' + lastBannerUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+  } else if (currentPage === 'members') {
+    topLine = '';
   }
   el.innerHTML = `
     ${topLine ? `<div class="header-center-line">${topLine}</div>` : ''}
@@ -2300,6 +2558,13 @@ function switchPage(page) {
   if (page === 'stats' && !statsState.tabsInited) {
     initStatsTabs();
     statsState.tabsInited = true;
+  }
+  if (page === 'members' && !membersState.tabsInited) {
+    initMembersTabs();
+    membersState.tabsInited = true;
+  }
+  if (page === 'members') {
+    renderMembersBody();
   }
   if (page === 'events') {
     stopTitleFlash();
@@ -3956,6 +4221,115 @@ function renderChemistry() {
     if (chemFilterMembers.size === MEMBERS.length) chemFilterMembers.clear(); else MEMBERS.forEach(m => chemFilterMembers.add(m.id));
     renderChemistry();
   });
+}
+
+function initMembersTabs() {
+  const wrap = document.getElementById('membersTabsWrap');
+  if (!wrap) return;
+  const crewTab = `<button class="members-tab members-tab-crew active" data-tab="crew"><img src="Favicon.webp" alt="크루"><span>크루</span></button>`;
+  const memberTabs = MEMBERS.map(m => `<button class="members-tab" data-tab="${m.id}" title="${m.name}"><img src="${m.img}" alt="${m.name}"></button>`).join('');
+  wrap.innerHTML = crewTab + memberTabs;
+  wrap.querySelectorAll('.members-tab').forEach(btn => {
+    btn.addEventListener('click', () => selectMembersTab(btn.dataset.tab));
+  });
+  renderMembersBody();
+}
+
+function selectMembersTab(tabId) {
+  membersState.selectedTab = tabId;
+  document.querySelectorAll('.members-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+  });
+  renderMembersBody();
+}
+
+function renderMembersBody() {
+  const body = document.getElementById('membersBody');
+  if (!body) return;
+  if (membersState.selectedTab === 'crew') {
+    renderMembersCrew(body);
+  } else {
+    renderMembersProfile(body, membersState.selectedTab);
+  }
+}
+
+function renderMembersCrew(body) {
+  body.innerHTML = `
+    <div class="members-crew">
+      <div class="members-crew-intro">
+        <img class="members-crew-intro-img" src="CHUNTAVERSE.webp" alt="CHUNTAVERSE">
+        <p>천타버스는 원래 천양님이 크루 콘텐츠에 참가하기 위해 결성한 '위장 크루'로 시작했으나<br>지속적인 합방과 다채로운 자체 콘텐츠를 통해<br>이제는 그 누구도 대체할 수 없는 독보적인 매력을 뽐내는 버추얼 크루로 당당히 성장해 나가는 중입니다.</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderMembersProfile(body, memberId) {
+  const m = MEMBER_BY_ID[memberId];
+  if (!m) { body.innerHTML = '<div class="loading"><div>멤버 정보를 찾을 수 없어요</div></div>'; return; }
+  const bd = MEMBER_BIRTHDAYS[memberId];
+  const info = MEMBER_INFO[memberId];
+  const fullImg = MEMBER_FULL_IMG[memberId];
+  const links = MEMBER_LINKS[memberId];
+
+  let quickHtml = '';
+  if (links) {
+    const qLinks = [];
+    const station = links.common?.['방송국'];
+    if (station) qLinks.push({ url: typeof station === 'string' ? station : station.url, icon: SVG_ICONS.infinity, title: '방송국', cls: 'quick-soop' });
+    const yt = links.common?.['유튜브'];
+    if (yt) qLinks.push({ url: typeof yt === 'string' ? yt : yt.url, icon: SVG_ICONS.youtube, title: '유튜브', cls: 'quick-youtube' });
+    const cafe = links.common?.['팬카페'];
+    if (cafe) qLinks.push({ url: typeof cafe === 'string' ? cafe : cafe.url, icon: SVG_ICONS.naver, title: '팬카페', cls: 'quick-naver' });
+    quickHtml = qLinks.map(l => `<a class="members-quick-btn ${l.cls}" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" title="${l.title}">${l.icon}</a>`).join('');
+    quickHtml += `<button class="members-quick-btn" id="membersGoLinks" title="관련 링크">${SVG_ICONS.link}</button>`;
+  }
+
+  const headerHtml = `
+    <div class="members-profile-header">
+      <img class="members-profile-avatar" src="${m.img}" alt="${escapeHtml(m.name)}" style="border-color:${m.color}">
+      <div class="members-profile-info">
+        <div class="members-profile-name" style="color:${m.color}">${escapeHtml(m.name)}</div>
+        ${info ? `<div class="members-profile-eng">${escapeHtml(info.engName)}</div>` : ''}
+      </div>
+      ${quickHtml ? `<div class="members-profile-quick">${quickHtml}</div>` : ''}
+    </div>
+  `;
+
+  let infoHtml = '';
+  if (info) {
+    const skip = v => !v || v.includes('해당없음') || v.includes('알려져있지');
+    const rows = [
+      ['나이', info.age],
+      ['생일', bd ? bd.display : ''],
+      ['키', info.height],
+      ['MBTI', info.mbti],
+      ['팬네임', info.fanName],
+      ['다른 소속', info.group],
+      ['첫 방송일', info.firstStream],
+      ['면접 득표수', info.voteCount],
+      ['면접 득표율', info.voteRate],
+    ].filter(r => !skip(r[1]));
+    const rowsHtml = rows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${rowsHtml}</div></div>`;
+  }
+
+  const fullImgHtml = fullImg ? `<div class="members-profile-full-img"><img src="${fullImg}" alt="${escapeHtml(m.name)}"></div>` : '';
+
+  body.innerHTML = `
+    <div class="members-profile">
+      <div class="members-profile-layout">
+        ${fullImgHtml}
+        <div class="members-profile-right">
+          ${headerHtml}
+          ${infoHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const goLinksBtn = document.getElementById('membersGoLinks');
+  if (goLinksBtn) goLinksBtn.addEventListener('click', () => { history.replaceState(null, '', '#links'); switchPage('links'); });
 }
 </script>
 </body>

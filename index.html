@@ -3785,7 +3785,7 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
+  requestAnimationFrame(() => {});
 }
 
 function membersRowStyle(count) {
@@ -3886,7 +3886,7 @@ function renderContent() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="content-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
+  requestAnimationFrame(() => {});
 }
 
 async function loadChemistry() {

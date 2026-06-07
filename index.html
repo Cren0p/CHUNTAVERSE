@@ -3782,7 +3782,7 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
-  setTimeout(() => adjustRanking(body.querySelector('.banner-ranking')), 50);
+  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 function membersRowStyle(count) {
@@ -3883,7 +3883,7 @@ function renderContent() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="content-grid">${cardsHtml}</div>
   `;
-  setTimeout(() => adjustRanking(body.querySelector('.banner-ranking')), 50);
+  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 async function loadChemistry() {

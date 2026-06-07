@@ -207,37 +207,15 @@
     background: linear-gradient(180deg, rgba(97,255,236,0.05) 0%, transparent 100%);
     display: flex; align-items: center; gap: 16px;
     min-height: 56px;
-    position: relative;
   }
   .page-title {
-    font-size: 18px; font-weight: 700; letter-spacing: 1px;
     flex-shrink: 0;
-    position: absolute;
-    left: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .header-center {
-    flex: 1; text-align: center; color: var(--muted);
-    font-size: 12px; min-width: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
+    flex-wrap: wrap;
   }
-  .header-center-line {
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 100%;
-  }
-  .header-disclaimer {
-    font-size: 11px;
-    opacity: 0.75;
-  }
-  .header-yt-btn {
-    position: absolute;
-    right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
+  .page-title-link {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -252,8 +230,37 @@
     transition: background 0.15s, border-color 0.15s;
     flex-shrink: 0;
   }
-  .header-yt-btn:hover { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.7); }
-  .header-yt-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .page-title-link:hover { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.7); }
+  .page-title-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .celebration-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    flex-shrink: 0;
+    text-decoration: none;
+  }
+  .celebration-box svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .header-center {
+    margin-left: auto; text-align: right; color: var(--muted);
+    font-size: 12px; min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .header-center-line {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%;
+  }
+  .header-disclaimer {
+    font-size: 11px;
+    opacity: 0.75;
+  }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
@@ -1633,7 +1640,7 @@
   <div class="nav-list">
     <button class="nav-item" data-page="members">
       <span class="nav-icon" id="navMembersIcon"></span>
-      <span>구성원</span>
+      <span>프로필</span>
     </button>
     <button class="nav-item" data-page="live">
       <span class="nav-icon" id="navLiveIcon"></span>
@@ -1677,12 +1684,8 @@
 
 <main class="main">
   <div class="main-header">
-    <div class="page-title" id="pageTitle">생방송</div>
+    <div class="page-title" id="pageTitle"></div>
     <div class="header-center" id="headerCenter"></div>
-    <a class="header-yt-btn" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-      <span>천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span>
-    </a>
   </div>
 
   <div class="page" id="page-members">
@@ -2078,7 +2081,7 @@ const SVG_ICONS = {
   people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
 };
 
-const PAGE_TITLES = { members: '구성원', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };
+const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -2251,10 +2254,76 @@ function calcDaysSince(dateStr) {
   const today = new Date(Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()));
   const diffDays = Math.floor((today - startDate) / 86400000);
   if (diffDays < 0) return dateStr;
-  const years = Math.floor(diffDays / 365);
-  const remain = diffDays % 365;
-  const dPlus = years > 0 ? `D+${years}년 ${remain}일` : `D+${diffDays}일`;
-  return `${dateStr} (${dPlus})`;
+  return `${dateStr} (D+${diffDays}일)`;
+}
+
+const CT_FORMATION = new Date(Date.UTC(2025, 10, 30));
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return `${parseInt(h.substring(0,2),16)},${parseInt(h.substring(2,4),16)},${parseInt(h.substring(4,6),16)}`;
+}
+
+const CELEB_SVG = {
+  birthday: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M12 7v4"/><path d="M12 7c-1-2 1-3 0-4 1 1-1 2 0 4"/><path d="M7.5 11c0-1.5 1-3 2.5-3s2.5 1.5 2.5 3"/><path d="M11.5 11c0-1.5 1-3 2.5-3s2.5 1.5 2.5 3"/></svg>`,
+  chuntaverse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>`,
+  broadcast: SVG_ICONS.infinity,
+};
+
+function celebBox(svg, text, hexColor) {
+  const rgb = hexToRgb(hexColor);
+  return `<div class="celebration-box" style="background:rgba(${rgb},0.12);border-color:rgba(${rgb},0.4);color:${hexColor}">${svg}<span>${text}</span></div>`;
+}
+
+function getTodayCelebrations() {
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const cy = kst.getUTCFullYear(), cm = kst.getUTCMonth() + 1, cd = kst.getUTCDate();
+  const todayMs = Date.UTC(cy, cm - 1, cd);
+  const results = [];
+
+  for (const m of MEMBERS) {
+    const bd = MEMBER_BIRTHDAYS[m.id];
+    if (!bd || bd.month !== cm || bd.day !== cd) continue;
+    const info = MEMBER_INFO[m.id];
+    const birthMatch = info?.age?.match(/^(\d{4})년생$/);
+    const nthText = birthMatch ? `${cy - parseInt(birthMatch[1])}번째 ` : '';
+    results.push(celebBox(CELEB_SVG.birthday, `${m.name}님의 ${nthText}생일을<br>축하합니다!`, m.color));
+  }
+
+  if (cm === 11 && cd === 30 && cy > 2025) {
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, '#61FFEC'));
+  }
+  const ctDays = Math.floor((todayMs - CT_FORMATION.getTime()) / 86400000);
+  if (ctDays > 0 && ctDays % 100 === 0 && !(cm === 11 && cd === 30)) {
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '#61FFEC'));
+  }
+
+  for (const m of MEMBERS) {
+    const info = MEMBER_INFO[m.id];
+    if (!info?.firstStream) continue;
+    const match = info.firstStream.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일$/);
+    if (!match) continue;
+    const fy = parseInt(match[1]), fm = parseInt(match[2]), fd = parseInt(match[3]);
+    if (fm === cm && fd === cd && cy > fy) {
+      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${cy - fy}주년을<br>축하합니다!`, m.color));
+    } else {
+      const days = Math.floor((todayMs - Date.UTC(fy, fm - 1, fd)) / 86400000);
+      if (days > 0 && days % 100 === 0) {
+        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${days}일을<br>축하합니다!`, m.color));
+      }
+    }
+  }
+
+  return results;
+}
+
+const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span>천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span></a>`;
+
+function updatePageTitle() {
+  const el = document.getElementById('pageTitle');
+  if (!el) return;
+  const celebrations = getTodayCelebrations();
+  el.innerHTML = BV_LINK + celebrations.join('');
 }
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
@@ -2580,7 +2649,6 @@ function switchPage(page) {
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
   updateHeaderCenter();
   if (page === 'stats' && !statsState.tabsInited) {
     initStatsTabs();
@@ -2617,6 +2685,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 });
 
 const initPage = (location.hash || '').replace('#', '') || 'live';
+updatePageTitle();
 switchPage(initPage);
 
 window.addEventListener('hashchange', () => {

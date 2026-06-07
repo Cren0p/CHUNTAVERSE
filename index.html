@@ -1312,17 +1312,6 @@
     justify-content: center;
     flex-wrap: wrap;
   }
-  .banner-ranking.split {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .banner-ranking.split .ranking-row {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    align-items: flex-end;
-  }
   .banner-rank-item {
     display: flex;
     flex-direction: column;
@@ -3699,37 +3688,6 @@ async function loadBanners() {
   } catch (e) {}
 }
 
-function adjustRanking(container) {
-  if (!container) return;
-  container.classList.remove('split');
-  const items = container.querySelectorAll('.banner-rank-item');
-  if (items.length <= 6) return;
-  const firstBottom = items[0].getBoundingClientRect().bottom;
-  const seventhBottom = items[6].getBoundingClientRect().bottom;
-  if (Math.abs(firstBottom - seventhBottom) < 2) return;
-  const row1 = document.createElement('div');
-  row1.className = 'ranking-row';
-  const row2 = document.createElement('div');
-  row2.className = 'ranking-row';
-  items.forEach((item, i) => { (i < 6 ? row1 : row2).appendChild(item); });
-  container.innerHTML = '';
-  container.appendChild(row1);
-  container.appendChild(row2);
-  container.classList.add('split');
-}
-
-function adjustAllRankings() {
-  document.querySelectorAll('.banner-ranking').forEach(adjustRanking);
-}
-
-window.addEventListener('resize', () => {
-  clearTimeout(window._rankingResizeTimer);
-  window._rankingResizeTimer = setTimeout(() => {
-    if (currentPage === 'banner') renderBanners();
-    if (currentPage === 'content') renderContent();
-  }, 200);
-});
-
 function renderBanners() {
   const body = document.getElementById('bannerBody');
   if (!body) return;
@@ -3782,7 +3740,6 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 function membersRowStyle(count) {
@@ -3883,7 +3840,6 @@ function renderContent() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="content-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 async function loadChemistry() {

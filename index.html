@@ -1872,6 +1872,9 @@ const VALID_PAGES = Object.keys(PAGE_TITLES);
 let lastLiveUpdate = null;
 let lastEventsUpdate = null;
 let lastStatsUpdate = null;
+let lastChemistryUpdate = null;
+let lastContentUpdate = null;
+let lastBannerUpdate = null;
 let currentPage = 'live';
 
 const ALL_TYPE_KEYS = ['soop', 'chat', 'post', 'youtube', 'cafe'];
@@ -2262,11 +2265,17 @@ function updateHeaderCenter() {
   if (!el) return;
   let topLine = '';
   if (currentPage === 'live') {
-    topLine = lastLiveUpdate ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+    topLine = lastLiveUpdate ? '30초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'events') {
-    topLine = lastEventsUpdate ? '1분마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+    topLine = lastEventsUpdate ? '30초마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'stats') {
     topLine = lastStatsUpdate ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+  } else if (currentPage === 'chemistry') {
+    topLine = lastChemistryUpdate ? '1분마다 자동 갱신 · ' + lastChemistryUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+  } else if (currentPage === 'content') {
+    topLine = lastContentUpdate ? '열람 시 자동 갱신 · ' + lastContentUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+  } else if (currentPage === 'banner') {
+    topLine = lastBannerUpdate ? '열람 시 자동 갱신 · ' + lastBannerUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   }
   el.innerHTML = `
     ${topLine ? `<div class="header-center-line">${topLine}</div>` : ''}
@@ -3624,8 +3633,8 @@ loadStats();
 loadChemistry();
 loadContent();
 loadBanners();
-setInterval(loadLive, 60 * 1000);
-setInterval(loadEvents, 60 * 1000);
+setInterval(loadLive, 30 * 1000);
+setInterval(loadEvents, 30 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
 
@@ -3685,6 +3694,7 @@ async function loadBanners() {
     });
     bannerData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_BANNER_CACHE, JSON.stringify(bannerData));
+    lastBannerUpdate = new Date();
     if (currentPage === 'banner') renderBanners();
   } catch (e) {}
 }
@@ -3782,6 +3792,7 @@ async function loadContent() {
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));
+    lastContentUpdate = new Date();
     if (currentPage === 'content') renderContent();
   } catch (e) {}
 }
@@ -3855,6 +3866,7 @@ async function loadChemistry() {
     if (!res.ok) throw new Error('no data');
     chemCounts = await res.json();
     lsSet(LS_CHEM_CACHE, JSON.stringify(chemCounts));
+    lastChemistryUpdate = new Date();
     if (currentPage === 'chemistry') renderChemistry();
   } catch (e) {}
 }

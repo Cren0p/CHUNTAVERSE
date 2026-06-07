@@ -1347,6 +1347,7 @@
   }
   @media (max-width: 1100px) { .banner-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .banner-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1100px) { .banner-ranking { max-width: 400px; margin: 0 auto; } }
   .banner-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -3688,26 +3689,6 @@ async function loadBanners() {
   } catch (e) {}
 }
 
-function adjustRanking(el) {
-  if (!el) return;
-  const items = el.querySelectorAll(':scope > .banner-rank-item');
-  if (items.length <= 6) return;
-  const bot0 = items[0].getBoundingClientRect().bottom;
-  const bot6 = items[6].getBoundingClientRect().bottom;
-  if (Math.abs(bot0 - bot6) < 2) return;
-  const row1 = document.createElement('div');
-  row1.style.cssText = 'display:flex;gap:12px;justify-content:center;align-items:flex-end';
-  const row2 = row1.cloneNode(false);
-  items.forEach((item, i) => (i < 6 ? row1 : row2).appendChild(item));
-  el.innerHTML = '';
-  el.appendChild(row1);
-  el.appendChild(row2);
-  el.style.flexDirection = 'column';
-  el.style.alignItems = 'center';
-}
-
-window.addEventListener('resize', (() => { let t; return () => { clearTimeout(t); t = setTimeout(() => { if (currentPage === 'banner') renderBanners(); if (currentPage === 'content') renderContent(); }, 300); }; })());
-
 function renderBanners() {
   const body = document.getElementById('bannerBody');
   if (!body) return;
@@ -3760,7 +3741,6 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking'))));
 }
 
 function membersRowStyle(count) {
@@ -3861,7 +3841,6 @@ function renderContent() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="content-grid">${cardsHtml}</div>
   `;
-  requestAnimationFrame(() => requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking'))));
 }
 
 async function loadChemistry() {

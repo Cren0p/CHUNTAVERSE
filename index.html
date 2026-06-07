@@ -556,9 +556,37 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 6px;
     padding: 8px 14px;
     border-bottom: 1px solid var(--border);
   }
+  .timeline-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .timeline-scroll-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .timeline-scroll-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .timeline-scroll-btn svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
   .sort-toggle {
     display: inline-flex;
     align-items: center;
@@ -2200,10 +2228,10 @@ const MEMBER_BIRTHDAYS = {
 };
 
 const MEMBER_FULL_IMG = {
-  '243000': 'members/001.webp', 'madaomm': 'members/002.webp', 'nanamoon777': 'members/003.webp',
-  'imha22': 'members/004.webp', 'doormomo': 'members/005.webp', 'kappuchan': 'members/007.webp',
-  'kyaang123': 'members/008.webp', 'wellro314': 'members/009.webp', 'mocamu2': 'members/010.webp',
-  'dalta20': 'members/011.webp', 'baeksoon2': 'members/012.webp',
+  '243000': 'members/001.webp?v=2', 'madaomm': 'members/002.webp?v=2', 'nanamoon777': 'members/003.webp?v=2',
+  'imha22': 'members/004.webp?v=2', 'doormomo': 'members/005.webp?v=2', 'kappuchan': 'members/007.webp?v=2',
+  'kyaang123': 'members/008.webp?v=2', 'wellro314': 'members/009.webp?v=2', 'mocamu2': 'members/010.webp?v=2',
+  'dalta20': 'members/011.webp?v=2', 'baeksoon2': 'members/012.webp?v=2',
 };
 
 const MEMBER_INFO = {
@@ -2938,7 +2966,11 @@ function applyFilter() {
   const arrowSvg = eventSortAsc
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 12 19"/><polyline points="5 12 12 19 19 12"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 19 12 5"/><polyline points="5 12 12 5 19 12"/></svg>';
-  const headerHtml = `<div class="timeline-header"><button class="sort-toggle" id="sortToggleBtn">${arrowSvg}<span>${sortLabel}</span></button></div>`;
+  const scrollDownSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
+  const scrollUpSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>';
+  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync">${arrowSvg}<span>${sortLabel}</span></button>`;
+  const headerHtml = `<div class="timeline-header"><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div>`;
+  const footerHtml = `<div class="timeline-footer"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button>${sortBtnHtml}</div>`;
   if (filtered.length === 0) {
     tl.innerHTML = headerHtml + (allEvents.length === 0
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
@@ -2947,10 +2979,15 @@ function applyFilter() {
     const sorted = [...filtered].sort((a, b) => eventSortAsc
       ? new Date(a.time) - new Date(b.time)
       : new Date(b.time) - new Date(a.time));
-    tl.innerHTML = headerHtml + sorted.map(e => renderEvent(e, sorted)).join('');
+    tl.innerHTML = headerHtml + sorted.map(e => renderEvent(e, sorted)).join('') + footerHtml;
   }
-  const sortBtn = document.getElementById('sortToggleBtn');
-  if (sortBtn) sortBtn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
+  tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
+    btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
+  });
+  const scrollBottomBtn = document.getElementById('scrollToBottom');
+  if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'end', behavior: 'smooth' }); });
+  const scrollTopBtn = document.getElementById('scrollToTop');
+  if (scrollTopBtn) scrollTopBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
 

@@ -1306,11 +1306,22 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .banner-ranking.split {
     display: grid;
-    grid-template-columns: repeat(6, auto);
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .banner-ranking.split .ranking-row {
+    display: flex;
     gap: 12px;
     justify-content: center;
-    justify-items: center;
+    align-items: flex-end;
   }
   .banner-rank-item {
     display: flex;
@@ -3688,6 +3699,40 @@ async function loadBanners() {
   } catch (e) {}
 }
 
+function adjustRanking(container) {
+  if (!container) return;
+  container.classList.remove('split');
+  const items = container.querySelectorAll('.banner-rank-item');
+  if (items.length <= 6) return;
+  const firstTop = items[0].getBoundingClientRect().top;
+  const sixthTop = items[5].getBoundingClientRect().top;
+  if (firstTop === sixthTop) {
+    const seventhTop = items[6].getBoundingClientRect().top;
+    if (seventhTop === firstTop) return;
+  }
+  const row1 = document.createElement('div');
+  row1.className = 'ranking-row';
+  const row2 = document.createElement('div');
+  row2.className = 'ranking-row';
+  items.forEach((item, i) => { (i < 6 ? row1 : row2).appendChild(item); });
+  container.innerHTML = '';
+  container.appendChild(row1);
+  container.appendChild(row2);
+  container.classList.add('split');
+}
+
+function adjustAllRankings() {
+  document.querySelectorAll('.banner-ranking').forEach(adjustRanking);
+}
+
+window.addEventListener('resize', () => {
+  clearTimeout(window._rankingResizeTimer);
+  window._rankingResizeTimer = setTimeout(() => {
+    if (currentPage === 'banner') renderBanners();
+    if (currentPage === 'content') renderContent();
+  }, 200);
+});
+
 function renderBanners() {
   const body = document.getElementById('bannerBody');
   if (!body) return;
@@ -3740,6 +3785,7 @@ function renderBanners() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="banner-grid">${cardsHtml}</div>
   `;
+  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 function membersRowStyle(count) {
@@ -3840,6 +3886,7 @@ function renderContent() {
     <div class="banner-ranking">${rankHtml}</div>
     <div class="content-grid">${cardsHtml}</div>
   `;
+  requestAnimationFrame(() => adjustRanking(body.querySelector('.banner-ranking')));
 }
 
 async function loadChemistry() {

@@ -1306,11 +1306,11 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 16px;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, auto);
     gap: 12px;
-    align-items: flex-end;
     justify-content: center;
-    flex-wrap: wrap;
+    justify-items: center;
   }
   .banner-rank-item {
     display: flex;
@@ -3709,12 +3709,12 @@ function renderBanners() {
     else { r.medal = ''; }
   });
 
-  const rankHtml = ranked.map((r, i) => `
+  const rankHtml = ranked.map(r => `
     <div class="banner-rank-item ${r.medal ? 'top' : ''}">
       ${r.medal ? `<span class="banner-rank-medal">${r.medal}</span>` : ''}
       <img class="banner-rank-img" src="${r.img}" alt="${escapeHtml(r.name)}">
       <span class="banner-rank-count" style="color:${r.color}">${r.count}회</span>
-    </div>${i === 4 ? '<div style="flex-basis:100%;height:0"></div>' : ''}
+    </div>
   `).join('');
 
   const cardsHtml = bannerData.map(b => {
@@ -3806,12 +3806,12 @@ function renderContent() {
     else { r.medal = ''; }
   });
 
-  const rankHtml = ranked.map((r, i) => `
+  const rankHtml = ranked.map(r => `
     <div class="banner-rank-item ${r.medal ? 'top' : ''}">
       ${r.medal ? `<span class="banner-rank-medal">${r.medal}</span>` : ''}
       <img class="banner-rank-img" src="${r.img}" alt="${escapeHtml(r.name)}">
       <span class="banner-rank-count" style="color:${r.color}">${r.count}회</span>
-    </div>${i === 4 ? '<div style="flex-basis:100%;height:0"></div>' : ''}
+    </div>
   `).join('');
 
   const cardsHtml = contentData.map(c => {

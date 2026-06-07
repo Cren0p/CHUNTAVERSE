@@ -1572,9 +1572,20 @@
     padding: 8px 0;
     border-bottom: 1px solid rgba(30,39,64,0.5);
     gap: 8px;
+    min-height: 36px;
   }
   .members-info-row:nth-child(odd) { padding-right: 16px; }
   .members-info-row:nth-child(even) { padding-left: 16px; }
+  .members-info-row-full {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30,39,64,0.5);
+    gap: 8px;
+    grid-column: 1 / -1;
+    min-height: 36px;
+  }
   @media (max-width: 500px) {
     .members-info-row:nth-child(odd) { padding-right: 0; }
     .members-info-row:nth-child(even) { padding-left: 0; }
@@ -4328,22 +4339,23 @@ function renderMembersProfile(body, memberId) {
   let infoHtml = '';
   if (info) {
     const skip = v => !v || v.includes('해당없음') || v.includes('알려져있지');
-    const basicRows = [
+    const pairedRows = [
       ['나이', calcAge(memberId, info.age)],
       ['생일', bd ? bd.display : ''],
       ['키', info.height],
       ['MBTI', info.mbti],
       ['팬네임', info.fanName],
       ['다른 소속', info.group],
-      ['첫 방송일', calcDaysSince(info.firstStream)],
     ].filter(r => !skip(r[1]));
+    const firstStreamVal = calcDaysSince(info.firstStream);
     const interviewRows = [
       ['면접 득표수', info.voteCount],
       ['면접 득표율', info.voteRate],
     ].filter(r => !skip(r[1]));
-    const basicHtml = basicRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    const pairedHtml = pairedRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    const firstStreamHtml = !skip(firstStreamVal) ? `<div class="members-info-row-full"><span class="members-info-label">첫 방송일</span><span class="members-info-value">${escapeHtml(firstStreamVal)}</span></div>` : '';
     const interviewHtml = interviewRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
-    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${basicHtml}${interviewHtml}</div></div>`;
+    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${pairedHtml}${firstStreamHtml}${interviewHtml}</div></div>`;
   }
 
   body.innerHTML = `

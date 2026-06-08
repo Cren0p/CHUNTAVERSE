@@ -2621,7 +2621,7 @@ function updateHeaderCenter() {
   if (!el) return;
   let topLine = '';
   if (currentPage === 'live') {
-    topLine = lastLiveUpdate ? '30초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+    topLine = lastLiveUpdate ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'events') {
     topLine = lastEventsUpdate ? '30초마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'stats') {

@@ -3241,8 +3241,9 @@ function computeMonthSummary(memberStats, year, month1) {
     if (memberStats.seed.viewerSum) result.viewerSum += memberStats.seed.viewerSum;
     if (memberStats.seed.viewerCount) result.viewerCount += memberStats.seed.viewerCount;
     if (memberStats.seed.viewerAvg && !memberStats.seed.viewerSum && result.viewerCount === 0) {
-      result.viewerSum = memberStats.seed.viewerAvg;
-      result.viewerCount = 1;
+      const seedMin = Math.round((memberStats.seed.broadcastMs || 0) / 60000);
+      if (seedMin > 0) { result.viewerSum = memberStats.seed.viewerAvg * seedMin; result.viewerCount = seedMin; }
+      else { result.viewerSum = memberStats.seed.viewerAvg; result.viewerCount = 1; }
     }
   }
   return result;
@@ -3333,7 +3334,7 @@ function renderStatsAnnual(body) {
         if (ms.seed.viewerPeak && ms.seed.viewerPeak > annualSums[m.id].viewerPeak) annualSums[m.id].viewerPeak = ms.seed.viewerPeak;
         if (ms.seed.viewerSum) annualSums[m.id].viewerSum += ms.seed.viewerSum;
         if (ms.seed.viewerCount) annualSums[m.id].viewerCount += ms.seed.viewerCount;
-        if (ms.seed.viewerAvg && !ms.seed.viewerSum) { annualSums[m.id].viewerSum += ms.seed.viewerAvg; annualSums[m.id].viewerCount += 1; }
+        if (ms.seed.viewerAvg && !ms.seed.viewerSum) { const seedMin = Math.round((ms.seed.broadcastMs || 0) / 60000); if (seedMin > 0) { annualSums[m.id].viewerSum += ms.seed.viewerAvg * seedMin; annualSums[m.id].viewerCount += seedMin; } else { annualSums[m.id].viewerSum += ms.seed.viewerAvg; annualSums[m.id].viewerCount += 1; } }
       }
     });
   }

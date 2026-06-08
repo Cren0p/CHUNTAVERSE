@@ -307,6 +307,8 @@
 
   .card.offline .card-thumb { opacity: 0.4; }
   .card.offline .card-name { color: var(--muted) !important; }
+  .card.vacation .card-thumb { opacity: 1; }
+  .card.vacation .card-thumb .placeholder img { max-width: 100%; max-height: 100%; opacity: 1; object-fit: cover; }
 
   .card-thumb {
     width: 100%; aspect-ratio: 16/9;
@@ -2784,7 +2786,8 @@ function daysInMonth(year, month1) {
 function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
-  card.className = 'card ' + (info.live ? 'live' : 'offline');
+  const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
+  card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
   card.style.animationDelay = delay + 'ms';
   if (info.live) {
@@ -2799,7 +2802,6 @@ function buildCard(m, info, delay) {
   const thumbTs = Math.floor(Date.now() / 60000);
   const thumbHtml = hasThumb
     ? `<img src="${info.thumb}?t=${thumbTs}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
-  const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
   const placeholderInner = info.live && mode && mode !== 'normal'
     ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
     : `<img src="${vacSrc || m.img}" alt="${m.name}">`;

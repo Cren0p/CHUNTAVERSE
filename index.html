@@ -2786,7 +2786,7 @@ function daysInMonth(year, month1) {
 function buildCard(m, info, delay) {
   const tag = info.live ? 'a' : 'div';
   const card = document.createElement(tag);
-  const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
+  const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
   card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
   card.style.animationDelay = delay + 'ms';

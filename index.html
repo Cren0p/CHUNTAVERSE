@@ -2625,9 +2625,9 @@ function updateHeaderCenter() {
   if (!el) return;
   let topLine = '';
   if (currentPage === 'live') {
-    topLine = lastLiveUpdate ? '1분마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+    topLine = lastLiveUpdate ? '20초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'events') {
-    topLine = lastEventsUpdate ? '30초마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+    topLine = lastEventsUpdate ? '20초마다 자동 감지 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'stats') {
     topLine = lastStatsUpdate ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'chemistry') {
@@ -4042,8 +4042,8 @@ loadStats();
 loadChemistry();
 loadContent();
 loadBanners();
-setInterval(loadLive, 60 * 1000);
-setInterval(loadEvents, 30 * 1000);
+setInterval(loadLive, 20 * 1000);
+setInterval(loadEvents, 20 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
 

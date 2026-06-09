@@ -3830,8 +3830,11 @@ async function loadEvents() {
     updateHeaderCenter();
     refreshUnreadIndicator();
   } catch (e) {
-    document.getElementById('timeline').innerHTML =
-      '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';
+    // 일시적 폴링 실패: 이미 불러온 이벤트가 있으면 기존 화면을 유지하고 이번 실패는 무시
+    if (!allEvents || allEvents.length === 0) {
+      const tl = document.getElementById('timeline');
+      if (tl) tl.innerHTML = '<div class="timeline-empty">이벤트 데이터를 불러올 수 없어요</div>';
+    }
   }
 }
 
@@ -3903,8 +3906,11 @@ async function loadLive() {
     lastLiveUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {
-    document.getElementById('app').innerHTML =
-      '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';
+    // 일시적 폴링 실패: 이미 카드 그리드가 그려져 있으면 유지하고 이번 실패는 무시
+    const app = document.getElementById('app');
+    if (app && !app.querySelector('.grid')) {
+      app.innerHTML = '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';
+    }
     console.error(e);
   }
 }
@@ -4036,7 +4042,7 @@ loadStats();
 loadChemistry();
 loadContent();
 loadBanners();
-setInterval(loadLive, 30 * 1000);
+setInterval(loadLive, 60 * 1000);
 setInterval(loadEvents, 30 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);

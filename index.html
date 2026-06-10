@@ -1517,7 +1517,6 @@
   }
   .members-profile-photo {
     position: relative;
-    aspect-ratio: 3 / 4;
     flex-shrink: 0;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -1536,7 +1535,7 @@
   }
   @media (max-width: 640px) {
     .members-profile { flex-direction: column; }
-    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; }
+    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; aspect-ratio: 3 / 4; }
   }
   .members-profile-header {
     background: var(--surface);
@@ -2228,6 +2227,8 @@ const membersState = {
   tabsInited: false,
   selectedTab: 'crew',
 };
+let profilePhotoSizer = null;
+window.addEventListener('resize', () => { if (profilePhotoSizer) profilePhotoSizer(); });
 
 const MEMBER_BIRTHDAYS = {
   'doormomo': { month: 1, day: 8, display: '1월 8일' },
@@ -4422,6 +4423,7 @@ function renderMembersBody() {
 }
 
 function renderMembersCrew(body) {
+  profilePhotoSizer = null;
   body.innerHTML = `
     <div class="members-crew">
       <div class="members-crew-intro">
@@ -4498,6 +4500,21 @@ function renderMembersProfile(body, memberId) {
 
   const goLinksBtn = document.getElementById('membersGoLinks');
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { history.replaceState(null, '', '#links'); switchPage('links'); });
+
+  const photoBox = body.querySelector('.members-profile-photo');
+  const mainBox = body.querySelector('.members-profile-main');
+  profilePhotoSizer = () => {
+    if (!photoBox || !mainBox || !photoBox.isConnected) return;
+    if (window.innerWidth <= 640) {
+      photoBox.style.height = '';
+      photoBox.style.width = '';
+      return;
+    }
+    const h = mainBox.offsetHeight;
+    photoBox.style.height = h + 'px';
+    photoBox.style.width = Math.round(h * 3 / 4) + 'px';
+  };
+  profilePhotoSizer();
 }
 </script>
 </body>

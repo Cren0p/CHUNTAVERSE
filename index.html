@@ -1963,7 +1963,7 @@ const MEMBER_LINKS = {
     common: {
       방송국: 'https://www.sooplive.com/station/kyaang123',
       유튜브: 'https://www.youtube.com/@kyaang',
-      유튜브2: null,
+      유튜브2: { label: '다시보기', url: 'https://www.youtube.com/@%EC%BA%AC%EC%95%99%EB%8B%A4%EC%8B%9C%EB%B3%B4%EA%B8%B0' },
       팬카페: 'https://cafe.naver.com/dopaminefancafe',
       나무위키: 'https://namu.wiki/w/%EC%BA%AC%EC%95%99',
     },
@@ -2597,7 +2597,6 @@ function refreshUnreadIndicator() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {});
 updateNotifySwitchUI();
 document.getElementById('notifySwitch').addEventListener('click', () => {
   setNotifyEnabled(!notifyEnabled);
@@ -3101,7 +3100,6 @@ function applyFilter() {
   const summary = document.getElementById('filterSummary');
   if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
 
-  tl.dataset.clickInit = '1';
   refreshUnreadIndicator();
 }
 

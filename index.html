@@ -1516,6 +1516,7 @@
     align-items: stretch;
   }
   .members-profile-photo {
+    position: relative;
     aspect-ratio: 3 / 4;
     flex-shrink: 0;
     border: 1px solid var(--border);
@@ -1523,6 +1524,8 @@
     overflow: hidden;
   }
   .members-profile-photo img {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
   }

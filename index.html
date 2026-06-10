@@ -1488,6 +1488,8 @@
 
   .members-crew {
     display: flex; flex-direction: column; gap: 24px;
+    max-width: 800px;
+    margin: 0 auto;
   }
   .members-crew-intro {
     background: var(--surface);
@@ -1508,9 +1510,30 @@
   }
 
   .members-profile {
-    display: flex; flex-direction: column; gap: 16px;
-    max-width: 720px;
+    display: flex; gap: 16px;
+    max-width: 1000px;
     margin: 0 auto;
+    align-items: stretch;
+  }
+  .members-profile-photo {
+    aspect-ratio: 3 / 4;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .members-profile-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .members-profile-main {
+    display: flex; flex-direction: column; gap: 16px;
+    flex: 1;
+    min-width: 0;
+  }
+  @media (max-width: 640px) {
+    .members-profile { flex-direction: column; }
+    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; }
   }
   .members-profile-header {
     background: var(--surface);
@@ -4459,10 +4482,14 @@ function renderMembersProfile(body, memberId) {
     infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${pairedHtml}${firstStreamHtml}${interviewHtml}</div></div>`;
   }
 
+  const photoSrc = m.img.replace('members/', 'profile/');
   body.innerHTML = `
     <div class="members-profile">
-      ${headerHtml}
-      ${infoHtml}
+      <div class="members-profile-photo"><img src="${photoSrc}" alt="${escapeHtml(m.name)}" onerror="this.parentNode.style.display='none'"></div>
+      <div class="members-profile-main">
+        ${headerHtml}
+        ${infoHtml}
+      </div>
     </div>
   `;
 

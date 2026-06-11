@@ -344,6 +344,11 @@
   .badge-mode.subscription { color: var(--mode-subscription); }
   .badge-mode.copyright { color: var(--mode-copyright); }
   .badge-mode.restricted { color: var(--muted); }
+  .badge-mode-wrap {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; gap: 4px;
+  }
+  .badge-mode-wrap .badge-mode { position: static; top: auto; right: auto; }
 
   .card-info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; }
   .card-avatar {
@@ -2070,11 +2075,17 @@ const MEMBER_LINKS = {
 const MODE_LABEL = {
   normal: '일반', adult: '19+',
   subscription: '구독+', copyright: '저작권', restricted: '제한',
+  adult_copyright: '19+·저작권',
 };
 const MODE_PLACEHOLDER_TEXT = {
   adult: '19금 방송', subscription: '구독플러스 전용 방송',
   copyright: '저작권 방송', restricted: '제한 방송',
+  adult_copyright: '19금 저작권 방송',
 };
+// 복합 모드는 기존 배지 두 개를 나란히 재사용해 표기
+function modeParts(mode) {
+  return mode === 'adult_copyright' ? ['adult', 'copyright'] : [mode];
+}
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
@@ -2831,8 +2842,12 @@ function buildCard(m, info, delay) {
   const placeholderInner = info.live && mode && mode !== 'normal'
     ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
     : `<img src="${vacSrc || m.img}" alt="${m.name}">`;
-  const modeBadge = info.live && mode && mode !== 'normal'
-    ? `<span class="badge-mode ${mode}">${MODE_LABEL[mode] || ''}</span>` : '';
+  let modeBadge = '';
+  if (info.live && mode && mode !== 'normal') {
+    const parts = modeParts(mode);
+    const spans = parts.map(p => `<span class="badge-mode ${p}">${MODE_LABEL[p] || ''}</span>`).join('');
+    modeBadge = parts.length > 1 ? `<span class="badge-mode-wrap">${spans}</span>` : spans;
+  }
   const profileUrl = soopProfileUrl(m.id);
   const avatarHtml = profileUrl
     ? `<img class="card-avatar" src="${profileUrl}" alt="${m.name}" onerror="this.onerror=null;this.src='${m.img}'">`
@@ -2914,8 +2929,9 @@ function renderEvent(e, allEvents) {
   const memberColor = member ? member.color : '#fff';
   let modeTag = '';
   if ((e.type === 'start' || e.type === 'end') && e.mode && e.mode !== 'normal') {
-    const label = MODE_LABEL[e.mode] || '';
-    if (label) modeTag = `<span class="event-mode-tag ${e.mode}">${label}</span>`;
+    modeTag = modeParts(e.mode)
+      .map(p => { const label = MODE_LABEL[p] || ''; return label ? `<span class="event-mode-tag ${p}">${label}</span>` : ''; })
+      .join('');
   }
   let targetTag = '';
   if (e.type === 'comment_recommend' && e.target_name) {
@@ -3805,7 +3821,7 @@ function renderDayDetail(year, month1, sum, memberId) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
         durStr = ` · ${formatDuration(ms)}`;
       }
-      const modeBadge = `<span class="day-session-mode ${s.mode || 'normal'}">${MODE_LABEL[s.mode] || '일반 방송'}</span>`;
+      const modeBadge = modeParts(s.mode || 'normal').map(p => `<span class="day-session-mode ${p}">${MODE_LABEL[p] || '일반 방송'}</span>`).join('');
       let changesHtml = '';
       if (s.changes && s.changes.length > 0) {
         changesHtml = `<div class="day-session-changes">${s.changes.map(c => {

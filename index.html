@@ -2803,6 +2803,13 @@ function formatDuration(ms) {
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
+// SOOP 게시판(/board) 폴백 링크에 텍스트 조각(#:~:text=)을 부착 → 브라우저가 게시판 목록에서 해당 글 제목으로 스크롤·강조.
+// 대상: 애청자 전용 글 등 정밀 링크로 업그레이드되지 않는 board형 링크. 미지원 브라우저·제목 미표시 시 fragment는 조용히 무시됨.
+function withTextFragment(url, title) {
+  if (!url || !title || !/\/board$/.test(url)) return url;
+  const frag = encodeURIComponent(title).replace(/-/g, '%2D');  // '-'는 텍스트 조각 문법의 prefix/suffix 구분자라 추가 인코딩 필요
+  return `${url}#:~:text=${frag}`;
+}
 function soopProfileUrl(userId) {
   const prefix = userId.substring(0, 2);
   return `https://profile.img.sooplive.com/LOGO/${prefix}/${userId}/${userId}.jpg`;
@@ -3005,7 +3012,7 @@ function renderEvent(e, allEvents) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
   if (e.url) {
-    return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
+    return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(withTextFragment(e.url, e.title))}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
   return `<div class="event" data-time="${eventTime}">${inner}</div>`;
 }
@@ -3843,7 +3850,7 @@ function renderDayDetail(year, month1, sum, memberId) {
     } else if (item.kind === 'post') {
       const p = item.data;
       const inner = `<span class="day-kind-icon post">${SVG_ICONS.board}</span><span class="day-item-time">${formatHHMM(p.time)}</span><span class="day-item-title">${escapeHtml(p.title||'(제목 없음)')}</span>`;
-      html += p.url ? `<a class="day-item" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
+      html += p.url ? `<a class="day-item" href="${escapeHtml(withTextFragment(p.url, p.title))}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
     } else if (item.kind === 'youtube') {
       const y = item.data;
       const inner = `<span class="day-kind-icon youtube">${SVG_ICONS.youtube}</span><span class="day-item-time">${formatHHMM(y.time)}</span><span class="day-item-title">${escapeHtml(y.title||'(제목 없음)')}</span>`;

@@ -4639,11 +4639,10 @@ function renderChemistry() {
   });
 }
 
-// ── 명예의 전당 ──
-// 집계 기준은 카드 하단 기록 설명('올해 최다 ~' 등)이 곧 정의:
-// 방송일수·방송시간·게시글·유튜브 = 당해 연도(통계 연간 탭과 동일 계산식 + seed 포함),
-// 개근·마라톤·정전 위원회 2종 = 역대(세션 기록 기반이라 seed 미포함, 2026-05 개시 이후),
-// 멤버 채팅 쌍·컨텐츠·현수막 = 누적.
+// ── 명예의 전당 ── 전 항목 통산(개시 이래) 집계. 연간 경쟁은 통계 탭 연간 메달이 담당.
+// 방송일수·방송시간·게시글·유튜브 = 연간 합(computeAnnualSums, 연간 탭과 동일 산식 + seed 포함)을 전 연도 누적,
+// 개근·마라톤·정전 위원회 2종 = 세션 기록 기반이라 seed 미포함(2026-05 개시 이후),
+// 멤버 채팅 쌍·컨텐츠·현수막 = 누적 카운터.
 // 정전 위원회: 다른 멤버 방송 구간(고아 세션은 48h 상한)과의 시점·구간 겹침으로 판정.
 
 // 구간 목록 병합 (정렬된 비중첩 구간으로)
@@ -4714,7 +4713,20 @@ function renderHall() {
     return;
   }
 
-  const annualSums = computeAnnualSums(year);
+  // 통산 합산: 통계 개시 연도부터 현재까지 연간 합을 연도별로 누적 (연간 탭과 동일 산식 computeAnnualSums 재사용, seed 포함)
+  const totalSums = {};
+  MEMBERS.forEach(m => { totalSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, cafeCount: 0, youtubeCount: 0 }; });
+  for (let y = STATS_START_YEAR; y <= year; y++) {
+    const ys = computeAnnualSums(y);
+    MEMBERS.forEach(m => {
+      const t = totalSums[m.id], s = ys[m.id];
+      t.sessions += s.sessions;
+      t.totalDurationMs += s.totalDurationMs;
+      t.postCount += s.postCount;
+      t.cafeCount += s.cafeCount;
+      t.youtubeCount += s.youtubeCount;
+    });
+  }
 
   // 세션 단위 역대 집계 (개근·마라톤·정전 위원회) — '올해' 항목이 아니므로 연도 제한 없음, 연말~연초 연속 방송도 안 끊김.
   // seed는 세션별 기록이 없어 미포함(서비스 개시 이후 데이터만)
@@ -4782,14 +4794,14 @@ function renderHall() {
   contentData.forEach(c => c.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) contentCounts[m.id]++; }));
 
   const categories = [
-    { label: '천타버스 공무원',           desc: '올해 최다 방송 일수',          icon: SVG_ICONS.calendarDays, color: 'var(--ev-start)',   get: id => annualSums[id].sessions,                              fmt: v => `${v}일` },
-    { label: '엉덩이가 무거운',           desc: '올해 최다 방송 시간',          icon: SVG_ICONS.clockTime,    color: 'var(--ev-start)',   get: id => annualSums[id].totalDurationMs,                       fmt: v => formatDuration(v) },
+    { label: '천타버스 공무원',           desc: '최다 방송 일수',          icon: SVG_ICONS.calendarDays, color: 'var(--ev-start)',   get: id => totalSums[id].sessions,                              fmt: v => `${v}일` },
+    { label: '엉덩이가 무거운',           desc: '최다 방송 시간',          icon: SVG_ICONS.clockTime,    color: 'var(--ev-start)',   get: id => totalSums[id].totalDurationMs,                       fmt: v => formatDuration(v) },
     { label: '휴방하는 것을 까먹은',       desc: '최장 연속 방송 일수',          icon: SVG_ICONS.flame,        color: '#FF8C00',           get: id => longestStreak(extra[id].dates),                       fmt: v => `${v}일` },
     { label: '방종하는 것을 까먹은',       desc: '최장 단일 방송 시간',          icon: SVG_ICONS.hourglass,    color: '#FF8C00',           get: id => extra[id].marathonMs,                                 fmt: v => formatDuration(v) },
     { label: '천타버스 정전 중단 위원회',  desc: '아무도 없을 때 시작한 방송',    icon: SVG_ICONS.sun,          color: '#FFDD00',           get: id => solo[id].starts,                                      fmt: v => `${v}회` },
     { label: '천타버스 정전 방지 위원회',  desc: '아무도 없을 때 혼자 방송한 시간', icon: SVG_ICONS.moon,         color: '#FFDD00',           get: id => solo[id].ms,                                          fmt: v => formatDuration(v) },
-    { label: '팬과 자주 소통하는',         desc: '올해 최다 숲·카페 게시글',     icon: SVG_ICONS.board,        color: 'var(--ev-post)',    icon2: SVG_ICONS.coffee, color2: '#03C75A', get: id => annualSums[id].postCount + annualSums[id].cafeCount, fmt: v => `${v}개` },
-    { label: '유튜브도 놓치지 않는',       desc: '올해 최다 유튜브 업로드',      icon: SVG_ICONS.youtube,      color: 'var(--ev-youtube)', get: id => annualSums[id].youtubeCount,                          fmt: v => `${v}개` },
+    { label: '팬과 자주 소통하는',         desc: '최다 숲·카페 게시글',     icon: SVG_ICONS.board,        color: 'var(--ev-post)',    icon2: SVG_ICONS.coffee, color2: '#03C75A', get: id => totalSums[id].postCount + totalSums[id].cafeCount, fmt: v => `${v}개` },
+    { label: '유튜브도 놓치지 않는',       desc: '최다 유튜브 업로드',      icon: SVG_ICONS.youtube,      color: 'var(--ev-youtube)', get: id => totalSums[id].youtubeCount,                          fmt: v => `${v}개` },
     { label: '멤버들을 좋아하는',          desc: '다른 멤버 방송에서 보낸 채팅',  icon: SVG_ICONS.send,         color: '#a78bfa',           get: id => chemOut[id],                                          fmt: v => `${v.toLocaleString()}회` },
     { label: '멤버들이 좋아하는',          desc: '본인 방송에서 받은 멤버 채팅',  icon: SVG_ICONS.heartBubble,  color: '#a78bfa',           get: id => chemIn[id],                                           fmt: v => `${v.toLocaleString()}회` },
     { label: '천타버스에 충실한',          desc: '천타버스 컨텐츠 참여 횟수',    icon: SVG_ICONS.film,         color: 'var(--accent)',     get: id => contentCounts[id],                                    fmt: v => `${v}회` },

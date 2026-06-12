@@ -1260,6 +1260,8 @@
     color: var(--muted);
   }
   .chem-arrow-row .chem-count { color: var(--text); font-weight: 700; }
+  .chem-chat-ico { display: flex; align-items: center; color: #a78bfa; }  /* 이벤트 탭 채팅 아이콘과 동일색 */
+  .chem-chat-ico svg { width: 12px; height: 12px; }
   .chem-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
   .chem-group-section {
     grid-column: 1 / -1;
@@ -2784,6 +2786,7 @@ function switchPage(page) {
     membersState.tabsInited = true;
   }
   if (page === 'members') {
+    preloadProfileSet();  // 크루 소개를 읽는 동안 멤버 상세 사진 11장을 백그라운드 적재
     renderMembersBody();
   }
   if (page === 'events') {
@@ -2813,6 +2816,29 @@ function parseHash(hash) {
   const raw = (hash || '').replace('#', '');
   if (raw.startsWith('members:')) return { page: 'members', memberId: raw.substring(8) };
   return { page: raw || 'live', memberId: null };
+}
+
+// ── 이미지 프리로드 ──
+// 정책: 홈 접속 시 모두에게 CHUNTAVERSE.webp(프로필 탭 랜딩, 첫인상) + 오늘 기념일 멤버의 프로필 사진.
+//       첫 방문자에겐 프로필 전체 11장 + 현수막·컨텐츠 상단 N장 추가(둘러볼 가능성 높음).
+//       프로필 탭 진입 시엔 방문 이력 무관하게 프로필 전체 프리로드(1회).
+// ※ switchPage 초기 호출보다 반드시 앞에 선언 (TDZ 방지)
+const PRELOAD_TAB_CAP = 6;   // 첫 방문 시 현수막·컨텐츠 각각 상단 프리로드 장수
+let profilePreloaded = false;
+
+function preloadImages(srcs) {
+  const list = (srcs || []).filter(Boolean);
+  if (list.length === 0) return;
+  const run = () => list.forEach(src => { const im = new Image(); im.src = src; });
+  // 유휴 시간에 실행해 초기 API 호출·화면 렌더와 대역폭 경쟁 방지
+  if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 4000 });
+  else setTimeout(run, 1500);
+}
+
+function preloadProfileSet() {
+  if (profilePreloaded) return;
+  profilePreloaded = true;
+  preloadImages(MEMBERS.map(m => m.img.replace('members/', 'profile/')));
 }
 
 const initHash = parseHash(location.hash);
@@ -4175,6 +4201,29 @@ setInterval(loadEvents, 20 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
 
+// ── 이미지 프리로드 부팅 훅 (선언부는 switchPage 초기 호출 이전에 위치) ──
+(function bootPreload() {
+  preloadImages(['CHUNTAVERSE.webp']);
+
+  // 오늘 기념일(생일) 멤버: 상단 기념일 박스 → 멤버 상세 직행 경로 대비
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const cm = kst.getUTCMonth() + 1, cd = kst.getUTCDate();
+  const bdSrcs = MEMBERS
+    .filter(m => { const b = MEMBER_BIRTHDAYS[m.id]; return b && b.month === cm && b.day === cd; })
+    .map(m => m.img.replace('members/', 'profile/'));
+  preloadImages(bdSrcs);
+
+  // 첫 방문자: 프로필 전체 + 현수막·컨텐츠 상단 (CSV 도착을 기다렸다가 실행)
+  if (!lsGet('ct_visited', null)) {
+    lsSet('ct_visited', '1');
+    preloadProfileSet();
+    setTimeout(() => {
+      preloadImages(bannerData.slice(0, PRELOAD_TAB_CAP).map(b => b.url));
+      preloadImages(contentData.slice(0, PRELOAD_TAB_CAP).map(c => c.url));
+    }, 4000);
+  }
+})();
+
 function parseCSV(text) {
   const rows = [];
   const lines = text.split('\n');
@@ -4438,8 +4487,8 @@ function renderChemistry() {
           <span class="chem-member-name" style="color:${p.m1.color}">${escapeHtml(p.m1.name)}</span>
         </div>
         <div class="chem-arrows">
-          <div class="chem-arrow-row"><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
-          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span></div>
+          <div class="chem-arrow-row"><span class="chem-chat-ico">${SVG_ICONS.chatBubble}</span><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
+          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span><span class="chem-chat-ico">${SVG_ICONS.chatBubble}</span></div>
         </div>
         <div class="chem-member">
           <img src="${p.m2.img}" alt="${escapeHtml(p.m2.name)}">

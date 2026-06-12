@@ -1261,7 +1261,7 @@
     color: var(--muted);
   }
   .chem-arrow-row .chem-count { color: var(--text); font-weight: 700; }
-  .chem-chat-ico { display: flex; align-items: center; color: #a78bfa; }  /* 이벤트 탭 채팅 아이콘과 동일색 */
+  .chem-chat-ico { display: flex; align-items: center; }  /* 색은 보낸 멤버 고유색을 인라인으로 지정 */
   .chem-chat-ico svg { width: 12px; height: 12px; }
   .chem-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
   .chem-group-section {
@@ -1514,12 +1514,12 @@
   .hall-card:hover { border-color: var(--time); box-shadow: 0 4px 12px rgba(251,191,36,0.12); }
   .hall-cat {
     display: flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 700;
-    color: var(--muted); letter-spacing: 0.5px;
+    font-size: 14px; font-weight: 700;
+    color: var(--text); letter-spacing: 0.5px;
     text-align: center;
   }
   .hall-cat-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
-  .hall-cat-icon svg { width: 13px; height: 13px; display: block; }
+  .hall-cat-icon svg { width: 15px; height: 15px; display: block; }
   .hall-winners {
     display: flex; gap: 14px; flex-wrap: wrap;
     align-items: flex-end; justify-content: center;
@@ -4582,8 +4582,8 @@ function renderChemistry() {
           <span class="chem-member-name" style="color:${p.m1.color}">${escapeHtml(p.m1.name)}</span>
         </div>
         <div class="chem-arrows">
-          <div class="chem-arrow-row"><span class="chem-chat-ico">${SVG_ICONS.chatBubble}</span><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
-          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span><span class="chem-chat-ico">${SVG_ICONS.chatBubble}</span></div>
+          <div class="chem-arrow-row"><span class="chem-chat-ico" style="color:${p.m1.color}">${SVG_ICONS.chatBubble}</span><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
+          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span><span class="chem-chat-ico" style="color:${p.m2.color}">${SVG_ICONS.chatBubble}</span></div>
         </div>
         <div class="chem-member">
           <img src="${p.m2.img}" alt="${escapeHtml(p.m2.name)}">

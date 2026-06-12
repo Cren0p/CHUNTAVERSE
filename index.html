@@ -209,7 +209,8 @@
     min-height: 66px;
   }
   .page-title {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1486,6 +1487,58 @@
     border: 1px solid var(--border);
   }
 
+  /* === 명예의 전당 탭 === */
+  .hall-wrap {
+    padding: 20px 24px;
+    max-width: 1400px; width: 100%; margin: 0 auto;
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 16px;
+  }
+  .hall-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1100px) { .hall-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px) { .hall-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .hall-grid { grid-template-columns: 1fr; } }
+  .hall-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 14px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .hall-card:hover { border-color: var(--time); box-shadow: 0 4px 12px rgba(251,191,36,0.12); }
+  .hall-cat {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700;
+    color: var(--muted); letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .hall-cat-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
+  .hall-cat-icon svg { width: 13px; height: 13px; display: block; }
+  .hall-winners {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    align-items: flex-end; justify-content: center;
+    flex: 1;
+  }
+  .hall-winner { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .hall-winner img {
+    width: 64px; height: 64px;
+    object-fit: cover;
+    border: 2px solid var(--time);
+  }
+  .hall-winner-name { font-size: 13px; font-weight: 700; }
+  .hall-value { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; }
+  .hall-desc { color: var(--muted); font-weight: 600; font-size: 11px; }
+  .hall-empty {
+    flex: 1; display: flex; align-items: center;
+    color: var(--muted); font-size: 12px; padding: 16px 0;
+  }
+
   /* === 구성원 탭 === */
   .members-wrap {
     padding: 20px 24px;
@@ -1700,8 +1753,10 @@
       border-right: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .main-header { padding: 16px 20px; min-height: 0; }
-    .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap { padding: 16px; }
+    .main-header { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
+    .page-title { width: 100%; }
+    .header-center { width: 100%; margin-left: 0; }
+    .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
     .page-title { font-size: 18px; }
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
@@ -1750,6 +1805,10 @@
     <button class="nav-item" data-page="banner">
       <span class="nav-icon" id="navBannerIcon"></span>
       <span>현수막</span>
+    </button>
+    <button class="nav-item" data-page="hall">
+      <span class="nav-icon" id="navHallIcon"></span>
+      <span>명예의 전당</span>
     </button>
     <button class="nav-item" data-page="links">
       <span class="nav-icon" id="navLinksIcon"></span>
@@ -1875,6 +1934,15 @@
       <div class="loading">
         <div class="spinner"></div>
         <div>현수막 데이터 불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-hall">
+    <div class="hall-wrap" id="hallBody">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>명예의 전당 불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -2170,9 +2238,16 @@ const SVG_ICONS = {
   film: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,3 6,21 20,12" fill="currentColor" stroke="currentColor"/></svg>`,
   flag: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="2" x2="4" y2="22"/><path d="M4 4h16l-3 5 3 5H4"/></svg>`,
   people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  trophy: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
+  flame: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+  hourglass: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/><path d="M9.6 8.4h4.8L12 11.2z" fill="currentColor" stroke="none"/><path d="M12 13v2.4" stroke-width="1.2"/><path d="M8.8 21h6.4L12 16.4z" fill="currentColor" stroke="none"/></svg>`,
+  sun: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+  moon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  send: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>`,
+  heartBubble: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 13.4l-.8-.74C9.7 11.3 8.8 10.4 8.8 9.3c0-.9.7-1.6 1.6-1.6.5 0 1 .25 1.6.7.6-.45 1.1-.7 1.6-.7.9 0 1.6.7 1.6 1.6 0 1.1-.9 2-2.4 3.36z" fill="currentColor" stroke="none"/></svg>`,
 };
 
-const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막' };
+const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
@@ -2181,6 +2256,7 @@ let lastStatsUpdate = null;
 let lastChemistryUpdate = null;
 let lastContentUpdate = null;
 let lastBannerUpdate = null;
+let lastHallUpdate = null;
 let currentPage = 'live';
 
 const ALL_TYPE_KEYS = ['soop', 'chat', 'post', 'youtube', 'cafe'];
@@ -2732,6 +2808,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
     navContentIcon: SVG_ICONS.film,
     navLinksIcon: SVG_ICONS.link,
     navBannerIcon: SVG_ICONS.flag,
+    navHallIcon: SVG_ICONS.trophy,
   };
   for (const [id, html] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -2755,6 +2832,8 @@ function updateHeaderCenter() {
     topLine = lastContentUpdate ? '열람 시 자동 갱신 · ' + lastContentUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'banner') {
     topLine = lastBannerUpdate ? '열람 시 자동 갱신 · ' + lastBannerUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
+  } else if (currentPage === 'hall') {
+    topLine = lastHallUpdate ? '열람 시 자동 갱신 · ' + lastHallUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'members') {
     topLine = '';
   }
@@ -2798,6 +2877,9 @@ function switchPage(page) {
   }
   if (page === 'banner') {
     renderBanners();
+  }
+  if (page === 'hall') {
+    renderHall();
   }
   if (page === 'content') {
     renderContent();
@@ -3430,29 +3512,8 @@ function renderStatsBody() {
   else renderStatsMember(body, statsState.selectedTab);
 }
 
-function renderStatsAnnual(body) {
-  const now = new Date();
-  if (!statsState.viewYear) statsState.viewYear = now.getFullYear();
-  const year = statsState.viewYear;
-  const isCurrentYear = (year === now.getFullYear());
-  const isStartYear = (year === STATS_START_YEAR);
-
-  // 해당 연도 모든 월이 로드됐는지 확인, 없으면 로드 후 재렌더
-  const maxMonth = isCurrentYear ? now.getMonth() + 1 : 12;
-  const monthsToLoad = [];
-  for (let mo = 1; mo <= maxMonth; mo++) {
-    const ym = `${year}-${String(mo).padStart(2,'0')}`;
-    if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) monthsToLoad.push(ym);
-  }
-  if (monthsToLoad.length > 0) {
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>연간 통계 불러오는 중...</div></div>';
-    Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
-      if (currentPage === 'stats') renderStatsBody();
-    });
-    return;
-  }
-
-  // 해당 연도의 모든 월 stats 합산
+// 해당 연도의 모든 월 stats 합산 — 통계 연간 탭과 명예의 전당이 공용 (수치·메달 일관성 보장)
+function computeAnnualSums(year) {
   const annualSums = {};
   MEMBERS.forEach(m => {
     annualSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0, viewerPeak: 0, viewerSum: 0, viewerCount: 0 };
@@ -3497,7 +3558,38 @@ function renderStatsAnnual(body) {
       }
     });
   }
+  return annualSums;
+}
 
+// 연간 통계에 필요한 월(1~현재월) 중 미적재분 목록
+function annualMonthsToLoad(year, maxMonth) {
+  const out = [];
+  for (let mo = 1; mo <= maxMonth; mo++) {
+    const ym = `${year}-${String(mo).padStart(2,'0')}`;
+    if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) out.push(ym);
+  }
+  return out;
+}
+
+function renderStatsAnnual(body) {
+  const now = new Date();
+  if (!statsState.viewYear) statsState.viewYear = now.getFullYear();
+  const year = statsState.viewYear;
+  const isCurrentYear = (year === now.getFullYear());
+  const isStartYear = (year === STATS_START_YEAR);
+
+  // 해당 연도 모든 월이 로드됐는지 확인, 없으면 로드 후 재렌더
+  const maxMonth = isCurrentYear ? now.getMonth() + 1 : 12;
+  const monthsToLoad = annualMonthsToLoad(year, maxMonth);
+  if (monthsToLoad.length > 0) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>연간 통계 불러오는 중...</div></div>';
+    Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
+      if (currentPage === 'stats') renderStatsBody();
+    });
+    return;
+  }
+
+  const annualSums = computeAnnualSums(year);
 
   // 순위 계산
   const MEDAL_KEYS = [
@@ -4282,6 +4374,7 @@ async function loadBanners() {
     lsSet(LS_BANNER_CACHE, JSON.stringify(bannerData));
     lastBannerUpdate = new Date();
     if (currentPage === 'banner') renderBanners();
+    if (currentPage === 'hall') renderHall();
   } catch (e) {}
 }
 
@@ -4380,6 +4473,7 @@ async function loadContent() {
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));
     lastContentUpdate = new Date();
     if (currentPage === 'content') renderContent();
+    if (currentPage === 'hall') renderHall();
   } catch (e) {}
 }
 
@@ -4454,6 +4548,7 @@ async function loadChemistry() {
     lsSet(LS_CHEM_CACHE, JSON.stringify(chemCounts));
     lastChemistryUpdate = new Date();
     if (currentPage === 'chemistry') renderChemistry();
+    if (currentPage === 'hall') renderHall();
   } catch (e) {}
 }
 
@@ -4544,6 +4639,198 @@ function renderChemistry() {
   });
 }
 
+// ── 명예의 전당 ──
+// 집계 기준은 카드 하단 기록 설명('올해 최다 ~' 등)이 곧 정의:
+// 방송일수·방송시간·게시글·유튜브 = 당해 연도(통계 연간 탭과 동일 계산식 + seed 포함),
+// 개근·마라톤·정전 위원회 2종 = 역대(세션 기록 기반이라 seed 미포함, 2026-05 개시 이후),
+// 멤버 채팅 쌍·컨텐츠·현수막 = 누적.
+// 정전 위원회: 다른 멤버 방송 구간(고아 세션은 48h 상한)과의 시점·구간 겹침으로 판정.
+
+// 구간 목록 병합 (정렬된 비중첩 구간으로)
+function mergeIntervals(list) {
+  const arr = [...list].sort((a, b) => a.s - b.s);
+  const out = [];
+  for (const iv of arr) {
+    const last = out[out.length - 1];
+    if (last && iv.s <= last.e) { if (iv.e > last.e) last.e = iv.e; }
+    else out.push({ s: iv.s, e: iv.e });
+  }
+  return out;
+}
+// 시각 t가 병합 구간 위에 있는지 (구간은 [s, e) 반개구간)
+function coversPoint(merged, t) {
+  for (const o of merged) {
+    if (o.s <= t && t < o.e) return true;
+    if (o.s > t) break;
+  }
+  return false;
+}
+// 구간 iv에서 병합 구간과 겹치는 부분을 뺀 길이(ms)
+function soloMsOf(iv, merged) {
+  let total = iv.e - iv.s;
+  for (const o of merged) {
+    if (o.e <= iv.s) continue;
+    if (o.s >= iv.e) break;
+    total -= Math.min(iv.e, o.e) - Math.max(iv.s, o.s);
+  }
+  return total;
+}
+
+// 가장 긴 연속 방송일 (달력 날짜 키 집합 → 최장 연속 구간)
+function longestStreak(dateSet) {
+  const days = [...dateSet].sort();
+  let best = 0, cur = 0, prev = null;
+  for (const d of days) {
+    const [y, mo, da] = d.split('-').map(Number);
+    const t = Date.UTC(y, mo - 1, da);
+    cur = (prev !== null && t - prev === 86400000) ? cur + 1 : 1;
+    if (cur > best) best = cur;
+    prev = t;
+  }
+  return best;
+}
+
+function renderHall() {
+  const body = document.getElementById('hallBody');
+  if (!body) return;
+  const now = new Date();
+  const year = now.getFullYear();
+  // 역대 집계(개근·마라톤)를 위해 통계 개시(2026-01)부터 현재까지 전 월을 적재 (과거 월은 localStorage 캐시)
+  const monthsToLoad = [];
+  const allMonths = [];
+  for (let y = STATS_START_YEAR; y <= year; y++) {
+    const maxMo = (y === year) ? now.getMonth() + 1 : 12;
+    for (let mo = 1; mo <= maxMo; mo++) {
+      const ym = `${y}-${String(mo).padStart(2,'0')}`;
+      allMonths.push(ym);
+      if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) monthsToLoad.push(ym);
+    }
+  }
+  if (monthsToLoad.length > 0) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명예의 전당 불러오는 중...</div></div>';
+    Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
+      if (currentPage === 'hall') renderHall();
+    });
+    return;
+  }
+
+  const annualSums = computeAnnualSums(year);
+
+  // 세션 단위 역대 집계 (개근·마라톤·정전 위원회) — '올해' 항목이 아니므로 연도 제한 없음, 연말~연초 연속 방송도 안 끊김.
+  // seed는 세션별 기록이 없어 미포함(서비스 개시 이후 데이터만)
+  const ORPHAN_CAP_MS = 48 * 3600000; // 종료 누락 고아 세션이 '영원히 방송 중'으로 남아 전원 판정을 오염시키는 것 방지
+  const nowMs = Date.now();
+  const extra = {};
+  const intervals = {};
+  MEMBERS.forEach(m => { extra[m.id] = { marathonMs: 0, dates: new Set() }; intervals[m.id] = []; });
+  for (const ym of allMonths) {
+    MEMBERS.forEach(m => {
+      const ms = statsState.data[ym]?.[m.id];
+      if (!ms) return;
+      for (const s of (ms.sessions || [])) {
+        const t = new Date(s.start).getTime();
+        if (isNaN(t)) continue;
+        const dk = isoToKstDateKey(s.start);
+        if (dk) extra[m.id].dates.add(dk);
+        let e = null;
+        if (s.end) {
+          e = new Date(s.end).getTime();
+          if (isNaN(e) || e <= t) e = null;
+        } else {
+          e = Math.min(nowMs, t + ORPHAN_CAP_MS); // 진행 중 세션은 현재 시각(상한 48h)까지로 간주
+          if (e <= t) e = null;
+        }
+        if (e === null) continue;
+        intervals[m.id].push({ s: t, e });
+        if (s.end) {
+          const dur = e - t;
+          if (dur > extra[m.id].marathonMs) extra[m.id].marathonMs = dur;
+        }
+      }
+    });
+  }
+
+  // 정전 중단 위원회(아무도 없을 때 시작한 방송 횟수) / 정전 방지 위원회(아무도 없을 때 혼자 방송한 시간)
+  const solo = {};
+  MEMBERS.forEach(m => { solo[m.id] = { starts: 0, ms: 0 }; });
+  MEMBERS.forEach(m => {
+    const others = [];
+    MEMBERS.forEach(o => { if (o.id !== m.id) others.push(...intervals[o.id]); });
+    const merged = mergeIntervals(others);
+    for (const iv of intervals[m.id]) {
+      if (!coversPoint(merged, iv.s)) solo[m.id].starts++;
+      const sm = soloMsOf(iv, merged);
+      if (sm > 0) solo[m.id].ms += sm;
+    }
+  });
+
+  // 멤버들을 좋아하는(다른 멤버 방송에 보낸 채팅) / 멤버들이 좋아하는(자기 방송에 받은 멤버 채팅) — chat_counts 양방향 합산
+  const chemOut = {};
+  const chemIn = {};
+  MEMBERS.forEach(m => { chemOut[m.id] = 0; chemIn[m.id] = 0; });
+  for (const [key, cnt] of Object.entries(chemCounts || {})) {
+    const [fromId, toId] = key.split(':');
+    if (chemOut[fromId] !== undefined) chemOut[fromId] += cnt;
+    if (chemIn[toId] !== undefined) chemIn[toId] += cnt;
+  }
+
+  // 컨텐츠·현수막 왕: 시트 데이터의 멤버 표기 횟수 누적 (각 탭 랭킹과 동일 기준)
+  const bannerCounts = {};
+  const contentCounts = {};
+  MEMBERS.forEach(m => { bannerCounts[m.id] = 0; contentCounts[m.id] = 0; });
+  bannerData.forEach(b => b.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) bannerCounts[m.id]++; }));
+  contentData.forEach(c => c.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) contentCounts[m.id]++; }));
+
+  const categories = [
+    { label: '천타버스 공무원',           desc: '올해 최다 방송 일수',          icon: SVG_ICONS.calendarDays, color: 'var(--ev-start)',   get: id => annualSums[id].sessions,                              fmt: v => `${v}일` },
+    { label: '엉덩이가 무거운',           desc: '올해 최다 방송 시간',          icon: SVG_ICONS.clockTime,    color: 'var(--ev-start)',   get: id => annualSums[id].totalDurationMs,                       fmt: v => formatDuration(v) },
+    { label: '휴방하는 것을 까먹은',       desc: '최장 연속 방송 일수',          icon: SVG_ICONS.flame,        color: '#FF8C00',           get: id => longestStreak(extra[id].dates),                       fmt: v => `${v}일` },
+    { label: '방종하는 것을 까먹은',       desc: '최장 단일 방송 시간',          icon: SVG_ICONS.hourglass,    color: '#FF8C00',           get: id => extra[id].marathonMs,                                 fmt: v => formatDuration(v) },
+    { label: '천타버스 정전 중단 위원회',  desc: '아무도 없을 때 시작한 방송',    icon: SVG_ICONS.sun,          color: '#FFDD00',           get: id => solo[id].starts,                                      fmt: v => `${v}회` },
+    { label: '천타버스 정전 방지 위원회',  desc: '아무도 없을 때 혼자 방송한 시간', icon: SVG_ICONS.moon,         color: '#FFDD00',           get: id => solo[id].ms,                                          fmt: v => formatDuration(v) },
+    { label: '팬과 자주 소통하는',         desc: '올해 최다 숲·카페 게시글',     icon: SVG_ICONS.board,        color: 'var(--ev-post)',    icon2: SVG_ICONS.coffee, color2: '#03C75A', get: id => annualSums[id].postCount + annualSums[id].cafeCount, fmt: v => `${v}개` },
+    { label: '유튜브도 놓치지 않는',       desc: '올해 최다 유튜브 업로드',      icon: SVG_ICONS.youtube,      color: 'var(--ev-youtube)', get: id => annualSums[id].youtubeCount,                          fmt: v => `${v}개` },
+    { label: '멤버들을 좋아하는',          desc: '다른 멤버 방송에서 보낸 채팅',  icon: SVG_ICONS.send,         color: '#a78bfa',           get: id => chemOut[id],                                          fmt: v => `${v.toLocaleString()}회` },
+    { label: '멤버들이 좋아하는',          desc: '본인 방송에서 받은 멤버 채팅',  icon: SVG_ICONS.heartBubble,  color: '#a78bfa',           get: id => chemIn[id],                                           fmt: v => `${v.toLocaleString()}회` },
+    { label: '천타버스에 충실한',          desc: '천타버스 컨텐츠 참여 횟수',    icon: SVG_ICONS.film,         color: 'var(--accent)',     get: id => contentCounts[id],                                    fmt: v => `${v}회` },
+    { label: '천타버스의 위상을 드높인',    desc: '천타버스 현수막 게시 횟수',    icon: SVG_ICONS.flag,         color: 'var(--accent)',     get: id => bannerCounts[id],                                     fmt: v => `${v}회` },
+  ];
+
+  const cards = categories.map(cat => {
+    let max = 0;
+    MEMBERS.forEach(m => { const v = cat.get(m.id); if (v > max) max = v; });
+    let bodyHtml;
+    if (max <= 0) {
+      bodyHtml = '<div class="hall-empty">아직 집계 전이에요</div>';
+    } else {
+      const winners = MEMBERS.filter(m => cat.get(m.id) === max);
+      bodyHtml = `
+        <div class="hall-winners">
+          ${winners.map(w => `
+            <div class="hall-winner">
+              <img src="${w.img}" alt="${escapeHtml(w.name)}">
+              <span class="hall-winner-name" style="color:${w.color}">${escapeHtml(w.name)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="hall-value"><span class="hall-desc">${cat.desc}:</span> ${cat.fmt(max)}</div>
+      `;
+    }
+    return `
+      <div class="hall-card">
+        <div class="hall-cat"><span class="hall-cat-icon" style="color:${cat.color}">${cat.icon}</span>${cat.icon2 ? `<span class="hall-cat-icon" style="color:${cat.color2}">${cat.icon2}</span>` : ''}<span>${cat.label}</span></div>
+        ${bodyHtml}
+      </div>
+    `;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="hall-grid">${cards}</div>
+  `;
+  lastHallUpdate = new Date();
+  updateHeaderCenter();
+}
+
 function initMembersTabs() {
   const wrap = document.getElementById('membersTabsWrap');
   if (!wrap) return;
@@ -4601,7 +4888,7 @@ function renderMembersProfile(body, memberId) {
     const yt = links.common?.['유튜브'];
     if (yt) qLinks.push({ url: typeof yt === 'string' ? yt : yt.url, icon: SVG_ICONS.youtube, title: '유튜브', cls: 'quick-youtube' });
     const cafe = links.common?.['팬카페'];
-    if (cafe) qLinks.push({ url: typeof cafe === 'string' ? cafe : cafe.url, icon: SVG_ICONS.naver, title: '팬카페', cls: 'quick-naver' });
+    if (cafe) qLinks.push({ url: typeof cafe === 'string' ? cafe : cafe.url, icon: SVG_ICONS.coffee, title: '팬카페', cls: 'quick-naver' });
     quickHtml = qLinks.map(l => `<a class="members-quick-btn ${l.cls}" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" title="${l.title}">${l.icon}</a>`).join('');
     quickHtml += `<button class="members-quick-btn" id="membersGoLinks" title="관련 링크">${SVG_ICONS.link}</button>`;
   }

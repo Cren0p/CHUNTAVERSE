@@ -3201,6 +3201,13 @@ function renderEvent(e, allEvents) {
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
   if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_id) {
+    // 채팅 본문이 http(s) 링크로 시작하면 방송이 아니라 그 링크로 연결 (뒤에 글자가 붙어 있으면 앞 URL 토큰만)
+    if (e.type === 'chat' && e.message) {
+      const urlMatch = e.message.match(/^(https?:\/\/\S+)/);
+      if (urlMatch) {
+        return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(urlMatch[1])}" target="_blank" rel="noopener">${inner}</a></div>`;
+      }
+    }
     const liveUrl = `https://play.sooplive.co.kr/${e.channel_id}`;
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }

@@ -1480,9 +1480,8 @@
   .hall-cat-icon svg { width: 15px; height: 15px; display: block; }
   /* 카드 본문: 두 레이아웃 공존. 끔=세로(hall-v, 1위만), 켬=수평(hall-h, 1~3위). 토글로 전환, 높이는 JS 실측으로 통일 */
   .hall-content { display: flex; flex-direction: column; justify-content: center; }
-  .hall-h { display: none; flex-direction: column; gap: 3px; }
+  .hall-h { display: none; flex-direction: column; gap: 3px; padding-right: 20px; }   /* 우측 여백: 토글 ON에서 카드 간 기록 값(우측 정렬) 열을 맞추기 위해 단독·공동 모두 동일 적용 */
   .hall-h-body { display: flex; align-items: center; gap: 12px; }   /* 설명 제외 [사진 | 1·2·3행] — 사진 수직중앙이 행 블록(=2등 행) 중앙과 맞음 */
-  .hall-h.solo { padding-right: 20px; }   /* 단독 1위: 사진이 104px 칸 중앙이라 좌측 20px 들여쓰기 생김 → 설명·기록을 같이 20px 좌측 이동해 좌우 대칭 */
   .hall-wrap.show-ranks .hall-v { display: none; }
   .hall-wrap.show-ranks .hall-h { display: flex; }
   /* 끔: 세로 (사진 + 이름 + 설명:값) — 기존의 그 화면 */
@@ -4809,7 +4808,7 @@ function renderHall() {
               <span class="hall-r-val">${cat.fmt(g.value)}</span>
             </div>` : '';
       const hLayout = `
-          <div class="hall-h${isSolo ? ' solo' : ''}">
+          <div class="hall-h">
             <div class="hall-desc">${cat.desc}</div>
             <div class="hall-h-body">
               <div class="hall-photos">${photos}</div>

@@ -734,11 +734,12 @@
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
   }
-  @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
   .stats-card {
     background: var(--surface);
@@ -764,11 +765,7 @@
     flex-shrink: 0;
   }
   .stats-card-name { font-size: 16px; font-weight: 700; }
-  .stats-card-rows { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0; }
-  .stats-card-col { display: flex; flex-direction: column; gap: 6px; }
-  .stats-card-col:first-child { padding-right: 12px; }
-  .stats-card-col:last-child { padding-left: 12px; }
-  .stats-card-sep { background: var(--border); }
+  .stats-card-rows { display: flex; flex-direction: column; gap: 6px; }
   .stats-card-row {
     display: flex; justify-content: space-between;
     align-items: center; font-size: 13px;
@@ -3637,38 +3634,33 @@ function renderStatsAnnual(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-col">
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-              <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
-              <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
-              <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
-              <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-            </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
+            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
           </div>
-          <div class="stats-card-sep"></div>
-          <div class="stats-card-col">
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-              <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-              <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-              <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-            </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
+            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
+            <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
+            <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
+            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
+            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
+            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
           </div>
         </div>
       </button>
@@ -3755,38 +3747,33 @@ function renderStatsAll(body) {
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-col">
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-              <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
-              <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
-              <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
-              <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-            </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
+            <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
           </div>
-          <div class="stats-card-sep"></div>
-          <div class="stats-card-col">
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-              <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-              <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-            </div>
-            <div class="stats-card-row">
-              <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-              <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-            </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
+            <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
+            <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
+            <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
+            <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
+            <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
+            <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
           </div>
         </div>
       </button>

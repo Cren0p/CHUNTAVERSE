@@ -1483,16 +1483,18 @@
   .hall-cat-icon svg { width: 15px; height: 15px; display: block; }
   /* 카드 본문: 두 레이아웃 공존. 끔=세로(hall-v, 1위만), 켬=수평(hall-h, 1~3위). 토글로 전환, 높이는 JS 실측으로 통일 */
   .hall-content { display: flex; flex-direction: column; justify-content: center; }
-  .hall-h { display: none; align-items: center; gap: 12px; }
+  .hall-h { display: none; flex-direction: column; gap: 3px; }
+  .hall-h-body { display: flex; align-items: center; gap: 12px; }   /* 설명 제외 [사진 | 1·2·3행] — 사진 수직중앙이 행 블록(=2등 행) 중앙과 맞음 */
+  .hall-h.solo { padding-right: 20px; }   /* 단독 1위: 사진이 104px 칸 중앙이라 좌측 20px 들여쓰기 생김 → 설명·기록을 같이 20px 좌측 이동해 좌우 대칭 */
   .hall-wrap.show-ranks .hall-v { display: none; }
   .hall-wrap.show-ranks .hall-h { display: flex; }
   /* 끔: 세로 (사진 + 이름 + 설명:값) — 기존의 그 화면 */
-  .hall-v { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .hall-v { display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .hall-v-winners { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: flex-end; }
   .hall-v-w { display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .hall-v-w img { object-fit: cover; box-sizing: border-box; border: 2px solid var(--time); }
   .hall-v-name { font-size: 13px; font-weight: 700; }
-  .hall-v-val { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; }
+  .hall-v-val { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1; }
   .hall-v-desc { color: var(--muted); font-weight: 600; font-size: 11px; }
   /* 켬: 수평 [좌: 1위 사진 | 우: 설명 헤더 + 금/은/동 1~3위 행] */
   .hall-photos {
@@ -4791,11 +4793,13 @@ function renderHall() {
       content = '<div class="hall-empty">아직 집계 전이에요</div>';
     } else {
       const g1 = ranks[0], g2 = ranks[1], g3 = ranks[2];
-      const ps = g1.members.length === 1 ? 64 : 48;   // 단독 64 / 공동 48
+      const isSolo = g1.members.length === 1;
+      const psV = 64;                 // 끔(세로): 단독·공동 모두 64
+      const psH = isSolo ? 64 : 48;   // 켬(수평): 단독 64 / 공동 48
       // 끔(세로): 1위 사진+이름 + "설명: 값"
       const vWinners = g1.members.map(w => `
             <div class="hall-v-w">
-              <img style="width:${ps}px;height:${ps}px" src="${w.img}" alt="${escapeHtml(w.name)}">
+              <img style="width:${psV}px;height:${psV}px" src="${w.img}" alt="${escapeHtml(w.name)}">
               <span class="hall-v-name" style="color:${w.color}">${escapeHtml(w.name)}</span>
             </div>`).join('');
       const vLayout = `
@@ -4803,19 +4807,21 @@ function renderHall() {
             <div class="hall-v-winners">${vWinners}</div>
             <div class="hall-v-val"><span class="hall-v-desc">${cat.desc}:</span> ${cat.fmt(g1.value)}</div>
           </div>`;
-      // 켬(수평): 1위 사진 | 설명 헤더 + 금/은/동 1~3위 행(이름 좌·기록 우)
-      const photos = g1.members.map(w => `<img style="width:${ps}px;height:${ps}px" src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');
+      // 켬(수평): 설명(상단 전체폭, 우측정렬) + [1위 사진 | 금/은/동 1~3위 행(이름 좌·기록 우)]
+      const photos = g1.members.map(w => `<img style="width:${psH}px;height:${psH}px" src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');
       const row = (g, cls) => g ? `
             <div class="hall-row ${cls}">
               <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join('·')}</span>
               <span class="hall-r-val">${cat.fmt(g.value)}</span>
             </div>` : '';
       const hLayout = `
-          <div class="hall-h">
-            <div class="hall-photos">${photos}</div>
-            <div class="hall-data">
-              <div class="hall-desc">${cat.desc}</div>
-              ${row(g1, 'm1')}${row(g2, 'm2')}${row(g3, 'm3')}
+          <div class="hall-h${isSolo ? ' solo' : ''}">
+            <div class="hall-desc">${cat.desc}</div>
+            <div class="hall-h-body">
+              <div class="hall-photos">${photos}</div>
+              <div class="hall-data">
+                ${row(g1, 'm1')}${row(g2, 'm2')}${row(g3, 'm3')}
+              </div>
             </div>
           </div>`;
       content = vLayout + hLayout;

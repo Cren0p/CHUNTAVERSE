@@ -613,7 +613,7 @@
   .timeline-header {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 6px;
     padding: 8px 14px;
     border-bottom: 1px solid var(--border);
@@ -621,11 +621,12 @@
   .timeline-footer {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 6px;
     padding: 8px 14px;
     border-top: 1px solid var(--border);
   }
+  .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 6px; }
   .timeline-scroll-btn {
     display: inline-flex;
     align-items: center;
@@ -939,7 +940,7 @@
     text-decoration: none;
     color: inherit;
     transition: border-color 0.15s;
-    align-items: baseline;
+    align-items: center;
   }
   .day-item:hover { border-color: var(--accent); }
   .day-item-time {
@@ -2209,7 +2210,8 @@ const SVG_ICONS = {
   broadcast: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49"/><path d="M7.76 16.24a6 6 0 0 1 0-8.49"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>`,
   eventList: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>`,
   tag: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>`,
-  pencil: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
+  pencil: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 4.5l3 3L8 19l-4 1 1-4L16.5 4.5z"/><path d="M14.5 6.5l3 3"/><path d="M4 20l2.5-2.5"/></svg>`,
+  checkAll: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>`,
   rotate: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>`,
   chatBubble: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   starBalloon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="7"/><line x1="12" y1="17" x2="12" y2="22"/><polygon points="12,5 13.5,8.5 17,8.8 14.5,11.2 15.3,14.7 12,12.8 8.7,14.7 9.5,11.2 7,8.8 10.5,8.5" fill="currentColor" stroke="none"/></svg>`,
@@ -3315,8 +3317,9 @@ function applyFilter() {
   const scrollDownSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
   const scrollUpSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>';
   const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync">${arrowSvg}<span>${sortLabel}</span></button>`;
-  const headerHtml = `<div class="timeline-header"><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div>`;
-  const footerHtml = `<div class="timeline-footer"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button>${sortBtnHtml}</div>`;
+  const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
+  const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div></div>`;
+  const footerHtml = `<div class="timeline-footer"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button>${sortBtnHtml}</div></div>`;
   if (filtered.length === 0) {
     tl.innerHTML = headerHtml + (allEvents.length === 0
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
@@ -3329,6 +3332,9 @@ function applyFilter() {
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
     btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
+  });
+  tl.querySelectorAll('.mark-read-btn').forEach(btn => {
+    btn.addEventListener('click', () => { setLastSeenToNow(); refreshUnreadIndicator(); });
   });
   const scrollBottomBtn = document.getElementById('scrollToBottom');
   if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'end', behavior: 'smooth' }); });
@@ -4030,7 +4036,7 @@ function renderDayDetail(year, month1, sum, memberId) {
       if (s.changes && s.changes.length > 0) {
         changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
           let icon, label, valHtml;
-          if (c.type === 'title') { icon = '✎'; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
           else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }

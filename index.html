@@ -1469,47 +1469,52 @@
     border: 1px solid var(--border);
     padding: 16px 14px;
     display: flex; flex-direction: column;
-    align-items: center; gap: 10px;
+    gap: 10px;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .hall-card:hover { border-color: var(--time); box-shadow: 0 4px 12px rgba(251,191,36,0.12); }
   .hall-cat {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
     font-size: 14px; font-weight: 700;
     color: var(--text); letter-spacing: 0.5px;
     text-align: center;
   }
   .hall-cat-icon { display: inline-flex; align-items: center; flex-shrink: 0; }
   .hall-cat-icon svg { width: 15px; height: 15px; display: block; }
-  .hall-winners {
-    display: flex; gap: 14px; flex-wrap: wrap;
-    align-items: flex-end; justify-content: center;
-    flex: 1;
+  /* 카드 본문: 두 레이아웃 공존. 끔=세로(hall-v, 1위만), 켬=수평(hall-h, 1~3위). 토글로 전환, 높이는 JS 실측으로 통일 */
+  .hall-content { display: flex; flex-direction: column; justify-content: center; }
+  .hall-h { display: none; align-items: center; gap: 12px; }
+  .hall-wrap.show-ranks .hall-v { display: none; }
+  .hall-wrap.show-ranks .hall-h { display: flex; }
+  /* 끔: 세로 (사진 + 이름 + 설명:값) — 기존의 그 화면 */
+  .hall-v { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .hall-v-winners { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: flex-end; }
+  .hall-v-w { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .hall-v-w img { object-fit: cover; box-sizing: border-box; border: 2px solid var(--time); }
+  .hall-v-name { font-size: 13px; font-weight: 700; }
+  .hall-v-val { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; }
+  .hall-v-desc { color: var(--muted); font-weight: 600; font-size: 11px; }
+  /* 켬: 수평 [좌: 1위 사진 | 우: 설명 헤더 + 금/은/동 1~3위 행] */
+  .hall-photos {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    width: 104px; flex-shrink: 0;            /* 사진 칸 고정폭: 단독 64px 또는 공동 48px 2개. 3~4명은 2줄(아래로) */
+    justify-content: center; align-content: center;
   }
-  .hall-winner { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-  .hall-winner img {
-    width: 64px; height: 64px;
-    object-fit: cover;
-    border: 2px solid var(--time);
+  .hall-photos img {
+    object-fit: cover; box-sizing: border-box;
+    border: 2px solid var(--time);           /* 공동 1위 = 금 테두리. 크기는 단독 64/공동 48, JS에서 인라인 지정 */
   }
-  .hall-winner-name { font-size: 13px; font-weight: 700; }
-  .hall-value { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; white-space: nowrap; }
-  .hall-desc { color: var(--muted); font-weight: 600; font-size: 11px; }
-  /* 2·3위 보기: 1위 양옆에 더 작은 사진만 추가(값은 하단으로). 1위(64)보다 작아 사진 줄 높이를 안 바꿈 → 카드 높이 그대로 */
-  .hall-winner.rank-2 img, .hall-winner.rank-3 img { width: 52px; height: 52px; }
-  .hall-winner.rank-2 img { border-color: #cbd5e1; }
-  .hall-winner.rank-3 img { border-color: #d98e4d; }
-  .hall-winner.rank-2, .hall-winner.rank-3 { display: none; }
-  .hall-wrap.show-ranks .hall-winner.rank-2, .hall-wrap.show-ranks .hall-winner.rank-3 { display: flex; }
-  /* 하단 값만 토글로 교체: 평소 1위 값 → 켜면 메달순(2·1·3) 값. 같은 한 줄(nowrap)이라 높이 동일 */
-  .hall-val-all { display: none; }
-  .hall-val-all .m1 { color: var(--time); }
-  .hall-val-all .m2 { color: #cbd5e1; }
-  .hall-val-all .m3 { color: #d98e4d; }
-  .hall-val-all .sep { color: var(--muted); margin: 0 5px; font-weight: 600; }
-  .hall-wrap.show-ranks .hall-val-one { display: none; }
-  .hall-wrap.show-ranks .hall-val-all { display: inline; }
-  .hall-wrap.show-ranks .hall-desc { display: none; }
+  .hall-data { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .hall-desc { color: var(--muted); font-weight: 600; font-size: 11px; text-align: right; }
+  .hall-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-size: 13px; font-weight: 700; line-height: 1.4;
+  }
+  .hall-r-name { text-align: left; word-break: keep-all; }
+  .hall-r-val { text-align: right; white-space: nowrap; flex-shrink: 0; }
+  .hall-row.m1 .hall-r-val { color: var(--time); }
+  .hall-row.m2 .hall-r-val { color: #cbd5e1; }
+  .hall-row.m3 .hall-r-val { color: #d98e4d; }
   .hall-empty {
     flex: 1; display: flex; align-items: center;
     color: var(--muted); font-size: 12px; padding: 16px 0;
@@ -4650,7 +4655,7 @@ function longestStreak(dateSet) {
   return best;
 }
 
-// 명전 2·3위 전체 토글 상태(세션 내 유지, localStorage 저장 안 함 — 새로고침하면 1위만 보이는 기본으로 복귀)
+// 명전 토글 상태(세로↔수평). 세션 내 유지, localStorage 저장 안 함(새로고침 시 끔=세로로 복귀)
 let hallShowRanks = false;
 // 값 내림차순 dense 순위로 상위 3개 그룹 추출(값 같으면 동순위, 0은 제외). [{rank,value,members}] 최대 3개.
 function hallTopRanks(getVal) {
@@ -4777,34 +4782,48 @@ function renderHall() {
     { label: '천타버스의 위상을 드높인',    desc: '천타버스 현수막 게시 횟수',    icon: SVG_ICONS.flag,         color: 'var(--accent)',     get: id => bannerCounts[id],                                     fmt: v => `${v}회` },
   ];
 
-  const cards = categories.map(cat => {
-    const ranks = hallTopRanks(cat.get);   // [1위, (2위), (3위)] dense, 0 제외
-    let bodyHtml;
+  const ranksByCat = categories.map(cat => hallTopRanks(cat.get));
+
+  const cards = categories.map((cat, ci) => {
+    const ranks = ranksByCat[ci];
+    let content;
     if (ranks.length === 0) {
-      bodyHtml = '<div class="hall-empty">아직 집계 전이에요</div>';
+      content = '<div class="hall-empty">아직 집계 전이에요</div>';
     } else {
-      const grp = (g) => g ? g.members.map(w => `
-            <div class="hall-winner rank-${g.rank}">
-              <img src="${w.img}" alt="${escapeHtml(w.name)}">
-              <span class="hall-winner-name" style="color:${w.color}">${escapeHtml(w.name)}</span>
-            </div>
-          `).join('') : '';
       const g1 = ranks[0], g2 = ranks[1], g3 = ranks[2];
-      // DOM 순서 [2위, 1위, 3위] → 토글 시 1위 양옆에 작은 사진만 추가. 값은 하단에서만 바뀜(메달순 2·1·3).
-      const allVals = [
-        g2 ? `<span class="m2">${cat.fmt(g2.value)}</span>` : '',
-        `<span class="m1">${cat.fmt(g1.value)}</span>`,
-        g3 ? `<span class="m3">${cat.fmt(g3.value)}</span>` : '',
-      ].filter(Boolean).join('<span class="sep">·</span>');
-      bodyHtml = `
-        <div class="hall-winners">${grp(g2)}${grp(g1)}${grp(g3)}</div>
-        <div class="hall-value"><span class="hall-desc">${cat.desc}:</span> <span class="hall-val-one">${cat.fmt(g1.value)}</span><span class="hall-val-all">${allVals}</span></div>
-      `;
+      const ps = g1.members.length === 1 ? 64 : 48;   // 단독 64 / 공동 48
+      // 끔(세로): 1위 사진+이름 + "설명: 값"
+      const vWinners = g1.members.map(w => `
+            <div class="hall-v-w">
+              <img style="width:${ps}px;height:${ps}px" src="${w.img}" alt="${escapeHtml(w.name)}">
+              <span class="hall-v-name" style="color:${w.color}">${escapeHtml(w.name)}</span>
+            </div>`).join('');
+      const vLayout = `
+          <div class="hall-v">
+            <div class="hall-v-winners">${vWinners}</div>
+            <div class="hall-v-val"><span class="hall-v-desc">${cat.desc}:</span> ${cat.fmt(g1.value)}</div>
+          </div>`;
+      // 켬(수평): 1위 사진 | 설명 헤더 + 금/은/동 1~3위 행(이름 좌·기록 우)
+      const photos = g1.members.map(w => `<img style="width:${ps}px;height:${ps}px" src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');
+      const row = (g, cls) => g ? `
+            <div class="hall-row ${cls}">
+              <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join('·')}</span>
+              <span class="hall-r-val">${cat.fmt(g.value)}</span>
+            </div>` : '';
+      const hLayout = `
+          <div class="hall-h">
+            <div class="hall-photos">${photos}</div>
+            <div class="hall-data">
+              <div class="hall-desc">${cat.desc}</div>
+              ${row(g1, 'm1')}${row(g2, 'm2')}${row(g3, 'm3')}
+            </div>
+          </div>`;
+      content = vLayout + hLayout;
     }
     return `
       <div class="hall-card">
         <div class="hall-cat"><span class="hall-cat-icon" style="color:${cat.color}">${cat.icon}</span>${cat.icon2 ? `<span class="hall-cat-icon" style="color:${cat.color2}">${cat.icon2}</span>` : ''}<span>${cat.label}</span></div>
-        ${bodyHtml}
+        <div class="hall-content">${content}</div>
       </div>
     `;
   }).join('');
@@ -4816,7 +4835,16 @@ function renderHall() {
     </div>
     <div class="hall-grid">${cards}</div>
   `;
-  body.classList.toggle('show-ranks', hallShowRanks);
+  // 끔(세로)·켬(수평) 양쪽에서 각 카드 콘텐츠 높이를 실측해, 가장 큰 값을 전 카드 공통 높이로 → 토글해도·카드끼리도 높이 동일
+  const contentEls = body.querySelectorAll('.hall-content');
+  contentEls.forEach(el => { el.style.minHeight = ''; });
+  let maxH = 0;
+  body.classList.remove('show-ranks');
+  contentEls.forEach(el => { if (el.offsetHeight > maxH) maxH = el.offsetHeight; });
+  body.classList.add('show-ranks');
+  contentEls.forEach(el => { if (el.offsetHeight > maxH) maxH = el.offsetHeight; });
+  contentEls.forEach(el => { el.style.minHeight = maxH + 'px'; });
+  body.classList.toggle('show-ranks', hallShowRanks);   // 실제 토글 상태로 복원
   const rankToggle = document.getElementById('hallRankToggle');
   if (rankToggle) rankToggle.addEventListener('click', () => {
     hallShowRanks = !hallShowRanks;

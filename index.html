@@ -1387,44 +1387,6 @@
     display: flex; flex-direction: column;
     gap: 16px;
   }
-  .banner-ranking {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .banner-rank-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .banner-rank-img {
-    width: 48px; height: 48px;
-    object-fit: cover;
-    border: 1.5px solid var(--border);
-  }
-  .banner-rank-item.top .banner-rank-img {
-    border-color: var(--accent);
-  }
-  .banner-rank-count {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .banner-rank-name {
-    font-size: 10px;
-    color: var(--muted);
-    font-weight: 600;
-  }
-  .banner-rank-medal {
-    font-size: 14px;
-    line-height: 1;
-  }
   .banner-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1432,7 +1394,6 @@
   }
   @media (max-width: 1100px) { .banner-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .banner-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 700px) { .banner-ranking { max-width: 400px; margin: 0 auto; } }
   .banner-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1493,6 +1454,8 @@
     display: flex; flex-direction: column;
     gap: 16px;
   }
+  .hall-bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+  .hall-bar-label { font-size: 13px; font-weight: 600; color: var(--muted); user-select: none; }
   .hall-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1530,8 +1493,23 @@
     border: 2px solid var(--time);
   }
   .hall-winner-name { font-size: 13px; font-weight: 700; }
-  .hall-value { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; }
+  .hall-value { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1.5; white-space: nowrap; }
   .hall-desc { color: var(--muted); font-weight: 600; font-size: 11px; }
+  /* 2·3위 보기: 1위 양옆에 더 작은 사진만 추가(값은 하단으로). 1위(64)보다 작아 사진 줄 높이를 안 바꿈 → 카드 높이 그대로 */
+  .hall-winner.rank-2 img, .hall-winner.rank-3 img { width: 52px; height: 52px; }
+  .hall-winner.rank-2 img { border-color: #cbd5e1; }
+  .hall-winner.rank-3 img { border-color: #d98e4d; }
+  .hall-winner.rank-2, .hall-winner.rank-3 { display: none; }
+  .hall-wrap.show-ranks .hall-winner.rank-2, .hall-wrap.show-ranks .hall-winner.rank-3 { display: flex; }
+  /* 하단 값만 토글로 교체: 평소 1위 값 → 켜면 메달순(2·1·3) 값. 같은 한 줄(nowrap)이라 높이 동일 */
+  .hall-val-all { display: none; }
+  .hall-val-all .m1 { color: var(--time); }
+  .hall-val-all .m2 { color: #cbd5e1; }
+  .hall-val-all .m3 { color: #d98e4d; }
+  .hall-val-all .sep { color: var(--muted); margin: 0 5px; font-weight: 600; }
+  .hall-wrap.show-ranks .hall-val-one { display: none; }
+  .hall-wrap.show-ranks .hall-val-all { display: inline; }
+  .hall-wrap.show-ranks .hall-desc { display: none; }
   .hall-empty {
     flex: 1; display: flex; align-items: center;
     color: var(--muted); font-size: 12px; padding: 16px 0;
@@ -2474,9 +2452,15 @@ const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?
 function updatePageTitle() {
   const el = document.getElementById('pageTitle');
   if (!el) return;
-  const likeReqBtn = `<button class="page-title-link like-req-btn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span>천타버스 멤버들의<br>좋아요 요청</span></button>`;
+  const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span>천타버스 멤버들의<br>좋아요 요청</span></button>`;
   const celebrations = getTodayCelebrations();
   el.innerHTML = likeReqBtn + BV_LINK + celebrations.join('');
+  // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
+  const btn = document.getElementById('likeReqBtn');
+  if (btn) {
+    btn.addEventListener('mouseenter', preloadLikeHide);
+    btn.addEventListener('touchstart', preloadLikeHide, { passive: true });
+  }
 }
 
 // ── 좋아요 요청 모아보기 모달 ──
@@ -2498,6 +2482,14 @@ async function loadLikeHideSet() {
   return new Set(urls.map(normLikeUrl));
 }
 
+// 숨김목록 선로딩분(모달 1회용). hover/클릭에서 호출하되 한 번 받기 시작하면 그 약속을 재사용(중복 fetch 방지).
+// 모달을 닫을 때 폐기 → 다음 열기는 그 시점 시트를 새로 읽음(stale 없음). loadLikeHideSet은 실패해도 Set을 돌려주므로 reject 없음.
+let likeHidePreload = null;
+function preloadLikeHide() {
+  if (!likeHidePreload) likeHidePreload = loadLikeHideSet();
+  return likeHidePreload;
+}
+
 async function openLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   const head = document.getElementById('lrHead');
@@ -2507,7 +2499,8 @@ async function openLikeRequests() {
   ov.hidden = false;
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   try {
-    const [res, hideSet] = await Promise.all([fetch(WORKER_URL + '/like-requests'), loadLikeHideSet()]);
+    // hover로 이미 받는 중/받아둔 게 있으면 그걸, 아니면 지금 시작. 숨김목록을 손에 쥔 뒤 렌더하므로 "보였다 사라짐" 없음.
+    const [res, hideSet] = await Promise.all([fetch(WORKER_URL + '/like-requests'), preloadLikeHide()]);
     const data = await res.json();
     const list = (data.like_requests || []).filter(e => !hideSet.has(normLikeUrl(e.url)));
     if (list.length === 0) {
@@ -2522,6 +2515,7 @@ async function openLikeRequests() {
 function closeLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   if (ov) ov.hidden = true;
+  likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
 }
 document.addEventListener('click', (e) => {
   const ov = document.getElementById('lrOverlay');
@@ -4392,27 +4386,6 @@ function renderBanners() {
     return;
   }
 
-  const counts = {};
-  MEMBERS.forEach(m => { counts[m.name] = 0; });
-  bannerData.forEach(b => b.members.forEach(name => { if (counts[name] !== undefined) counts[name]++; }));
-  const ranked = MEMBERS.map(m => ({ ...m, count: counts[m.name] || 0 })).sort((a, b) => b.count - a.count);
-  const MEDALS = ['🥇','🥈','🥉'];
-  let medalIdx = 0;
-  let prevCount = -1;
-  ranked.forEach(r => {
-    if (r.count > 0 && r.count !== prevCount) { r.medal = MEDALS[medalIdx] || ''; medalIdx++; prevCount = r.count; }
-    else if (r.count > 0) { r.medal = MEDALS[medalIdx - 1] || ''; }
-    else { r.medal = ''; }
-  });
-
-  const rankHtml = ranked.map(r => `
-    <div class="banner-rank-item ${r.medal ? 'top' : ''}">
-      ${r.medal ? `<span class="banner-rank-medal">${r.medal}</span>` : ''}
-      <img class="banner-rank-img" src="${r.img}" alt="${escapeHtml(r.name)}">
-      <span class="banner-rank-count" style="color:${r.color}">${r.count}회</span>
-    </div>
-  `).join('');
-
   const cardsHtml = bannerData.map(b => {
     const memberImgs = b.members.map(name => {
       const m = MEMBERS.find(x => x.name === name);
@@ -4432,10 +4405,7 @@ function renderBanners() {
     `;
   }).join('');
 
-  body.innerHTML = `
-    <div class="banner-ranking">${rankHtml}</div>
-    <div class="banner-grid">${cardsHtml}</div>
-  `;
+  body.innerHTML = `<div class="banner-grid">${cardsHtml}</div>`;
 }
 
 function membersRowStyle(count) {
@@ -4491,27 +4461,6 @@ function renderContent() {
     return;
   }
 
-  const counts = {};
-  MEMBERS.forEach(m => { counts[m.name] = 0; });
-  contentData.forEach(c => c.members.forEach(name => { if (counts[name] !== undefined) counts[name]++; }));
-  const ranked = MEMBERS.map(m => ({ ...m, count: counts[m.name] || 0 })).sort((a, b) => b.count - a.count);
-  const MEDALS = ['🥇','🥈','🥉'];
-  let medalIdx = 0;
-  let prevCount = -1;
-  ranked.forEach(r => {
-    if (r.count > 0 && r.count !== prevCount) { r.medal = MEDALS[medalIdx] || ''; medalIdx++; prevCount = r.count; }
-    else if (r.count > 0) { r.medal = MEDALS[medalIdx - 1] || ''; }
-    else { r.medal = ''; }
-  });
-
-  const rankHtml = ranked.map(r => `
-    <div class="banner-rank-item ${r.medal ? 'top' : ''}">
-      ${r.medal ? `<span class="banner-rank-medal">${r.medal}</span>` : ''}
-      <img class="banner-rank-img" src="${r.img}" alt="${escapeHtml(r.name)}">
-      <span class="banner-rank-count" style="color:${r.color}">${r.count}회</span>
-    </div>
-  `).join('');
-
   const cardsHtml = contentData.map(c => {
     const memberImgs = c.members.map(name => {
       const m = MEMBERS.find(x => x.name === name);
@@ -4534,10 +4483,7 @@ function renderContent() {
     `;
   }).join('');
 
-  body.innerHTML = `
-    <div class="banner-ranking">${rankHtml}</div>
-    <div class="content-grid">${cardsHtml}</div>
-  `;
+  body.innerHTML = `<div class="content-grid">${cardsHtml}</div>`;
 }
 
 async function loadChemistry() {
@@ -4704,6 +4650,14 @@ function longestStreak(dateSet) {
   return best;
 }
 
+// 명전 2·3위 전체 토글 상태(세션 내 유지, localStorage 저장 안 함 — 새로고침하면 1위만 보이는 기본으로 복귀)
+let hallShowRanks = false;
+// 값 내림차순 dense 순위로 상위 3개 그룹 추출(값 같으면 동순위, 0은 제외). [{rank,value,members}] 최대 3개.
+function hallTopRanks(getVal) {
+  const distinct = [...new Set(MEMBERS.map(m => getVal(m.id)))].filter(v => v > 0).sort((a, b) => b - a);
+  return distinct.slice(0, 3).map((v, i) => ({ rank: i + 1, value: v, members: MEMBERS.filter(m => getVal(m.id) === v) }));
+}
+
 function renderHall() {
   const body = document.getElementById('hallBody');
   if (!body) return;
@@ -4824,23 +4778,27 @@ function renderHall() {
   ];
 
   const cards = categories.map(cat => {
-    let max = 0;
-    MEMBERS.forEach(m => { const v = cat.get(m.id); if (v > max) max = v; });
+    const ranks = hallTopRanks(cat.get);   // [1위, (2위), (3위)] dense, 0 제외
     let bodyHtml;
-    if (max <= 0) {
+    if (ranks.length === 0) {
       bodyHtml = '<div class="hall-empty">아직 집계 전이에요</div>';
     } else {
-      const winners = MEMBERS.filter(m => cat.get(m.id) === max);
-      bodyHtml = `
-        <div class="hall-winners">
-          ${winners.map(w => `
-            <div class="hall-winner">
+      const grp = (g) => g ? g.members.map(w => `
+            <div class="hall-winner rank-${g.rank}">
               <img src="${w.img}" alt="${escapeHtml(w.name)}">
               <span class="hall-winner-name" style="color:${w.color}">${escapeHtml(w.name)}</span>
             </div>
-          `).join('')}
-        </div>
-        <div class="hall-value"><span class="hall-desc">${cat.desc}:</span> ${cat.fmt(max)}</div>
+          `).join('') : '';
+      const g1 = ranks[0], g2 = ranks[1], g3 = ranks[2];
+      // DOM 순서 [2위, 1위, 3위] → 토글 시 1위 양옆에 작은 사진만 추가. 값은 하단에서만 바뀜(메달순 2·1·3).
+      const allVals = [
+        g2 ? `<span class="m2">${cat.fmt(g2.value)}</span>` : '',
+        `<span class="m1">${cat.fmt(g1.value)}</span>`,
+        g3 ? `<span class="m3">${cat.fmt(g3.value)}</span>` : '',
+      ].filter(Boolean).join('<span class="sep">·</span>');
+      bodyHtml = `
+        <div class="hall-winners">${grp(g2)}${grp(g1)}${grp(g3)}</div>
+        <div class="hall-value"><span class="hall-desc">${cat.desc}:</span> <span class="hall-val-one">${cat.fmt(g1.value)}</span><span class="hall-val-all">${allVals}</span></div>
       `;
     }
     return `
@@ -4852,8 +4810,19 @@ function renderHall() {
   }).join('');
 
   body.innerHTML = `
+    <div class="hall-bar">
+      <span class="hall-bar-label">2·3위 보기</span>
+      <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2·3위 보기"></button>
+    </div>
     <div class="hall-grid">${cards}</div>
   `;
+  body.classList.toggle('show-ranks', hallShowRanks);
+  const rankToggle = document.getElementById('hallRankToggle');
+  if (rankToggle) rankToggle.addEventListener('click', () => {
+    hallShowRanks = !hallShowRanks;
+    body.classList.toggle('show-ranks', hallShowRanks);
+    rankToggle.classList.toggle('on', hallShowRanks);
+  });
   lastHallUpdate = new Date();
   updateHeaderCenter();
 }

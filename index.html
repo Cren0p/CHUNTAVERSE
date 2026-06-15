@@ -1756,8 +1756,8 @@
       flex-direction: column; gap: 4px;
       border-left: none;
       border-bottom: 3px solid transparent;
-      padding: 8px 10px; white-space: nowrap;
-      width: auto; flex-shrink: 0;
+      padding: 8px 2px; white-space: nowrap;
+      flex: 1 1 0;   /* 9칸 균등폭으로 가로 꽉 채움 — 기본 min-width:auto라 라벨보다 좁아지진 않고, 320px 미만 등 극협폭이면 flex-wrap으로 잘림 없이 다음 줄로 */
       font-size: 10px; line-height: 1.2;
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
@@ -2732,7 +2732,9 @@ async function openSchedule() {
 // 모달 리스트 항목: 절대 날짜·시간 + 제목(+링크) + D-day 배지(목록은 날짜 단위 D-day로 고정 — 똑딱이는 D-time은 상단바 버튼 전용).
 function renderScheduleItem(item) {
   const dateDisp = item.date.slice(2).replace(/-/g, '.');   // 26.06.20
-  const when = item.hasTime ? `${dateDisp} ${item.time}` : dateDisp;
+  const [schY, schMo, schD] = item.date.split('-').map(Number);
+  const dow = ['일','월','화','수','목','금','토'][new Date(Date.UTC(schY, schMo - 1, schD)).getUTCDay()];  // 달력 요일(UTC 고정 계산이라 브라우저 타임존 무관)
+  const when = item.hasTime ? `${dateDisp} (${dow}) ${item.time}` : `${dateDisp} (${dow})`;
   const inner = `${escapeHtml(item.title)}${item.link ? ' ' + SVG_ICONS.externalLink : ''}`;
   const titleEl = item.link
     ? `<a class="sch-item-title" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${inner}</a>`

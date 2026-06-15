@@ -115,16 +115,15 @@
   }
   .nav-icon svg { width: 16px; height: 16px; display: block; vertical-align: middle; }
   .nav-badge {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: relative;
+    top: -6px;            /* 라벨 위쪽으로 올림(superscript) — 우측 빈공간은 알림 벨이 사용 */
+    margin-left: 3px;
     background: var(--ev-unread);
     color: var(--bg);
     font-size: 10px;
     font-weight: 700;
-    padding: 2px 6px;
-    min-width: 18px;
+    padding: 1px 5px;
+    min-width: 16px;
     text-align: center;
     line-height: 1.2;
   }
@@ -157,19 +156,19 @@
     animation: pulse 1.8s ease-in-out infinite;
   }
 
-  .notify-toggle {
-    padding: 8px 20px 10px 23px;
-    display: flex;
+  .nav-notify-bell {
+    margin-left: auto;            /* events 행 우측 끝으로 */
+    display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--muted);         /* 무채색 = 알림 꺼짐 */
+    cursor: pointer;
+    transition: color 0.15s;
   }
-  .notify-toggle-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    user-select: none;
-  }
+  .nav-notify-bell svg { width: 16px; height: 16px; display: block; }
+  .nav-notify-bell.on { color: var(--accent); }          /* 유채색 = 알림 켜짐 */
+  .nav-notify-bell:not(.on):hover { color: var(--text); }
   .notify-switch {
     position: relative;
     width: 36px;
@@ -1761,8 +1760,8 @@
       font-size: 10px; line-height: 1.2;
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
-    .nav-badge { right: 6px; top: 4px; transform: none; }
-    .notify-toggle { display: none; }
+    .nav-badge { position: absolute; right: 6px; top: 4px; margin-left: 0; }
+    .nav-notify-bell { display: none; }
     .main-header { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
     /* 3열(상단바): 버튼 좌 · 설명 우 — width:100% 스택 해제, header-center는 base의 margin-left:auto로 우측. 좁으면 wrap으로 설명이 아래로 */
     .page-title { gap: 6px; }
@@ -1795,6 +1794,9 @@
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
+    /* 연간/월간을 1열에 세로로 (연간 위·월간 아래) — 멤버 사진은 나머지 칸으로 자동 흐름 */
+    .stats-tab-all[data-mode="annual"]  { grid-column: 1; grid-row: 1; }
+    .stats-tab-all[data-mode="monthly"] { grid-column: 1; grid-row: 2; }
   }
 </style>
 </head>
@@ -1820,11 +1822,8 @@
       <span class="nav-icon" id="navEventsIcon"></span>
       <span class="nav-label-pc">최근 이벤트</span><span class="nav-label-mb">이벤트</span>
       <span class="nav-badge" id="navBadge" style="display:none">0</span>
+      <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="새 이벤트 알림"></span>
     </button>
-    <div class="notify-toggle">
-      <span class="notify-toggle-label">알림</span>
-      <button class="notify-switch" id="notifySwitch" aria-label="알림 토글" title="새 이벤트 알림"></button>
-    </div>
     <button class="nav-item" data-page="stats">
       <span class="nav-icon" id="navStatsIcon"></span>
       <span>통계</span>
@@ -2277,6 +2276,7 @@ const SVG_ICONS = {
   moon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
   send: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>`,
   heartBubble: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 13.4l-.8-.74C9.7 11.3 8.8 10.4 8.8 9.3c0-.9.7-1.6 1.6-1.6.5 0 1 .25 1.6.7.6-.45 1.1-.7 1.6-.7.9 0 1.6.7 1.6 1.6 0 1.1-.9 2-2.4 3.36z" fill="currentColor" stroke="none"/></svg>`,
+  bell: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>`,
 };
 
 const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };
@@ -2733,8 +2733,11 @@ async function openSchedule() {
 function renderScheduleItem(item) {
   const dateDisp = item.date.slice(2).replace(/-/g, '.');   // 26.06.20
   const [schY, schMo, schD] = item.date.split('-').map(Number);
-  const dow = ['일','월','화','수','목','금','토'][new Date(Date.UTC(schY, schMo - 1, schD)).getUTCDay()];  // 달력 요일(UTC 고정 계산이라 브라우저 타임존 무관)
-  const when = item.hasTime ? `${dateDisp} (${dow}) ${item.time}` : `${dateDisp} (${dow})`;
+  const dowIdx = new Date(Date.UTC(schY, schMo - 1, schD)).getUTCDay();   // 달력 요일(UTC 고정 계산 → 브라우저 타임존 무관)
+  const dowChar = ['일','월','화','수','목','금','토'][dowIdx];
+  const dowColor = dowIdx === 0 ? '#f87171' : (dowIdx === 6 ? '#60a5fa' : '');   // 일=빨강·토=파랑 (달력 주말색과 동일), 요일 글자에만
+  const dowHtml = dowColor ? `<span style="color:${dowColor}">${dowChar}</span>` : dowChar;
+  const when = item.hasTime ? `${dateDisp} (${dowHtml}) ${item.time}` : `${dateDisp} (${dowHtml})`;
   const inner = `${escapeHtml(item.title)}${item.link ? ' ' + SVG_ICONS.externalLink : ''}`;
   const titleEl = item.link
     ? `<a class="sch-item-title" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${inner}</a>`
@@ -2812,9 +2815,9 @@ let titleFlashOn = false;
 let pendingFlashCount = 0;
 
 function updateNotifySwitchUI() {
-  const sw = document.getElementById('notifySwitch');
-  if (!sw) return;
-  sw.classList.toggle('on', notifyEnabled);
+  const bell = document.getElementById('notifyBell');
+  if (!bell) return;
+  bell.classList.toggle('on', notifyEnabled);
 }
 
 async function setNotifyEnabled(enabled) {
@@ -3006,9 +3009,12 @@ function refreshUnreadIndicator() {
 }
 
 updateNotifySwitchUI();
-document.getElementById('notifySwitch').addEventListener('click', () => {
-  setNotifyEnabled(!notifyEnabled);
-});
+const notifyBellEl = document.getElementById('notifyBell');
+if (notifyBellEl) {
+  const toggleNotify = (e) => { e.stopPropagation(); setNotifyEnabled(!notifyEnabled); };  // stopPropagation: 벨 클릭이 events 탭 전환을 일으키지 않게(.nav-item 클릭 리스너 차단)
+  notifyBellEl.addEventListener('click', toggleNotify);
+  notifyBellEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNotify(e); } });
+}
 
 (() => {
   const map = {
@@ -3021,6 +3027,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
     navLinksIcon: SVG_ICONS.link,
     navBannerIcon: SVG_ICONS.flag,
     navHallIcon: SVG_ICONS.trophy,
+    notifyBell: SVG_ICONS.bell,
   };
   for (const [id, html] of Object.entries(map)) {
     const el = document.getElementById(id);

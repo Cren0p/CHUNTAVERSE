@@ -272,6 +272,26 @@
   .lr-close:hover { color: var(--text); }
   .lr-body { overflow-y: auto; }
   .lr-msg { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 12px; }
+  /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
+  .sch-btn-dday { color: #93c5fd; font-variant-numeric: tabular-nums; }
+  .sch-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sch-item:last-child { border-bottom: none; }
+  .sch-item-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .sch-item-when { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .sch-item-title {
+    font-size: 14px; color: var(--text); font-weight: 700;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+  }
+  a.sch-item-title:hover { color: var(--accent); }
+  .sch-item-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
+  .sch-item-dday {
+    font-size: 13px; color: #93c5fd; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
+  }
   .celebration-box {
     display: flex;
     align-items: center;
@@ -2462,14 +2482,20 @@ const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?
 function updatePageTitle() {
   const el = document.getElementById('pageTitle');
   if (!el) return;
+  const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 일정 1개(없으면 빈 문자열 → 버튼 미표시)
   const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span>천타버스 멤버들의<br>좋아요 요청</span></button>`;
   const celebrations = getTodayCelebrations();
-  el.innerHTML = likeReqBtn + BV_LINK + celebrations.join('');
+  el.innerHTML = scheduleBtn + likeReqBtn + BV_LINK + celebrations.join('');
   // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
   const btn = document.getElementById('likeReqBtn');
   if (btn) {
     btn.addEventListener('mouseenter', preloadLikeHide);
     btn.addEventListener('touchstart', preloadLikeHide, { passive: true });
+  }
+  const schBtn = document.getElementById('schBtn');
+  if (schBtn) {
+    schBtn.addEventListener('mouseenter', preloadSchedule);
+    schBtn.addEventListener('touchstart', preloadSchedule, { passive: true });
   }
 }
 
@@ -2526,6 +2552,7 @@ function closeLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   if (ov) ov.hidden = true;
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
+  schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기
 }
 document.addEventListener('click', (e) => {
   const ov = document.getElementById('lrOverlay');
@@ -2534,6 +2561,141 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLikeRequests();
 });
+
+// ── 다가오는 일정 (구글 시트 gid=1374057594) ──
+// 열: A=YYYY-MM-DD / B=HH:MM(빈칸 가능) / C=제목 / D=링크(빈칸 가능). 모든 시각은 KST 기준.
+// 상단바 버튼: 가장 임박한 일정 1개만 표시 — 그 일정에 시간이 있으면 D-time(초 카운트다운), 없으면 D-day. 표시할 일정이 없으면 버튼 자체를 숨김.
+// 숨김 기준: 시간 있는 일정은 그 시각이 지나면, 시간 없는 일정은 그날 자정(KST)을 넘기면 목록에서 빠짐(시트 행은 그대로 둠).
+// CSV: 페이지 로드 시 1회(버튼 표시용) + 모달 열 때 재풀링(최신 반영). 좋아요 모달과 동일한 lrOverlay·선로딩 패턴 재사용.
+const SCHEDULE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1374057594';
+const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache';
+let scheduleData = [];   // 파싱·정렬 완료된 일정
+let scheduleSig = '';    // 버튼 구조(headline·개수) 식별자 — 변할 때만 상단바 전체 재구성, 평소엔 카운트다운 숫자만 갱신
+let schedulePreload = null;
+
+function parseScheduleRows(rows) {
+  const out = [];
+  for (const r of rows) {
+    const date = (r[0] || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;  // 헤더·빈 행 자동 제외
+    const title = (r[2] || '').trim();
+    if (!title) continue;
+    const timeRaw = (r[1] || '').trim();
+    const hasTime = /^\d{1,2}:\d{2}$/.test(timeRaw);
+    const hhmm = hasTime ? timeRaw.padStart(5, '0') : '00:00';
+    const target = new Date(`${date}T${hhmm}:00+09:00`).getTime();
+    const dayStart = new Date(`${date}T00:00:00+09:00`).getTime();
+    out.push({
+      date, time: hasTime ? hhmm : '', title, link: (r[3] || '').trim(), hasTime, target,
+      hideAfter: hasTime ? target : dayStart + 86400000,
+    });
+  }
+  // 날짜 오름차순 → 같은 날은 시간 있는 것 먼저(시간순), 시간 없는 것은 맨 아래
+  out.sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    if (a.hasTime !== b.hasTime) return a.hasTime ? -1 : 1;
+    return a.target - b.target;
+  });
+  return out;
+}
+
+function visibleSchedule() {
+  const now = Date.now();
+  return scheduleData.filter(s => now < s.hideAfter);
+}
+
+// KST 기준 D-day 일수(오늘=0). 자정끼리의 차이라 시:분과 무관.
+function ddayNum(item) {
+  const dayMs = 86400000;
+  const nowMid = Math.floor((Date.now() + 9 * 3600 * 1000) / dayMs);
+  const tgtMid = Math.floor((new Date(`${item.date}T00:00:00+09:00`).getTime() + 9 * 3600 * 1000) / dayMs);
+  return tgtMid - nowMid;
+}
+function ddayText(item) {
+  const d = ddayNum(item);
+  return d <= 0 ? 'D-DAY' : `D-${d}`;
+}
+function dtimeText(item) {
+  let sec = Math.floor((item.target - Date.now()) / 1000);
+  if (sec <= 0) return 'D-DAY';
+  const d = Math.floor(sec / 86400); sec -= d * 86400;
+  const h = Math.floor(sec / 3600); sec -= h * 3600;
+  const m = Math.floor(sec / 60); sec -= m * 60;
+  const hms = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return d > 0 ? `${d}일 ${hms}` : hms;
+}
+
+// 상단바 일정 버튼 HTML. 호출 시 scheduleSig도 갱신(tick이 구조 변화를 감지하는 기준).
+function scheduleBtnHTML() {
+  const vis = visibleSchedule();
+  if (vis.length === 0) { scheduleSig = ''; return ''; }
+  const head = vis[0];
+  scheduleSig = `${vis.length}|${head.date}|${head.time}`;
+  const second = head.hasTime ? dtimeText(head) : ddayText(head);
+  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span>${escapeHtml(head.title)}<br><span class="sch-btn-dday">${second}</span></span></button>`;
+}
+
+// 1초마다: 구조(headline·개수)가 바뀌었으면(임박 일정 경과/소멸/추가) 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
+function tickSchedule() {
+  const vis = visibleSchedule();
+  const sig = vis.length ? `${vis.length}|${vis[0].date}|${vis[0].time}` : '';
+  if (sig !== scheduleSig) { updatePageTitle(); return; }
+  if (vis.length && vis[0].hasTime) {
+    const el = document.querySelector('#schBtn .sch-btn-dday');
+    if (el) el.textContent = dtimeText(vis[0]);
+  }
+}
+
+async function loadSchedule() {
+  let rows = [];
+  try {
+    const res = await fetch(SCHEDULE_SHEET_URL);
+    if (!res.ok) throw new Error('no data');
+    rows = parseCSV(await res.text());
+    lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows));
+  } catch (e) {
+    try { rows = JSON.parse(lsGet(LS_SCHEDULE_CACHE, '[]')); } catch (e2) { rows = []; }
+  }
+  scheduleData = parseScheduleRows(rows);
+  updatePageTitle();
+}
+
+// 모달용 선로딩(hover/터치 시 1회). 실패 시 null을 돌려주고, openSchedule이 기존 데이터로 폴백.
+function preloadSchedule() {
+  if (!schedulePreload) {
+    schedulePreload = fetch(SCHEDULE_SHEET_URL)
+      .then(r => { if (!r.ok) throw new Error('no data'); return r.text(); })
+      .then(t => parseCSV(t))
+      .catch(() => null);
+  }
+  return schedulePreload;
+}
+
+async function openSchedule() {
+  const ov = document.getElementById('lrOverlay');
+  const head = document.getElementById('lrHead');
+  const body = document.getElementById('lrBody');
+  if (!ov || !body) return;
+  head.innerHTML = `<span style="color:#93c5fd">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  ov.hidden = false;
+  body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
+  const rows = await preloadSchedule();  // hover로 미리 받아둔 게 있으면 그것, 없으면 지금 받음
+  if (rows) { lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows)); scheduleData = parseScheduleRows(rows); updatePageTitle(); }
+  const vis = visibleSchedule();
+  if (vis.length === 0) { body.innerHTML = '<div class="lr-msg">예정된 일정이 없습니다.</div>'; return; }
+  body.innerHTML = vis.map(renderScheduleItem).join('');
+}
+
+// 모달 리스트 항목: 절대 날짜·시간 + 제목(+링크) + D-day 배지(목록은 날짜 단위 D-day로 고정 — 똑딱이는 D-time은 상단바 버튼 전용).
+function renderScheduleItem(item) {
+  const dateDisp = item.date.slice(2).replace(/-/g, '.');   // 26.06.20
+  const when = item.hasTime ? `${dateDisp} ${item.time}` : dateDisp;
+  const inner = `${escapeHtml(item.title)}${item.link ? ' ' + SVG_ICONS.externalLink : ''}`;
+  const titleEl = item.link
+    ? `<a class="sch-item-title" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${inner}</a>`
+    : `<span class="sch-item-title">${inner}</span>`;
+  return `<div class="sch-item"><div class="sch-item-main"><span class="sch-item-when">${when}</span>${titleEl}</div><span class="sch-item-dday">${ddayText(item)}</span></div>`;
+}
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
@@ -2808,7 +2970,7 @@ document.getElementById('notifySwitch').addEventListener('click', () => {
     navMembersIcon: SVG_ICONS.people,
     navLiveIcon: SVG_ICONS.broadcast,
     navEventsIcon: SVG_ICONS.eventList,
-    navStatsIcon: SVG_ICONS.calendar,
+    navStatsIcon: SVG_ICONS.barChart,
     navChemistryIcon: SVG_ICONS.chemistry,
     navContentIcon: SVG_ICONS.film,
     navLinksIcon: SVG_ICONS.link,
@@ -4295,10 +4457,12 @@ loadChemistry();
 loadChemNames();
 loadContent();
 loadBanners();
+loadSchedule();
 setInterval(loadLive, 10 * 1000);
 setInterval(loadEvents, 10 * 1000);
 setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
+setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지(순수 로컬 연산, 네트워크 없음)
 
 // ── 이미지 프리로드 부팅 훅 (선언부는 switchPage 초기 호출 이전에 위치) ──
 (function bootPreload() {

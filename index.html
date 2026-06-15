@@ -2600,9 +2600,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── 다가오는 일정 (구글 시트 gid=1374057594) ──
-// 열: A=YYYY-MM-DD / B=HH:MM(빈칸 가능) / C=제목 / D=링크(빈칸 가능). 모든 시각은 KST 기준.
-// 상단바 버튼: 가장 임박한 일정 1개만 표시 — 그 일정에 시간이 있으면 D-time(초 카운트다운), 없으면 D-day. 표시할 일정이 없으면 버튼 자체를 숨김.
-// 숨김 기준: 시간 있는 일정은 그 시각이 지나면, 시간 없는 일정은 그날 자정(KST)을 넘기면 목록에서 빠짐(시트 행은 그대로 둠).
+// 열: A=YYYY-MM-DD / B=HH:MM(빈칸 가능) / C=간략제목(버튼용·빈칸 가능) / D=상세제목(모달용) / E=링크(빈칸 가능). C·D 중 하나라도 있으면 행 유지(버튼=C 우선, 모달=D 우선, 한쪽 비면 다른 쪽). 모든 시각은 KST 기준.
+// 상단바 버튼: 가장 임박한 일정 1개만 표시 — 당일이고 시간 있으면 D-time(D-HH:MM:SS 초 카운트다운), 그 외(미래 날짜)는 D-day.
+// 숨김 기준: 시간 유무와 무관하게 그날 자정(KST)을 넘겨야 빠짐. 시간 있는 일정도 그 시각이 지나면 사라지지 않고 D-DAY로 그날 자정까지 유지(시간 없는 일정과 동일·합방 중에도 상단 노출) → 자정 넘으면 다음 일정으로. 시트 행은 그대로 둠.
 // CSV: 페이지 로드 시 1회(버튼 표시용) + 모달 열 때 재풀링(최신 반영). 좋아요 모달과 동일한 lrOverlay·선로딩 패턴 재사용.
 const SCHEDULE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1374057594';
 const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache';
@@ -2615,16 +2615,20 @@ function parseScheduleRows(rows) {
   for (const r of rows) {
     const date = (r[0] || '').trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;  // 헤더·빈 행 자동 제외
-    const title = (r[2] || '').trim();
-    if (!title) continue;
+    const brief = (r[2] || '').trim();   // C=간략제목(버튼)
+    const detail = (r[3] || '').trim();  // D=상세제목(모달)
+    if (!brief && !detail) continue;     // 제목이 둘 다 없으면 무효 행
     const timeRaw = (r[1] || '').trim();
     const hasTime = /^\d{1,2}:\d{2}$/.test(timeRaw);
     const hhmm = hasTime ? timeRaw.padStart(5, '0') : '00:00';
     const target = new Date(`${date}T${hhmm}:00+09:00`).getTime();
     const dayStart = new Date(`${date}T00:00:00+09:00`).getTime();
     out.push({
-      date, time: hasTime ? hhmm : '', title, link: (r[3] || '').trim(), hasTime, target,
-      hideAfter: hasTime ? target : dayStart + 86400000,
+      date, time: hasTime ? hhmm : '',
+      title: detail || brief,        // 모달·기준 제목(상세 우선)
+      shortTitle: brief || detail,   // 버튼 제목(간략 우선)
+      link: (r[4] || '').trim(), hasTime, target,
+      hideAfter: dayStart + 86400000,  // 시간 유무 무관 그날 자정까지 유지(시간 지나면 D-DAY로 표기)
     });
   }
   // 날짜 오름차순 → 같은 날은 시간 있는 것 먼저(시간순), 시간 없는 것은 맨 아래
@@ -2652,14 +2656,13 @@ function ddayText(item) {
   const d = ddayNum(item);
   return d <= 0 ? 'D-DAY' : `D-${d}`;
 }
+// D-time: 당일에만 호출(남은 시간 < 24h) → D-HH:MM:SS. D-day와 머리글자('D-') 통일.
 function dtimeText(item) {
   let sec = Math.floor((item.target - Date.now()) / 1000);
   if (sec <= 0) return 'D-DAY';
-  const d = Math.floor(sec / 86400); sec -= d * 86400;
   const h = Math.floor(sec / 3600); sec -= h * 3600;
   const m = Math.floor(sec / 60); sec -= m * 60;
-  const hms = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  return d > 0 ? `${d}일 ${hms}` : hms;
+  return `D-${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
 // 상단바 일정 버튼 HTML. 호출 시 scheduleSig도 갱신(tick이 구조 변화를 감지하는 기준).
@@ -2668,8 +2671,9 @@ function scheduleBtnHTML() {
   if (vis.length === 0) { scheduleSig = ''; return ''; }
   const head = vis[0];
   scheduleSig = `${vis.length}|${head.date}|${head.time}`;
-  const second = head.hasTime ? dtimeText(head) : ddayText(head);
-  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.title)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
+  // 당일(D-day)부터 시간 카운트다운, 그 전엔 D-day. 버튼 제목은 간략제목 우선(없으면 상세제목).
+  const second = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
+  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.shortTitle)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
 }
 
 // 1초마다: 구조(headline·개수)가 바뀌었으면(임박 일정 경과/소멸/추가) 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
@@ -2678,11 +2682,9 @@ function tickSchedule() {
   const sig = vis.length ? `${vis.length}|${vis[0].date}|${vis[0].time}` : '';
   if (sig !== scheduleSig) { updatePageTitle(); return; }
   if (vis.length) {
-    if (vis[0].hasTime) {
-      const el = document.querySelector('#schBtn .sch-btn-dday');
-      if (el) el.textContent = dtimeText(vis[0]);
-    }
-    const elM = document.querySelector('#schBtn .tb-t-mb');   // 모바일 D-day(시간 무관) — 자정 경계 갱신
+    const el = document.querySelector('#schBtn .sch-btn-dday');   // PC: 당일+시간이면 D-HH:MM:SS, 아니면 D-day
+    if (el) el.textContent = (vis[0].hasTime && ddayNum(vis[0]) === 0) ? dtimeText(vis[0]) : ddayText(vis[0]);
+    const elM = document.querySelector('#schBtn .tb-t-mb');       // 모바일은 항상 D-day(자정 경계 갱신)
     if (elM) elM.textContent = ddayText(vis[0]);
   }
 }

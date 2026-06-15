@@ -319,6 +319,10 @@
   }
   .celebration-box:hover { background: rgba(var(--cb-rgb), 0.22); border-color: rgba(var(--cb-rgb), 0.7); }
   .celebration-box svg { width: 16px; height: 16px; flex-shrink: 0; }
+  /* 상단바/사이드바 PC↔모바일 변형 토글 (기본=PC, 모바일 변형은 700px 미디어쿼리에서 표시) */
+  .tb-ic-mb, .tb-t-mb { display: none; }
+  .nav-label-mb { display: none; }
+  .nav-live-dot-m { display: none; }
   .header-center {
     margin-left: auto; text-align: right; color: var(--muted);
     font-size: 12px; min-width: 0;
@@ -1746,27 +1750,47 @@
       position: relative;
       flex-direction: column; padding: 0;
     }
-    .sidebar-logo { display: none; }
-    .nav-list { flex-direction: row; flex: none; padding: 8px; flex-wrap: wrap; align-items: center; }
+    .sidebar-logo { padding: 8px; min-height: 0; }
+    .nav-list { flex-direction: row; flex: none; padding: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
     .nav-item {
+      flex-direction: column; gap: 4px;
       border-left: none;
       border-bottom: 3px solid transparent;
-      padding: 10px 14px; white-space: nowrap;
+      padding: 8px 10px; white-space: nowrap;
       width: auto; flex-shrink: 0;
+      font-size: 10px; line-height: 1.2;
     }
     .nav-item.active { border-left: none; border-bottom-color: var(--accent); }
     .nav-badge { right: 6px; top: 4px; transform: none; }
-    .notify-toggle {
-      padding: 8px 12px;
-      border-left: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    .notify-toggle { display: none; }
     .main-header { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
-    .page-title { width: 100%; }
-    .header-center { width: 100%; margin-left: 0; }
+    /* 3열(상단바): 버튼 좌 · 설명 우 — width:100% 스택 해제, header-center는 base의 margin-left:auto로 우측. 좁으면 wrap으로 설명이 아래로 */
+    .page-title { gap: 6px; }
+    /* 상단바 버튼: 세로 미니(아이콘 위 · 짧은 텍스트 아래) + PC/모바일 토글 */
+    .page-title-link, .celebration-box {
+      flex-direction: column; gap: 2px;
+      padding: 6px 8px; font-size: 9px;
+      text-align: center; line-height: 1.3;
+    }
+    .tb-ic-pc, .tb-t-pc { display: none; }
+    .tb-ic-mb { display: block; }
+    .tb-t-mb { display: block; }
+    .page-title-link img.tb-ic-mb, .celebration-box img.tb-ic-mb {
+      width: 16px; height: 16px; object-fit: cover; border-radius: 3px;
+    }
+    /* 사이드바 라벨: 긴 것만 축약본으로 교체 */
+    .nav-label-pc { display: none; }
+    .nav-label-mb { display: inline; }
+    /* 라이브: PC 뱃지 제거 → 생방송 아이콘 우상단 점(회색=없음 / 빨강=방송중) */
+    .nav-live-badge { display: none; }
+    .nav-live-dot-m {
+      display: block; position: absolute; top: 4px; right: 8px;
+      width: 8px; height: 8px; border-radius: 50%; background: var(--muted);
+    }
+    .nav-live-badge.on ~ .nav-live-dot-m {
+      background: var(--live); box-shadow: 0 0 5px var(--live-glow);
+    }
     .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
-    .page-title { font-size: 18px; }
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
@@ -1789,10 +1813,11 @@
         <span class="nav-live-dot" id="navLiveDot"></span>
         <span class="nav-live-count" id="navLiveCount">0</span>
       </span>
+      <span class="nav-live-dot-m"></span>
     </button>
     <button class="nav-item" data-page="events">
       <span class="nav-icon" id="navEventsIcon"></span>
-      <span>최근 이벤트</span>
+      <span class="nav-label-pc">최근 이벤트</span><span class="nav-label-mb">이벤트</span>
       <span class="nav-badge" id="navBadge" style="display:none">0</span>
     </button>
     <div class="notify-toggle">
@@ -1817,11 +1842,11 @@
     </button>
     <button class="nav-item" data-page="hall">
       <span class="nav-icon" id="navHallIcon"></span>
-      <span>명예의 전당</span>
+      <span class="nav-label-pc">명예의 전당</span><span class="nav-label-mb">명전</span>
     </button>
     <button class="nav-item" data-page="links">
       <span class="nav-icon" id="navLinksIcon"></span>
-      <span>관련 링크</span>
+      <span class="nav-label-pc">관련 링크</span><span class="nav-label-mb">링크</span>
     </button>
   </div>
 </aside>
@@ -2440,9 +2465,10 @@ const CELEB_SVG = {
   broadcast: SVG_ICONS.soop,
 };
 
-function celebBox(svg, text, hexColor, hash) {
+function celebBox(svg, photoSrc, pcText, mbText, hexColor, hash) {
   const rgb = hexToRgb(hexColor);
-  return `<a class="celebration-box" href="#${hash}" style="--cb-rgb:${rgb};color:${hexColor}">${svg}<span>${text}</span></a>`;
+  const ic = `<span class="tb-ic-pc">${svg}</span><img class="tb-ic-mb" src="${photoSrc}" alt="">`;
+  return `<a class="celebration-box" href="#${hash}" style="--cb-rgb:${rgb};color:${hexColor}">${ic}<span class="tb-t-pc">${pcText}</span><span class="tb-t-mb">${mbText}</span></a>`;
 }
 
 function getTodayCelebrations() {
@@ -2457,15 +2483,15 @@ function getTodayCelebrations() {
     const info = MEMBER_INFO[m.id];
     const birthMatch = info?.age?.match(/^(\d{4})년생$/);
     const nthText = birthMatch ? `${cy - parseInt(birthMatch[1])}번째 ` : '';
-    results.push(celebBox(CELEB_SVG.birthday, `${m.name}님의 ${nthText}생일을<br>축하합니다!`, m.color, `members:${m.id}`));
+    results.push(celebBox(CELEB_SVG.birthday, m.img, `${m.name}님의 ${nthText}생일을<br>축하합니다!`, '생축!', m.color, `members:${m.id}`));
   }
 
   if (cm === 11 && cd === 30 && cy > 2025) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, '#61FFEC', 'members'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, 'Favicon.webp', `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, `${cy - 2025}주년!`, '#61FFEC', 'members'));
   }
   const ctDays = Math.floor((todayMs - CT_FORMATION.getTime()) / 86400000);
   if (ctDays > 0 && ctDays % 100 === 0 && !(cm === 11 && cd === 30)) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '#61FFEC', 'members'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, 'Favicon.webp', `천타버스 결성 ${ctDays}일을<br>축하합니다!`, `${ctDays}일!`, '#61FFEC', 'members'));
   }
 
   for (const m of MEMBERS) {
@@ -2475,11 +2501,11 @@ function getTodayCelebrations() {
     if (!match) continue;
     const fy = parseInt(match[1]), fm = parseInt(match[2]), fd = parseInt(match[3]);
     if (fm === cm && fd === cd && cy > fy) {
-      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${cy - fy}주년을<br>축하합니다!`, m.color, `members:${m.id}`));
+      results.push(celebBox(CELEB_SVG.broadcast, m.img, `${m.name}님의 숲 방송 ${cy - fy}주년을<br>축하합니다!`, `${cy - fy}주년!`, m.color, `members:${m.id}`));
     } else {
       const days = Math.floor((todayMs - Date.UTC(fy, fm - 1, fd)) / 86400000);
       if (days > 0 && days % 100 === 0) {
-        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${days}일을<br>축하합니다!`, m.color, `members:${m.id}`));
+        results.push(celebBox(CELEB_SVG.broadcast, m.img, `${m.name}님의 숲 방송 ${days}일을<br>축하합니다!`, `${days}일!`, m.color, `members:${m.id}`));
       }
     }
   }
@@ -2487,13 +2513,13 @@ function getTodayCelebrations() {
   return results;
 }
 
-const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span>천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span></a>`;
+const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span class="tb-t-pc">천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span><span class="tb-t-mb">커버곡</span></a>`;
 
 function updatePageTitle() {
   const el = document.getElementById('pageTitle');
   if (!el) return;
   const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 일정 1개(없으면 빈 문자열 → 버튼 미표시)
-  const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span>천타버스 멤버들의<br>좋아요 요청</span></button>`;
+  const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 요청</span><span class="tb-t-mb">좋아요</span></button>`;
   const celebrations = getTodayCelebrations();
   el.innerHTML = scheduleBtn + likeReqBtn + BV_LINK + celebrations.join('');
   // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
@@ -2642,7 +2668,7 @@ function scheduleBtnHTML() {
   const head = vis[0];
   scheduleSig = `${vis.length}|${head.date}|${head.time}`;
   const second = head.hasTime ? dtimeText(head) : ddayText(head);
-  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span>${escapeHtml(head.title)}<br><span class="sch-btn-dday">${second}</span></span></button>`;
+  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.title)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
 }
 
 // 1초마다: 구조(headline·개수)가 바뀌었으면(임박 일정 경과/소멸/추가) 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
@@ -2650,9 +2676,13 @@ function tickSchedule() {
   const vis = visibleSchedule();
   const sig = vis.length ? `${vis.length}|${vis[0].date}|${vis[0].time}` : '';
   if (sig !== scheduleSig) { updatePageTitle(); return; }
-  if (vis.length && vis[0].hasTime) {
-    const el = document.querySelector('#schBtn .sch-btn-dday');
-    if (el) el.textContent = dtimeText(vis[0]);
+  if (vis.length) {
+    if (vis[0].hasTime) {
+      const el = document.querySelector('#schBtn .sch-btn-dday');
+      if (el) el.textContent = dtimeText(vis[0]);
+    }
+    const elM = document.querySelector('#schBtn .tb-t-mb');   // 모바일 D-day(시간 무관) — 자정 경계 갱신
+    if (elM) elM.textContent = ddayText(vis[0]);
   }
 }
 

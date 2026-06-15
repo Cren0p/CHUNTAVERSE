@@ -117,7 +117,7 @@
   .nav-events-label { position: relative; display: inline-flex; align-items: center; }
   .nav-badge {
     position: absolute;
-    top: -6px; right: -6px;   /* 라벨 우상단 위로(superscript) — 흐름을 차지하지 않아 라벨이 밀리거나 줄바꿈되지 않음 */
+    top: -6px; right: -10px;   /* 라벨 우상단 위로(superscript) — 흐름을 차지하지 않아 라벨이 밀리거나 줄바꿈되지 않음 */
     background: var(--ev-unread);
     color: var(--bg);
     font-size: 10px;
@@ -166,9 +166,25 @@
     cursor: pointer;
     transition: color 0.15s;
   }
-  .nav-notify-bell svg { width: 16px; height: 16px; display: block; }
-  .nav-notify-bell.on { color: var(--accent); }          /* 유채색 = 알림 켜짐 */
+  .nav-notify-bell svg { width: 20px; height: 20px; display: block; overflow: visible; }
+  .nav-notify-bell .ring-wave { opacity: 0; }                   /* 사운드 웨이브 — 꺼짐 땐 숨김 */
+  .nav-notify-bell.on { color: #fbbf24; }                       /* 켜짐 = 앰버(민트 아닌 별도색) · 종 울림 강조 */
+  .nav-notify-bell.on .ring-wave { opacity: 1; }                /* 켜짐 = 양옆 웨이브 표시 */
+  .nav-notify-bell.on svg { transform-origin: 50% 12%; animation: bell-ring 2.5s ease-in-out infinite; }
   .nav-notify-bell:not(.on):hover { color: var(--text); }
+  @keyframes bell-ring {
+    0%  { transform: rotate(0); }
+    4%  { transform: rotate(16deg); }
+    10% { transform: rotate(-14deg); }
+    16% { transform: rotate(11deg); }
+    22% { transform: rotate(-8deg); }
+    28% { transform: rotate(5deg); }
+    34% { transform: rotate(-2deg); }
+    40%, 100% { transform: rotate(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-notify-bell.on svg { animation: none; }
+  }
   .notify-switch {
     position: relative;
     width: 36px;
@@ -2279,7 +2295,7 @@ const SVG_ICONS = {
   moon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
   send: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>`,
   heartBubble: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 13.4l-.8-.74C9.7 11.3 8.8 10.4 8.8 9.3c0-.9.7-1.6 1.6-1.6.5 0 1 .25 1.6.7.6-.45 1.1-.7 1.6-.7.9 0 1.6.7 1.6 1.6 0 1.1-.9 2-2.4 3.36z" fill="currentColor" stroke="none"/></svg>`,
-  bell: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`,
+  bell: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path class="ring-wave" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M3.5 7a5 5 0 0 0 0 5"/><path class="ring-wave" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M20.5 7a5 5 0 0 1 0 5"/><path d="M12 2.5c-.83 0-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5c0-3.08-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5z"/><path d="M9.4 18.8a2.6 2.6 0 0 0 5.2 0z"/></svg>`,
 };
 
 const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };

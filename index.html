@@ -243,6 +243,16 @@
     text-align: left;
   }
   button.page-title-link.like-req-btn:hover { background: rgba(52,211,153,0.22); border-color: rgba(52,211,153,0.7); }
+  /* 일정 버튼: 천타버스 메인 민트(--accent) 박스 — 좋아요(에메랄드)·블루발(파랑)과 색으로 구분 */
+  button.page-title-link.sch-btn {
+    background: rgba(97,255,236,0.12);
+    border: 1px solid rgba(97,255,236,0.4);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+  button.page-title-link.sch-btn:hover { background: rgba(97,255,236,0.22); border-color: rgba(97,255,236,0.7); }
   .lr-overlay {
     position: fixed; inset: 0; z-index: 1000;
     background: rgba(0,0,0,0.65);
@@ -273,7 +283,7 @@
   .lr-body { overflow-y: auto; }
   .lr-msg { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 12px; }
   /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
-  .sch-btn-dday { color: #93c5fd; font-variant-numeric: tabular-nums; }
+  .sch-btn-dday { color: var(--accent); font-variant-numeric: tabular-nums; }
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
@@ -289,7 +299,7 @@
   a.sch-item-title:hover { color: var(--accent); }
   .sch-item-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
   .sch-item-dday {
-    font-size: 13px; color: #93c5fd; font-weight: 700;
+    font-size: 13px; color: var(--accent); font-weight: 700;
     white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
   }
   .celebration-box {
@@ -2676,7 +2686,7 @@ async function openSchedule() {
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !body) return;
-  head.innerHTML = `<span style="color:#93c5fd">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  head.innerHTML = `<span style="color:var(--accent)">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
   ov.hidden = false;
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   const rows = await preloadSchedule();  // hover로 미리 받아둔 게 있으면 그것, 없으면 지금 받음

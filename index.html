@@ -167,10 +167,12 @@
     transition: color 0.15s;
   }
   .nav-notify-bell svg { width: 20px; height: 20px; display: block; overflow: visible; }
-  .nav-notify-bell .ring-wave { opacity: 0; }                   /* 사운드 웨이브 — 평소 숨김, 울릴 때만 플래시 */
-  .nav-notify-bell.on { color: #fbbf24; }                       /* 켜짐(정적) = 앰버색만(민트 아닌 별도색) */
+  /* ON/OFF를 색(앰버↔무채)·모양(웨이브 선 유무)으로 구별 + 켤 때 1회 애니메이션 */
+  .nav-notify-bell .ring-wave { opacity: 0; }                   /* OFF: 양옆 웨이브 선 숨김 (모양 단서) */
+  .nav-notify-bell.on { color: #fbbf24; }                       /* ON: 앰버색 (색 단서, 민트 아닌 별도색) */
+  .nav-notify-bell.on .ring-wave { opacity: 1; }                /* ON 정지: 양옆 웨이브 선 정적 표시 (currentColor=앰버) */
   .nav-notify-bell:not(.on):hover { color: var(--text); }
-  /* 울림은 클릭으로 켤 때 1회만 (.ringing은 JS가 붙였다 뗌) — 상시 흔들리지 않음 */
+  /* 클릭으로 켤 때 1회만 (.ringing은 JS가 붙였다 뗌) — 상시 흔들리지 않음 */
   .nav-notify-bell.ringing svg { transform-origin: 50% 12%; animation: bell-ring 0.9s ease-in-out; }
   .nav-notify-bell.ringing .ring-wave { animation: ring-wave-flash 0.9s ease-out; }
   @keyframes bell-ring {
@@ -187,7 +189,7 @@
     0%   { opacity: 0; }
     20%  { opacity: 1; }
     60%  { opacity: 0.8; }
-    100% { opacity: 0; }
+    100% { opacity: 1; }                                        /* ON 정지값(1)으로 안착 — 끝에서 사라졌다 튀지 않게 */
   }
   @media (prefers-reduced-motion: reduce) {
     .nav-notify-bell.ringing svg, .nav-notify-bell.ringing .ring-wave { animation: none; }
@@ -3038,7 +3040,7 @@ updateNotifySwitchUI();
 const notifyBellEl = document.getElementById('notifyBell');
 if (notifyBellEl) {
   let ringTimer = null;
-  const ringBell = () => {   // 클릭으로 켤 때 1회만 울림(흔들림 + 웨이브 플래시)
+  const ringBell = () => {   // 클릭으로 켤 때 1회만 (벨 흔들림 + 웨이브 생겨나 안착)
     clearTimeout(ringTimer);
     notifyBellEl.classList.remove('ringing');
     void notifyBellEl.offsetWidth;   // 강제 리플로우 → 빠른 재클릭에도 애니메이션 재시작
@@ -3048,8 +3050,8 @@ if (notifyBellEl) {
   const toggleNotify = async (e) => {
     e.stopPropagation();   // 벨 클릭이 events 탭 전환을 일으키지 않게(.nav-item 클릭 리스너 차단)
     const wasOn = notifyEnabled;
-    await setNotifyEnabled(!notifyEnabled);
-    if (!wasOn && notifyEnabled) ringBell();   // 꺼짐→켜짐(권한 허용 포함) 성공 시에만 울림
+    await setNotifyEnabled(!notifyEnabled);   // .on 토글 → updateNotifySwitchUI가 색+웨이브 정적 전환
+    if (!wasOn && notifyEnabled) ringBell();   // 꺼짐→켜짐(권한 허용 포함) 성공 시에만 1회 애니메이션
   };
   notifyBellEl.addEventListener('click', toggleNotify);
   notifyBellEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNotify(e); } });

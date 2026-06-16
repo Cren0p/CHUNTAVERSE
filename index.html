@@ -362,7 +362,7 @@
   .celebration-box:hover { background: rgba(var(--cb-rgb), 0.22); border-color: rgba(var(--cb-rgb), 0.7); }
   .celebration-box svg { width: 16px; height: 16px; flex-shrink: 0; }
   /* 상단바/사이드바 PC↔모바일 변형 토글 (기본=PC, 모바일 변형은 700px 미디어쿼리에서 표시) */
-  .tb-ic-mb, .tb-t-mb { display: none; }
+  .tb-t-mb { display: none; }
   .nav-label-mb { display: none; }
   .nav-live-dot-m { display: none; }
   .header-center {
@@ -1660,12 +1660,12 @@
 
   .members-crew {
     display: flex; gap: 16px;
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     align-items: stretch;
   }
   .members-crew-intro {
-    flex: 1.4; min-width: 0;
+    flex: 1.7; min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 28px 32px;
@@ -1866,11 +1866,10 @@
       text-align: center; line-height: 1.3;
       min-width: 60px;   /* 전 버튼 동일 폭 — 가장 긴 라벨 기준 floor (좋아요·커버곡·N주년!·N일! 등 모두 수용) */
     }
-    .tb-ic-pc, .tb-t-pc { display: none; }
-    .tb-ic-mb { display: block; }
+    .tb-t-pc { display: none; }
     .tb-t-mb { display: block; }
-    /* 기념일 박스 모바일: 사진 대신 멤버명 텍스트(색+이름으로 식별) */
-    .celebration-box .celeb-mbname { font-weight: 800; }
+    /* 기념일 박스 모바일(C안): 아이콘 + "이름 종류" 한 줄, 폭 가변(긴 이름은 넓어짐) */
+    .celebration-box .tb-t-mb { white-space: nowrap; font-weight: 700; }
     /* 사이드바 라벨: 긴 것만 축약본으로 교체 */
     .nav-label-pc { display: none; }
     .nav-label-mb { display: inline; }
@@ -2565,9 +2564,8 @@ const CELEB_SVG = {
 
 function celebBox(svg, pcText, mbName, mbType, hexColor, hash) {
   const rgb = hexToRgb(hexColor);
-  // PC: SVG 아이콘 + 전체 문구 / 모바일: 멤버명(색+굵게) + 종류 라벨 — 식별은 색·이름, 종류는 하단 라벨
-  const ic = `<span class="tb-ic-pc">${svg}</span><span class="tb-ic-mb celeb-mbname">${mbName}</span>`;
-  return `<a class="celebration-box" href="#${hash}" style="--cb-rgb:${rgb};color:${hexColor}">${ic}<span class="tb-t-pc">${pcText}</span><span class="tb-t-mb">${mbType}</span></a>`;
+  // 아이콘 PC·모바일 공통. PC: 전체 문구 / 모바일: "이름 종류" 한 줄(C안 — 높이는 다른 버튼과 동일, 폭만 가변)
+  return `<a class="celebration-box" href="#${hash}" style="--cb-rgb:${rgb};color:${hexColor}">${svg}<span class="tb-t-pc">${pcText}</span><span class="tb-t-mb">${mbName} ${mbType}</span></a>`;
 }
 
 function getTodayCelebrations() {
@@ -2827,7 +2825,7 @@ function scheduleBtnHTML() {
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (vis.length === 0) {
     scheduleSig = '∅';
-    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday" style="color:var(--muted)">불러오는 중</span></span><span class="tb-t-mb">일정</span></button>`;
+    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday">불러오는 중</span></span><span class="tb-t-mb">일정</span></button>`;
   }
   const head = vis[0];
   scheduleSig = `${vis.length}|${head.date}|${head.time}`;
@@ -5398,8 +5396,8 @@ function renderMembersCrew(body) {
         <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025.11.30</span> — 출범</span></div>
         <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.06.27</span> — 추가멤버 면접</span></div>
         <div class="crew-act-sub">정기 활동</div>
-        <div class="crew-act-li"><span class="dot">•</span><span>천타버스 티타임 — 매월 초 <span class="tag">(2026.01~)</span></span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span>강제 모캡방송 — 매월 후반 <span class="tag">(2026.03~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026.01~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡방송 <span class="tag">(2026.03~)</span></span></div>
         <div class="crew-act-sub">비정기 활동</div>
         <div class="crew-act-li"><span class="dot">•</span><span>VRChat · 풀트래킹 합방</span></div>
         <div class="crew-act-li"><span class="dot">•</span><span>디코 · 종겜 합방 등</span></div>

@@ -2648,11 +2648,12 @@ const likeReqKey = (e) => `${e.member_id || ''}|${e.time || ''}|${e.url || ''}`;
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
 function lsHideSet() { try { return new Set(JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')).map(normLikeUrl)); } catch (e) { return new Set(); } }
-// 같은 글 좋아요 요청 dedup: normLikeUrl(SOOP은 #comment 제거, 카페는 글 URL) 기준으로 묶어 최신 1건만 남김(과거 건 숨김)
+// 같은 멤버가 같은 글에 보낸 좋아요 요청만 dedup: 멤버 + normLikeUrl(SOOP은 #comment 제거, 카페는 글 URL) 기준 최신 1건(과거 건 숨김).
+// 다른 멤버가 같은 글을 요청한 건은 별개 요청이므로 각각 유지(달타·캬앙이 같은 컨텐츠 좋아요를 요청한 경우 둘 다 노출).
 function dedupeLikeReqs(list) {
   const byKey = new Map();
   for (const e of (list || [])) {
-    const k = normLikeUrl(e.url);
+    const k = `${e.member_id || ''}|${normLikeUrl(e.url)}`;
     const prev = byKey.get(k);
     if (!prev || new Date(e.time) > new Date(prev.time)) byKey.set(k, e);
   }

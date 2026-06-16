@@ -2662,7 +2662,7 @@ function updatePageTitle() {
 // 좋아요 요청 숨김 목록 — 시트 A열에 게시글 URL(# 앞부분)을 적으면 해당 글의 요청이 모두 숨김.
 // 댓글 단위가 아닌 게시글(컨텐츠) 단위 차단 — 같은 글의 추가 요청 댓글도 함께 숨겨짐.
 const LIKE_HIDE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=66286785';
-const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v1';
+const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v2';   // v2: A=URL, B=만료일(YYYY-MM-DD) → {u,d} 객체배열로 캐시
 const normLikeUrl = (u) => (u || '').split('#')[0].trim().replace(/\/$/, '');
 // ── 유저 단위 좋아요 요청 상태(localStorage) — CSV 숨김(글 단위·Crenop 관리)과 별개 ──
 const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // 유저가 ✕로 숨긴 요청(요청 단위, 영구)
@@ -2672,7 +2672,27 @@ let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계�
 const likeReqKey = (e) => `${e.member_id || ''}|${e.time || ''}|${e.url || ''}`;
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
-function lsHideSet() { try { return new Set(JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')).map(normLikeUrl)); } catch (e) { return new Set(); } }
+// 좋아요 숨김 B열(만료일) 판정: B 비었거나 날짜 형식 밖이면 즉시 숨김, 날짜면 그날(KST)까지 노출하고 지나면 숨김.
+// 날짜는 일정 시트와 동일 YYYY-MM-DD 기준(. / 구분·한 자리 월일·뒤따르는 구분자 허용). B엔 날짜만 적을 것(여분 텍스트는 형식 밖→즉시 숨김).
+function likeHideActiveOn(dateRaw, todayKst) {
+  const m = String(dateRaw || '').trim().replace(/\s+/g, '').replace(/[.\/]/g, '-').replace(/-+$/, '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return true;
+  const due = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  return todayKst > due;
+}
+// 캐시 엔트리({u: 정규화URL, d: 만료일})에서 "지금 숨겨야 할" URL Set 생성. 날짜는 호출 시점 KST로 매번 재평가(자정 넘기면 자동 반영).
+function buildLikeHideSet(entries) {
+  const kst = new Date(Date.now() + 9 * 3600 * 1000);
+  const todayKst = `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+  const s = new Set();
+  for (const e of (entries || [])) {
+    if (e && e.u && likeHideActiveOn(e.d, todayKst)) s.add(e.u);
+  }
+  return s;
+}
+function lsHideSet() {
+  try { return buildLikeHideSet(JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]'))); } catch (e) { return new Set(); }
+}
 // 같은 멤버가 같은 글에 보낸 좋아요 요청만 dedup: 멤버 + normLikeUrl(SOOP은 #comment 제거, 카페는 글 URL) 기준 최신 1건(과거 건 숨김).
 // 다른 멤버가 같은 글을 요청한 건은 별개 요청이므로 각각 유지(달타·캬앙이 같은 컨텐츠 좋아요를 요청한 경우 둘 다 노출).
 function dedupeLikeReqs(list) {
@@ -2685,16 +2705,18 @@ function dedupeLikeReqs(list) {
   return [...byKey.values()].sort((a, b) => new Date(b.time) - new Date(a.time));
 }
 async function loadLikeHideSet() {
-  let urls = [];
+  let entries = [];
   try {
     const res = await fetch(LIKE_HIDE_SHEET_URL);
     if (!res.ok) throw new Error('no data');
-    urls = parseCSV(await res.text()).map(r => (r[0] || '').trim()).filter(u => u.startsWith('http'));
-    lsSet(LS_LIKEHIDE_CACHE, JSON.stringify(urls));
+    entries = parseCSV(await res.text())
+      .map(r => ({ u: normLikeUrl((r[0] || '').trim()), d: (r[1] || '').trim() }))
+      .filter(e => e.u.startsWith('http'));
+    lsSet(LS_LIKEHIDE_CACHE, JSON.stringify(entries));
   } catch (e) {
-    try { urls = JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')); } catch (e2) { urls = []; }
+    try { entries = JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')); } catch (e2) { entries = []; }
   }
-  return new Set(urls.map(normLikeUrl));
+  return buildLikeHideSet(entries);
 }
 
 // 숨김목록 선로딩분(모달 1회용). hover/클릭에서 호출하되 한 번 받기 시작하면 그 약속을 재사용(중복 fetch 방지).

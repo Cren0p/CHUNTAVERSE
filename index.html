@@ -940,6 +940,25 @@
     background: rgba(46, 245, 225, 0.12);
   }
 
+  /* 시간대별 방송 분포 히트맵 (멤버 개별 화면) */
+  .stats-detail-left { min-width: 0; }
+  .toh-wrap { margin-top: 16px; }
+  .toh-mb { display: none; }
+  @media (max-width: 900px) {
+    .toh-pc { display: none; }
+    .toh-mb { display: block; }
+  }
+  .toh-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+  .toh-title { font-size: 12px; font-weight: 600; color: #cbd5e1; }
+  .toh-sub { font-size: 11px; color: var(--muted); }
+  .toh-body { display: flex; align-items: flex-start; padding: 7px 0; }
+  .toh-yaxis { position: relative; width: 22px; flex: none; }
+  .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--muted); }
+  .toh-right { flex: 1; min-width: 0; }
+  .toh-grid { display: grid; gap: 0; }
+  .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
+  .toh-xlabel { font-size: 11px; line-height: 12px; text-align: center; }
+
   .day-section + .day-section {
     margin-top: 14px;
     padding-top: 12px;
@@ -4089,6 +4108,7 @@ function renderStatsMember(body, memberId) {
   const now = new Date();
   const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
+  const heatHtml = renderTimeOfDayHeatmap(year, month, sum, isCurrentMonth);
 
   // medals가 없거나 이 멤버 메달이 비어있으면 재계산
   if (!statsState.medals || Object.keys(statsState.medals[memberId] || {}).length === 0) {
@@ -4164,8 +4184,12 @@ function renderStatsMember(body, memberId) {
       </div>
     </div>
     <div class="stats-detail-body">
-      ${renderCalendar(year, month, sum)}
+      <div class="stats-detail-left">
+        ${renderCalendar(year, month, sum)}
+        ${heatHtml ? `<div class="toh-wrap toh-pc">${heatHtml}</div>` : ''}
+      </div>
       <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
+      ${heatHtml ? `<div class="toh-wrap toh-mb">${heatHtml}</div>` : ''}
     </div>
   `;
   body.querySelectorAll('.stats-month-btn').forEach(btn => {
@@ -4324,6 +4348,79 @@ function renderDayDetail(year, month1, sum, memberId) {
     }
   }
   return html;
+}
+
+// 시간대별 방송 분포: 세션 [start,end]를 KST 기준 일·3시간밴드 경계로 쪼개 분 단위 누적.
+// 자정 넘는 방송은 양일에 나눠 들어가고, 표시 월 밖으로 넘어가는 구간은 잘라낸다(클립). 진행 중 세션은 현재 월에서만 now까지 집계.
+function computeTimeOfDayMinutes(sessionsByDate, year, month1, isCurrentMonth) {
+  const dim = daysInMonth(year, month1);
+  const grid = [];
+  for (let i = 0; i < dim; i++) grid.push([0, 0, 0, 0, 0, 0, 0, 0]);
+  const nowMs = Date.now();
+  const sessions = [];
+  for (const arr of Object.values(sessionsByDate || {})) {
+    for (const s of arr) sessions.push(s);
+  }
+  for (const s of sessions) {
+    const startMs = new Date(s.start).getTime();
+    if (isNaN(startMs)) continue;
+    let endMs;
+    if (s.end) endMs = new Date(s.end).getTime();
+    else if (isCurrentMonth) endMs = nowMs;   // 진행 중 세션은 현재 월에서만 now까지
+    else continue;                            // 과거 월의 끝나지 않은 세션(고아)은 제외
+    if (isNaN(endMs) || endMs <= startMs) continue;
+    let cursor = startMs;
+    let guard = 0;
+    while (cursor < endMs && guard < 400) {
+      guard++;
+      const k = new Date(cursor + 9 * 3600 * 1000);   // KST 벽시계 성분
+      const yr = k.getUTCFullYear();
+      const mo = k.getUTCMonth() + 1;
+      const dom = k.getUTCDate();
+      const band = Math.floor(k.getUTCHours() / 3);    // 0..7 (3시간 단위, 자정=밴드0 시작과 일치)
+      const boundaryKst = Date.UTC(yr, mo - 1, dom, 0, 0, 0) + (band + 1) * 3 * 3600 * 1000;
+      const segEnd = Math.min(endMs, boundaryKst - 9 * 3600 * 1000);   // 이 밴드 끝(=다음 경계)까지
+      if (yr === year && mo === month1 && dom >= 1 && dom <= dim) {
+        grid[dom - 1][band] += (segEnd - cursor) / 60000;
+      }
+      cursor = segEnd;
+    }
+  }
+  return grid;
+}
+
+// 히트맵 렌더: 가로=일(월별, 1fr로 폭은 달력에 맞춤), 세로=3시간 8밴드(경계눈금 00..24), 농도=선형 min(분/180,1).
+// 주말만 날짜를 색으로 표기(토 파랑·일 빨강), 간격 없이 연속. 세션이 전혀 없는 달은 '' 반환(숨김).
+function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
+  const grid = computeTimeOfDayMinutes(sum.sessionsByDate, year, month1, isCurrentMonth);
+  let hasAny = false;
+  for (const day of grid) { for (const v of day) { if (v > 0) { hasAny = true; break; } } if (hasAny) break; }
+  if (!hasAny) return '';
+  const dim = grid.length;
+  const R = 15, H = R * 8;
+  const ylab = ['00', '03', '06', '09', '12', '15', '18', '21', '24'];
+  let yc = `<div class="toh-yaxis" style="height:${H}px;">`;
+  for (let i = 0; i < 9; i++) yc += `<span class="toh-ylabel" style="top:${i * R - 6}px;">${ylab[i]}</span>`;
+  yc += `</div>`;
+  let cells = `<div class="toh-grid" style="grid-template-columns:repeat(${dim},1fr);grid-auto-rows:${R}px;">`;
+  for (let b = 0; b < 8; b++) {
+    for (let d = 1; d <= dim; d++) {
+      const minutes = grid[d - 1][b];
+      const v = Math.min(minutes / 180, 1);
+      const bg = v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.14 + 0.72 * v).toFixed(3)})`;
+      const tip = minutes > 0 ? ` title="${month1}/${d} ${ylab[b]}–${ylab[b + 1]}시 · ${Math.round(minutes)}분"` : '';
+      cells += `<div${tip} style="background:${bg};"></div>`;
+    }
+  }
+  cells += `</div>`;
+  let xa = `<div class="toh-xaxis" style="grid-template-columns:repeat(${dim},1fr);">`;
+  for (let d = 1; d <= dim; d++) {
+    const g = new Date(year, month1 - 1, d).getDay();
+    const c = g === 0 ? '#f87171' : (g === 6 ? '#60a5fa' : '');
+    xa += `<div class="toh-xlabel" style="color:${c || 'transparent'};">${c ? d : ''}</div>`;
+  }
+  xa += `</div>`;
+  return `<div class="toh-head"><span class="toh-title">시간대별 방송 분포</span><span class="toh-sub">방송시간 기준</span></div><div class="toh-body">${yc}<div class="toh-right">${cells}${xa}</div></div>`;
 }
 
 async function loadEvents() {

@@ -1659,15 +1659,18 @@
   }
 
   .members-crew {
-    display: flex; flex-direction: column; gap: 24px;
+    display: flex; gap: 16px;
     max-width: 800px;
     margin: 0 auto;
+    align-items: stretch;
   }
   .members-crew-intro {
+    flex: 1.4; min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 28px 32px;
     text-align: center;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
   }
   .members-crew-intro-img {
     max-width: 380px;
@@ -1680,6 +1683,34 @@
     line-height: 1.8; max-width: 720px;
     margin: 0 auto;
   }
+  .members-crew-activities {
+    flex: 1; min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+    display: flex; flex-direction: column;
+  }
+  .crew-act-sub {
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    letter-spacing: 1.5px; margin: 16px 0 7px;
+  }
+  .crew-act-sub:first-child { margin-top: 0; }
+  .crew-act-li {
+    display: flex; gap: 9px;
+    font-size: 14px; color: #94a3b8;
+    line-height: 1.5; padding: 4px 0;
+  }
+  .crew-act-li .dot { color: var(--accent); flex: none; }
+  .crew-act-li .d { color: #cbd5e1; font-weight: 700; }
+  .crew-act-li .tag { color: var(--muted); font-size: 12px; }
+  .crew-act-more { margin-top: auto; padding-top: 16px; text-align: right; }
+  .crew-act-more button {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    background: rgba(97,255,236,0.08); border: 1px solid rgba(97,255,236,0.35);
+    padding: 7px 14px; cursor: pointer; font-family: inherit;
+  }
+  .crew-act-more button:hover { background: rgba(97,255,236,0.16); border-color: rgba(97,255,236,0.6); }
 
   .members-profile {
     display: flex; gap: 16px;
@@ -1827,7 +1858,7 @@
     .nav-notify-bell { display: none; }
     .main-header { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
     /* 3열(상단바): 버튼 좌 · 설명 우 — width:100% 스택 해제, header-center는 base의 margin-left:auto로 우측. 좁으면 wrap으로 설명이 아래로 */
-    .page-title { gap: 6px; }
+    .page-title { gap: 6px; align-items: stretch; }
     /* 상단바 버튼: 세로 미니(아이콘 위 · 짧은 텍스트 아래) + PC/모바일 토글 */
     .page-title-link, .celebration-box {
       flex-direction: column; gap: 2px; justify-content: center;
@@ -1855,6 +1886,8 @@
     .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
+    .members-crew { flex-direction: column; }
+    .members-crew-intro, .members-crew-activities { flex: none; }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
     /* 연간/월간을 1열에 세로로 (연간 위·월간 아래) — 멤버 사진은 나머지 칸으로 자동 흐름 */
     .stats-tab-all[data-mode="annual"]  { grid-column: 1; grid-row: 1; }
@@ -2794,7 +2827,7 @@ function scheduleBtnHTML() {
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (vis.length === 0) {
     scheduleSig = '∅';
-    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday">&nbsp;</span></span><span class="tb-t-mb">일정</span></button>`;
+    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday" style="color:var(--muted)">불러오는 중</span></span><span class="tb-t-mb">일정</span></button>`;
   }
   const head = vis[0];
   scheduleSig = `${vis.length}|${head.date}|${head.time}`;
@@ -4499,7 +4532,7 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
     for (let d = 1; d <= dim; d++) {
       const minutes = grid[d - 1][b];
       const v = Math.min(minutes / 180, 1);
-      const bg = v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.14 + 0.66 * v).toFixed(3)})`;
+      const bg = v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.14 + 0.68 * v).toFixed(3)})`;
       const tip = minutes > 0 ? ` title="${month1}/${d} ${ylab[b]}–${ylab[b + 1]}시 · ${Math.round(minutes)}분"` : '';
       cells += `<div${tip} style="background:${bg};"></div>`;
     }
@@ -5359,6 +5392,18 @@ function renderMembersCrew(body) {
       <div class="members-crew-intro">
         <img class="members-crew-intro-img" src="CHUNTAVERSE.webp" alt="CHUNTAVERSE">
         <p>천타버스는 원래 천양님이 크루 콘텐츠에 참가하기 위해 결성한 '위장 크루'로 시작했으나<br><br>지속적인 합방과 다채로운 자체 콘텐츠를 통해<br><br>이제는 그 누구도 대체할 수 없는 독보적인 매력을 뽐내는 버추얼 크루로 당당히 성장해 나가는 중입니다.</p>
+      </div>
+      <div class="members-crew-activities">
+        <div class="crew-act-sub">주요 일정</div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025.11.30</span> — 출범</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.06.27</span> — 추가멤버 면접</span></div>
+        <div class="crew-act-sub">정기 활동</div>
+        <div class="crew-act-li"><span class="dot">•</span><span>천타버스 티타임 — 매월 초 <span class="tag">(2026.01~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>강제 모캡방송 — 매월 후반 <span class="tag">(2026.03~)</span></span></div>
+        <div class="crew-act-sub">비정기 활동</div>
+        <div class="crew-act-li"><span class="dot">•</span><span>VRChat · 풀트래킹 합방</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>디코 · 종겜 합방 등</span></div>
+        <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>
   `;

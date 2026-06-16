@@ -1660,12 +1660,12 @@
 
   .members-crew {
     display: flex; gap: 16px;
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
     align-items: stretch;
   }
   .members-crew-intro {
-    flex: 1.7; min-width: 0;
+    flex: 2.4; min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 28px 32px;
@@ -2648,6 +2648,16 @@ const likeReqKey = (e) => `${e.member_id || ''}|${e.time || ''}|${e.url || ''}`;
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
 function lsHideSet() { try { return new Set(JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')).map(normLikeUrl)); } catch (e) { return new Set(); } }
+// 같은 글 좋아요 요청 dedup: normLikeUrl(SOOP은 #comment 제거, 카페는 글 URL) 기준으로 묶어 최신 1건만 남김(과거 건 숨김)
+function dedupeLikeReqs(list) {
+  const byKey = new Map();
+  for (const e of (list || [])) {
+    const k = normLikeUrl(e.url);
+    const prev = byKey.get(k);
+    if (!prev || new Date(e.time) > new Date(prev.time)) byKey.set(k, e);
+  }
+  return [...byKey.values()].sort((a, b) => new Date(b.time) - new Date(a.time));
+}
 async function loadLikeHideSet() {
   let urls = [];
   try {
@@ -2681,7 +2691,7 @@ async function openLikeRequests() {
     // hover로 이미 받는 중/받아둔 게 있으면 그걸, 아니면 지금 시작. 숨김목록을 손에 쥔 뒤 렌더하므로 "보였다 사라짐" 없음.
     const [res, hideSet] = await Promise.all([fetch(WORKER_URL + '/like-requests'), preloadLikeHide()]);
     const data = await res.json();
-    likeReqCache = data.like_requests || [];                          // 점 계산용 갱신
+    likeReqCache = dedupeLikeReqs(data.like_requests || []);          // 점 계산용 갱신(같은 글 최신만)
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
     const dismiss = lsKeySet(LS_LIKE_DISMISS);
     const list = likeReqCache.filter(e => !hideSet.has(normLikeUrl(e.url)) && !dismiss.has(likeReqKey(e)));
@@ -2716,12 +2726,12 @@ function refreshLikeDot() {
 }
 // 페이지 로드 시 점 계산용 목록 1회 로드(엣지 캐시 max-age=60 → 대부분 히트, 비용 미미). 캐시 우선으로 점 즉시 반영.
 async function loadLikeReqForDot() {
-  try { likeReqCache = JSON.parse(lsGet(LS_LIKEREQ_CACHE, '[]')); } catch (e) { likeReqCache = []; }
+  try { likeReqCache = dedupeLikeReqs(JSON.parse(lsGet(LS_LIKEREQ_CACHE, '[]'))); } catch (e) { likeReqCache = []; }
   refreshLikeDot();
   try {
     const res = await fetch(WORKER_URL + '/like-requests');
     const data = await res.json();
-    likeReqCache = data.like_requests || [];
+    likeReqCache = dedupeLikeReqs(data.like_requests || []);
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
     refreshLikeDot();
   } catch (e) {}

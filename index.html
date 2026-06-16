@@ -315,6 +315,7 @@
   .lr-msg { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 12px; }
   /* 좋아요 요청 개별 숨김 ✕ (카드 우상단 오버레이) */
   .lr-item { position: relative; }
+  .lr-item .event { padding-right: 38px; }   /* ✕(우상단) 자리 확보 — 상대시간과 겹침 방지 */
   .lr-dismiss {
     position: absolute; top: 8px; right: 8px; z-index: 2;
     width: 22px; height: 22px;
@@ -2793,7 +2794,7 @@ function scheduleBtnHTML() {
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (vis.length === 0) {
     scheduleSig = '∅';
-    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정</span><span class="tb-t-mb">일정</span></button>`;
+    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday">&nbsp;</span></span><span class="tb-t-mb">일정</span></button>`;
   }
   const head = vis[0];
   scheduleSig = `${vis.length}|${head.date}|${head.time}`;
@@ -4498,7 +4499,7 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
     for (let d = 1; d <= dim; d++) {
       const minutes = grid[d - 1][b];
       const v = Math.min(minutes / 180, 1);
-      const bg = v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.13 + 0.59 * v).toFixed(3)})`;
+      const bg = v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.14 + 0.66 * v).toFixed(3)})`;
       const tip = minutes > 0 ? ` title="${month1}/${d} ${ylab[b]}–${ylab[b + 1]}시 · ${Math.round(minutes)}분"` : '';
       cells += `<div${tip} style="background:${bg};"></div>`;
     }

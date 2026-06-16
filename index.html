@@ -1251,6 +1251,31 @@
     padding: 6px 8px;
     text-align: center;
   }
+  /* 모바일: 멤버 가로 매트릭스 대신 멤버별 세로 블록 (가로 스크롤 제거). 데스크톱은 .links-table-wrap 유지 */
+  .links-mobile { display: none; }
+  .links-m-block {
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .links-m-block:last-child { border-bottom: none; }
+  .links-m-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 11px;
+  }
+  .links-m-avatar {
+    width: 42px; height: 42px; object-fit: cover;
+    border: 1.5px solid var(--border); flex-shrink: 0;
+  }
+  .links-m-name { font-size: 14px; font-weight: 700; }
+  .links-m-btns {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 6px;
+  }
+  /* 표 min-width 720px + .links-wrap 좌우 패딩 48px → 뷰포트 768px 미만에서 표가 넘침. 그 지점에서 블록으로 전환 */
+  @media (max-width: 767px) {
+    .links-table-wrap { display: none; }
+    .links-mobile { display: block; }
+  }
 
   /* === 케미 탭 === */
   .chem-wrap {
@@ -1681,7 +1706,7 @@
   .members-crew-intro p {
     font-size: 15px; color: var(--muted);
     line-height: 1.8; max-width: 720px;
-    margin: 0 auto;
+    margin: 0 auto; word-break: keep-all;
   }
   .members-crew-activities {
     flex: 1; min-width: 0;
@@ -4709,6 +4734,39 @@ function renderLinks() {
     if (label === '팬사이트') return 'site';
     return 'site';
   }
+  // 모바일 멤버블록용: 한 멤버의 모든 링크 버튼 HTML. 위 표 행 빌더(rowBangsong~rowOgq)와 동일한 소스·순서·라벨 규칙(둘 중 하나만 바꾸면 데스크톱/모바일이 어긋나니 함께 유지).
+  function memberLinkButtons(m) {
+    const links = MEMBER_LINKS[m.id] || {};
+    const common = links.common || {};
+    const asUrl = (v) => typeof v === 'string' ? v : v?.url;
+    const asLabel = (v, def) => typeof v === 'string' ? def : (v.label || def);
+    const out = [];
+    const add = (kind, label, url) => {
+      if (!url) return;
+      const icon = ICON_FOR[kind] || '';
+      const color = COLORS[kind] || 'var(--text)';
+      const bg = ICON_BG[kind];
+      const iconStyle = bg ? `color: ${color}; background: ${bg}; padding: 2px;` : `color: ${color};`;
+      out.push(`<a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener"><span class="link-icon" style="${iconStyle}">${icon}</span><span class="link-label">${escapeHtml(label)}</span></a>`);
+    };
+    add('soop', '방송국', asUrl(common['방송국']));
+    if (common['유튜브'])  add('youtube', asLabel(common['유튜브'], '유튜브'),  asUrl(common['유튜브']));
+    if (common['유튜브2']) add('youtube', asLabel(common['유튜브2'], '유튜브'), asUrl(common['유튜브2']));
+    add('cafe', '팬카페', asUrl(common['팬카페']));
+    add('namuwiki', '나무위키', asUrl(common['나무위키']));
+    add('instagram', '인스타그램', links.instagram);
+    add('x', 'X', links.x);
+    (links.discordOrFancim || []).forEach(it => add(inferKindFromLabel(it.label), it.label, it.url));
+    (links.etc || []).forEach(it => add(inferKindFromLabel(it.label), it.label, it.url));
+    (links.ogq || []).forEach(o => {
+      const platformKind = o.platform === '네이버' ? 'naverOgq' : 'soopOgq';
+      const icon = ICON_FOR[platformKind];
+      const color = COLORS[platformKind];
+      const isSoop = platformKind === 'soopOgq';
+      out.push(`<a class="link-btn ogq-btn" href="${escapeHtml(o.url)}" target="_blank" rel="noopener"><span class="ogq-name">${escapeHtml(o.name)}</span><span class="ogq-platform"><span class="link-icon${isSoop ? ' soop-icon' : ''}" style="color: ${color}">${icon}</span>${escapeHtml(o.platform)}</span></a>`);
+    });
+    return out.join('');
+  }
   const rowBangsong = MEMBERS.map(m => {
     const url = MEMBER_LINKS[m.id]?.common?.['방송국'];
     return iconLinkCell('soop', '방송국', typeof url === 'string' ? url : url?.url);
@@ -4753,6 +4811,15 @@ function renderLinks() {
     }).join('');
     return `<td><div class="links-cell">${btns}</div></td>`;
   }).join('');
+  const mobileBlocks = MEMBERS.map(m => `
+    <div class="links-m-block">
+      <div class="links-m-head">
+        <img class="links-m-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">
+        <span class="links-m-name" style="color: ${m.color}">${escapeHtml(m.name)}</span>
+      </div>
+      <div class="links-m-btns">${memberLinkButtons(m)}</div>
+    </div>
+  `).join('');
   body.innerHTML = `
     <div class="links-section">
       <div class="links-table-wrap">
@@ -4771,6 +4838,7 @@ function renderLinks() {
           </tbody>
         </table>
       </div>
+      <div class="links-mobile">${mobileBlocks}</div>
     </div>
   `;
 }

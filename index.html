@@ -2776,10 +2776,12 @@ function renderScheduleItem(item) {
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
 let bannerData = [];
+let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
 const CONTENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
 const LS_CONTENT_CACHE = 'chuntaverse_content_cache';
 let contentData = [];
+let _contentRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
 function isCurrentMonth(yyyymm) {
   const now = new Date();
@@ -4650,6 +4652,12 @@ function renderBanners() {
     return;
   }
 
+  // 데이터가 직전 렌더와 동일하고 이미 그려져 있으면 재구축 생략(탭 전환은 CSS show/hide라 DOM이 유지됨 → 매 진입 재구축은 낭비).
+  // 항목은 추가만 되고 삭제는 거의 없으므로 length + 최신 항목 정렬키로 변경을 충분히 감지.
+  const sig = bannerData.length + '|' + (bannerData[0]?.date?.sort || '');
+  if (sig === _bannerRenderSig && body.querySelector('.banner-grid')) return;
+  _bannerRenderSig = sig;
+
   const cardsHtml = bannerData.map(b => {
     const memberImgs = b.members.map(name => {
       const m = MEMBERS.find(x => x.name === name);
@@ -4724,6 +4732,12 @@ function renderContent() {
     body.innerHTML = '<div class="loading"><div>컨텐츠 데이터가 없어요</div></div>';
     return;
   }
+
+  // 데이터가 직전 렌더와 동일하고 이미 그려져 있으면 재구축 생략(탭 전환은 CSS show/hide라 DOM이 유지됨 → 매 진입 재구축은 낭비).
+  // 항목은 추가만 되고 삭제는 거의 없으므로 length + 최신 항목 정렬키로 변경을 충분히 감지.
+  const sig = contentData.length + '|' + (contentData[0]?.date?.sort || '');
+  if (sig === _contentRenderSig && body.querySelector('.content-grid')) return;
+  _contentRenderSig = sig;
 
   const cardsHtml = contentData.map(c => {
     const memberImgs = c.members.map(name => {

@@ -1887,8 +1887,8 @@
 
   @media (max-width: 700px) {
     body { flex-direction: column; }
-    /* 상단바 모달: 모바일은 중앙정렬 대신 상단 고정 — 길어지면 body가 스크롤(패널 max-height:80vh) */
-    .lr-overlay { align-items: flex-start; }
+    /* 상단바 모달(모바일): PC처럼 중앙 + 내부 스크롤 유지(패널 max-height:80vh, lr-body 스크롤). 헤더(X)가 고정돼야 내용 스크롤 중에도 닫기 가능 → 페이지 스크롤 대신 내부 스크롤. 짧으면 중앙 정렬 */
+    .lr-overlay { align-items: center; }
     .sidebar {
       width: 100%; height: auto;
       position: relative;
@@ -2692,11 +2692,11 @@ const LIKE_HIDE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9U
 const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v2';   // v2: A=URL, B=만료일(YYYY-MM-DD) → {u,d} 객체배열로 캐시
 const normLikeUrl = (u) => (u || '').split('#')[0].trim().replace(/\/$/, '');
 // ── 유저 단위 좋아요 요청 상태(localStorage) — CSV 숨김(글 단위·Crenop 관리)과 별개 ──
-const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // 유저가 ✕로 숨긴 요청(요청 단위, 영구)
-const LS_LIKE_SEEN = 'chuntaverse_like_seen_v1';          // 유저가 모달에서 본 요청(빨간 점 끔용)
+const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // 유저가 ✕로 숨긴 댓글(멤버+URL 단위, 영구)
+const LS_LIKE_SEEN = 'chuntaverse_like_seen_v1';          // 유저가 모달에서 본 댓글(멤버+URL 단위, 빨간 점 끔용)
 const LS_LIKEREQ_CACHE = 'chuntaverse_like_req_cache_v1'; // 점 계산용 마지막 목록 캐시
 let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계산용)
-const likeReqKey = (e) => `${e.member_id || ''}|${e.time || ''}|${e.url || ''}`;
+const likeReqKey = (e) => `${e.member_id || ''}|${normLikeUrl(e.url)}`;   // dedup과 동일 키(멤버+정규화 URL). dismiss·seen·빨간점이 '같은 댓글'을 시간 무관 동일 취급 → X했거나 본 댓글은 재요청돼도 다시 안 켜짐
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
 // 좋아요 숨김 B열(만료일) 판정: B 비었거나 날짜 형식 밖이면 즉시 숨김, 날짜면 그날(KST)까지 노출하고 지나면 숨김.
@@ -2981,8 +2981,8 @@ async function openSchedule() {
 
 // 모달 리스트 항목: 절대 날짜·시간 + 제목(+링크) + D-day 배지(목록은 날짜 단위 D-day로 고정 — 똑딱이는 D-time은 상단바 버튼 전용).
 function renderScheduleItem(item) {
-  const dateDisp = item.date.slice(2).replace(/-/g, '.');   // 26.06.20
   const [schY, schMo, schD] = item.date.split('-').map(Number);
+  const dateDisp = koDate(schY, schMo, schD);   // YYYY년 M월 D일 (한글 통일)
   const dowIdx = new Date(Date.UTC(schY, schMo - 1, schD)).getUTCDay();   // 달력 요일(UTC 고정 계산 → 브라우저 타임존 무관)
   const dowChar = ['일','월','화','수','목','금','토'][dowIdx];
   const dowColor = dowIdx === 0 ? '#f87171' : (dowIdx === 6 ? '#60a5fa' : '');   // 일=빨강·토=파랑 (달력 주말색과 동일), 요일 글자에만
@@ -3441,16 +3441,15 @@ function formatRelTime(iso) {
   if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
   return Math.floor(diff / 86400) + '일 전';
 }
+// 사이트 날짜 표시 통일(한글 'YYYY년 M월 D일'). 연도 없는 생일(M월 D일)·월 단위 라벨(YYYY년 M월)은 별도 범주라 미적용.
+function koDate(y, m, d) { return `${y}년 ${m}월 ${d}일`; }
 function formatAbsTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
   const hh = String(d.getHours()).padStart(2, '0');
   const mi = String(d.getMinutes()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+  return `${koDate(d.getFullYear(), d.getMonth() + 1, d.getDate())} ${hh}:${mi}`;
 }
 function formatHHMM(iso) {
   if (!iso) return '';
@@ -4957,7 +4956,7 @@ function parseBannerDate(url) {
   const yy = parseInt(s.substring(0, 2));
   const mm = s.substring(2, 4);
   const dd = s.substring(4, 6);
-  return { sort: s, display: `20${yy}.${mm}.${dd}` };
+  return { sort: s, display: koDate(2000 + yy, parseInt(mm), parseInt(dd)) };
 }
 
 async function loadBanners() {
@@ -5037,7 +5036,7 @@ function parseContentDate(url) {
   const dd = s.substring(4, 6);
   // sort key: full match including suffix for stable ordering
   const fullMatch = url.match(/(\d{6}(?:-\d+)?)\.webp/);
-  return { sort: fullMatch ? fullMatch[1] : s, display: `20${yy}.${mm}.${dd}` };
+  return { sort: fullMatch ? fullMatch[1] : s, display: koDate(2000 + yy, parseInt(mm), parseInt(dd)) };
 }
 
 async function loadContent() {
@@ -5552,17 +5551,17 @@ function renderMembersCrew(body) {
       </div>
       <div class="members-crew-activities">
         <div class="crew-act-sub">주요 일정</div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025.11.30</span> — 출범${ctDays > 0 ? ` <span class="tag">(D+${ctDays}일)</span>` : ''}</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.06.27</span> — 추가멤버 면접</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025년 11월 30일</span> — 출범${ctDays > 0 ? ` <span class="tag">(D+${ctDays}일)</span>` : ''}</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 6월 27일</span> — 추가멤버 면접</span></div>
         <div class="crew-act-sub">정기 활동</div>
-        <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026.01~)</span></span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡합방 <span class="tag">(2026.03~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026년 1월~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡합방 <span class="tag">(2026년 3월~)</span></span></div>
         <div class="crew-act-sub">비정기 활동</div>
         <div class="crew-act-li"><span class="dot">•</span><span>VRChat · 풀트래킹 합방</span></div>
         <div class="crew-act-li"><span class="dot">•</span><span>디코 · 종겜 합방 등</span></div>
         <div class="crew-act-sub">크루 대전 전적</div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.01.10</span> — vs 털즈란 패배 (VRC 야구)</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.01.15</span> — vs 버인협회 패배 (롤)</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 1월 10일</span> — vs 털즈란 패배 (VRC 야구)</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 1월 15일</span> — vs 버인협회 패배 (롤)</span></div>
         <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>

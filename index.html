@@ -1265,7 +1265,9 @@
   }
   .links-m-btns .link-label { white-space: nowrap; }   /* 라벨 1줄 고정 → 일반 버튼 높이 통일(OGQ는 별도 행) */
   .links-m-ogq {
-    display: flex; flex-wrap: wrap; gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 6px;
     margin-top: 6px;
   }
   /* 표 min-width 720px + .links-wrap 좌우 패딩 48px → 뷰포트 768px 미만에서 표가 넘침. 그 지점에서 블록으로 전환 */
@@ -2184,7 +2186,7 @@ const MEMBER_LINKS = {
     common: {
       방송국: 'https://www.sooplive.com/station/nanamoon777',
       유튜브: 'https://www.youtube.com/@nanamoon777',
-      유튜브2: { label: '아카이브 스튜디오', url: 'https://www.youtube.com/@AkaivStudioOfficial' },
+      유튜브2: { label: '아카이브', url: 'https://www.youtube.com/@AkaivStudioOfficial' },
       팬카페: 'https://cafe.naver.com/nanamoonswicked',
       나무위키: 'https://namu.wiki/w/%EB%82%98%EB%82%98%EB%AC%B8',
     },
@@ -5483,10 +5485,13 @@ function renderMembersCrew(body) {
         <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.06.27</span> — 추가멤버 면접</span></div>
         <div class="crew-act-sub">정기 활동</div>
         <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026.01~)</span></span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡방송 <span class="tag">(2026.03~)</span></span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡합방 <span class="tag">(2026.03~)</span></span></div>
         <div class="crew-act-sub">비정기 활동</div>
         <div class="crew-act-li"><span class="dot">•</span><span>VRChat · 풀트래킹 합방</span></div>
         <div class="crew-act-li"><span class="dot">•</span><span>디코 · 종겜 합방 등</span></div>
+        <div class="crew-act-sub">크루 대전 전적</div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.01.10</span> — vs 털즈란 패배 (VRC 야구)</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.01.15</span> — vs 버인협회 패배 (롤)</span></div>
         <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>

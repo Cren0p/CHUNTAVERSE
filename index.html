@@ -1859,6 +1859,8 @@
 
   @media (max-width: 700px) {
     body { flex-direction: column; }
+    /* 상단바 모달: 모바일은 중앙정렬 대신 상단 고정 — 길어지면 body가 스크롤(패널 max-height:80vh) */
+    .lr-overlay { align-items: flex-start; }
     .sidebar {
       width: 100%; height: auto;
       position: relative;
@@ -1973,13 +1975,6 @@
   <div class="main-header">
     <div class="page-title" id="pageTitle"></div>
     <div class="header-center" id="headerCenter"></div>
-  </div>
-
-  <div class="lr-overlay" id="lrOverlay" hidden>
-    <div class="lr-panel">
-      <div class="lr-head" id="lrHead"></div>
-      <div class="lr-body" id="lrBody"></div>
-    </div>
   </div>
 
   <div class="page" id="page-members">
@@ -5577,5 +5572,13 @@ function renderMembersProfile(body, memberId) {
   profilePhotoSizer();
 }
 </script>
+
+  <!-- 상단바 모달(좋아요/일정): body 직속이어야 z-index 1000이 nav(sidebar, z-index:2) 위로 올라감 -->
+  <div class="lr-overlay" id="lrOverlay" hidden>
+    <div class="lr-panel">
+      <div class="lr-head" id="lrHead"></div>
+      <div class="lr-body" id="lrBody"></div>
+    </div>
+  </div>
 </body>
 </html>

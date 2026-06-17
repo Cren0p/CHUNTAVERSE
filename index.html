@@ -649,9 +649,9 @@
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-elapsed { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   .event-action { color: var(--muted); }
-  .event-target { color: #cbd5e1; margin-left: 4px; }
-  /* 헤더 조각(멤버명·액션라벨·경과시간·괄호)을 각각 한 줄 고정 → 줄바꿈은 조각 사이에서만(방송시간/카페명/방송맥락 중간이 안 끊김). 액션라벨과 경과시간은 별도 조각이라 그 사이에선 줄바꿈 가능(좁은 본문 폭 대응). */
-  .event-member, .event-action-label, .event-elapsed, .event-target { white-space: nowrap; }
+  .event-target { color: #cbd5e1; margin-left: 4px; display: inline-block; }   /* 괄호는 하나의 덩어리 — inline이면 앞 텍스트와 섞여 중간에서 끊기므로 inline-block으로 묶음. 한 줄에 안 들어가면 통째로 다음 줄로, 카페명처럼 길면 본문 폭 안에서 덩어리 내부 줄바꿈(좁은 모바일 가로 overflow 방지). 짧은 '(X 방송)'은 공간 되면 앞 조각과 같은 줄. */
+  /* 멤버명·액션라벨·경과시간은 짧으니 각각 한 줄 고정(조각 내부 중간이 안 끊김). */
+  .event-member, .event-action-label, .event-elapsed { white-space: nowrap; }
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: 0; margin-right: 6px;

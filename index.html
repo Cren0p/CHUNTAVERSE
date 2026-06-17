@@ -2636,11 +2636,11 @@ function getTodayCelebrations() {
   }
 
   if (cm === 11 && cd === 30 && cy > 2025) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, '천타버스', `${cy - 2025}주년!`, '#61FFEC', 'members'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, '천타버스', `${cy - 2025}주년!`, '#61FFEC', 'members:crew'));
   }
   const ctDays = Math.floor((todayMs - CT_FORMATION.getTime()) / 86400000);
   if (ctDays > 0 && ctDays % 100 === 0 && !(cm === 11 && cd === 30)) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '천타버스', `${ctDays}일!`, '#61FFEC', 'members'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '천타버스', `${ctDays}일!`, '#61FFEC', 'members:crew'));
   }
 
   for (const m of MEMBERS) {
@@ -5542,6 +5542,8 @@ function renderMembersBody() {
 
 function renderMembersCrew(body) {
   profilePhotoSizer = null;
+  const k = new Date(Date.now() + 9 * 3600 * 1000);
+  const ctDays = Math.floor((Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - CT_FORMATION.getTime()) / 86400000);   // 출범(2025-11-30) 경과일 — getTodayCelebrations와 동일 산식
   body.innerHTML = `
     <div class="members-crew">
       <div class="members-crew-intro">
@@ -5550,7 +5552,7 @@ function renderMembersCrew(body) {
       </div>
       <div class="members-crew-activities">
         <div class="crew-act-sub">주요 일정</div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025.11.30</span> — 출범</span></div>
+        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025.11.30</span> — 출범${ctDays > 0 ? ` <span class="tag">(D+${ctDays}일)</span>` : ''}</span></div>
         <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026.06.27</span> — 추가멤버 면접</span></div>
         <div class="crew-act-sub">정기 활동</div>
         <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026.01~)</span></span></div>

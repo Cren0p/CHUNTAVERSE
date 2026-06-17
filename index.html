@@ -1396,6 +1396,22 @@
     letter-spacing: 1px;
     margin-bottom: 12px;
   }
+  /* 트랙 헤더(모두 포함·일부 포함): 하위 섹션 라벨(2인/3인 케미)보다 위계 ↑ — 더 크고 밝게 + 민트 바 */
+  .chem-track-title {
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chem-track-title::before {
+    content: '';
+    width: 3px;
+    height: 15px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
   .chem-group-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -3473,17 +3489,17 @@ function daysInMonth(year, month1) {
 }
 
 function buildCard(m, info, delay) {
-  const tag = info.live ? 'a' : 'div';
+  const tag = 'a';   // 생방송=시청 페이지, 오프라인=방송국 페이지 — 둘 다 SOOP 새 탭 링크
   const card = document.createElement(tag);
   const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
   card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
   card.style.animationDelay = delay + 'ms';
-  if (info.live) {
-    card.href = 'https://play.sooplive.co.kr/' + info.id;
-    card.target = '_blank';
-    card.rel = 'noopener';
-  }
+  card.href = info.live
+    ? 'https://play.sooplive.co.kr/' + info.id           // 방송 중: 시청 페이지
+    : 'https://www.sooplive.com/station/' + info.id;     // 오프라인: 방송국(다시보기·게시판)
+  card.target = '_blank';
+  card.rel = 'noopener';
   const btime = formatBtime(info.btime);
   const mode = info.mode || (info.live ? 'normal' : null);
   const isNormalLive = info.live && mode === 'normal';
@@ -5118,9 +5134,17 @@ function renderChemistry() {
   }
   pairs.sort((a, b) => b.total - a.total);
 
-  const filtered = pairs.filter(p => chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id));
+  // 그룹(N인) 주고받은 채팅 합 — 정렬용 (2인 케미와 동일 산식)
+  const groupChatTotal = (g) => {
+    let t = 0;
+    for (let a = 0; a < g.members.length; a++)
+      for (let b = 0; b < g.members.length; b++)
+        if (a !== b) t += chemCounts[`${g.members[a]}:${g.members[b]}`] || 0;
+    return t;
+  };
 
-  const cards = filtered.map(p => {
+  // 카드 HTML 빌더 — 상단(모두 포함)·하단(일부 포함) 두 트랙이 동일 카드를 쓰도록 분리(두 경로 드리프트 방지)
+  const pairCardHtml = (p) => {
     const chemKey = `${p.m1.id}:${p.m2.id}`;
     const customName = CHEM_NAMES[chemKey];
     const displayName = customName || `${escapeHtml(p.m1.name)} × ${escapeHtml(p.m2.name)}`;
@@ -5143,7 +5167,57 @@ function renderChemistry() {
       </div>
     </div>
   `;
+  };
+  const groupCardHtml = (g) => {
+    const membersHtml = g.members.map(id => {
+      const m = MEMBER_BY_ID[id];
+      if (!m) return '';
+      return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
+    }).join('');
+    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : ''}">${membersHtml}</div></div></div>`;
+  };
+
+  // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)
+  const sec = (label, firstNoBorder, isTrack) =>
+    `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div></div>`;
+
+  // 상단 트랙(모두 포함)은 2~10명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
+  const selArr = [...chemFilterMembers];
+  const topActive = selArr.length >= 2 && selArr.length <= MEMBERS.length - 1;
+  const allIncluded = (ids) => selArr.every(id => ids.includes(id));   // 선택집합 ⊆ 조합
+  const excluded = (ids) => topActive && allIncluded(ids);             // 상단에 올라간 카드는 하단에서 중복 제외
+
+  // ── 상단: 모두 포함 — 선택 멤버가 전부 든 조합만, 2인·그룹 통합 평면 나열(인원수 적은 순 → 같은 인원수면 채팅 합 내림차순) ──
+  let topHtml = '';
+  if (topActive) {
+    const matched = [];
+    for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id])) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
+    for (const g of CHEM_GROUPS) if (allIncluded(g.members)) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
+    matched.sort((a, b) => a.size - b.size || b.total - a.total);
+    // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~10명에서만 발생
+    const matchedBody = matched.length > 0
+      ? matched.map(x => x.html).join('')
+      : '<div class="chem-empty">조건에 맞는 케미가 없어요</div>';
+    topHtml = sec('모두 포함', true, true) + matchedBody;
+  }
+
+  // ── 하단: 일부 포함 — 기존 OR 결과(상단에 올라간 카드는 제외). 우산 라벨은 상단이 떴을 때만. ──
+  const botPairCards = pairs
+    .filter(p => (chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id)) && !excluded([p.m1.id, p.m2.id]))
+    .map(pairCardHtml).join('');
+  const botGroupSections = [...new Set(CHEM_GROUPS.map(g => g.members.length))].sort((a, b) => a - b).map(n => {
+    const groups = CHEM_GROUPS
+      .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)) && !excluded(g.members))
+      .sort((a, b) => groupChatTotal(b) - groupChatTotal(a));   // 2인 케미와 동일하게 주고받은 채팅 합 내림차순
+    if (groups.length === 0) return '';
+    return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groups.map(groupCardHtml).join('')}</div></div>`;
   }).join('');
+
+  let botHtml = '';
+  if (topActive) botHtml += sec('일부 포함', false, true);   // 우산 라벨(상단과 구분하는 트랙 구분선)
+  botHtml += sec('2인 케미', true);                     // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거
+  botHtml += (botPairCards.length > 0 ? botPairCards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>');
+  botHtml += botGroupSections;
 
   const allOn = chemFilterMembers.size === MEMBERS.length;
   const memberBtns = MEMBERS.map(m => `
@@ -5158,30 +5232,8 @@ function renderChemistry() {
       <button class="chem-filter-toggle" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
     </div>
     <div class="chem-grid">
-      <div class="chem-group-section" style="margin-top:0;padding-top:0;border-top:none"><div class="chem-group-title">2인 케미</div></div>
-      ${cards.length > 0 ? cards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>'}
-      ${[...new Set(CHEM_GROUPS.map(g => g.members.length))].sort((a, b) => a - b).map(n => {
-        const groupChatTotal = (g) => {
-          let t = 0;
-          for (let a = 0; a < g.members.length; a++)
-            for (let b = 0; b < g.members.length; b++)
-              if (a !== b) t += chemCounts[`${g.members[a]}:${g.members[b]}`] || 0;
-          return t;
-        };
-        const groups = CHEM_GROUPS
-          .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)))
-          .sort((a, b) => groupChatTotal(b) - groupChatTotal(a));  // 2인 케미와 동일하게 주고받은 채팅 합 내림차순
-        if (groups.length === 0) return '';
-        const groupCards = groups.map(g => {
-          const membersHtml = g.members.map(id => {
-            const m = MEMBER_BY_ID[id];
-            if (!m) return '';
-            return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
-          }).join('');
-          return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : ''}">${membersHtml}</div></div></div>`;
-        }).join('');
-        return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groupCards}</div></div>`;
-      }).join('')}
+      ${topHtml}
+      ${botHtml}
     </div>
   `;
 
@@ -5330,7 +5382,7 @@ function renderHall() {
     });
   }
 
-  // 정전 중단 위원회(아무도 없을 때 시작한 방송 횟수) / 정전 방지 위원회(아무도 없을 때 혼자 방송한 시간)
+  // 정전 중단 위원회(아무도 없을 때 시작한 방송 횟수) / 정전 방지 위원회(아무도 없을 때 방송한 시간)
   const solo = {};
   MEMBERS.forEach(m => { solo[m.id] = { starts: 0, ms: 0 }; });
   MEMBERS.forEach(m => {
@@ -5367,7 +5419,7 @@ function renderHall() {
     { label: '휴방하는 것을 까먹은',       desc: '연속 방송 일수',          icon: SVG_ICONS.flame,        color: '#FF8C00',           get: id => longestStreak(extra[id].dates),                       fmt: v => `${v}일` },
     { label: '방종하는 것을 까먹은',       desc: '단일 방송 시간',          icon: SVG_ICONS.hourglass,    color: '#FF8C00',           get: id => extra[id].marathonMs,                                 fmt: v => formatDuration(v) },
     { label: '천타버스 정전 중단 위원회',  desc: '아무도 없을 때 시작한 방송',    icon: SVG_ICONS.sun,          color: '#FFDD00',           get: id => solo[id].starts,                                      fmt: v => `${v}회` },
-    { label: '천타버스 정전 방지 위원회',  desc: '아무도 없을 때 혼자 방송한 시간', icon: SVG_ICONS.moon,         color: '#FFDD00',           get: id => solo[id].ms,                                          fmt: v => formatDuration(v) },
+    { label: '천타버스 정전 방지 위원회',  desc: '아무도 없을 때 방송한 시간', icon: SVG_ICONS.moon,         color: '#FFDD00',           get: id => solo[id].ms,                                          fmt: v => formatDuration(v) },
     { label: '팬과 자주 소통하는',         desc: '숲·카페 게시글',     icon: SVG_ICONS.board,        color: 'var(--ev-post)',    icon2: SVG_ICONS.coffee, color2: '#03C75A', get: id => totalSums[id].postCount + totalSums[id].cafeCount, fmt: v => `${v}개` },
     { label: '유튜브도 놓치지 않는',       desc: '유튜브 업로드',      icon: SVG_ICONS.youtube,      color: 'var(--ev-youtube)', get: id => totalSums[id].youtubeCount,                          fmt: v => `${v}개` },
     { label: '멤버들을 좋아하는',          desc: '다른 멤버 방송에서 보낸 채팅',  icon: SVG_ICONS.send,         color: '#a78bfa',           get: id => chemOut[id],                                          fmt: v => `${v.toLocaleString()}회` },

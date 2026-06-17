@@ -620,16 +620,6 @@
     box-shadow: inset 4px 0 12px -4px rgba(97, 255, 236, 0.35);
   }
   .event.unread:hover { background: rgba(97, 255, 236, 0.16); }
-  .event-new-badge {
-    background: var(--ev-unread);
-    color: var(--bg);
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 6px;
-    letter-spacing: 0.5px;
-    margin-right: 6px;
-    flex-shrink: 0;
-  }
   .event-icon {
     width: 32px; height: 32px;
     display: flex; align-items: center; justify-content: center;
@@ -660,6 +650,8 @@
   .event-elapsed { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   .event-action { color: var(--muted); }
   .event-target { color: #cbd5e1; margin-left: 4px; }
+  /* 헤더 조각(멤버명·액션라벨·경과시간·괄호)을 각각 한 줄 고정 → 줄바꿈은 조각 사이에서만(방송시간/카페명/방송맥락 중간이 안 끊김). 액션라벨과 경과시간은 별도 조각이라 그 사이에선 줄바꿈 가능(좁은 본문 폭 대응). */
+  .event-member, .event-action-label, .event-elapsed, .event-target { white-space: nowrap; }
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: 0; margin-right: 6px;
@@ -1270,6 +1262,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
     gap: 6px;
+  }
+  .links-m-btns .link-label { white-space: nowrap; }   /* 라벨 1줄 고정 → 일반 버튼 높이 통일(OGQ는 별도 행) */
+  .links-m-ogq {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 6px;
   }
   /* 표 min-width 720px + .links-wrap 좌우 패딩 48px → 뷰포트 768px 미만에서 표가 넘침. 그 지점에서 블록으로 전환 */
   @media (max-width: 767px) {
@@ -2345,7 +2342,7 @@ const MEMBER_LINKS = {
 const MODE_LABEL = {
   normal: '일반', adult: '19+',
   subscription: '구독+', copyright: '저작권', restricted: '제한',
-  adult_copyright: '19+·저작권',
+  adult_copyright: '19+ · 저작권',
 };
 const MODE_PLACEHOLDER_TEXT = {
   adult: '19금 방송', subscription: '구독플러스 전용 방송',
@@ -3218,17 +3215,6 @@ function refreshUnreadIndicator() {
       const t = parseInt(el.dataset.time || '0', 10);
       const isUnread = t > lastSeen;
       el.classList.toggle('unread', isUnread);
-      const oldBadge = el.querySelector('.event-new-badge');
-      if (oldBadge) oldBadge.remove();
-      if (isUnread) {
-        const timeEl = el.querySelector('.event-time');
-        if (timeEl) {
-          const badgeEl = document.createElement('span');
-          badgeEl.className = 'event-new-badge';
-          badgeEl.textContent = 'NEW';
-          timeEl.parentNode.insertBefore(badgeEl, timeEl);
-        }
-      }
     });
   }
 }
@@ -3642,7 +3628,7 @@ function renderEvent(e, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
-        <span class="event-action">${actionMap[e.type] || e.type}${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
+        <span class="event-action"><span class="event-action-label">${actionMap[e.type] || e.type}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
         ${targetTag}
       </div>
       ${detail}
@@ -4756,7 +4742,7 @@ function renderLinks() {
     if (label === '팬사이트') return 'site';
     return 'site';
   }
-  // 모바일 멤버블록용: 한 멤버의 모든 링크 버튼 HTML. 위 표 행 빌더(rowBangsong~rowOgq)와 동일한 소스·순서·라벨 규칙(둘 중 하나만 바꾸면 데스크톱/모바일이 어긋나니 함께 유지).
+  // 모바일 멤버블록용: 한 멤버의 링크 버튼을 {main: 일반, ogq: OGQ}로 분리 반환(OGQ는 모양이 달라 별도 행). 표 행 빌더(rowBangsong~rowOgq)와 동일 소스·순서·라벨 규칙(둘 중 하나만 바꾸면 데스크톱/모바일이 어긋나니 함께 유지).
   function memberLinkButtons(m) {
     const links = MEMBER_LINKS[m.id] || {};
     const common = links.common || {};
@@ -4780,14 +4766,15 @@ function renderLinks() {
     add('x', 'X', links.x);
     (links.discordOrFancim || []).forEach(it => add(inferKindFromLabel(it.label), it.label, it.url));
     (links.etc || []).forEach(it => add(inferKindFromLabel(it.label), it.label, it.url));
+    const ogq = [];
     (links.ogq || []).forEach(o => {
       const platformKind = o.platform === '네이버' ? 'naverOgq' : 'soopOgq';
       const icon = ICON_FOR[platformKind];
       const color = COLORS[platformKind];
       const isSoop = platformKind === 'soopOgq';
-      out.push(`<a class="link-btn ogq-btn" href="${escapeHtml(o.url)}" target="_blank" rel="noopener"><span class="ogq-name">${escapeHtml(o.name)}</span><span class="ogq-platform"><span class="link-icon${isSoop ? ' soop-icon' : ''}" style="color: ${color}">${icon}</span>${escapeHtml(o.platform)}</span></a>`);
+      ogq.push(`<a class="link-btn ogq-btn" href="${escapeHtml(o.url)}" target="_blank" rel="noopener"><span class="ogq-name">${escapeHtml(o.name)}</span><span class="ogq-platform"><span class="link-icon${isSoop ? ' soop-icon' : ''}" style="color: ${color}">${icon}</span>${escapeHtml(o.platform)}</span></a>`);
     });
-    return out.join('');
+    return { main: out.join(''), ogq: ogq.join('') };
   }
   const rowBangsong = MEMBERS.map(m => {
     const url = MEMBER_LINKS[m.id]?.common?.['방송국'];
@@ -4833,15 +4820,18 @@ function renderLinks() {
     }).join('');
     return `<td><div class="links-cell">${btns}</div></td>`;
   }).join('');
-  const mobileBlocks = MEMBERS.map(m => `
+  const mobileBlocks = MEMBERS.map(m => {
+    const lb = memberLinkButtons(m);
+    return `
     <div class="links-m-block">
       <div class="links-m-head">
         <img class="links-m-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">
         <span class="links-m-name" style="color: ${m.color}">${escapeHtml(m.name)}</span>
       </div>
-      <div class="links-m-btns">${memberLinkButtons(m)}</div>
-    </div>
-  `).join('');
+      <div class="links-m-btns">${lb.main}</div>
+      ${lb.ogq ? `<div class="links-m-ogq">${lb.ogq}</div>` : ''}
+    </div>`;
+  }).join('');
   body.innerHTML = `
     <div class="links-section">
       <div class="links-table-wrap">
@@ -5404,7 +5394,7 @@ function renderHall() {
       const photos = g1.members.map(w => `<img style="width:${psH}px;height:${psH}px" src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');
       const row = (g, cls) => g ? `
             <div class="hall-row ${cls}">
-              <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join('·')}</span>
+              <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join(' · ')}</span>
               <span class="hall-r-val">${cat.fmt(g.value)}</span>
             </div>` : '';
       const hLayout = `
@@ -5429,8 +5419,8 @@ function renderHall() {
 
   body.innerHTML = `
     <div class="hall-bar">
-      <span class="hall-bar-label">2·3위 보기</span>
-      <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2·3위 보기"></button>
+      <span class="hall-bar-label">2 · 3위 보기</span>
+      <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2 · 3위 보기"></button>
     </div>
     <div class="hall-grid">${cards}</div>
   `;

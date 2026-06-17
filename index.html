@@ -37,7 +37,9 @@
     --ev-unread: #61FFEC;
     --mode-adult: #f87171;
     --mode-subscription: #f59e0b;
-    --mode-copyright: #cbd5e1;
+    --mode-copyright: #38bdf8;
+    --mode-password: #cbd5e1;
+    --mode-restricted: #a78bfa;
     --filter-soop: #0388FF;
     --filter-post: #2EF5E1;
     --sidebar-w: 200px;
@@ -451,7 +453,7 @@
   .badge-mode {
     position: absolute; top: 10px; right: 10px;
     font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px; padding: 3px 8px;
+    letter-spacing: 0.5px; padding: 3px 8px; min-width: 46px; box-sizing: border-box;
     background: transparent; border: 1.5px solid currentColor;
     display: inline-flex; align-items: center; justify-content: center;
     line-height: 1;
@@ -459,7 +461,8 @@
   .badge-mode.adult { color: var(--mode-adult); }
   .badge-mode.subscription { color: var(--mode-subscription); }
   .badge-mode.copyright { color: var(--mode-copyright); }
-  .badge-mode.restricted { color: var(--muted); }
+  .badge-mode.password { color: var(--mode-password); }
+  .badge-mode.restricted { color: var(--mode-restricted); }
   .badge-mode-wrap {
     position: absolute; top: 10px; right: 10px;
     display: flex; gap: 4px;
@@ -655,7 +658,7 @@
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: 0; margin-right: 6px;
-    padding: 2px 6px 3px; font-size: 11px;
+    padding: 2px 6px 3px; font-size: 11px; min-width: 46px; box-sizing: border-box;
     font-weight: 700; letter-spacing: 0.3px;
     background: transparent; border: 1.5px solid currentColor;
     line-height: 1; vertical-align: 1px;
@@ -663,7 +666,8 @@
   .event-mode-tag.adult { color: var(--mode-adult); }
   .event-mode-tag.subscription { color: var(--mode-subscription); }
   .event-mode-tag.copyright { color: var(--mode-copyright); }
-  .event-mode-tag.restricted { color: var(--muted); }
+  .event-mode-tag.password { color: var(--mode-password); }
+  .event-mode-tag.restricted { color: var(--mode-restricted); }
   .event-detail {
     color: #94a3b8; font-size: 12px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1079,15 +1083,16 @@
   }
   .day-session-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
   .day-session-mode {
-    display: inline-block;
-    padding: 1px 6px; font-size: 10px;
+    display: inline-block; text-align: center;
+    padding: 1px 6px; font-size: 10px; min-width: 44px; box-sizing: border-box;
     font-weight: 700; letter-spacing: 0.3px; margin-right: 6px;
     background: transparent; border: 1.5px solid currentColor;
   }
   .day-session-mode.adult { color: var(--mode-adult); }
   .day-session-mode.subscription { color: var(--mode-subscription); }
   .day-session-mode.copyright { color: var(--mode-copyright); }
-  .day-session-mode.restricted { color: var(--muted); }
+  .day-session-mode.password { color: var(--mode-password); }
+  .day-session-mode.restricted { color: var(--mode-restricted); }
   .day-session-mode.normal { color: var(--ev-start); }
   .day-session-changes {
     margin-top: 8px; padding-top: 6px;
@@ -2338,17 +2343,24 @@ const MEMBER_LINKS = {
 
 const MODE_LABEL = {
   normal: '일반', adult: '19+',
-  subscription: '구독+', copyright: '저작권', restricted: '제한',
-  adult_copyright: '19+ · 저작권',
+  subscription: '구독+', copyright: '저작권', password: '비번', restricted: '기타',
 };
 const MODE_PLACEHOLDER_TEXT = {
   adult: '19금 방송', subscription: '구독플러스 전용 방송',
-  copyright: '저작권 방송', restricted: '제한 방송',
-  adult_copyright: '19금 저작권 방송',
+  copyright: '저작권 방송', password: '비밀번호 방송', restricted: '기타 제한 방송',
 };
-// 복합 모드는 기존 배지 두 개를 나란히 재사용해 표기
+// mode는 활성 속성 조합 문자열('adult_subscription' 등) — '_'로 분해해 각각 배지로. 단일/normal/레거시 'adult_copyright'도 그대로 분해됨.
 function modeParts(mode) {
-  return mode === 'adult_copyright' ? ['adult', 'copyright'] : [mode];
+  return (mode || 'normal').split('_');
+}
+// 조합 문자열을 사람이 읽는 라벨로(예: 'adult_subscription' → '19+ · 구독+'). mode_change before/after 표시용.
+function modeLabel(mode) {
+  return modeParts(mode).map(p => MODE_LABEL[p] || p).join(' · ');
+}
+// 썸네일 없는 제한방송의 안내 텍스트(조합 대응). 예: 'adult_password' → '19금 방송 · 비밀번호 방송'.
+function modePlaceholder(mode) {
+  if (!mode || mode === 'normal') return '';
+  return modeParts(mode).map(p => MODE_PLACEHOLDER_TEXT[p] || MODE_LABEL[p] || p).join(' · ');
 }
 
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
@@ -3125,7 +3137,7 @@ function sendBrowserNotification(ev) {
     case 'end':        body = `${memberName} 방송 종료`; break;
     case 'title':      body = `${memberName} 방송 제목 변경 — ${ev.after || ''}`; break;
     case 'category':   body = `${memberName} 카테고리 변경 — ${ev.after || ''}`; break;
-    case 'mode_change':body = `${memberName} 방송 모드 변경 — ${MODE_LABEL[ev.after] || ev.after}`; break;
+    case 'mode_change':body = `${memberName} 방송 모드 변경 — ${modeLabel(ev.after)}`; break;
     case 'post':       body = `${memberName} 숲 게시글 — ${ev.title || ''}`; break;
     case 'comment_recommend': body = `${memberName} 좋아요 요청 — ${ev.target_name || ''} 컨텐츠`; break;
     case 'youtube':    body = `${memberName} 유튜브 업로드 — ${ev.title || ''}`; break;
@@ -3480,7 +3492,7 @@ function buildCard(m, info, delay) {
   const thumbHtml = hasThumb
     ? `<img src="${info.thumb}?t=${thumbTs}" alt="${m.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
   const placeholderInner = info.live && mode && mode !== 'normal'
-    ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${MODE_PLACEHOLDER_TEXT[mode] || ''}</div>`
+    ? `<img src="${m.img}" alt="${m.name}"><div class="placeholder-mode-text">${modePlaceholder(mode)}</div>`
     : `<img src="${vacSrc || m.img}" alt="${m.name}">`;
   let modeBadge = '';
   if (info.live && mode && mode !== 'normal') {
@@ -3495,7 +3507,7 @@ function buildCard(m, info, delay) {
   let titleText;
   if (!info.live) titleText = '오프라인';
   else if (info.title) titleText = info.title;
-  else if (mode && mode !== 'normal') titleText = MODE_PLACEHOLDER_TEXT[mode] || '방송 중';
+  else if (mode && mode !== 'normal') titleText = modePlaceholder(mode) || '방송 중';
   else titleText = '방송 중';
   const btimeHtml = btime ? `<span class="card-btime"><span>⏱</span><span>${btime}</span></span>` : '';
   const nameColorStyle = info.live ? `color: ${m.color}` : '';
@@ -3604,7 +3616,7 @@ function renderEvent(e, allEvents) {
   } else if (e.type === 'title' || e.type === 'category') {
     detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
   } else if (e.type === 'mode_change') {
-    detail = `<div class="event-detail">${escapeHtml(MODE_LABEL[e.before] || e.before)} → ${escapeHtml(MODE_LABEL[e.after] || e.after)}</div>`;
+    detail = `<div class="event-detail">${escapeHtml(modeLabel(e.before))} → ${escapeHtml(modeLabel(e.after))}</div>`;
   } else if ((e.type === 'post' || e.type === 'youtube' || e.type === 'comment_recommend' || e.type === 'cafe_post') && e.title) {
     detail = `<div class="event-detail">${escapeHtml(e.title)}</div>`;
   } else if (e.type === 'chat' && e.message) {
@@ -4477,14 +4489,14 @@ function renderDayDetail(year, month1, sum, memberId) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
         durStr = ` · ${formatDuration(ms)}`;
       }
-      const modeBadge = modeParts(s.mode || 'normal').map(p => `<span class="day-session-mode ${p}">${MODE_LABEL[p] || '일반 방송'}</span>`).join('');
+      const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}">${MODE_LABEL[p] || ''}</span>`).join('') : '';
       let changesHtml = '';
       if (s.changes && s.changes.length > 0) {
         changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
           let icon, label, valHtml;
           if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
-          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${MODE_LABEL[c.before]||c.before} → ${MODE_LABEL[c.after]||c.after}`; }
+          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → ${modeLabel(c.after)}`; }
           else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
           return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
         }).join('')}</div>`;

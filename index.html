@@ -817,6 +817,7 @@
   @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 560px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }   /* 좁은 폰: 카드 행이 nowrap이라 2열이면 폭이 못 줄어 가로스크롤 → 1열로 */
 
   .stats-card {
     background: var(--surface);

@@ -409,12 +409,6 @@
     text-decoration: none; color: inherit;
     display: block;
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-    opacity: 0;
-    animation: fadeIn 0.4s ease forwards;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
   }
 
 
@@ -686,6 +680,11 @@
   .event-time-abs {
     display: block; font-size: 10px;
     color: var(--muted); opacity: 0.7;
+    white-space: nowrap;   /* 기본 1줄 고정(PC·일반 모바일) — 날짜/시간 inline */
+  }
+  /* 좁은 화면(≤480px)에서만 날짜·시간 2줄 분리. '좁을때'를 480px로 정의 — 이 숫자만 바꾸면 조정됨 */
+  @media (max-width: 480px) {
+    .event-time-abs .ev-abs-d { display: block; }
   }
   .timeline-header {
     display: flex;
@@ -3449,7 +3448,7 @@ function formatAbsTime(iso) {
   if (isNaN(d.getTime())) return '';
   const hh = String(d.getHours()).padStart(2, '0');
   const mi = String(d.getMinutes()).padStart(2, '0');
-  return `${koDate(d.getFullYear(), d.getMonth() + 1, d.getDate())} ${hh}:${mi}`;
+  return `<span class="ev-abs-d">${koDate(d.getFullYear(), d.getMonth() + 1, d.getDate())}</span> <span class="ev-abs-t">${hh}:${mi}</span>`;   // 날짜·시간 분리 span. 기본 1줄, 좁은 화면(≤480px)에서만 CSS로 2줄
 }
 function formatHHMM(iso) {
   if (!iso) return '';
@@ -3492,13 +3491,12 @@ function daysInMonth(year, month1) {
   return new Date(year, month1, 0).getDate();
 }
 
-function buildCard(m, info, delay) {
+function buildCard(m, info) {
   const tag = 'a';   // 생방송=시청 페이지, 오프라인=방송국 페이지 — 둘 다 SOOP 새 탭 링크
   const card = document.createElement(tag);
   const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
   card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
-  card.style.animationDelay = delay + 'ms';
   card.href = info.live
     ? 'https://play.sooplive.co.kr/' + info.id           // 방송 중: 시청 페이지
     : 'https://www.sooplive.com/station/' + info.id;     // 오프라인: 방송국(다시보기·게시판)
@@ -4691,9 +4689,9 @@ async function loadLive() {
     const grid = document.createElement('div');
     grid.className = 'grid';
     let liveCount = 0;
-    sorted.forEach((m, i) => {
+    sorted.forEach(m => {
       const info = infoMap[m.id] || { id: m.id, live: false };
-      grid.appendChild(buildCard(m, info, i * 35));
+      grid.appendChild(buildCard(m, info));
       if (info.live) liveCount++;
     });
     document.getElementById('app').innerHTML = '';

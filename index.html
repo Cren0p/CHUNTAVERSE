@@ -1709,7 +1709,7 @@
 
   .members-crew {
     display: flex; gap: 16px;
-    max-width: 1100px;
+    max-width: 1300px;   /* 전체폭 확대 — 비율 2.4:1 유지한 채 우측 활동 패널 절대폭 확보(가장 긴 줄 한 줄 수용). 좌측 소개도 함께 넓어짐 */
     margin: 0 auto;
     align-items: stretch;
   }
@@ -1910,6 +1910,10 @@
     .main-header { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
     /* 3열(상단바): 버튼 좌 · 설명 우 — width:100% 스택 해제, header-center는 base의 margin-left:auto로 우측. 좁으면 wrap으로 설명이 아래로 */
     .page-title { gap: 6px; align-items: stretch; }
+    /* 상단바 우측 갱신정보: 좁은 모바일에선 '주기 · 시각'을 2줄로 분리(주기/시각/비공식문구=3줄). PC는 스팬 inline이라 1줄 유지. */
+    .header-center-line { white-space: normal; }
+    .header-center-line .hc-period, .header-center-line .hc-stamp { display: block; }
+    .header-center-line .hc-mid { display: none; }
     /* 상단바 버튼: 세로 미니(아이콘 위 · 짧은 텍스트 아래) + PC/모바일 토글 */
     .page-title-link, .celebration-box {
       flex-direction: column; gap: 2px; justify-content: center;
@@ -3309,8 +3313,16 @@ function updateHeaderCenter() {
   } else if (currentPage === 'members') {
     topLine = '';
   }
+  // topLine은 "{주기} · {시각} 기준" 형태. 모바일에서 '·' 기준 2줄 분리를 위해 주기/시각을 스팬으로 감쌈(PC는 inline이라 1줄 동일).
+  let topLineHtml = '';
+  if (topLine) {
+    const sepIdx = topLine.indexOf(' · ');
+    topLineHtml = sepIdx >= 0
+      ? `<div class="header-center-line"><span class="hc-period">${topLine.slice(0, sepIdx)}</span><span class="hc-mid"> · </span><span class="hc-stamp">${topLine.slice(sepIdx + 3)}</span></div>`
+      : `<div class="header-center-line">${topLine}</div>`;
+  }
   el.innerHTML = `
-    ${topLine ? `<div class="header-center-line">${topLine}</div>` : ''}
+    ${topLineHtml}
     <div class="header-center-line header-disclaimer">비공식 팬사이트입니다.</div>
   `;
 }

@@ -2554,7 +2554,7 @@ const MEMBER_INFO = {
   'imha22': { engName: 'IMHAMING', fanName: '고구밍', age: '2000년생', height: '168cm', mbti: 'ISFP', group: '없음', firstStream: '2022년 3월 28일', vote: '583표 / 48.1%' },
   'doormomo': { engName: 'MOONMOMO', fanName: '곰탕이', age: '1998년생', height: '153cm', mbti: 'INTP', group: '블리즈', firstStream: '2023년 11월 25일', vote: '777표 / 64.1%' },
   'kappuchan': { engName: 'KAPPU', fanName: '울푸단', age: '비공개', height: '비공개', mbti: 'ISTP', group: '없음', firstStream: '2023년 11월 18일', vote: '313표 / 25.8%' },
-  'kyaang123': { engName: 'KYAANG', fanName: '마늘', age: '1997년생', height: '159cm', mbti: 'ENTP', group: '도파민', firstStream: '2022년 10월 10일', vote: '740표 / 61%' },
+  'kyaang123': { engName: 'KYAANG', fanName: '마늘', age: '1997년생', height: '159cm', mbti: 'ENTP', group: '도파민', firstStream: '2022년 10월 10일', vote: '740표 / 61.0%' },
   'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '비공개', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', vote: '604표 / 49.8%' },
   'mocamu2': { engName: 'MOCA', fanName: '초코', age: '2003년생', height: '155.1cm', mbti: 'ENTP', group: 'UR:L', firstStream: '2024년 7월 9일', vote: '808표 / 66.6%' },
   'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', vote: '657표 / 54.2%' },
@@ -4895,7 +4895,7 @@ setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정
 
 // ── 이미지 프리로드 부팅 훅 (선언부는 switchPage 초기 호출 이전에 위치) ──
 (function bootPreload() {
-  preloadImages(['CHUNTAVERSE.webp']);
+  preloadImages(['CHUNTAVERSE.webp', 'Favicon.webp']);
 
   // 오늘 기념일(생일) 멤버: 상단 기념일 박스 → 멤버 상세 직행 경로 대비
   const kst = new Date(Date.now() + 9 * 3600 * 1000);

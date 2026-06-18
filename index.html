@@ -318,6 +318,7 @@
   /* 좋아요 요청 개별 숨김 ✕ (카드 우상단 오버레이) */
   .lr-item { position: relative; }
   .lr-item .event { padding-right: 38px; }   /* ✕(우상단) 자리 확보 — 상대시간과 겹침 방지 */
+  .lr-item .event-icon { display: none; }   /* 모달엔 좋아요 요청만 모이므로 타입 구분용 따봉 아이콘 불필요(이벤트 탭은 유지). flex 항목 제거라 좌측 빈칸·gap 안 남음 */
   .lr-dismiss {
     position: absolute; top: 8px; right: 8px; z-index: 2;
     width: 22px; height: 22px;

@@ -519,7 +519,8 @@
   }
   @media (max-width: 900px) {
     .events-wrap { grid-template-columns: 1fr; }
-    .filter-panel { position: static !important; }
+    .filter-panel { position: static !important; order: -1; }   /* 최신순(기본): 필터를 이벤트 위로 */
+    .events-wrap.evt-sort-asc .filter-panel { order: 0; }        /* 오래된순: 필터를 아래로(DOM 순서 복귀) */
   }
   .timeline { background: var(--surface); border: 1px solid var(--border); min-width: 0; }
   .timeline-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
@@ -564,6 +565,7 @@
   @media (max-width: 900px) { .filter-toggle-all { width: 25%; } }
 
   .filter-members { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  @media (max-width: 900px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일: 6열 2행 */
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -1335,6 +1337,7 @@
   @media (max-width: 700px) {
     .chem-filter-members { grid-template-columns: repeat(6, 1fr); }
   }
+  @media (max-width: 500px) { .chem-filter-bar { flex-direction: column; } }   /* 좁은 폰: '모두 해제'를 필터 아래로 줄바꿈(최소폭 축소) */
   .chem-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1835,6 +1838,7 @@
   .members-quick-btn.quick-youtube:hover { border-color: #FF0000; color: #FF0000; background: rgba(255,0,0,0.10); }
   .members-quick-btn.quick-naver:hover { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
   .members-quick-btn svg { width: 16px; height: 16px; display: block; }
+  @media (max-width: 500px) { .members-profile-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 좁은 폰: 이름 우측 버튼 2×2 (가로 넘침 방지) */
   .members-profile-id {
     font-size: 11px; color: var(--muted); font-weight: 500;
     opacity: 0.5;
@@ -3779,6 +3783,8 @@ function updateTypeAllToggle() {
 function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
+  const ew = document.querySelector('.events-wrap');
+  if (ew) ew.classList.toggle('evt-sort-asc', eventSortAsc);   // 정렬 따라 필터 위/아래(모바일 CSS order)
   const filtered = allEvents.filter(e => {
     const cat = typeToCat(e.type);
     if (!filterState.types.has(cat)) return false;

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>천타버스</title>
-<meta name="description" content="천타버스(CHUNTAVERSE) 비공식 팬사이트 - 천양, 마다옴, 나나문, 임하밍, 문모모, 카푸, 캬앙, 김웰로, 모카, 달타, 파니의 생방송 현황, 최근 이벤트, 월별 통계를 한눈에 확인하세요.">
+<meta name="description" content="천타버스(CHUNTAVERSE) 비공식 팬사이트 - 천양, 마다옴, 나나문, 임하밍, 문모모, 카푸, 캬앙, 김웰로, 모카, 달타의 생방송 현황, 최근 이벤트, 월별 통계를 한눈에 확인하세요.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:title" content="천타버스">
@@ -750,7 +750,7 @@
 
   .stats-tabs-wrap {
     display: grid;
-    grid-template-columns: repeat(13, 1fr);
+    grid-template-columns: repeat(12, 1fr);
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1305,7 +1305,7 @@
   }
   .chem-filter-members {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     gap: 6px;
     flex: 1;
     min-width: 0;
@@ -1670,7 +1670,7 @@
   }
   .members-tabs-wrap {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
+    grid-template-columns: repeat(11, 1fr);
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -2169,7 +2169,6 @@ const MEMBERS = [
   { id: 'wellro314',   name: '김웰로', img: 'members/09.webp', color: '#BFEF90' },
   { id: 'mocamu2',     name: '모카',   img: 'members/10.webp', color: '#366CD8' },
   { id: 'dalta20',     name: '달타',   img: 'members/11.webp', color: '#FFC462' },
-  { id: 'baeksoon2',   name: '파니',   img: 'members/12.webp', color: '#9FC5E8' },
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
@@ -2348,20 +2347,6 @@ const MEMBER_LINKS = {
       { name: '달달하이! 난 꿀즙이', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
       { name: '달달하이! 난 꿀즙이', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/644df30193953' },
     ],
-  },
-  'baeksoon2': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/baeksoon2',
-      유튜브: 'https://www.youtube.com/@pani22222',
-      유튜브2: null,
-      팬카페: 'https://cafe.naver.com/godok0311?iframe_url=/MyCafeIntro.nhn%3Fclubid=31133029',
-      나무위키: 'https://namu.wiki/w/%ED%8C%8C%EB%8B%88_',
-    },
-    instagram: null,
-    x: null,
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dokgopani' }],
-    etc: [{ label: '노래책', url: 'https://docs.google.com/document/d/1stslb_GAnVcNAq_sQvYfw4GyLkd9QNnNIPR8F5Dj-XA/edit?tab=t.0#heading=h.4r8fp7nst7tu' }],
-    ogq: [{ name: '파니티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63adcae3ef502' }],
   },
 };
 
@@ -2545,7 +2530,6 @@ window.addEventListener('resize', () => { if (profilePhotoSizer) profilePhotoSiz
 const MEMBER_BIRTHDAYS = {
   'doormomo': { month: 1, day: 8, display: '1월 8일' },
   'kappuchan': { month: 1, day: 22, display: '1월 22일' },
-  'baeksoon2': { month: 3, day: 11, display: '3월 11일' },
   '243000': { month: 6, day: 22, display: '6월 22일' },
   'mocamu2': { month: 6, day: 29, display: '6월 29일' },
   'nanamoon777': { month: 7, day: 27, display: '7월 27일' },
@@ -2560,7 +2544,7 @@ const MEMBER_FULL_IMG = {
   '243000': 'members/001.webp?v=2', 'madaomm': 'members/002.webp?v=2', 'nanamoon777': 'members/003.webp?v=2',
   'imha22': 'members/004.webp?v=2', 'doormomo': 'members/005.webp?v=2', 'kappuchan': 'members/007.webp?v=2',
   'kyaang123': 'members/008.webp?v=2', 'wellro314': 'members/009.webp?v=2', 'mocamu2': 'members/010.webp?v=2',
-  'dalta20': 'members/011.webp?v=2', 'baeksoon2': 'members/012.webp?v=2',
+  'dalta20': 'members/011.webp?v=2',
 };
 
 const MEMBER_INFO = {
@@ -2574,7 +2558,6 @@ const MEMBER_INFO = {
   'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '비공개', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', vote: '604표 / 49.8%' },
   'mocamu2': { engName: 'MOCA', fanName: '초코', age: '2003년생', height: '155.1cm', mbti: 'ENTP', group: 'UR:L', firstStream: '2024년 7월 9일', vote: '808표 / 66.6%' },
   'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', vote: '657표 / 54.2%' },
-  'baeksoon2': { engName: 'PANI', fanName: '쿠쿠단', age: '2000년생', height: '162cm', mbti: 'ISTP', group: '없음', firstStream: '2024년 1월 15일', vote: '510표 / 42%' },
 };
 
 function calcAge(memberId, ageStr) {

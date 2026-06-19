@@ -535,19 +535,16 @@
     margin-top: 20px; padding-top: 20px;
     border-top: 1px solid var(--border);
   }
-  .filter-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;   /* 필터 항목 간격(grid/flex gap 6px)과 일치 — 버튼↔필터 리스트 간격 통일 */
-  }
   .filter-title {
     font-size: 12px; font-weight: 700;
     color: var(--muted); letter-spacing: 1px;
+    margin-bottom: 6px;   /* 필터 항목 간격(grid/flex gap 6px)과 일치 */
   }
-  /* 케미 .chem-filter-toggle와 동일 디자인(외곽선 알약). 다른 폭/높이로 '필터가 아니라 전체 선택·해제 액션'임을 모양으로 구분. 폭은 멤버 그리드 기준 반응형 — PC 50%(≈2칸+간격), 모바일 25%(≈1칸, 아래 900px 미디어쿼리) */
+  /* 멤버/종류 그리드 좌측에 '모두 선택/해제' 버튼 — 버튼은 그리드 높이만큼 stretch. 전체 관련 액션이라 좌측 배치(크루소개 등과 동일 패턴) */
+  .filter-row { display: flex; gap: 6px; align-items: stretch; }
+  /* 외곽선 알약 버튼. 좁은 세로 버튼 — 폭 좁으면 '모두/선택' 2줄(keep-all) 자동 분리. 이벤트·케미 필터 공용 */
   .filter-toggle-all {
-    width: 50%;
+    width: 38px;
     flex-shrink: 0;
     background: var(--surface2);
     border: 1.5px solid var(--border);
@@ -556,16 +553,16 @@
     font-family: inherit;
     font-size: 11px;
     font-weight: 600;
-    padding: 5px 0;
-    white-space: nowrap;
+    padding: 4px 2px;
+    line-height: 1.25;
+    white-space: normal;
+    word-break: keep-all;
     transition: all 0.15s;
   }
   .filter-toggle-all:hover { border-color: var(--accent); }
-  /* 모바일: 패널이 넓어져 멤버 ≈1칸(25%). 반드시 베이스(width:50%) 뒤에 와야 같은 우선순위에서 오버라이드됨(소스 순서) */
-  @media (max-width: 900px) { .filter-toggle-all { width: 25%; } }
 
-  .filter-members { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  @media (max-width: 900px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일: 6열 2행 */
+  .filter-members { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
+  @media (max-width: 900px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일 strip: 6열(12명=6×2) */
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -584,21 +581,26 @@
   .filter-member.on { border-color: var(--accent); }
   .filter-member:hover { border-color: var(--accent); }
 
-  .filter-types { display: flex; flex-direction: column; gap: 6px; }
+  /* 종류 필터: 멤버와 동일한 정사각 셀(아이콘 위·라벨 아래). 열 수를 멤버와 맞춰 셀 크기 일치(PC 3열/모바일 6열). 5종 + 모두선택 좌측 */
+  .filter-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
+  @media (max-width: 900px) { .filter-types { grid-template-columns: repeat(6, 1fr); } }
   .filter-type {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    aspect-ratio: 1;
+    padding: 6px 4px;
     background: var(--surface2);
     border: 1.5px solid var(--border);
-    cursor: pointer; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-size: 11px; font-weight: 600;
     color: var(--muted); transition: all 0.15s;
-    font-family: inherit; text-align: left; width: 100%;
+    font-family: inherit; text-align: center;
+    line-height: 1.2; word-break: keep-all;
   }
   .filter-type:hover { color: var(--text); border-color: var(--accent); }
   .filter-type.on { border-color: var(--accent); color: var(--text); }
   .filter-type:not(.on) { opacity: 0.35; }
   .filter-type:not(.on):hover { opacity: 0.6; }
-  .filter-type .filter-icon { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .filter-type .filter-icon { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .filter-type .filter-icon svg { width: 100%; height: 100%; }   /* SVG에 박힌 width/height(14px) 무시하고 셀 크기로 스케일(비율은 meet로 유지) */
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
   .filter-type[data-type="post"] .filter-icon { color: var(--ev-post); }
@@ -1294,50 +1296,28 @@
     padding: 20px 24px;
     max-width: 1400px; width: 100%; margin: 0 auto;
     flex: 1;
-    display: flex; flex-direction: column;
-    gap: 16px;
+    display: grid; grid-template-columns: 1fr 280px;
+    gap: 20px; align-items: start;
   }
-  .chem-filter-bar {
-    display: flex;
-    gap: 6px;
+  @media (max-width: 900px) {
+    .chem-wrap { grid-template-columns: 1fr; }
+    .chem-filter-panel { position: static !important; order: -1; }   /* 모바일: 필터를 케미 위 strip으로 */
+  }
+  .chem-content { min-width: 0; }
+  /* 케미 필터: 이벤트 .filter-panel과 동일 — 우측 사이드 sticky. 스크롤이 길어(2인+그룹) 필터 상시 노출이 이득 */
+  .chem-filter-panel {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 8px;
-    align-items: stretch;
-    max-width: 880px;
-    margin: 0 auto;
+    padding: 16px;
+    position: sticky; top: 20px;
   }
   .chem-filter-members {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
-    flex: 1;
-    min-width: 0;
+    flex: 1; min-width: 0;
   }
-  .chem-filter-bar .filter-member {
-    aspect-ratio: 1;
-  }
-  .chem-filter-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    color: var(--accent);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    white-space: nowrap;
-    transition: all 0.15s;
-    flex-shrink: 0;
-  }
-  .chem-filter-toggle:hover { border-color: var(--accent); }
-  @media (max-width: 700px) {
-    .chem-filter-members { grid-template-columns: repeat(6, 1fr); }
-  }
-  @media (max-width: 500px) { .chem-filter-bar { flex-direction: column; } }   /* 좁은 폰: '모두 해제'를 필터 아래로 줄바꿈(최소폭 축소) */
+  @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일 strip: 6열 */
   .chem-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1789,6 +1769,7 @@
     display: flex; flex-direction: column; gap: 16px;
     flex: 1;
     min-width: 0;
+    container-type: inline-size;   /* 헤더 버튼 2×2 전환을 정보 컬럼 폭 기준으로(뷰포트 아님) */
   }
   @media (max-width: 640px) {
     .members-profile { flex-direction: column; }
@@ -1838,7 +1819,7 @@
   .members-quick-btn.quick-youtube:hover { border-color: #FF0000; color: #FF0000; background: rgba(255,0,0,0.10); }
   .members-quick-btn.quick-naver:hover { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
   .members-quick-btn svg { width: 16px; height: 16px; display: block; }
-  @media (max-width: 500px) { .members-profile-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 좁은 폰: 이름 우측 버튼 2×2 (가로 넘침 방지) */
+  @container (max-width: 520px) { .members-profile-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 정보 컬럼 ≤520px면(폰/태블릿 2단 무관) 이름 우측 버튼 2×2 */
   .members-profile-id {
     font-size: 11px; color: var(--muted); font-weight: 500;
     opacity: 0.5;
@@ -1945,13 +1926,15 @@
     }
     .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
-    .members-tabs-wrap { grid-template-columns: repeat(6, 1fr); }
+    .members-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-crew { flex-direction: column; }
     .members-crew-intro, .members-crew-activities { flex: none; }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
     /* 연간/월간을 1열에 세로로 (연간 위·월간 아래) — 멤버 사진은 나머지 칸으로 자동 흐름 */
     .stats-tab-all[data-mode="annual"]  { grid-column: 1; grid-row: 1; }
     .stats-tab-all[data-mode="monthly"] { grid-column: 1; grid-row: 2; }
+    /* 크루소개 버튼: 좌측 1열 고정·2행 차지(통계 연간/월간 2버튼 높이와 정렬). 멤버는 2~7열로 흐름(12명=6×2) */
+    .members-tab-crew { grid-column: 1; grid-row: 1 / span 2; aspect-ratio: auto; }
   }
 </style>
 </head>
@@ -2042,33 +2025,33 @@
       </div>
       <div class="filter-panel">
         <div class="filter-section">
-          <div class="filter-title-row">
-            <span class="filter-title">멤버</span>
+          <div class="filter-title">멤버</div>
+          <div class="filter-row">
             <button class="filter-toggle-all" id="filterMemberToggleAll">모두 해제</button>
+            <div class="filter-members" id="filterMembers"></div>
           </div>
-          <div class="filter-members" id="filterMembers"></div>
         </div>
         <div class="filter-section">
-          <div class="filter-title-row">
-            <span class="filter-title">종류</span>
+          <div class="filter-title">종류</div>
+          <div class="filter-row">
             <button class="filter-toggle-all" id="filterTypeToggleAll">모두 해제</button>
-          </div>
-          <div class="filter-types" id="filterTypes">
-            <button class="filter-type" data-type="soop">
-              <span class="filter-icon soop"></span><span>숲 방송</span>
-            </button>
-            <button class="filter-type" data-type="chat">
-              <span class="filter-icon chat"></span><span>방송 채팅</span>
-            </button>
-            <button class="filter-type" data-type="post">
-              <span class="filter-icon post"></span><span>숲 게시글</span>
-            </button>
-            <button class="filter-type" data-type="cafe">
-              <span class="filter-icon cafe"></span><span>카페 게시글</span>
-            </button>
-            <button class="filter-type" data-type="youtube">
-              <span class="filter-icon youtube"></span><span>유튜브 업로드</span>
-            </button>
+            <div class="filter-types" id="filterTypes">
+              <button class="filter-type" data-type="soop">
+                <span class="filter-icon soop"></span><span>숲 방송</span>
+              </button>
+              <button class="filter-type" data-type="chat">
+                <span class="filter-icon chat"></span><span>방송 채팅</span>
+              </button>
+              <button class="filter-type" data-type="post">
+                <span class="filter-icon post"></span><span>숲 게시글</span>
+              </button>
+              <button class="filter-type" data-type="cafe">
+                <span class="filter-icon cafe"></span><span>카페 게시글</span>
+              </button>
+              <button class="filter-type" data-type="youtube">
+                <span class="filter-icon youtube"></span><span>유튜브 업로드</span>
+              </button>
+            </div>
           </div>
         </div>
         <div class="filter-summary" id="filterSummary"></div>
@@ -5231,13 +5214,18 @@ function renderChemistry() {
   `).join('');
 
   body.innerHTML = `
-    <div class="chem-filter-bar">
-      <div class="chem-filter-members" id="chemFilterMembers">${memberBtns}</div>
-      <button class="chem-filter-toggle" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
+    <div class="chem-content">
+      <div class="chem-grid">
+        ${topHtml}
+        ${botHtml}
+      </div>
     </div>
-    <div class="chem-grid">
-      ${topHtml}
-      ${botHtml}
+    <div class="chem-filter-panel">
+      <div class="filter-title">멤버</div>
+      <div class="filter-row">
+        <button class="filter-toggle-all" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
+        <div class="chem-filter-members" id="chemFilterMembers">${memberBtns}</div>
+      </div>
     </div>
   `;
 

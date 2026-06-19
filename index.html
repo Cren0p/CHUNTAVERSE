@@ -1591,15 +1591,10 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
   }
-  /* 세로형(1위만): 카드 좁아도 OK */
-  @container (max-width: 740px) { .hall-grid { grid-template-columns: repeat(3, 1fr); } }
-  @container (max-width: 550px) { .hall-grid { grid-template-columns: repeat(2, 1fr); } }
-  @container (max-width: 370px) { .hall-grid { grid-template-columns: 1fr; } }
-  /* 2·3위 보기(수평형: 사진104px + 순위행): 카드가 더 넓어야 해 더 일찍 열 감소 → 가로스크롤 방지 */
-  .hall-wrap.show-ranks .hall-grid { grid-template-columns: repeat(4, 1fr); }
-  @container (max-width: 1200px) { .hall-wrap.show-ranks .hall-grid { grid-template-columns: repeat(3, 1fr); } }
-  @container (max-width: 740px) { .hall-wrap.show-ranks .hall-grid { grid-template-columns: repeat(2, 1fr); } }
-  @container (max-width: 550px) { .hall-wrap.show-ranks .hall-grid { grid-template-columns: 1fr; } }
+  /* 열 수는 2·3위 보기(수평형: 사진104px+순위행, 더 넓은 카드 필요) 켜진 상태 기준으로 통일 → 토글해도 열이 안 바뀜. 세로형은 같은 열수에서 카드만 더 여유 */
+  @container (max-width: 1200px) { .hall-grid { grid-template-columns: repeat(3, 1fr); } }
+  @container (max-width: 740px) { .hall-grid { grid-template-columns: repeat(2, 1fr); } }
+  @container (max-width: 550px) { .hall-grid { grid-template-columns: 1fr; } }
   .hall-card {
     background: var(--surface);
     border: 1px solid var(--border);

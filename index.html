@@ -2182,8 +2182,11 @@ const MEMBERS = [
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
-const VACATION_IMG = { '243000': 'members/CHUNCATION.webp', 'mocamu2': 'members/MOCATION.webp' };
-const VACATION_UNTIL = '2026-06-20';
+const VACATION = {
+  '243000':      { img: 'members/CHUNCATION.webp', until: '2026-06-20' },
+  'mocamu2':     { img: 'members/MOCATION.webp',   until: '2026-06-20' },
+  'nanamoon777': { img: 'members/NACATION.webp',   until: '2026-06-27' },
+};
 
 const MEMBER_LINKS = {
   '243000': {
@@ -3499,7 +3502,7 @@ function daysInMonth(year, month1) {
 function buildCard(m, info) {
   const tag = 'a';   // 생방송=시청 페이지, 오프라인=방송국 페이지 — 둘 다 SOOP 새 탭 링크
   const card = document.createElement(tag);
-  const vacSrc = !info.live && VACATION_IMG[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION_UNTIL; })() ? VACATION_IMG[m.id] : null;
+  const vacSrc = !info.live && VACATION[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION[m.id].until; })() ? VACATION[m.id].img : null;
   card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
   card.href = info.live

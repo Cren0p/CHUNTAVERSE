@@ -1433,6 +1433,7 @@
     justify-content: center;
     gap: 8px 12px;
   }
+  .chem-group-members.large.cols3 { grid-template-columns: repeat(3, auto); }   /* 6인: 폭기준 5+1 줄바꿈 대신 3+3 */
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
   /* === 컨텐츠 탭 === */
@@ -5194,7 +5195,7 @@ function renderChemistry() {
       if (!m) return '';
       return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
     }).join('');
-    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : ''}">${membersHtml}</div></div></div>`;
+    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : (g.members.length === 6 ? ' large cols3' : '')}">${membersHtml}</div></div></div>`;
   };
 
   // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)

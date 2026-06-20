@@ -1352,6 +1352,7 @@
   .chem-body {
     display: flex; align-items: center;
     gap: 10px; justify-content: center;
+    container-type: inline-size;   /* 카드 내 멤버 줄바꿈을 카드 폭 기준으로 판단 */
   }
   .chem-member {
     display: flex; flex-direction: column;
@@ -1433,7 +1434,9 @@
     justify-content: center;
     gap: 8px 12px;
   }
-  .chem-group-members.large.cols3 { grid-template-columns: repeat(3, auto); }   /* 6인: 폭기준 5+1 줄바꿈 대신 3+3 */
+  .chem-group-members.large.cols3 { grid-template-columns: repeat(3, auto); }   /* 6인: 어떤 카드폭에서도 한 줄에 안 들어가 항상 3+3 */
+  /* 4인: 카드가 4명 한 줄(≈4×40px+이름·gap)을 담으면 한 줄, 좁아지면 2+2 (3+1 방지) */
+  @container (max-width: 215px) { .chem-group-members.large.n4 { grid-template-columns: repeat(2, auto); } }
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
   /* === 컨텐츠 탭 === */
@@ -5195,7 +5198,9 @@ function renderChemistry() {
       if (!m) return '';
       return `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`;
     }).join('');
-    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${g.members.length >= 7 ? ' large' : (g.members.length === 6 ? ' large cols3' : '')}">${membersHtml}</div></div></div>`;
+    const memN = g.members.length;
+    const memCls = memN >= 7 ? ' large' : memN === 6 ? ' large cols3' : memN === 4 ? ' large n4' : '';
+    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div></div>`;
   };
 
   // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)

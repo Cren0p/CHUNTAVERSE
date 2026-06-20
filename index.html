@@ -45,6 +45,12 @@
     --sidebar-w: 200px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* 전역 미니멀 스크롤바 (초미니 6px·거의 안 보이다 hover 시 진해짐). webkit=Edge/Chrome/Safari, scrollbar-*=Firefox */
+  * { scrollbar-width: thin; scrollbar-color: rgba(226,232,240,0.14) transparent; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: rgba(226,232,240,0.14); border-radius: 6px; }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(226,232,240,0.3); }
   html, body { min-height: 100vh; }
   html { scrollbar-gutter: stable; }
   body {

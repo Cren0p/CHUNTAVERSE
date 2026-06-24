@@ -337,7 +337,7 @@
   .sch-btn-dday { color: var(--accent); font-variant-numeric: tabular-nums; }
   /* 같은 날 2건+ 일정 묶음: 제목 행 위 / 각 제목 아래 같은 열에 그 일정의 dtime(열 정렬). 폭은 내용으로 관리(컷·말줄임 없음). */
   .sch-grid { display: grid; column-gap: 16px; row-gap: 1px; }
-  .sch-grid .sch-col-title { color: var(--text); white-space: nowrap; }
+  .sch-grid .sch-col-title { white-space: nowrap; }   /* 색 미지정 = 버튼 기본색(민트) 상속, 단일 일정 제목과 동일 */
   .sch-grid .sch-btn-dtime { color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .sch-grid .sch-dtime-merged { grid-column: 1 / -1; }   /* dtime이 전부 같을 때 한 칸으로 병합(전 열 span) */
   .sch-item {
@@ -2202,7 +2202,7 @@ MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
 const VACATION = {
   '243000':      { img: 'members/CHUNCATION.webp', until: '2026-06-20' },
   'mocamu2':     { img: 'members/MOCATION.webp',   until: '2026-06-20' },
-  'nanamoon777': { img: 'members/NACATION.webp',   until: '2026-06-27' },
+  'nanamoon777': { img: 'members/NACATION.webp',   until: '2026-06-30' },
 };
 
 const MEMBER_LINKS = {

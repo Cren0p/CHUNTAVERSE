@@ -335,6 +335,11 @@
   .lr-dismiss:hover { color: var(--text); background: var(--surface2); border-color: var(--muted); }
   /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
   .sch-btn-dday { color: var(--accent); font-variant-numeric: tabular-nums; }
+  /* 같은 날 2건+ 일정 묶음: 제목 행 위 / 각 제목 아래 같은 열에 그 일정의 dtime(열 정렬). 폭은 내용으로 관리(컷·말줄임 없음). */
+  .sch-grid { display: grid; column-gap: 16px; row-gap: 1px; }
+  .sch-grid .sch-col-title { color: var(--text); white-space: nowrap; }
+  .sch-grid .sch-btn-dtime { color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sch-grid .sch-dtime-merged { grid-column: 1 / -1; }   /* dtime이 전부 같을 때 한 칸으로 병합(전 열 span) */
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
@@ -2678,7 +2683,7 @@ const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?
 function updatePageTitle() {
   const el = document.getElementById('pageTitle');
   if (!el) return;
-  const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 일정 1개(없으면 빈 문자열 → 버튼 미표시)
+  const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 날짜의 일정 묶음(같은 날 2건+는 열 정렬, 데이터 전엔 셸)
   const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 요청</span><span class="tb-t-mb">좋아요</span></button>`;
   const celebrations = getTodayCelebrations();
   el.innerHTML = scheduleBtn + likeReqBtn + BV_LINK + celebrations.join('');
@@ -2922,32 +2927,54 @@ function dtimeText(item) {
   return `D-${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
-// 상단바 일정 버튼 HTML. 호출 시 scheduleSig도 갱신(tick이 구조 변화를 감지하는 기준).
-function scheduleBtnHTML() {
+// 가장 임박한 날짜의 일정 묶음 + 표기 상태(버튼·틱 공통). dtime이 전부 같으면 병합(M), 다르면 분리(S).
+// sig엔 카운트다운 숫자(매초 변동) 대신 묶음 구성·단일(1)/병합/분리만 담아 → 구조가 바뀔 때만 재렌더.
+function scheduleHead() {
   const vis = visibleSchedule();
-  // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
-  if (vis.length === 0) {
-    scheduleSig = '∅';
-    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday">불러오는 중</span></span><span class="tb-t-mb">일정</span></button>`;
-  }
-  const head = vis[0];
-  scheduleSig = `${vis.length}|${head.date}|${head.time}`;
-  // 당일(D-day)부터 시간 카운트다운, 그 전엔 D-day. 버튼 제목은 간략제목 우선(없으면 상세제목).
-  const second = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
-  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.shortTitle)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
+  if (!vis.length) return { vis, group: [], dtimes: [], allSame: true, sig: '∅' };
+  const d0 = vis[0].date;
+  const group = vis.filter(s => s.date === d0);   // vis는 정렬됨 → 같은 날짜는 시간순 prefix
+  const dtimes = group.map(e => (e.hasTime && ddayNum(e) === 0) ? dtimeText(e) : ddayText(e));
+  const allSame = dtimes.every(x => x === dtimes[0]);
+  const state = group.length >= 2 ? (allSame ? 'M' : 'S') : '1';
+  const sig = group.map(e => `${e.date}T${e.time}`).join(',') + '|' + state;
+  return { vis, group, dtimes, allSame, sig };
 }
 
-// 1초마다: 구조(headline·개수)가 바뀌었으면(임박 일정 경과/소멸/추가) 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
-function tickSchedule() {
-  const vis = visibleSchedule();
-  const sig = vis.length ? `${vis.length}|${vis[0].date}|${vis[0].time}` : '∅';
-  if (sig !== scheduleSig) { updatePageTitle(); return; }
-  if (vis.length) {
-    const el = document.querySelector('#schBtn .sch-btn-dday');   // PC: 당일+시간이면 D-HH:MM:SS, 아니면 D-day
-    if (el) el.textContent = (vis[0].hasTime && ddayNum(vis[0]) === 0) ? dtimeText(vis[0]) : ddayText(vis[0]);
-    const elM = document.querySelector('#schBtn .tb-t-mb');       // 모바일은 항상 D-day(자정 경계 갱신)
-    if (elM) elM.textContent = ddayText(vis[0]);
+// 상단바 일정 버튼 HTML. 호출 시 scheduleSig도 갱신(tick이 구조 변화를 감지하는 기준).
+function scheduleBtnHTML() {
+  const h = scheduleHead();
+  scheduleSig = h.sig;
+  // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
+  if (!h.vis.length) {
+    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">다가오는 일정<br><span class="sch-btn-dday">불러오는 중</span></span><span class="tb-t-mb">일정</span></button>`;
   }
+  const head = h.vis[0];
+  // 단일 일정 — 현행: 제목 + (당일부터 D-time, 그 전 D-day). 모바일은 항상 D-day.
+  if (h.group.length < 2) {
+    const second = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
+    return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.shortTitle)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
+  }
+  // 같은 날 2건+ (C): 제목 행 + dtime 행(열 정렬). dtime 전부 같으면 한 칸 병합, 다르면 열별 분리. 모바일은 현행(D-day).
+  const titleCells = h.group.map(e => `<span class="sch-col-title">${escapeHtml(e.shortTitle)}</span>`).join('');
+  const dtimeRow = h.allSame
+    ? `<span class="sch-btn-dtime sch-dtime-merged">${h.dtimes[0]}</span>`
+    : h.dtimes.map(d => `<span class="sch-btn-dtime">${d}</span>`).join('');
+  const pc = `<span class="tb-t-pc sch-grid" style="grid-template-columns:repeat(${h.group.length},auto)">${titleCells}${dtimeRow}</span>`;
+  return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}${pc}<span class="tb-t-mb">${ddayText(head)}</span></button>`;
+}
+
+// 1초마다: 구조(묶음 구성·병합/분리)가 바뀌었으면 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
+function tickSchedule() {
+  const h = scheduleHead();
+  if (h.sig !== scheduleSig) { updatePageTitle(); return; }
+  if (!h.vis.length) return;
+  const elM = document.querySelector('#schBtn .tb-t-mb');            // 모바일: 항상 가장 임박 일정의 D-day
+  if (elM) elM.textContent = ddayText(h.vis[0]);
+  const elS = document.querySelector('#schBtn .sch-btn-dday');       // 단일 일정(현행): D-time/D-day 한 칸
+  if (elS) elS.textContent = (h.vis[0].hasTime && ddayNum(h.vis[0]) === 0) ? dtimeText(h.vis[0]) : ddayText(h.vis[0]);
+  const cells = document.querySelectorAll('#schBtn .sch-btn-dtime'); // 그룹(C): 병합 1칸 또는 열별 N칸
+  cells.forEach((c, i) => { c.textContent = cells.length === 1 ? h.dtimes[0] : h.dtimes[i]; });
 }
 
 async function loadSchedule() {

@@ -2573,11 +2573,11 @@ const MEMBER_FULL_IMG = {
 };
 
 const MEMBER_INFO = {
-  '243000': { engName: 'CHUNYANG', fanName: '블롭단', age: '1994년생', height: '178cm', mbti: 'INTP', group: '패러블엔터테인먼트', firstStream: '2009년 (정확한 날짜는 알려져 있지 않음)', vote: '수장이라서 해당 없음' },
+  '243000': { engName: 'CHUNYANG', fanName: '블롭단', age: '1994년생', height: '178cm', mbti: 'INTP', group: '패러블 · 신스멀게동', firstStream: '2009년 (정확한 날짜는 알려져 있지 않음)', vote: '수장이라서 해당 없음' },
   'madaomm': { engName: 'MADAOMM', fanName: '당고단', age: '1998년생', height: '152cm', mbti: 'INFP', group: '맏쎄이', firstStream: '2021년 7월 3일', vote: '내정자라서 해당 없음' },
   'nanamoon777': { engName: 'NANAMOON', fanName: '제냥이', age: '700살', height: '155.8cm', mbti: 'ISTP', group: '아카이브 스튜디오', firstStream: '2023년 1월 23일', vote: '894표 / 73.7%' },
   'imha22': { engName: 'IMHAMING', fanName: '고구밍', age: '2000년생', height: '168cm', mbti: 'ISFP', group: '없음', firstStream: '2022년 3월 28일', vote: '583표 / 48.1%' },
-  'doormomo': { engName: 'MOONMOMO', fanName: '곰탕이', age: '1998년생', height: '153cm', mbti: 'INTP', group: '블리즈', firstStream: '2023년 11월 25일', vote: '777표 / 64.1%' },
+  'doormomo': { engName: 'MOONMOMO', fanName: '곰탕이', age: '1998년생', height: '153cm', mbti: 'INTP', group: '블리즈 · 브품동', firstStream: '2023년 11월 25일', vote: '777표 / 64.1%' },
   'kappuchan': { engName: 'KAPPU', fanName: '울푸단', age: '비공개', height: '비공개', mbti: 'ISTP', group: '시뮬동', firstStream: '2023년 11월 18일', vote: '313표 / 25.8%' },
   'kyaang123': { engName: 'KYAANG', fanName: '마늘', age: '1997년생', height: '159cm', mbti: 'ENTP', group: '도파민', firstStream: '2022년 10월 10일', vote: '740표 / 61.0%' },
   'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '비공개', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', vote: '604표 / 49.8%' },
@@ -2854,8 +2854,9 @@ document.addEventListener('click', (e) => {
 // 상단바 버튼: 가장 임박한 일정 1개만 표시 — 당일이고 시간 있으면 D-time(D-HH:MM:SS 초 카운트다운), 그 외(미래 날짜)는 D-day.
 // 숨김 기준: 시간 유무와 무관하게 그날 자정(KST)을 넘겨야 빠짐. 시간 있는 일정도 그 시각이 지나면 사라지지 않고 D-DAY로 그날 자정까지 유지(시간 없는 일정과 동일·합방 중에도 상단 노출) → 자정 넘으면 다음 일정으로. 시트 행은 그대로 둠.
 // CSV: 페이지 로드 시 1회(버튼 표시용) + 모달 열 때 재풀링(최신 반영). 좋아요 모달과 동일한 lrOverlay·선로딩 패턴 재사용.
-const SCHEDULE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1374057594';
-const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache';
+// 컨텐츠 시트와 통합(같은 gid). 일정 행 = A열이 날짜(YYMMDD 또는 YYYY-MM-DD)인 행. 컨텐츠 행(A=http URL)은 parseScheduleRows의 날짜 정규화에서 null→자동 제외.
+const SCHEDULE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
+const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache_v2';  // v2: 통합 시트 칼럼 재배치(C=링크/D=간략/E=상세)로 구 캐시(raw rows) 무효화
 let scheduleData = [];   // 파싱·정렬 완료된 일정
 let scheduleSig = '';    // 버튼 구조(headline·개수) 식별자 — 변할 때만 상단바 전체 재구성, 평소엔 카운트다운 숫자만 갱신
 let schedulePreload = null;
@@ -2863,12 +2864,17 @@ let schedulePreload = null;
 function parseScheduleRows(rows) {
   const out = [];
   for (const r of rows) {
-    const date = (r[0] || '').trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;  // 헤더·빈 행 자동 제외
-    const brief = (r[2] || '').trim();   // C=간략제목(버튼)
-    const detail = (r[3] || '').trim();  // D=상세제목(모달)
+    // A열: YYMMDD(통합 시트 일정 행) 또는 YYYY-MM-DD 둘 다 허용 → YYYY-MM-DD로 정규화.
+    // A가 http(컨텐츠 카드 행)·헤더·빈칸이면 null → 자동 제외(한 시트를 일정/컨텐츠 두 필터로 가르는 기준).
+    const rawDate = (r[0] || '').trim();
+    let date = null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) date = rawDate;
+    else if (/^\d{6}$/.test(rawDate)) date = `20${rawDate.slice(0, 2)}-${rawDate.slice(2, 4)}-${rawDate.slice(4, 6)}`;
+    if (!date) continue;
+    const brief = (r[3] || '').trim();   // D=간략제목(버튼)
+    const detail = (r[4] || '').trim();  // E=상세제목(모달)
     if (!brief && !detail) continue;     // 제목이 둘 다 없으면 무효 행
-    const timeRaw = (r[1] || '').trim();
+    const timeRaw = (r[1] || '').trim(); // B=시간
     const hasTime = /^\d{1,2}:\d{2}$/.test(timeRaw);
     const hhmm = hasTime ? timeRaw.padStart(5, '0') : '00:00';
     const target = new Date(`${date}T${hhmm}:00+09:00`).getTime();
@@ -2877,7 +2883,8 @@ function parseScheduleRows(rows) {
       date, time: hasTime ? hhmm : '',
       title: detail || brief,        // 모달·기준 제목(상세 우선)
       shortTitle: brief || detail,   // 버튼 제목(간략 우선)
-      link: (r[4] || '').trim(), hasTime, target,
+      link: (r[2] || '').trim(),     // C=링크
+      hasTime, target,
       hideAfter: dayStart + 86400000,  // 시간 유무 무관 그날 자정까지 유지(시간 지나면 D-DAY로 표기)
     });
   }
@@ -5073,9 +5080,9 @@ async function loadContent() {
     const rows = parseCSV(csv);
     contentData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
       const url = r[0];
-      const link = (r[1] || '').trim();
-      const title = (r[2] || '').trim();
-      const members = r.slice(3).filter(c => c.length > 0);
+      const link = (r[2] || '').trim();        // C=링크 (B는 일정 전용 시간칸 — 컨텐츠 행은 비움)
+      const title = (r[4] || '').trim();       // E=제목 (D는 일정 전용 간략제목칸 — 컨텐츠 행은 비움)
+      const members = r.slice(5).filter(c => c.length > 0);  // F~ 멤버
       return { url, link, title, members, date: parseContentDate(url) };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));

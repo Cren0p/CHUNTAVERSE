@@ -340,6 +340,7 @@
   .sch-grid .sch-col-title { white-space: nowrap; }   /* 색 미지정 = 버튼 기본색(민트) 상속, 단일 일정 제목과 동일 */
   .sch-grid .sch-btn-dtime { color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .sch-grid .sch-dtime-merged { grid-column: 1 / -1; }   /* dtime이 전부 같을 때 한 칸으로 병합(전 열 span) */
+  .sch-grid .sch-sep { opacity: .55; }   /* 일정 사이 가운뎃점 — 민트 상속, 구분자로 읽히게 약간 옅게 */
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
@@ -2200,8 +2201,6 @@ const MEMBERS = [
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
 const VACATION = {
-  '243000':      { img: 'members/CHUNCATION.webp', until: '2026-06-20' },
-  'mocamu2':     { img: 'members/MOCATION.webp',   until: '2026-06-20' },
   'nanamoon777': { img: 'members/NACATION.webp',   until: '2026-06-30' },
 };
 
@@ -2955,12 +2954,14 @@ function scheduleBtnHTML() {
     const second = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
     return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}<span class="tb-t-pc">${escapeHtml(head.shortTitle)}<br><span class="sch-btn-dday">${second}</span></span><span class="tb-t-mb">${ddayText(head)}</span></button>`;
   }
-  // 같은 날 2건+ (C): 제목 행 + dtime 행(열 정렬). dtime 전부 같으면 한 칸 병합, 다르면 열별 분리. 모바일은 현행(D-day).
-  const titleCells = h.group.map(e => `<span class="sch-col-title">${escapeHtml(e.shortTitle)}</span>`).join('');
+  // 같은 날 2건+ (C): 제목 행 + dtime 행(열 정렬), 사이에 가운뎃점(·)으로 분리 표시. dtime 전부 같으면 한 칸 병합.
+  const sep = `<span class="sch-sep">·</span>`;
+  const titleCells = h.group.map(e => `<span class="sch-col-title">${escapeHtml(e.shortTitle)}</span>`).join(sep);
   const dtimeRow = h.allSame
     ? `<span class="sch-btn-dtime sch-dtime-merged">${h.dtimes[0]}</span>`
-    : h.dtimes.map(d => `<span class="sch-btn-dtime">${d}</span>`).join('');
-  const pc = `<span class="tb-t-pc sch-grid" style="grid-template-columns:repeat(${h.group.length},auto)">${titleCells}${dtimeRow}</span>`;
+    : h.dtimes.map(d => `<span class="sch-btn-dtime">${d}</span>`).join(sep);
+  const cols = 2 * h.group.length - 1;   // 이벤트 N칸 + 구분점 N-1칸
+  const pc = `<span class="tb-t-pc sch-grid" style="grid-template-columns:repeat(${cols},auto)">${titleCells}${dtimeRow}</span>`;
   return `<button class="page-title-link sch-btn" id="schBtn" type="button" onclick="openSchedule()">${SVG_ICONS.calendar}${pc}<span class="tb-t-mb">${ddayText(head)}</span></button>`;
 }
 

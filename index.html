@@ -336,7 +336,7 @@
   /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
   .sch-btn-dday { color: var(--accent); font-variant-numeric: tabular-nums; }
   /* 같은 날 2건+ 일정 묶음: 제목 행 위 / 각 제목 아래 같은 열에 그 일정의 dtime(열 정렬). 폭은 내용으로 관리(컷·말줄임 없음). */
-  .sch-grid { display: grid; column-gap: 16px; row-gap: 1px; }
+  .sch-grid { display: grid; column-gap: 6px; row-gap: 1px; }   /* 점이 자체 칸 → gap이 점 양옆에 붙으므로 6px(점 포함 총 ~16px, 점 추가 전 간격과 동일) */
   .sch-grid .sch-col-title { white-space: nowrap; }   /* 색 미지정 = 버튼 기본색(민트) 상속, 단일 일정 제목과 동일 */
   .sch-grid .sch-btn-dtime { color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .sch-grid .sch-dtime-merged { grid-column: 1 / -1; }   /* dtime이 전부 같을 때 한 칸으로 병합(전 열 span) */

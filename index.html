@@ -1774,14 +1774,16 @@
   .crew-act-more button:hover { background: rgba(97,255,236,0.16); border-color: rgba(97,255,236,0.6); }
 
   .members-profile {
-    display: flex; gap: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 320px) 1fr;
+    gap: 16px;
     max-width: 1000px;
     margin: 0 auto;
-    align-items: stretch;
+    align-items: start;   /* 사진을 늘리지 않아 3:4 유지(stretch면 정보컬럼 높이로 늘어나 비율 깨짐) */
   }
   .members-profile-photo {
     position: relative;
-    flex-shrink: 0;
+    aspect-ratio: 3 / 4;
     border: 1px solid var(--border);
     background: var(--surface);
     overflow: hidden;
@@ -1794,13 +1796,12 @@
   }
   .members-profile-main {
     display: flex; flex-direction: column; gap: 16px;
-    flex: 1;
     min-width: 0;
     container-type: inline-size;   /* 헤더 버튼 2×2 전환을 정보 컬럼 폭 기준으로(뷰포트 아님) */
   }
-  @media (max-width: 640px) {
-    .members-profile { flex-direction: column; }
-    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; aspect-ratio: 3 / 4; }
+  @container (max-width: 640px) {   /* 통계 멤버탭과 동일 방식: 정보컬럼이 좁아지기 전에 1열 스택(좌320+gap+우~300 기준) */
+    .members-profile { grid-template-columns: 1fr; }
+    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; }
   }
   .members-profile-header {
     background: var(--surface);
@@ -2593,8 +2594,6 @@ const membersState = {
   tabsInited: false,
   selectedTab: 'crew',
 };
-let profilePhotoSizer = null;
-window.addEventListener('resize', () => { if (profilePhotoSizer) profilePhotoSizer(); });
 
 const MEMBER_BIRTHDAYS = {
   'doormomo': { month: 1, day: 8, display: '1월 8일' },
@@ -5647,7 +5646,6 @@ function renderMembersBody() {
 }
 
 function renderMembersCrew(body) {
-  profilePhotoSizer = null;
   const k = new Date(Date.now() + 9 * 3600 * 1000);
   const ctDays = Math.floor((Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - CT_FORMATION.getTime()) / 86400000);   // 출범(2025-11-30) 경과일 — getTodayCelebrations와 동일 산식
   body.innerHTML = `
@@ -5737,21 +5735,6 @@ function renderMembersProfile(body, memberId) {
 
   const goLinksBtn = document.getElementById('membersGoLinks');
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { history.replaceState(null, '', '#links'); switchPage('links'); });
-
-  const photoBox = body.querySelector('.members-profile-photo');
-  const mainBox = body.querySelector('.members-profile-main');
-  profilePhotoSizer = () => {
-    if (!photoBox || !mainBox || !photoBox.isConnected) return;
-    if (window.innerWidth <= 640) {
-      photoBox.style.height = '';
-      photoBox.style.width = '';
-      return;
-    }
-    const h = mainBox.offsetHeight;
-    photoBox.style.height = h + 'px';
-    photoBox.style.width = Math.round(h * 3 / 4) + 'px';
-  };
-  profilePhotoSizer();
 }
 </script>
 

@@ -2170,8 +2170,10 @@ const STATS_ALL_START_MONTH = 1; // 월간 전체탭은 1월부터
   const birthdays = [
     { month: 1,  day: 8,  file: 'birthday/MOONMOMO.webp' },
     { month: 1,  day: 22, file: 'birthday/KAPPU.webp' },
+    { month: 4,  day: 25, file: 'birthday/CHEBI.webp' },
     { month: 6,  day: 22, file: 'birthday/CHUNYANG.webp' },
     { month: 6,  day: 29, file: 'birthday/MOCA.webp' },
+    { month: 6,  day: 30, file: 'birthday/PLI.webp' },
     { month: 7,  day: 27, file: 'birthday/NANAMOON.webp' },
     { month: 8,  day: 8,  file: 'birthday/KYAANG.webp' },
     { month: 8,  day: 20, file: 'birthday/DALTA.webp' },
@@ -2189,7 +2191,7 @@ const STATS_ALL_START_MONTH = 1; // 월간 전체탭은 1월부터
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: 'members/01.webp', color: '#43EAF6' },
   { id: 'madaomm',     name: '마다옴', img: 'members/02.webp', color: '#FFF5C3' },
-  { id: 'nanamoon777', name: '나나문', img: 'members/03.webp', color: '#F4F6FF' },
+  { id: 'nanamoon777', name: '나나문', img: 'members/03.webp', color: '#D9DCE3' },
   { id: 'imha22',      name: '임하밍', img: 'members/04.webp', color: '#F8DBFF' },
   { id: 'doormomo',    name: '문모모', img: 'members/05.webp', color: '#8D4BD6' },
   { id: 'kappuchan',   name: '카푸',   img: 'members/07.webp', color: '#FFCFB7' },
@@ -2197,6 +2199,8 @@ const MEMBERS = [
   { id: 'wellro314',   name: '김웰로', img: 'members/09.webp', color: '#BFEF90' },
   { id: 'mocamu2',     name: '모카',   img: 'members/10.webp', color: '#366CD8' },
   { id: 'dalta20',     name: '달타',   img: 'members/11.webp', color: '#FFC462' },
+  { id: 'chebi2',      name: '체비',   img: 'members/13.webp', color: '#FFFFFF' },
+  { id: 'plincess',    name: '플리',   img: 'members/14.webp', color: '#E2F3FE' },
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
@@ -2375,6 +2379,31 @@ const MEMBER_LINKS = {
     ogq: [
       { name: '달달하이! 난 꿀즙이', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
       { name: '달달하이! 난 꿀즙이', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/644df30193953' },
+    ],
+  },
+  'chebi2': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/chebi2',
+      유튜브: 'https://www.youtube.com/@chebi444',
+      팬카페: 'https://cafe.naver.com/chebichebi',
+    },
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=chebi' }],
+    etc: [{ label: '노래책', url: 'https://meloming.com/channel/chebi' }],
+  },
+  'plincess': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/plincess',
+      유튜브: 'https://www.youtube.com/channel/UCTTHWvk6M928M7U2RHht49Q',
+      유튜브2: { label: 'ASMR', url: 'https://www.youtube.com/@%ED%94%8C%EB%A6%AC%EC%9D%98ASMR-z3d' },
+      팬카페: 'https://cafe.naver.com/plinetarium',
+      나무위키: 'https://namu.wiki/w/%ED%94%8C%EB%A6%AC(LUVITA)',
+    },
+    instagram: 'https://www.instagram.com/plincess_____/',
+    x: 'https://x.com/pli_ncess',
+    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=plincess' }],
+    etc: [
+      { label: '노래책', url: 'https://meloming.com/channel/plincess?category=3346' },
+      { label: '팬사이트', url: 'https://playlist-673991d4.base44.app/' },
     ],
   },
 };
@@ -2567,6 +2596,8 @@ const MEMBER_BIRTHDAYS = {
   'wellro314': { month: 12, day: 7, display: '12월 7일' },
   'madaomm': { month: 12, day: 8, display: '12월 8일' },
   'imha22': { month: 12, day: 31, display: '12월 31일' },
+  'chebi2': { month: 4, day: 25, display: '4월 25일' },
+  'plincess': { month: 6, day: 30, display: '6월 30일' },
 };
 
 const MEMBER_FULL_IMG = {
@@ -2574,6 +2605,7 @@ const MEMBER_FULL_IMG = {
   'imha22': 'members/004.webp?v=2', 'doormomo': 'members/005.webp?v=2', 'kappuchan': 'members/007.webp?v=2',
   'kyaang123': 'members/008.webp?v=2', 'wellro314': 'members/009.webp?v=2', 'mocamu2': 'members/010.webp?v=2',
   'dalta20': 'members/011.webp?v=2',
+  'chebi2': 'members/013.webp?v=2', 'plincess': 'members/014.webp?v=2',
 };
 
 const MEMBER_INFO = {
@@ -2587,6 +2619,8 @@ const MEMBER_INFO = {
   'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '비공개', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', vote: '604표 / 49.8%' },
   'mocamu2': { engName: 'MOCA', fanName: '초코', age: '2003년생', height: '155.1cm', mbti: 'ENTP', group: 'UR:L', firstStream: '2024년 7월 9일', vote: '808표 / 66.6%' },
   'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', vote: '657표 / 54.2%' },
+  'chebi2': { engName: 'CHEBI', fanName: '젤비', age: '2005년생', height: '비공개', mbti: 'ESTP', group: '없음', firstStream: '2024년 2월 12일' },
+  'plincess': { engName: 'PLI', fanName: '별님', age: '비공개', height: '비공개', mbti: 'INTJ', group: '러비타', firstStream: '2023년 9월 20일' },
 };
 
 function calcAge(memberId, ageStr) {

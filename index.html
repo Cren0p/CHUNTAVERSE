@@ -1870,7 +1870,7 @@
     gap: 0;
     column-gap: 24px;
   }
-  @media (max-width: 500px) { .members-info-grid { grid-template-columns: 1fr; column-gap: 0; } }
+  @container (max-width: 500px) { .members-info-grid { grid-template-columns: 1fr; column-gap: 0; } }   /* 정보컬럼(.members-profile-main) 폭 기준 — 좁아지면 1열로 떨어져 긴 값(다른 소속 등)이 전체 폭 사용해 2열 반칸 넘침 방지 */
   .members-info-row {
     display: flex;
     justify-content: space-between;
@@ -1896,7 +1896,7 @@
   }
   .members-info-value {
     font-size: 14px; color: var(--text); font-weight: 700;
-    text-align: right; white-space: nowrap; line-height: 20px;
+    text-align: right; white-space: normal; line-height: 20px;
   }
 
   /* 프로필/통계 상단 셀렉터: 1행(11~12칸, max-width 800/880)이 폭 좁아지면 버튼이 ~67px 밑으로 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버=크루(좌측 2행)+12를 7열, 통계=연간/월간 좌측 세로 스택 */

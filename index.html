@@ -1775,15 +1775,14 @@
 
   .members-profile {
     display: grid;
-    grid-template-columns: minmax(0, 320px) 1fr;
+    grid-template-columns: minmax(0, 300px) 1fr;
     gap: 16px;
     max-width: 1000px;
     margin: 0 auto;
-    align-items: start;   /* 사진을 늘리지 않아 3:4 유지(stretch면 정보컬럼 높이로 늘어나 비율 깨짐) */
+    align-items: stretch;   /* 사진 높이를 우측 표 높이에 맞춤(아래끝 일치). 폭 300 + 표높이≈402 → 박스≈3:4 */
   }
   .members-profile-photo {
     position: relative;
-    aspect-ratio: 3 / 4;
     border: 1px solid var(--border);
     background: var(--surface);
     overflow: hidden;
@@ -1799,9 +1798,9 @@
     min-width: 0;
     container-type: inline-size;   /* 헤더 버튼 2×2 전환을 정보 컬럼 폭 기준으로(뷰포트 아님) */
   }
-  @container (max-width: 640px) {   /* 통계 멤버탭과 동일 방식: 정보컬럼이 좁아지기 전에 1열 스택(좌320+gap+우~300 기준) */
+  @container (max-width: 640px) {   /* 통계 멤버탭과 동일 방식: 정보컬럼이 좁아지기 전에 1열 스택(좌300+gap+우~300 기준) */
     .members-profile { grid-template-columns: 1fr; }
-    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; }
+    .members-profile-photo { width: 70%; max-width: 300px; margin: 0 auto; aspect-ratio: 3 / 4; }   /* 1열일 땐 옆에 맞출 표가 없어 비율로 높이를 줘야 함(2열일 땐 stretch가 표 높이를 줌) */
   }
   .members-profile-header {
     background: var(--surface);

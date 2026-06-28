@@ -1601,8 +1601,13 @@
     display: flex; flex-direction: column;
     gap: 16px;
   }
-  .hall-bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+  .hall-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .hall-bar-right { display: flex; align-items: center; gap: 8px; }
   .hall-bar-label { font-size: 13px; font-weight: 600; color: var(--muted); user-select: none; }
+  .hall-period { display: flex; gap: 4px; flex-wrap: wrap; }
+  .hall-period-btn { font-size: 12px; font-weight: 600; padding: 5px 10px; background: var(--surface2); border: 1.5px solid var(--border); color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .hall-period-btn:hover { border-color: var(--accent); }
+  .hall-period-btn.active { border-color: var(--accent); color: #fff; background: var(--surface); }
   .hall-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -5418,6 +5423,64 @@ function hallTopRanks(getVal) {
   return distinct.slice(0, 3).map((v, i) => ({ rank: i + 1, value: v, members: MEMBERS.filter(m => getVal(m.id) === v) }));
 }
 
+// 명전 기간 분할 — 통산 / 2026 상반기 / 2026 하반기. 기본 통산(7월 초 하반기가 빌 동안 통산 노출).
+let hallPeriod = 'total';
+const HALL_PERIODS = [
+  { key: 'total', label: '통산' },
+  { key: 'h1',    label: '2026 상반기' },
+  { key: 'h2',    label: '2026 하반기' },
+];
+const HALL_H1_CHAT_MONTH  = '2026-06';                 // 상반기 채팅 버킷(채팅 수집 6/5 개시 → 6월=상반기 전체)
+const HALL_H2_START_MONTH = '2026-07';                 // 하반기 채팅 버킷 시작월(from)
+const HALL_H1_LO = new Date(2026, 0, 1).getTime();     // 2026-01-01 (세션·시트 상반기 하한)
+const HALL_H2_LO = new Date(2026, 6, 1).getTime();     // 2026-07-01 (상/하반기 경계)
+const HALL_H2_HI = new Date(2027, 0, 1).getTime();     // 2027-01-01 (하반기 상한)
+const hallChemCache = {};
+
+// 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-06 버킷, h2=2026-07~현재 합산. 기간별 캐시.
+async function loadHallChem(period) {
+  let url = WORKER_URL + '/chat-counts';
+  if (period === 'h1') url += '?month=' + HALL_H1_CHAT_MONTH;
+  else if (period === 'h2') url += '?from=' + HALL_H2_START_MONTH;
+  try {
+    const res = await fetch(url);
+    hallChemCache[period] = res.ok ? await res.json() : {};
+  } catch (e) { hallChemCache[period] = {}; }
+}
+
+// 기간 월 목록의 월 stats 합산 (연간탭 computeAnnualSums와 동일 월별 산식 — viewer 제외 + seed 포함)
+function hallSumMonths(monthList) {
+  const sums = {};
+  MEMBERS.forEach(m => { sums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, cafeCount: 0, youtubeCount: 0 }; });
+  for (const ym of monthList) {
+    const [y, mo] = ym.split('-').map(Number);
+    const monthStart = new Date(y, mo - 1, 1).getTime();
+    const monthEnd = new Date(y, mo, 1).getTime();
+    MEMBERS.forEach(m => {
+      const ms = statsState.data[ym]?.[m.id];
+      if (!ms) return;
+      const t = sums[m.id];
+      t.sessions += (ms.sessions || []).filter(s => { const x = new Date(s.start).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
+      (ms.sessions || []).forEach(s => {
+        const x = new Date(s.start).getTime();
+        if (isNaN(x) || x < monthStart || x >= monthEnd) return;
+        if (s.end) { const e = new Date(s.end).getTime(); if (!isNaN(e) && e > x) t.totalDurationMs += (e - x); }
+      });
+      t.postCount    += (ms.posts   || []).filter(p => { const x = new Date(p.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
+      t.youtubeCount += (ms.youtube || []).filter(yv => { const x = new Date(yv.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
+      t.cafeCount    += (ms.cafe    || []).filter(c => { const x = new Date(c.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
+      if (ms.seed) {
+        t.sessions        += ms.seed.sessions    || 0;
+        t.totalDurationMs += ms.seed.broadcastMs || 0;
+        t.postCount       += ms.seed.posts       || 0;
+        t.youtubeCount    += ms.seed.youtube     || 0;
+        t.cafeCount       += ms.seed.cafe        || 0;
+      }
+    });
+  }
+  return sums;
+}
+
 function renderHall() {
   const body = document.getElementById('hallBody');
   if (!body) return;
@@ -5442,20 +5505,25 @@ function renderHall() {
     return;
   }
 
-  // 통산 합산: 통계 개시 연도부터 현재까지 연간 합을 연도별로 누적 (연간 탭과 동일 산식 computeAnnualSums 재사용, seed 포함)
-  const totalSums = {};
-  MEMBERS.forEach(m => { totalSums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, cafeCount: 0, youtubeCount: 0 }; });
-  for (let y = STATS_START_YEAR; y <= year; y++) {
-    const ys = computeAnnualSums(y);
-    MEMBERS.forEach(m => {
-      const t = totalSums[m.id], s = ys[m.id];
-      t.sessions += s.sessions;
-      t.totalDurationMs += s.totalDurationMs;
-      t.postCount += s.postCount;
-      t.cafeCount += s.cafeCount;
-      t.youtubeCount += s.youtubeCount;
-    });
+  // 기간(통산/2026 상반기/2026 하반기) 결정 + 채팅 기간 데이터 게이트
+  const period = hallPeriod;
+  if (!hallChemCache[period]) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명예의 전당 불러오는 중...</div></div>';
+    loadHallChem(period).then(() => { if (currentPage === 'hall') renderHall(); });
+    return;
   }
+  const chem = hallChemCache[period];
+  // 기간별 월 목록(월 stats 합산용) / 세션·시트 시각 경계
+  const periodMonths = period === 'h1' ? allMonths.filter(ym => ym >= '2026-01' && ym <= '2026-06')
+                     : period === 'h2' ? allMonths.filter(ym => ym >= '2026-07' && ym <= '2026-12')
+                     : allMonths;
+  const inPeriodTs  = t    => period === 'h1' ? (t >= HALL_H1_LO && t < HALL_H2_LO)
+                            : period === 'h2' ? (t >= HALL_H2_LO && t < HALL_H2_HI) : true;
+  const inPeriodYmd = sort => period === 'h1' ? (sort >= '260101' && sort < '260701')   // YYMMDD
+                            : period === 'h2' ? (sort >= '260701' && sort < '270101') : true;
+
+  // 통산/기간 합산: 월 stats를 기간 월 목록만큼 합산 (연간탭 산식과 동일, seed 포함)
+  const totalSums = hallSumMonths(periodMonths);
 
   // 세션 단위 역대 집계 (개근·마라톤·정전 위원회) — '올해' 항목이 아니므로 연도 제한 없음, 연말~연초 연속 방송도 안 끊김.
   // seed는 세션별 기록이 없어 미포함(서비스 개시 이후 데이터만)
@@ -5464,13 +5532,14 @@ function renderHall() {
   const extra = {};
   const intervals = {};
   MEMBERS.forEach(m => { extra[m.id] = { marathonMs: 0, dates: new Set() }; intervals[m.id] = []; });
-  for (const ym of allMonths) {
+  for (const ym of periodMonths) {
     MEMBERS.forEach(m => {
       const ms = statsState.data[ym]?.[m.id];
       if (!ms) return;
       for (const s of (ms.sessions || [])) {
         const t = new Date(s.start).getTime();
         if (isNaN(t)) continue;
+        if (!inPeriodTs(t)) continue;
         const dk = isoToKstDateKey(s.start);
         if (dk) extra[m.id].dates.add(dk);
         let e = null;
@@ -5509,7 +5578,7 @@ function renderHall() {
   const chemOut = {};
   const chemIn = {};
   MEMBERS.forEach(m => { chemOut[m.id] = 0; chemIn[m.id] = 0; });
-  for (const [key, cnt] of Object.entries(chemCounts || {})) {
+  for (const [key, cnt] of Object.entries(chem || {})) {
     const [fromId, toId] = key.split(':');
     if (chemOut[fromId] !== undefined) chemOut[fromId] += cnt;
     if (chemIn[toId] !== undefined) chemIn[toId] += cnt;
@@ -5519,8 +5588,8 @@ function renderHall() {
   const bannerCounts = {};
   const contentCounts = {};
   MEMBERS.forEach(m => { bannerCounts[m.id] = 0; contentCounts[m.id] = 0; });
-  bannerData.forEach(b => b.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) bannerCounts[m.id]++; }));
-  contentData.forEach(c => c.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) contentCounts[m.id]++; }));
+  bannerData.forEach(b => { if (!inPeriodYmd(b.date?.sort || '')) return; b.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) bannerCounts[m.id]++; }); });
+  contentData.forEach(c => { if (!inPeriodYmd(c.date?.sort || '')) return; c.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) contentCounts[m.id]++; }); });
 
   const categories = [
     { label: '천타버스 공무원',           desc: '방송 일수',          icon: SVG_ICONS.calendar, color: 'var(--ev-start)',   get: id => totalSums[id].sessions,                              fmt: v => `${v}일` },
@@ -5587,10 +5656,14 @@ function renderHall() {
     `;
   }).join('');
 
+  const periodBtns = HALL_PERIODS.map(p => `<button class="hall-period-btn ${p.key === period ? 'active' : ''}" data-period="${p.key}" type="button">${p.label}</button>`).join('');
   body.innerHTML = `
     <div class="hall-bar">
-      <span class="hall-bar-label">2 · 3위 보기</span>
-      <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2 · 3위 보기"></button>
+      <div class="hall-period">${periodBtns}</div>
+      <div class="hall-bar-right">
+        <span class="hall-bar-label">2 · 3위 보기</span>
+        <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2 · 3위 보기"></button>
+      </div>
     </div>
     <div class="hall-grid">${cards}</div>
   `;
@@ -5610,6 +5683,11 @@ function renderHall() {
     body.classList.toggle('show-ranks', hallShowRanks);
     rankToggle.classList.toggle('on', hallShowRanks);
   });
+  body.querySelectorAll('.hall-period-btn').forEach(btn => btn.addEventListener('click', () => {
+    if (btn.dataset.period === hallPeriod) return;
+    hallPeriod = btn.dataset.period;
+    renderHall();
+  }));
   lastHallUpdate = new Date();
   updateHeaderCenter();
 }

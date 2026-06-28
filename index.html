@@ -618,7 +618,7 @@
   .filter-type.on { border-color: var(--accent); }
   .filter-type:not(.on) { opacity: 0.35; }
   .filter-type:not(.on):hover { opacity: 0.6; }
-  .filter-type .filter-icon { width: 55%; height: 55%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .filter-type .filter-icon { width: clamp(20px, 6vw, 35px); height: clamp(20px, 6vw, 35px); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }   /* 셀 %가 아닌 뷰포트 기준 — 1fr 셀의 디바이스픽셀 반올림(특정 배율 1px 변동)에 아이콘 크기가 휩쓸리지 않게 고정 */
   .filter-type .filter-icon svg { width: 100%; height: 100%; }   /* SVG에 박힌 width/height 무시하고 셀 비례로 스케일(비율은 meet로 유지) */
   /* 모바일 strip: 종류도 멤버와 동일 6열(5종 + 우측 빈칸 1) */
   @media (max-width: 900px) { .filter-types { grid-template-columns: repeat(6, 1fr); } }

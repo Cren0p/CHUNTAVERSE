@@ -292,6 +292,13 @@
     text-align: left;
   }
   button.page-title-link.sch-btn:hover { background: rgba(97,255,236,0.22); border-color: rgba(97,255,236,0.7); }
+  /* 두번째 커버곡 버튼: 핑크(--ev-comment #ec4899 계열) — 첫 커버곡(파랑)·좋아요(에메랄드)·일정(민트)과 구분 */
+  .page-title-link.cover2-btn {
+    background: rgba(236,72,153,0.12);
+    border: 1px solid rgba(236,72,153,0.4);
+    color: #f9a8d4;
+  }
+  .page-title-link.cover2-btn:hover { background: rgba(236,72,153,0.22); border-color: rgba(236,72,153,0.7); }
   .lr-overlay {
     position: fixed; inset: 0; z-index: 1000;
     background: rgba(0,0,0,0.65);
@@ -2725,7 +2732,7 @@ function getTodayCelebrations() {
   return results;
 }
 
-const BV_LINK = `<a class="page-title-link" href="https://www.youtube.com/watch?v=_Rd_A7haE1o" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span class="tb-t-pc">천타버스 첫 커버곡<br>블루 발렌타인 보러가기</span><span class="tb-t-mb">커버곡</span></a>`;
+const BV_LINK = `<a class="page-title-link cover2-btn" href="https://www.youtube.com/watch?v=jmPqEMcb8Y4" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span class="tb-t-pc">천타버스 두번째 커버곡<br>귀엽기만 하면 안되나요?</span><span class="tb-t-mb">커버곡</span></a>`;
 
 function updatePageTitle() {
   const el = document.getElementById('pageTitle');

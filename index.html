@@ -1914,8 +1914,8 @@
   @media (max-width: 1100px) {
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
-    .stats-tab-all[data-mode="annual"]  { grid-column: 1; grid-row: 1; }
-    .stats-tab-all[data-mode="monthly"] { grid-column: 1; grid-row: 2; }
+    .stats-tab-all[data-tab="all"]   { grid-column: 1; grid-row: 1; }
+    .stats-tab-all[data-tab="graph"] { grid-column: 1; grid-row: 2; }
     .members-tab-crew { grid-column: 1; grid-row: 1 / span 2; aspect-ratio: auto; }
   }
 
@@ -1977,6 +1977,37 @@
     .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
   }
+  /* 통계: 종합 연/월 토글 (각짐) */
+  .stats-mode-toggle { display:flex; gap:6px; margin:0; }
+  .stats-mode-toggle button { padding:0 16px; height:30px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:13px; font-weight:600; }
+  .stats-mode-toggle button.active { background:var(--accent); color:#08111f; border-color:var(--accent); }
+  .stats-tab-all .stats-tab-gico { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .stats-tab-all .stats-tab-gico svg { width:75%; height:75%; color:var(--accent); }
+  .stats-tab:not(.active) .stats-tab-gico { opacity:0.3; }
+  /* 통계: 그래프 탭 — 좌 차트 / 우 필터 */
+  .graph-layout { display:flex; gap:18px; align-items:flex-start; }
+  .graph-left { flex:1; min-width:0; position:relative; }
+  .graph-right { width:236px; flex-shrink:0; background:var(--surface); border:1px solid var(--border); padding:16px; position:sticky; top:20px; }
+  @media (max-width:900px){
+    .graph-layout { flex-direction:column; }
+    .graph-left { flex:none; width:100%; }
+    .graph-right { width:100%; position:static; }
+    .evt-type-spacer { display:none; }
+    .graph-types { grid-template-columns:repeat(6,1fr); }
+  }
+  /* 차트(SVG) */
+  .graph-svg { width:100%; height:auto; display:block; }
+  .g-grid { stroke:rgba(255,255,255,0.08); stroke-width:1; }
+  .g-ylabel { fill:var(--muted); font-size:11px; text-anchor:end; }
+  .g-xlabel { fill:var(--muted); font-size:11px; text-anchor:middle; }
+  .g-vlabel { font-size:11px; font-weight:700; paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; }
+  .g-hit { fill:transparent; cursor:pointer; }
+  .graph-tooltip { position:absolute; pointer-events:none; background:var(--surface2,#161d2e); border:1px solid var(--accent); padding:5px 9px; font-size:12px; color:var(--text); white-space:nowrap; transform:translate(-50%,-135%); opacity:0; transition:opacity .1s; z-index:5; }
+  .graph-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 14px; margin-top:14px; }
+  .g-leg { font-size:12px; color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
+  .g-leg b { color:var(--text); font-weight:600; }
+  .g-dot { width:10px; height:10px; display:inline-block; }
+  .graph-empty { text-align:center; color:var(--muted); padding:40px 0; }
 </style>
 </head>
 <body>
@@ -2094,6 +2125,7 @@
               <button class="filter-type" data-type="soop" title="숲 방송">
                 <span class="filter-icon soop"></span>
               </button>
+              <span class="filter-type evt-type-spacer" style="visibility:hidden;pointer-events:none"></span>
               <button class="filter-type" data-type="post" title="숲 게시글">
                 <span class="filter-icon post"></span>
               </button>
@@ -2548,6 +2580,9 @@ const statsState = {
   viewMonth: null,
   viewYear: null,
   selectedDate: null,
+  fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
+  graphMember: MEMBERS[0].id,                     // 그래프 멤버 필터(단일, 기본 첫 멤버)
+  graphMetric: 'fan',                             // 그래프 종류 필터(단일, 기본 애청자)
 };
 const LS_STATS_PREFIX = 'chuntaverse_stats_v8_';
 
@@ -2576,8 +2611,15 @@ function applyChemNameRows(rows) {
       .filter(Boolean);
     // 쌍 키는 renderChemistry의 케미 카드 조회 키(`m1.id:m2.id`, MEMBERS 순서라 i<j)와 맞아야 하므로 MEMBERS 인덱스 순으로 정렬
     ids.sort((a, b) => memberIndex[a] - memberIndex[b]);
-    if (ids.length === 2) names[`${ids[0]}:${ids[1]}`] = name;
-    else if (ids.length >= 3) groups.push({ members: ids, name });
+    if (ids.length === 2) {
+      const k = `${ids[0]}:${ids[1]}`;
+      names[k] = names[k] ? names[k] + ' · ' + name : name;   // 같은 쌍 여러 행 → 가운뎃점 나열
+    } else if (ids.length >= 3) {
+      const gkey = ids.join(':');
+      const ex = groups.find(g => g.members.join(':') === gkey);
+      if (ex) ex.name += ' · ' + name;   // 같은 조합 여러 행 → 가운뎃점 나열
+      else groups.push({ members: ids, name });
+    }
   }
   CHEM_NAMES = names;
   CHEM_GROUPS = groups;
@@ -3951,8 +3993,8 @@ function initStatsTabs() {
     </button>
   `).join('');
   sideBox.innerHTML = `
-    <button class="stats-tab stats-tab-all" data-tab="annual" data-mode="annual"><img src="Favicon.webp" alt="연간"><span>연간</span></button>
-    <button class="stats-tab stats-tab-all active" data-tab="all" data-mode="monthly"><img src="Favicon.webp" alt="월간"><span>월간</span></button>
+    <button class="stats-tab stats-tab-all active" data-tab="all"><img src="Favicon.webp" alt="종합"></button>
+    <button class="stats-tab stats-tab-all" data-tab="graph"><span class="stats-tab-gico">${SVG_ICONS.barChart}</span></button>
   `;
   const allTabs = [...memberBox.querySelectorAll('.stats-tab'), ...sideBox.querySelectorAll('.stats-tab')];
   allTabs.forEach(btn => {
@@ -3966,11 +4008,12 @@ function initStatsTabs() {
 
 function selectStatsTab(tabId) {
   statsState.selectedTab = tabId;
-  if (tabId !== 'all' && tabId !== 'annual') statsState.viewMode = 'monthly';
+  // 종합('all')은 연/월 토글(viewMode) 유지, 그래프('graph')는 viewMode 무관. 멤버 탭만 월간 고정.
+  if (tabId !== 'all' && tabId !== 'graph') statsState.viewMode = 'monthly';
   document.querySelectorAll('.stats-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tabId);
   });
-  if (tabId !== 'all') {
+  if (tabId !== 'all' && tabId !== 'graph') {
     const latestDate = findLatestActivityDate(tabId);
     if (latestDate) {
       const d = new Date(latestDate);
@@ -4009,6 +4052,47 @@ function findLatestActivityDate(memberId) {
   }
   return latest;
 }
+
+// 애청자(즐겨찾기) 일별 누적을 /fancnt에서 1회 로드. 카드 표시·그래프 공용.
+async function loadFancnt() {
+  if (statsState.fancnt) return;
+  try {
+    const res = await fetch(WORKER_URL + '/fancnt');
+    statsState.fancnt = res.ok ? (await res.json()) : {};
+  } catch (e) { statsState.fancnt = {}; }
+}
+// 해당 멤버·해당 월의 월말 누적 애청자(그 달 일별 중 가장 늦은 날짜 값). 없으면 null.
+function fancntMonthEnd(memberId, year, month1) {
+  const days = statsState.fancnt && statsState.fancnt[memberId];
+  if (!days) return null;
+  const prefix = `${year}-${String(month1).padStart(2, '0')}-`;
+  let best = null;
+  for (const ymd in days) { if (ymd.indexOf(prefix) === 0 && (!best || ymd > best)) best = ymd; }
+  return best ? days[best] : null;
+}
+// 해당 멤버·해당 연도의 연말 누적(그 해 일별 중 가장 늦은 날짜 값). 없으면 null.
+function fancntYearEnd(memberId, year) {
+  const days = statsState.fancnt && statsState.fancnt[memberId];
+  if (!days) return null;
+  const prefix = `${year}-`;
+  let best = null;
+  for (const ymd in days) { if (ymd.indexOf(prefix) === 0 && (!best || ymd > best)) best = ymd; }
+  return best ? days[best] : null;
+}
+// 그래프 종류(메트릭) 정의. fan은 fancnt에서 별도 산출(special), 나머지는 computeMonthSummary 결과에서.
+const GRAPH_METRICS = [
+  { key: 'broadcastDays', label: '방송 일수',   unit: '일', get: s => s.daysWithBroadcast },
+  { key: 'broadcastTime', label: '방송 시간',   unit: '시간', get: s => s.totalDurationMs / 3600000, fmt: v => formatDuration(v * 3600000) },
+  { key: 'fan',           label: '애청자',      unit: '명', special: true },
+  { key: 'peakViewer',    label: '최고 시청자', unit: '명', get: s => s.viewerPeak },
+  { key: 'avgViewer',     label: '평균 시청자', unit: '명', get: s => s.viewerCount > 0 ? Math.round(s.viewerSum / s.viewerCount) : 0 },
+  { key: 'post',          label: '숲 게시글',   unit: '개', get: s => s.postCount },
+  { key: 'cafe',          label: '카페',        unit: '개', get: s => s.cafeCount },
+  { key: 'youtube',       label: '유튜브',      unit: '개', get: s => s.youtubeCount },
+];
+const FAN_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
+function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
 
 function computeMonthSummary(memberStats, year, month1) {
   const result = {
@@ -4093,23 +4177,54 @@ function computeMonthSummary(memberStats, year, month1) {
 function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
+
+  // 그래프 탭: 자체적으로 여러 월 + 애청자 로딩을 처리(단일월 가드 건너뜀)
+  if (statsState.selectedTab === 'graph') { renderStatsGraph(body); return; }
+
   if (!statsState.viewMonth) {
     const now = new Date();
     statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
   }
-  const ym = currentViewYm();
-  if (ym && !statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-    loadStatsMonth(ym).then(() => { if (currentPage === 'stats') renderStatsBody(); });
-    return;
+
+  // 연간은 renderStatsAnnual이 해당 연도 월들을 자체 로딩하므로 단일월 가드 생략. 월간/멤버만 현재 보는 월을 선로딩.
+  if (statsState.viewMode !== 'annual') {
+    const ym = currentViewYm();
+    if (ym && !statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
+      body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
+      loadStatsMonth(ym).then(() => { if (currentPage === 'stats') renderStatsBody(); });
+      return;
+    }
+    if (statsState.loadingMonths.has(ym)) {
+      body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
+      return;
+    }
   }
-  if (statsState.loadingMonths.has(ym)) {
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-    return;
+
+  if (statsState.selectedTab === 'all') { renderStatsCombined(body); return; }
+  renderStatsMember(body, statsState.selectedTab);
+}
+
+// 종합 탭: [월간|연간] 토글을 얹고 그 안에 기존 renderStatsAll/renderStatsAnnual을 그대로 재활용(본체 무수정).
+function renderStatsCombined(body) {
+  const isAnnual = statsState.viewMode === 'annual';
+  body.innerHTML = `<div id="statsCombInner"></div>`;
+  const inner = body.querySelector('#statsCombInner');
+  if (isAnnual) renderStatsAnnual(inner); else renderStatsAll(inner);
+  // 월간/연간 토글을 날짜 헤더 왼쪽에 삽입(연간 좌, 월간 우)
+  const header = inner.querySelector('.stats-detail-header');
+  if (header) {
+    const toggle = document.createElement('div');
+    toggle.className = 'stats-mode-toggle';
+    toggle.innerHTML = `<button class="${isAnnual ? 'active' : ''}" data-vm="annual">연간</button><button class="${isAnnual ? '' : 'active'}" data-vm="monthly">월간</button>`;
+    header.insertBefore(toggle, header.firstChild);
+    toggle.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        if (statsState.viewMode === b.dataset.vm) return;
+        statsState.viewMode = b.dataset.vm;
+        renderStatsBody();
+      });
+    });
   }
-  if (statsState.viewMode === 'annual') { renderStatsAnnual(body); return; }
-  if (statsState.selectedTab === 'all') renderStatsAll(body);
-  else renderStatsMember(body, statsState.selectedTab);
 }
 
 // 해당 연도의 모든 월 stats 합산 — 통계 연간 탭과 명예의 전당이 공용 (수치·메달 일관성 보장)
@@ -4233,11 +4348,15 @@ function renderStatsAnnual(body) {
             <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
+            <span class="stats-card-value">${fanCellYear(m.id, year)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
             <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
             <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
           </div>
           <div class="stats-card-row">
@@ -4346,11 +4465,15 @@ function renderStatsAll(body) {
             <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
+            <span class="stats-card-value">${fanCellMonth(m.id, year, month)}</span>
+          </div>
+          <div class="stats-card-row">
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
             <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
           </div>
           <div class="stats-card-row">
-            <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.barChart}</span>평균 시청자</span>
+            <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
             <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
           </div>
           <div class="stats-card-row">
@@ -4469,6 +4592,10 @@ function renderStatsMember(body, memberId) {
           <span class="stats-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
         </div>
         <div class="stats-summary-item">
+          <span class="stats-summary-label">애청자</span>
+          <span class="stats-summary-value">${fanCellMonth(memberId, year, month)}</span>
+        </div>
+        <div class="stats-summary-item">
           <span class="stats-summary-label">최고 시청자</span>
           <span class="stats-summary-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
         </div>
@@ -4530,6 +4657,177 @@ function renderStatsMember(body, memberId) {
       if (dd) dd.innerHTML = renderDayDetail(year, month, sum, memberId);
     });
   });
+}
+
+// 그래프 탭: 멤버 다중 필터 + 종류 단일 필터 → 켠 멤버들의 월별 추이 라인(SVG). 연 단위.
+function renderStatsGraph(body) {
+  const now = new Date();
+  if (!statsState.viewYear) statsState.viewYear = now.getFullYear();
+  const year = statsState.viewYear;
+  const isCurrentYear = (year === now.getFullYear());
+  const maxMonth = isCurrentYear ? now.getMonth() + 1 : 12;
+
+  // 데이터 로딩: 해당 연도 월별 stats + 애청자(fancnt)
+  const monthsToLoad = annualMonthsToLoad(year, maxMonth);
+  const needFan = !statsState.fancnt;
+  if (monthsToLoad.length > 0 || needFan) {
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>그래프 데이터 불러오는 중...</div></div>';
+    Promise.all([...monthsToLoad.map(ym => loadStatsMonth(ym)), needFan ? loadFancnt() : Promise.resolve()]).then(() => {
+      if (currentPage === 'stats' && statsState.selectedTab === 'graph') renderStatsBody();
+    });
+    return;
+  }
+
+  const metric = GRAPH_METRICS.find(g => g.key === statsState.graphMetric) || GRAPH_METRICS[0];
+  const isStartYear = (year === STATS_START_YEAR);
+
+  // 종류 필터: 이벤트탭 .filter-type 재활용(SVG 아이콘 전용, 텍스트 없음). 아이콘은 카드용 SVG_ICONS + 별 재사용.
+  const METRIC_ICON = { fan: FAN_ICON, broadcastTime: SVG_ICONS.clockTime, broadcastDays: SVG_ICONS.calendar, avgViewer: SVG_ICONS.barChart, peakViewer: SVG_ICONS.arrowUp, post: SVG_ICONS.board, youtube: SVG_ICONS.youtube, cafe: SVG_ICONS.coffee };
+  const METRIC_COLOR = { fan: '#FFC94D', broadcastTime: 'var(--ev-start)', broadcastDays: 'var(--ev-start)', avgViewer: '#FF8C00', peakViewer: '#FF8C00', post: 'var(--ev-post)', youtube: 'var(--ev-youtube)', cafe: '#03C75A' };
+  const metricBtnArr = GRAPH_METRICS.map(g => `
+    <button class="filter-type ${g.key === metric.key ? 'on' : ''}" data-gmetric="${g.key}" title="${g.label}">
+      <span class="filter-icon" style="color:${METRIC_COLOR[g.key] || 'var(--ev-start)'}">${METRIC_ICON[g.key] || ''}</span>
+    </button>`);
+  const narrowG = typeof window !== 'undefined' && window.innerWidth <= 900;
+  metricBtnArr.splice(narrowG ? 5 : 2, 0, '<span class="filter-type graph-type-spacer" style="visibility:hidden;pointer-events:none"></span>');   // 좁으면 6열 5+빈/3(멤버와 셀 일치), 넓으면 3열 2/3/3
+  const metricBtns = metricBtnArr.join('');
+  // 멤버 필터: 이벤트탭 .filter-member 재활용(각짐, accent 테두리)
+  const memberBtns = MEMBERS.map(m => `
+    <button class="filter-member ${statsState.graphMember === m.id ? 'on' : ''}" data-gm="${m.id}" title="${m.name}">
+      <img src="${m.img}" alt="${m.name}">
+    </button>`).join('');
+
+  body.innerHTML = `
+    <div class="stats-detail-header" style="justify-content:center;">
+      <div class="stats-detail-month">
+        <button class="stats-month-btn" data-dir="prev" ${isStartYear ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="stats-month-text">${year}년</span>
+        <button class="stats-month-btn" data-dir="next" ${isCurrentYear ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="graph-layout">
+      <div class="graph-left">
+        <div id="graphChartWrap"></div>
+      </div>
+      <div class="graph-right">
+        <div class="filter-section">
+          <div class="filter-title">멤버</div>
+          <div class="filter-row">
+            <div class="filter-members">${memberBtns}</div>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">종류</div>
+          <div class="filter-row">
+            <div class="filter-types graph-types">${metricBtns}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  drawGraphChart(document.getElementById('graphChartWrap'), year, maxMonth, metric);
+
+  body.querySelectorAll('.stats-month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      statsState.viewYear = (statsState.viewYear || now.getFullYear()) + (btn.dataset.dir === 'prev' ? -1 : 1);
+      renderStatsBody();
+    });
+  });
+  body.querySelectorAll('.filter-type[data-gmetric]').forEach(btn => {
+    btn.addEventListener('click', () => { statsState.graphMetric = btn.dataset.gmetric; renderStatsBody(); });
+  });
+  body.querySelectorAll('.filter-member[data-gm]').forEach(btn => {
+    btn.addEventListener('click', () => { statsState.graphMember = btn.dataset.gm; renderStatsBody(); });
+  });
+
+  if (!window._graphResizeBound) {
+    window._graphResizeBound = true;
+    window.addEventListener('resize', () => {
+      clearTimeout(window._graphResizeT);
+      window._graphResizeT = setTimeout(() => {
+        if (currentPage === 'stats' && statsState.selectedTab === 'graph') renderStatsBody();
+      }, 200);
+    });
+  }
+}
+
+// 월별 추이 라인 차트(SVG). 켠 멤버마다 라인(멤버 색). x=월(1~maxMonth), y=메트릭값. 값 없는 월은 라인 끊김.
+function drawGraphChart(wrap, year, maxMonth, metric) {
+  if (!wrap) return;
+  const id = statsState.graphMember;
+  const m = MEMBER_BY_ID[id];
+  if (!m) { wrap.innerHTML = '<div class="graph-empty">멤버를 선택하세요</div>'; return; }
+  const color = m.color;
+
+  const months = [];
+  for (let mo = 1; mo <= maxMonth; mo++) months.push(mo);
+  const valueOf = (mo) => {
+    if (metric.special) return fancntMonthEnd(id, year, mo);   // 애청자(월말 누적), 없으면 null → 라인 끊김
+    const ym = `${year}-${String(mo).padStart(2, '0')}`;
+    const ms = statsState.data[ym] && statsState.data[ym][id];
+    if (!ms) return 0;
+    return metric.get(computeMonthSummary(ms, year, mo));
+  };
+  const pts = months.map(mo => valueOf(mo));
+  const showVal = (v) => metric.fmt ? metric.fmt(v) : (v.toLocaleString() + (metric.unit || ''));
+
+  // Y축: 데이터 min~max 기준으로 살짝 여유(변화폭 강조). 최소값이 0보다 높게 잡힐 수 있음.
+  const vals = pts.filter(v => v != null);
+  let minV = vals.length ? Math.min(...vals) : 0;
+  let maxV = vals.length ? Math.max(...vals) : 1;
+  if (minV === maxV) { minV = Math.max(0, minV - 1); maxV = maxV + 1; }
+  const span = maxV - minV;
+  const step = niceNum(span / 4);
+  let yMin = Math.floor((minV - span * 0.12) / step) * step;
+  let yMax = Math.ceil((maxV + span * 0.12) / step) * step;
+  if (yMin < 0) yMin = 0;
+  if (yMax <= yMin) yMax = yMin + step;
+
+  const narrow = typeof window !== 'undefined' && window.innerWidth <= 900;
+  const W = narrow ? 380 : 720, H = narrow ? 300 : 380;
+  const padL = narrow ? 16 : 32, padR = narrow ? 16 : 32, padT = narrow ? 22 : 30, padB = 36;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const xOf = (i) => months.length <= 1 ? padL + plotW / 2 : padL + (i / (months.length - 1)) * plotW;
+  const yOf = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+  // 그리드 가로선만(Y축 숫자는 없음 — 값은 점마다 표기)
+  let grid = '';
+  for (let v = yMin; v <= yMax + step * 0.001; v += step) {
+    const y = yOf(v);
+    grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" class="g-grid"/>`;
+  }
+  let xlab = '';
+  months.forEach((mo, i) => { xlab += `<text x="${xOf(i).toFixed(1)}" y="${H - padB + 22}" class="g-xlabel">${mo}월</text>`; });
+
+  // 라인 + 각진 마커 + 값 텍스트(멤버색, 상시 표시). 양끝 점은 앵커로 잘림 방지.
+  let d = '', started = false, marks = '', vlabels = '';
+  pts.forEach((v, i) => {
+    if (v == null) { started = false; return; }
+    const x = xOf(i), y = yOf(v);
+    d += (started ? ' L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    started = true;
+    marks += `<rect x="${(x - 3).toFixed(1)}" y="${(y - 3).toFixed(1)}" width="6" height="6" fill="${color}"/>`;
+    const anchor = i === 0 ? 'start' : (i === months.length - 1 ? 'end' : 'middle');
+    vlabels += `<text x="${x.toFixed(1)}" y="${(y - 11).toFixed(1)}" text-anchor="${anchor}" class="g-vlabel" fill="${color}">${showVal(v)}</text>`;
+  });
+  const line = d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : '';
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="graph-svg" preserveAspectRatio="xMidYMid meet">${grid}${line}${marks}${vlabels}${xlab}</svg>`;
+}
+
+// 축 눈금 간격을 보기 좋은 값(1·2·2.5·5·10 ×10ⁿ)으로
+function niceNum(v) {
+  if (v <= 0) return 1;
+  const exp = Math.floor(Math.log10(v));
+  const base = Math.pow(10, exp);
+  const f = v / base;
+  const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+  return nice * base;
+}
+function fmtAxis(v) {
+  if (v >= 10000) { const m = v / 10000; return (Number.isInteger(m) ? m : m.toFixed(1)) + '만'; }
+  return Number.isInteger(v) ? v.toLocaleString() : v.toFixed(1);
 }
 
 function renderCalendar(year, month1, sum) {
@@ -4777,7 +5075,7 @@ async function loadStats() {
   try {
     const now = new Date();
     const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    await loadStatsMonth(cur);
+    await Promise.all([loadStatsMonth(cur), loadFancnt()]);
     if (currentPage === 'stats') renderStatsBody();
     lastStatsUpdate = new Date();
     updateHeaderCenter();

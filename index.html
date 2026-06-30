@@ -1988,11 +1988,15 @@
   .g-vlabel { font-size:12px; font-weight:700; paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; }
   /* 이벤트 종류 필터: 좁을 때(1행) 2/3용 빈칸 숨김 */
   @media (max-width:900px){ .evt-type-spacer { display:none; } }
+  /* 모바일(narrow viewBox 380×300): 차트 월·값 글씨 키움(작은 화면 가독성) */
+  @media (max-width:900px){ .g-xlabel { font-size:14px; } .g-vlabel { font-size:14px; } }
   /* 그래프 모달 (좋아요 모달 lr-panel 골격 재사용, 폭·글씨 키움) */
-  .graph-modal-panel { max-width:740px; }
+  .graph-modal-panel { max-width:740px; max-height:90vh; }
   .graph-modal-panel .lr-head { color:var(--text); font-size:14px; padding:14px 18px; }
   .graph-modal-panel .lr-body { padding:22px 20px; }
   .graph-modal-panel .sg-dot { width:11px; height:11px; display:inline-block; }
+  /* 차트가 뷰포트 높이를 넘지 않게(세로 스크롤 방지). meet라 비율 유지하며 축소 */
+  .graph-modal-panel .graph-svg { max-height: calc(90vh - 100px); }
 </style>
 </head>
 <body>

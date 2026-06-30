@@ -2791,9 +2791,9 @@ function updatePageTitle() {
 // 좋아요 요청 숨김 목록 — 시트 A열에 게시글 URL(# 앞부분)을 적으면 해당 글의 요청이 모두 숨김.
 // 댓글 단위가 아닌 게시글(컨텐츠) 단위 차단 — 같은 글의 추가 요청 댓글도 함께 숨겨짐.
 const LIKE_HIDE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=66286785';
-const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v2';   // v2: A=URL, B=만료일(YYYY-MM-DD) → {u,d} 객체배열로 캐시
+const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v3';   // v3: u에 댓글 앵커(#comment_noti) 보존 — v2(앵커 제거)와 저장 의미 달라 무효화. A=URL, B=만료일(YYYY-MM-DD) → {u,d} 객체배열로 캐시
 const normLikeUrl = (u) => (u || '').split('#')[0].trim().replace(/\/$/, '');
-// dedup·✕·빨간점 키용: 댓글 앵커(#comment_noti…) 보존 — 같은 글이라도 서로 다른 댓글/링크는 별개 요청으로 취급(이벤트 탭과 동일). CSV 글단위 숨김만 normLikeUrl(앵커 제거) 사용.
+// dedup·✕·빨간점 키용: 댓글 앵커(#comment_noti…) 보존 — 같은 글이라도 서로 다른 댓글/링크는 별개 요청으로 취급(이벤트 탭과 동일). CSV 숨김은 앵커 있으면 그 댓글만(fullLikeUrl 매칭), 앵커 없으면 글 전체(normLikeUrl 매칭) 숨김.
 const fullLikeUrl = (u) => (u || '').trim().replace(/\/$/, '');
 // ── 유저 단위 좋아요 요청 상태(localStorage) — CSV 숨김(글 단위·Crenop 관리)과 별개 ──
 const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // 유저가 ✕로 숨긴 댓글(멤버+URL 단위, 영구)
@@ -2841,7 +2841,7 @@ async function loadLikeHideSet() {
     const res = await fetch(LIKE_HIDE_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     entries = parseCSV(await res.text())
-      .map(r => ({ u: normLikeUrl((r[0] || '').trim()), d: (r[1] || '').trim() }))
+      .map(r => ({ u: fullLikeUrl((r[0] || '').trim()), d: (r[1] || '').trim() }))   // 앵커 보존: 앵커 있으면 그 댓글만, 없으면 글 URL(글단위 매칭은 대조 시 normLikeUrl로)
       .filter(e => e.u.startsWith('http'));
     lsSet(LS_LIKEHIDE_CACHE, JSON.stringify(entries));
   } catch (e) {
@@ -2873,7 +2873,7 @@ async function openLikeRequests() {
     likeReqCache = dedupeLikeReqs(data.like_requests || []);          // 점 계산용 갱신(같은 글 최신만)
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
     const dismiss = lsKeySet(LS_LIKE_DISMISS);
-    const list = likeReqCache.filter(e => !hideSet.has(normLikeUrl(e.url)) && !dismiss.has(likeReqKey(e)));
+    const list = likeReqCache.filter(e => !(hideSet.has(fullLikeUrl(e.url)) || hideSet.has(normLikeUrl(e.url))) && !dismiss.has(likeReqKey(e)));
     if (list.length === 0) {
       body.innerHTML = '<div class="lr-msg">기록된 좋아요 요청이 없습니다.</div>';
     } else {
@@ -2896,7 +2896,7 @@ function computeLikeDot() {
   const dismiss = lsKeySet(LS_LIKE_DISMISS), seen = lsKeySet(LS_LIKE_SEEN), hide = lsHideSet();
   return likeReqCache.some(e => {
     const k = likeReqKey(e);
-    return !dismiss.has(k) && !seen.has(k) && !hide.has(normLikeUrl(e.url));
+    return !dismiss.has(k) && !seen.has(k) && !(hide.has(fullLikeUrl(e.url)) || hide.has(normLikeUrl(e.url)));
   });
 }
 function refreshLikeDot() {

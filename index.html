@@ -2223,6 +2223,20 @@ const MEMBER_BIRTHDAYS = {
   }
 })();
 
+// ══ 멤버 추가/탈퇴 체크리스트 — 한 명 변동 시 아래 전부 확인 (체비·플리 추가 때 전면 작업이었던 지점들) ══
+// [index.html]
+//  ① MEMBERS: id · name · img(members/NN.webp) · color(캐릭터 아트 실측, 대비보다 아트 충실도 우선)
+//  ② MEMBER_LINKS: 방송국·유튜브(들)·팬카페·나무위키·인스타·X·팬심/디코·기타·OGQ
+//  ③ MEMBER_INFO: engName·fanName·age·height·mbti·group·firstStream·vote
+//  ④ MEMBER_BIRTHDAYS: month·day·display·file(birthday/NAME.webp) — 단일 소스(로고 교체·프로필·기념일 공용)
+//  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
+//  ⑥ 문서 상단 meta description 멤버 명단
+//  ⑦ CSS 열수: .stats-tabs-wrap repeat(14 = 연간+월간+멤버수) · .members-tabs-wrap repeat(13 = 크루+멤버수)
+//     + 1100px 미디어쿼리의 repeat(7) 배치 확인 · .links-table min-width(720px)와 링크탭 모바일 전환 임계(@container 740px)
+//  ⑧ (해당 시) VACATION
+// [worker.js] MEMBERS(id·name·nick·yt 채널ID 배열) · CAFES(공용 카페 2곳 닉 매핑 + 개인 팬카페 블록)
+// [index.js]  MEMBERS(id·name·nick) · (봇 닉이 있으면) getMember 봇 제외
+// [데이터]    과거 통계가 있으면 /seed-stats(방송 일수는 '날짜 수' 기준)·/seed-fancnt로 시딩
 const MEMBERS = [
   { id: '243000',      name: '천양',   img: 'members/01.webp', color: '#43EAF6' },
   { id: 'madaomm',     name: '마다옴', img: 'members/02.webp', color: '#FFDE9B' },
@@ -4064,6 +4078,39 @@ const FAN_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentC
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
 function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
 
+// 메달(🥇🥈🥉) 계산 — 월간 전체탭·멤버탭·연간탭 공용(과거 3중 복사 → 단일화). dense rank: 값 같으면 공동, 0은 무메달.
+// 키 목록만 다름: 월간=daysWithBroadcast(computeMonthSummary 결과), 연간=sessions(computeAnnualSums 결과, 의미는 동일하게 방송 일수).
+const MEDAL_EMOJI = ['🥇', '🥈', '🥉'];
+const MONTHLY_MEDAL_KEYS = [
+  { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
+  { key: 'totalDurationMs',   get: s => s.totalDurationMs },
+  { key: 'postCount',         get: s => s.postCount },
+  { key: 'youtubeCount',      get: s => s.youtubeCount },
+  { key: 'cafeCount',         get: s => s.cafeCount },
+];
+const ANNUAL_MEDAL_KEYS = [
+  { key: 'sessions',        get: s => s.sessions },
+  { key: 'totalDurationMs', get: s => s.totalDurationMs },
+  { key: 'postCount',       get: s => s.postCount },
+  { key: 'youtubeCount',    get: s => s.youtubeCount },
+  { key: 'cafeCount',       get: s => s.cafeCount },
+];
+function computeMedals(sums, medalKeys) {
+  const medals = {};
+  MEMBERS.forEach(m => { medals[m.id] = {}; });
+  medalKeys.forEach(({ key, get }) => {
+    const vals = MEMBERS.map(m => ({ id: m.id, v: get(sums[m.id]) }));
+    const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
+    let rank = 0;
+    sorted.forEach(v => {
+      const medal = v > 0 ? (MEDAL_EMOJI[rank] || '') : '';
+      vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
+      if (v > 0) rank++;
+    });
+  });
+  return medals;
+}
+
 function computeMonthSummary(memberStats, year, month1) {
   const result = {
     daysWithBroadcast: 0, totalDaysInMonth: daysInMonth(year, month1),
@@ -4255,27 +4302,8 @@ function renderStatsAnnual(body) {
 
   const annualSums = computeAnnualSums(year);
 
-  // 순위 계산
-  const MEDAL_KEYS = [
-    { key: 'sessions',       get: s => s.sessions },
-    { key: 'totalDurationMs',get: s => s.totalDurationMs },
-    { key: 'postCount',      get: s => s.postCount },
-    { key: 'youtubeCount',   get: s => s.youtubeCount },
-    { key: 'cafeCount',      get: s => s.cafeCount },
-  ];
-  const MEDALS = ['🥇','🥈','🥉'];
-  const medals = {};
-  MEMBERS.forEach(m => { medals[m.id] = {}; });
-  MEDAL_KEYS.forEach(({ key, get }) => {
-    const vals = MEMBERS.map(m => ({ id: m.id, v: get(annualSums[m.id]) }));
-    const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
-    let rank = 0;
-    sorted.forEach(v => {
-      const medal = v > 0 ? (MEDALS[rank] || '') : '';
-      vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
-      if (v > 0) rank++;
-    });
-  });
+  // 순위 계산 (공통 computeMedals — 연간 키 목록)
+  const medals = computeMedals(annualSums, ANNUAL_MEDAL_KEYS);
 
   const cards = MEMBERS.map(m => {
     const sum = annualSums[m.id];
@@ -4373,28 +4401,8 @@ function renderStatsAll(body) {
     allSums[m.id] = computeMonthSummary(ms, year, month);
   });
 
-  // 항목별 순위 계산 (공동 허용, 0이면 메달 없음)
-  const MEDAL_KEYS = [
-    { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
-    { key: 'totalDurationMs',   get: s => s.totalDurationMs },
-    { key: 'postCount',         get: s => s.postCount },
-    { key: 'youtubeCount',      get: s => s.youtubeCount },
-    { key: 'cafeCount',         get: s => s.cafeCount },
-  ];
-  const MEDALS = ['🥇', '🥈', '🥉'];
-  // medals[memberId][key] = medal emoji or ''
-  const medals = {};
-  MEMBERS.forEach(m => { medals[m.id] = {}; });
-  MEDAL_KEYS.forEach(({ key, get }) => {
-    const vals = MEMBERS.map(m => ({ id: m.id, v: get(allSums[m.id]) }));
-    const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
-    let rank = 0;
-    sorted.forEach(v => {
-      const medal = v > 0 ? (MEDALS[rank] || '') : '';
-      vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
-      if (v > 0) rank++;
-    });
-  });
+  // 항목별 순위 계산 (공통 computeMedals — 공동 허용, 0이면 메달 없음)
+  const medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
   // 전역 공유 (개별탭에서 사용)
   statsState.medals = medals;
   statsState.allSums = allSums;
@@ -4502,27 +4510,7 @@ function renderStatsMember(body, memberId) {
       const mms = (() => { const ym2 = currentViewYm(); return ym2 && statsState.data[ym2] ? statsState.data[ym2][m.id] : null; })();
       allSums[m.id] = computeMonthSummary(mms, year, month);
     });
-    const MEDAL_KEYS2 = [
-      { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
-      { key: 'totalDurationMs',   get: s => s.totalDurationMs },
-      { key: 'postCount',         get: s => s.postCount },
-      { key: 'youtubeCount',      get: s => s.youtubeCount },
-      { key: 'cafeCount',         get: s => s.cafeCount },
-    ];
-    const MEDALS2 = ['🥇','🥈','🥉'];
-    const medals2 = {};
-    MEMBERS.forEach(m => { medals2[m.id] = {}; });
-    MEDAL_KEYS2.forEach(({ key, get }) => {
-      const vals = MEMBERS.map(m => ({ id: m.id, v: get(allSums[m.id]) }));
-      const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
-      let rank = 0;
-      sorted.forEach(v => {
-        const medal = v > 0 ? (MEDALS2[rank] || '') : '';
-        vals.filter(x => x.v === v).forEach(x => { medals2[x.id][key] = medal; });
-        if (v > 0) rank++;
-      });
-    });
-    statsState.medals = medals2;
+    statsState.medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
     statsState.allSums = allSums;
   }
   body.innerHTML = `

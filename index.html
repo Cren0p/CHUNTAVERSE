@@ -2352,7 +2352,10 @@ const MEMBER_LINKS = {
     instagram: null,
     x: null,
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=679293' }],
-    etc: [{ label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' }],
+    etc: [
+      { label: '캘린더', url: 'https://www.sooplive.com/station/wellro314/calendar' },
+      { label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' },
+    ],
     ogq: [
       { name: '웰로티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62f3e9f462bb2' },
       { name: '웰로티콘2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6545ce6f4e142' },
@@ -2553,7 +2556,7 @@ const statsState = {
   selectedDate: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
-const LS_STATS_PREFIX = 'chuntaverse_stats_v9_';   // v9: 미종료 세션 포함 월은 캐시 보류 규칙 도입 — v8엔 월경계 오염분(자정 걸친 방송이 '진행 중'으로 동결)이 있을 수 있어 무효화
+const LS_STATS_PREFIX = 'chuntaverse_stats_v10_';   // v10: 1~5월 과거 세션 시딩(소프트콘 CSV) KV 반영 — v9 캐시(시딩 전 데이터) 무효화
 
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));

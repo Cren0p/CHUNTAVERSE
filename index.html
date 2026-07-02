@@ -2214,9 +2214,8 @@ const MEMBERS = [
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
-const VACATION = {
-  'nanamoon777': { img: 'members/NACATION.webp',   until: '2026-06-30' },
-};
+// 휴방 표시: { memberId: { img, until: 'YYYY-MM-DD' } } — until(KST)까지 오프라인 카드에 휴방 이미지. 만료 항목은 삭제(나나문 ~6/30 사용)
+const VACATION = {};
 
 const MEMBER_LINKS = {
   '243000': {
@@ -4374,9 +4373,9 @@ function renderStatsAll(body) {
 
   // 항목별 순위 계산 (공통 computeMedals — 공동 허용, 0이면 메달 없음)
   const medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
-  // 전역 공유 (개별탭에서 사용)
+  // 전역 공유 (개별탭에서 사용) — medalsYm=계산 기준월. 멤버탭이 다른 월로 열리면 이 값 불일치로 재계산됨
   statsState.medals = medals;
-  statsState.allSums = allSums;
+  statsState.medalsYm = `${year}-${String(month).padStart(2, '0')}`;
 
   const cards = MEMBERS.map(m => {
     const sum = allSums[m.id];
@@ -4474,15 +4473,17 @@ function renderStatsMember(body, memberId) {
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
   const heatHtml = renderTimeOfDayHeatmap(year, month, sum, isCurrentMonth);
 
-  // medals가 없거나 이 멤버 메달이 비어있으면 재계산
-  if (!statsState.medals || Object.keys(statsState.medals[memberId] || {}).length === 0) {
+  // medals가 없거나 계산 기준월이 지금 보는 월과 다르면 재계산.
+  // (구 가드 "이 멤버 메달이 비어있으면"은 computeMedals가 값 0 멤버에도 ''를 채워 medals 존재 시 절대 발화하지 않았음 →
+  //  월간 전체탭에서 M월을 보다가 그 달 활동 없는 멤버를 클릭해 뷰가 현재월로 점프하면 M월 메달이 그대로 표시되던 버그)
+  if (!statsState.medals || statsState.medalsYm !== currentViewYm()) {
     const allSums = {};
     MEMBERS.forEach(m => {
       const mms = (() => { const ym2 = currentViewYm(); return ym2 && statsState.data[ym2] ? statsState.data[ym2][m.id] : null; })();
       allSums[m.id] = computeMonthSummary(mms, year, month);
     });
     statsState.medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
-    statsState.allSums = allSums;
+    statsState.medalsYm = currentViewYm();
   }
   body.innerHTML = `
     <div class="stats-member-header">

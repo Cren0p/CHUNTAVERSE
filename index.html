@@ -2557,6 +2557,13 @@ const statsState = {
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
 const LS_STATS_PREFIX = 'chuntaverse_stats_v10_';   // v10: 1~5월 과거 세션 시딩(소프트콘 CSV) KV 반영 — v9 캐시(시딩 전 데이터) 무효화
+// 버전 범프로 사장된 구버전 캐시(v8_/v9_ 등) 잔존 키 정리 — 방문자 LS 용량 회수. 프리픽스 기준이라 이후 범프에도 재작업 불필요.
+try {
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('chuntaverse_stats_') && !k.startsWith(LS_STATS_PREFIX)) localStorage.removeItem(k);
+  }
+} catch (e) {}
 
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
@@ -5173,28 +5180,32 @@ setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정
 })();
 
 function parseCSV(text) {
+  // 문자 스트림 파서 — 따옴표 셀 안의 줄바꿈(시트 셀 내 Alt+Enter)을 셀 내용으로 처리.
+  // (구현 주의: 줄 단위로 먼저 쪼개는 방식은 그런 셀에서 행이 두 동강 나 조용히 소실됐음)
   const rows = [];
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const row = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (inQuotes) {
-        if (ch === '"' && line[i+1] === '"') { current += '"'; i++; }
-        else if (ch === '"') inQuotes = false;
-        else current += ch;
-      } else {
-        if (ch === '"') inQuotes = true;
-        else if (ch === ',') { row.push(current.trim()); current = ''; }
-        else current += ch;
-      }
-    }
+  let row = [];
+  let current = '';
+  let inQuotes = false;
+  const endRow = () => {
     row.push(current.trim());
-    rows.push(row);
+    current = '';
+    if (!(row.length === 1 && row[0] === '')) rows.push(row);   // 빈 줄 스킵 (기존 line.trim() 스킵과 동치)
+    row = [];
+  };
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"' && text[i+1] === '"') { current += '"'; i++; }
+      else if (ch === '"') inQuotes = false;
+      else current += ch;
+    } else {
+      if (ch === '"' && current === '') inQuotes = true;   // 여는 따옴표는 셀 시작에서만 — 셀 중간의 낱개 따옴표(비표준 인코딩)는 리터럴로 통과시켜 행 파괴 방지
+      else if (ch === ',') { row.push(current.trim()); current = ''; }
+      else if (ch === '\n') endRow();
+      else current += ch;
+    }
   }
+  if (row.length > 0 || current !== '') endRow();
   return rows;
 }
 
@@ -5513,9 +5524,9 @@ function renderChemistry() {
 
 // ── 명예의 전당 ── 전 항목 통산(개시 이래) 집계. 연간 경쟁은 통계 탭 연간 메달이 담당.
 // 방송일수·방송시간·게시글·유튜브 = 연간 합(computeAnnualSums, 연간 탭과 동일 산식 + seed 포함)을 전 연도 누적,
-// 개근·마라톤·정전 위원회 2종 = 세션 기록 기반이라 seed 미포함(2026-05 개시 이후),
+// 개근·마라톤·정전 위원회 2종 = 세션 기록 기반(과거 세션 시딩으로 2026-01부터, seed 합계는 미사용),
 // 멤버 채팅 쌍·컨텐츠·현수막 = 누적 카운터.
-// 정전 위원회: 다른 멤버 방송 구간(고아 세션은 48h 상한)과의 시점·구간 겹침으로 판정.
+// 정전 위원회: 다른 멤버 방송 구간(고아 세션은 48h 상한)과의 시점·구간 겹침으로 판정 — 간섭 구간은 기간 밖 세션도 포함(경계 걸침 역전 방지).
 
 // 구간 목록 병합 (정렬된 비중첩 구간으로)
 function mergeIntervals(list) {
@@ -5675,22 +5686,25 @@ function renderHall() {
   const totalSums = hallSumMonths(periodMonths);
 
   // 세션 단위 역대 집계 (개근·마라톤·정전 위원회) — '올해' 항목이 아니므로 연도 제한 없음, 연말~연초 연속 방송도 안 끊김.
-  // seed는 세션별 기록이 없어 미포함(서비스 개시 이후 데이터만)
+  // seed 합계는 세션별 기록이 없어 미사용(과거 구간은 시딩된 세션이 담당)
   const ORPHAN_CAP_MS = 48 * 3600000; // 종료 누락 고아 세션이 '영원히 방송 중'으로 남아 전원 판정을 오염시키는 것 방지
   const nowMs = Date.now();
   const extra = {};
-  const intervals = {};
-  MEMBERS.forEach(m => { extra[m.id] = { marathonMs: 0, dates: new Set() }; intervals[m.id] = []; });
-  for (const ym of periodMonths) {
+  const intervals = {};      // 기간 내 시작 세션 (점수 대상)
+  const intervalsAll = {};   // 전 월 세션 (간섭 판정 전용) — 기간 경계에 걸친 세션의 겹침도 반영해 '기간 solo > 통산 solo' 역전 방지
+  MEMBERS.forEach(m => { extra[m.id] = { marathonMs: 0, dates: new Set() }; intervals[m.id] = []; intervalsAll[m.id] = []; });
+  for (const ym of allMonths) {   // 간섭 판정용으로 기간 밖 월도 순회 (renderHall이 전 월을 이미 적재해 추가 fetch 없음)
     MEMBERS.forEach(m => {
       const ms = statsState.data[ym]?.[m.id];
       if (!ms) return;
       for (const s of (ms.sessions || [])) {
         const t = new Date(s.start).getTime();
         if (isNaN(t)) continue;
-        if (!inPeriodTs(t)) continue;
-        const dk = isoToKstDateKey(s.start);
-        if (dk) extra[m.id].dates.add(dk);
+        const scored = inPeriodTs(t);   // 기간 편입은 시작 시각 기준(방송일수·마라톤과 동일 귀속)
+        if (scored) {
+          const dk = isoToKstDateKey(s.start);
+          if (dk) extra[m.id].dates.add(dk);
+        }
         let e = null;
         if (s.end) {
           e = new Date(s.end).getTime();
@@ -5700,6 +5714,8 @@ function renderHall() {
           if (e <= t) e = null;
         }
         if (e === null) continue;
+        intervalsAll[m.id].push({ s: t, e });
+        if (!scored) continue;
         intervals[m.id].push({ s: t, e });
         if (s.end) {
           const dur = e - t;
@@ -5714,7 +5730,7 @@ function renderHall() {
   MEMBERS.forEach(m => { solo[m.id] = { starts: 0, ms: 0 }; });
   MEMBERS.forEach(m => {
     const others = [];
-    MEMBERS.forEach(o => { if (o.id !== m.id) others.push(...intervals[o.id]); });
+    MEMBERS.forEach(o => { if (o.id !== m.id) others.push(...intervalsAll[o.id]); });   // 간섭은 기간 밖 세션 포함 — 자기 점수 구간(intervals)만 기간 한정
     const merged = mergeIntervals(others);
     for (const iv of intervals[m.id]) {
       if (!coversPoint(merged, iv.s)) solo[m.id].starts++;

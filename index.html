@@ -30,8 +30,6 @@
     --ev-start: #60a5fa;
     --ev-end: #f87171;
     --ev-yellow: #fbbf24;
-    --ev-blue: #60a5fa;
-    --ev-comment: #ec4899;
     --ev-post: #34d399;
     --ev-youtube: #ef4444;
     --ev-unread: #61FFEC;
@@ -40,7 +38,6 @@
     --mode-copyright: #38bdf8;
     --mode-password: #cbd5e1;
     --mode-restricted: #a78bfa;
-    --filter-soop: #0388FF;
     --filter-post: #2EF5E1;
     --sidebar-w: 200px;
   }
@@ -49,7 +46,7 @@
   * { scrollbar-width: thin; scrollbar-color: rgba(226,232,240,0.14) transparent; }
   *::-webkit-scrollbar { width: 6px; height: 6px; }
   *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb { background: rgba(226,232,240,0.14); border-radius: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(226,232,240,0.14); }   /* 각진 정책 정합: 썸도 사각(원형은 상태 점에만 허용) */
   *::-webkit-scrollbar-thumb:hover { background: rgba(226,232,240,0.3); }
   html, body { min-height: 100vh; }
   html { scrollbar-gutter: stable; }
@@ -292,7 +289,7 @@
     text-align: left;
   }
   button.page-title-link.sch-btn:hover { background: rgba(97,255,236,0.22); border-color: rgba(97,255,236,0.7); }
-  /* 두번째 커버곡 버튼: 핑크(--ev-comment #ec4899 계열) — 첫 커버곡(파랑)·좋아요(에메랄드)·일정(민트)과 구분 */
+  /* 두번째 커버곡 버튼: 핑크(#ec4899 계열) — 첫 커버곡(파랑)·좋아요(에메랄드)·일정(민트)과 구분 */
   .page-title-link.cover2-btn {
     background: rgba(236,72,153,0.12);
     border: 1px solid rgba(236,72,153,0.4);
@@ -1004,28 +1001,6 @@
   .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
   .toh-xlabel { font-size: 11px; line-height: 12px; text-align: center; }
 
-  .day-section + .day-section {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--border);
-  }
-  .day-section-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .day-section-title .icon {
-    width: 14px;
-    text-align: center;
-    font-weight: 700;
-  }
-  .day-section-title.post .icon { color: var(--ev-post); }
-  .day-section-title.youtube .icon { color: var(--ev-youtube); }
   .day-kind-icon {
     width: 18px;
     height: 18px;
@@ -1179,16 +1154,6 @@
     position: sticky;
     top: 0;
     z-index: 2;
-  }
-  .links-group-row td {
-    padding: 10px 16px;
-    text-align: left;
-    background: var(--surface2);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border-right: none;
   }
   .links-th-avatar {
     width: 56px;
@@ -1859,10 +1824,6 @@
   .members-quick-btn.quick-naver:hover { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
   .members-quick-btn svg { width: 16px; height: 16px; display: block; }
   @container (max-width: 520px) { .members-profile-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 정보 컬럼 ≤520px면(폰/태블릿 2단 무관) 이름 우측 버튼 2×2 */
-  .members-profile-id {
-    font-size: 11px; color: var(--muted); font-weight: 500;
-    opacity: 0.5;
-  }
   .members-info-section {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -2023,7 +1984,7 @@
       <span class="nav-icon" id="navLiveIcon"></span>
       <span>생방송</span>
       <span class="nav-live-badge off" id="navLiveBadge">
-        <span class="nav-live-dot" id="navLiveDot"></span>
+        <span class="nav-live-dot"></span>
         <span class="nav-live-count" id="navLiveCount">0</span>
       </span>
       <span class="nav-live-dot-m"></span>
@@ -2034,7 +1995,7 @@
         <span class="nav-label-pc">최근 이벤트</span><span class="nav-label-mb">이벤트</span>
         <span class="nav-badge" id="navBadge" style="display:none">0</span>
       </span>
-      <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="새 이벤트 알림"></span>
+      <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="새 이벤트 알림 — 필터에서 선택한 멤버·종류만 알림됩니다"></span>
     </button>
     <button class="nav-item" data-page="stats">
       <span class="nav-icon" id="navStatsIcon"></span>
@@ -4701,11 +4662,6 @@ function niceNum(v) {
   const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
   return nice * base;
 }
-function fmtAxis(v) {
-  if (v >= 10000) { const m = v / 10000; return (Number.isInteger(m) ? m : m.toFixed(1)) + '만'; }
-  return Number.isInteger(v) ? v.toLocaleString() : v.toFixed(1);
-}
-
 function renderCalendar(year, month1, sum) {
   const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
   const totalDays = daysInMonth(year, month1);

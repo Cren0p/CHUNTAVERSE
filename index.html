@@ -2578,7 +2578,7 @@ const statsState = {
   selectedDate: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
-const LS_STATS_PREFIX = 'chuntaverse_stats_v8_';
+const LS_STATS_PREFIX = 'chuntaverse_stats_v9_';   // v9: 미종료 세션 포함 월은 캐시 보류 규칙 도입 — v8엔 월경계 오염분(자정 걸친 방송이 '진행 중'으로 동결)이 있을 수 있어 무효화
 
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
@@ -4952,7 +4952,11 @@ async function loadStatsMonth(yyyymm) {
     const data = await res.json();
     const monthData = data.stats || {};
     statsState.data[yyyymm] = monthData;
-    if (!isCurrentMonth(yyyymm)) lsSetMonthCache(yyyymm, monthData);
+    // 미종료 세션(end 없음)이 하나라도 있으면 캐시 보류 — 자정 걸친 방송이 끝나기 전에 월이 바뀌어 이 달을 받으면
+    // '진행 중' 상태로 영구 동결됨(그 사용자 화면에서 방송 시간 누락 + 명전 정전위원회 최대 48h 오염).
+    // 서버가 세션을 닫은 뒤의 응답부터 캐시(보류 동안의 재요청 비용은 60s 엣지캐시가 흡수).
+    const hasOpenSession = Object.values(monthData).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
+    if (!isCurrentMonth(yyyymm) && !hasOpenSession) lsSetMonthCache(yyyymm, monthData);
   } catch (e) {
   } finally {
     statsState.loadingMonths.delete(yyyymm);

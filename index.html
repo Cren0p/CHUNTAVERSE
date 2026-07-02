@@ -2425,7 +2425,7 @@ const MEMBER_LINKS = {
     common: {
       방송국: 'https://www.sooplive.com/station/chebi2',
       유튜브: 'https://www.youtube.com/@chebi444',
-      유튜브2: { label: '서브채널', url: 'https://www.youtube.com/@chebi333' },  // @chebi333 (UCYK-lGzolq2rmHTRak7FkbA) 표시만 · 감지 제외
+      유튜브2: { label: '서브채널', url: 'https://www.youtube.com/@chebi333' },  // @chebi333 (UCYK-lGzolq2rmHTRak7FkbA) 표시 + 감지 포함(worker yt[1])
       팬카페: 'https://cafe.naver.com/chebichebi',
     },
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=chebi' }],
@@ -5302,7 +5302,7 @@ function renderBanners() {
       const m = MEMBERS.find(x => x.name === name);
       return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
     }).join('');
-    const imgTag = `<img src="${b.url}" alt="${b.date?.display || ''}" loading="lazy">`;
+    const imgTag = `<img src="${escapeHtml(b.url)}" alt="${b.date?.display || ''}" loading="lazy">`;
     const cardTag = b.link ? 'a' : 'div';
     const cardAttrs = b.link ? ` href="${escapeHtml(b.link)}" target="_blank" rel="noopener"` : '';
     return `
@@ -5383,7 +5383,7 @@ function renderContent() {
       const m = MEMBERS.find(x => x.name === name);
       return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
     }).join('');
-    const imgTag = `<img src="${c.url}" alt="${escapeHtml(c.title || '')}" loading="lazy">`;
+    const imgTag = `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">`;
     const cardTag = c.link ? 'a' : 'div';
     const cardAttrs = c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '';
     return `

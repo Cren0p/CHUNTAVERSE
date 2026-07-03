@@ -3302,6 +3302,8 @@ function sendBrowserNotification(ev) {
   } catch (e) {}
 }
 
+const NOTIFY_RECENT_MS = 10 * 60 * 1000;   // 알림 대상 = 발생 10분 이내 이벤트만 (재편입 폭주 가드 — 아래 주석)
+
 function processNewEventsForNotification(events) {
   // 빈 배열(KV 장애 등 일시적 빈 응답)에 키를 리셋하면 다음 정상 폴링에서 전체가 '새 이벤트'로 판정돼 알림 폭주 → 무시하고 기존 키 유지.
   // 최초 로드가 빈 배열인 경우도 ready=false 유지 → 이후 첫 정상 응답이 조용히 시드(아래 !ready 분기).
@@ -3315,7 +3317,12 @@ function processNewEventsForNotification(events) {
     lastSeenEventKeysReady = true;
     return;
   }
-  const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)));
+  // '키에 없음' ≠ '새 이벤트': 키 셋은 매 폴링 현재 응답으로 교체되므로, 옛 이벤트가 응답에 재편입되면
+  // (병합 상한 상향 재배포, KV 일시 장애로 리스트 하나가 빠졌다 복귀 등) 통째로 키-신규가 돼 알림이 폭주한다.
+  // → 발생 시각이 최근(10분)인 것만 알림 대상. 정상 전달 지연은 감지 10s+flush 5s+폴링 10s 수준이라 충분히 관대하고,
+  //   재편입분은 시간상 오래돼 자연 차단. 미확인 뱃지가 시간 기반이라 폭주 없는 것과 같은 원리.
+  const nowMs = Date.now();
+  const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)) && (nowMs - new Date(e.time).getTime()) < NOTIFY_RECENT_MS);
   lastSeenEventKeys = new Set(events.map(eventKey));
   if (newOnes.length === 0) return;
   const filtered = newOnes.filter(e => {

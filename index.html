@@ -5570,7 +5570,7 @@ function renderChemistry() {
   const sec = (label, firstNoBorder, isTrack) =>
     `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div></div>`;
 
-  // 상단 트랙(모두 포함)은 2~10명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
+  // 상단 트랙(모두 포함)은 2~11명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
   const selArr = [...chemFilterMembers];
   const topActive = selArr.length >= 2 && selArr.length <= MEMBERS.length - 1;
   const allIncluded = (ids) => selArr.every(id => ids.includes(id));   // 선택집합 ⊆ 조합
@@ -5583,7 +5583,7 @@ function renderChemistry() {
     for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id])) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
     for (const g of CHEM_GROUPS) if (allIncluded(g.members)) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
     matched.sort((a, b) => a.size - b.size || b.total - a.total);
-    // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~10명에서만 발생
+    // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~11명에서만 발생
     const matchedBody = matched.length > 0
       ? matched.map(x => x.html).join('')
       : '<div class="chem-empty">조건에 맞는 케미가 없어요</div>';

@@ -726,6 +726,8 @@
   .cbr-don svg { width: 12px; height: 12px; }
   .cbr-chan { text-decoration: none; }
   .cbr-chan:hover { text-decoration: underline; }
+  .event.chat-bundle { align-items: flex-start; }   /* 다행 묶음: center면 아이콘·아바타·시간이 세로 중앙에 떠 헤더와 분리돼 보임 */
+  .chat-bundle-avatars { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }   /* 발화자 사진 세로 나열(겹침 없음) — 묶음이 세로로 자라는 아이템이라 사진 열도 세로가 공간 문법에 맞음 */
   .timeline-header {
     display: flex;
     align-items: center;
@@ -3857,7 +3859,8 @@ function renderChatBundle(items, allEvents) {
   const channelMember = MEMBERS.find(m => m.id === first.channel_id);
   const channelColor = channelMember ? channelMember.color : '#cbd5e1';
   const donCnt = items.filter(i => i.type === 'donation').length;
-  const label = `채팅 ${items.length - donCnt}건${donCnt ? ` · 후원 ${donCnt}건` : ''}`;
+  const chatCnt = items.length - donCnt;
+  const label = [chatCnt ? `채팅 ${chatCnt}건` : '', donCnt ? `후원 ${donCnt}건` : ''].filter(Boolean).join(' · ');   // 후원 연타만 묶이면 "채팅 0건" 없이 "후원 N건"
   const senderIds = [...new Set(items.map(i => i.member_id))];
   const senderHtml = senderIds.map(id => {
     const m = findMember(id);
@@ -3879,9 +3882,14 @@ function renderChatBundle(items, allEvents) {
     return `<div class="chat-bundle-row"><span class="cbr-time">${formatHHMM(i.time)}</span><span class="cbr-name" style="color: ${m ? m.color : '#fff'}">${escapeHtml(i.member_name || '')}</span><span class="cbr-msg">${msg}</span></div>`;
   }).join('');
   const liveUrl = `https://play.sooplive.co.kr/${first.channel_id}`;
+  // 아바타 = 발화자들(첫 발화 순, 헤더 이름 나열과 동일 순서) 세로 나열 — 단건 채팅(발화자 사진)과 의미 통일. 장소(채널)는 헤더의 '(X 방송)' 링크가 담당
+  const avatarsHtml = senderIds.map(id => {
+    const m = findMember(id);
+    return m ? `<img class="event-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">` : '';
+  }).join('');
   const inner = `
     <div class="event-icon chat">${SVG_ICONS.chatBubble}</div>
-    ${channelMember ? `<img class="event-avatar" src="${channelMember.img}" alt="${escapeHtml(first.channel_name || '')}">` : ''}
+    ${avatarsHtml ? `<div class="chat-bundle-avatars">${avatarsHtml}</div>` : ''}
     <div class="event-body">
       <div>
         <span class="event-member">${senderHtml}</span>

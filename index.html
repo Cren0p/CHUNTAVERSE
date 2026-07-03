@@ -3125,8 +3125,8 @@ let contentData = [];
 let _contentRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
 function isCurrentMonth(yyyymm) {
-  const now = new Date();
-  const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const now = kstNow();
+  const cur = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
   return yyyymm === cur;
 }
 
@@ -3578,19 +3578,23 @@ function formatRelTime(iso) {
 }
 // 사이트 날짜 표시 통일(한글 'YYYY년 M월 D일'). 연도 없는 생일(M월 D일)·월 단위 라벨(YYYY년 M월)은 별도 범주라 미적용.
 function koDate(y, m, d) { return `${y}년 ${m}월 ${d}일`; }
+function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }   // 뷰어 TZ 무관 현재 KST — getUTC*로 읽음
+function kstMonthStartMs(year, month1) { return Date.UTC(year, month1 - 1, 1) - 9 * 3600 * 1000; }   // KST YYYY-MM-01 00:00의 epoch ms (월 경계 필터)
 function formatAbsTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
-  return `<span class="ev-abs-d">${koDate(d.getFullYear(), d.getMonth() + 1, d.getDate())}</span> <span class="ev-abs-t">${hh}:${mi}</span>`;   // 날짜·시간 분리 span. 기본 1줄, 좁은 화면(≤480px)에서만 CSS로 2줄
+  const k = new Date(d.getTime() + 9 * 3600 * 1000);
+  const hh = String(k.getUTCHours()).padStart(2, '0');
+  const mi = String(k.getUTCMinutes()).padStart(2, '0');
+  return `<span class="ev-abs-d">${koDate(k.getUTCFullYear(), k.getUTCMonth() + 1, k.getUTCDate())}</span> <span class="ev-abs-t">${hh}:${mi}</span>`;   // 날짜·시간 분리 span. 기본 1줄, 좁은 화면(≤480px)에서만 CSS로 2줄
 }
 function formatHHMM(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const k = new Date(d.getTime() + 9 * 3600 * 1000);
+  return `${String(k.getUTCHours()).padStart(2,'0')}:${String(k.getUTCMinutes()).padStart(2,'0')}`;
 }
 function formatDuration(ms) {
   if (!ms || ms <= 0) return '0분';
@@ -3618,7 +3622,8 @@ function isoToKstDateKey(iso) {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const k = new Date(d.getTime() + 9 * 3600 * 1000);
+  return `${k.getUTCFullYear()}-${String(k.getUTCMonth()+1).padStart(2,'0')}-${String(k.getUTCDate()).padStart(2,'0')}`;
 }
 function ymdKey(year, month1, day) {
   return `${year}-${String(month1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -4093,11 +4098,12 @@ function selectStatsTab(tabId) {
     const latestDate = findLatestActivityDate(tabId);
     if (latestDate) {
       const d = new Date(latestDate);
-      statsState.viewMonth = { year: d.getFullYear(), month: d.getMonth() + 1 };
+      const k = new Date(d.getTime() + 9 * 3600 * 1000);
+      statsState.viewMonth = { year: k.getUTCFullYear(), month: k.getUTCMonth() + 1 };
       statsState.selectedDate = isoToKstDateKey(latestDate);
     } else {
-      const now = new Date();
-      statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+      const now = kstNow();
+      statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
       statsState.selectedDate = null;
     }
   }
@@ -4211,8 +4217,8 @@ function computeMonthSummary(memberStats, year, month1) {
     sessionsByDate: {}, postsByDate: {}, youtubeByDate: {}, cafeByDate: {},
   };
   if (!memberStats) return result;
-  const monthStart = new Date(year, month1 - 1, 1, 0, 0, 0).getTime();
-  const monthEnd = new Date(year, month1, 1, 0, 0, 0).getTime();
+  const monthStart = kstMonthStartMs(year, month1);
+  const monthEnd = kstMonthStartMs(year, month1 + 1);
   const dateSet = new Set();
   for (const s of (memberStats.sessions || [])) {
     const startMs = new Date(s.start).getTime();
@@ -4288,8 +4294,8 @@ function renderStatsBody() {
   if (!body) return;
 
   if (!statsState.viewMonth) {
-    const now = new Date();
-    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+    const now = kstNow();
+    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
   }
 
   // 연간은 renderStatsAnnual이 해당 연도 월들을 자체 로딩하므로 단일월 가드 생략. 월간/멤버만 현재 보는 월을 선로딩.
@@ -4322,8 +4328,8 @@ function computeAnnualSums(year) {
     MEMBERS.forEach(m => {
       const ms = statsState.data[ym]?.[m.id];
       if (!ms) return;
-      const monthStart = new Date(year, mo - 1, 1).getTime();
-      const monthEnd = new Date(year, mo, 1).getTime();
+      const monthStart = kstMonthStartMs(year, mo);
+      const monthEnd = kstMonthStartMs(year, mo + 1);
       // 자동 수집 데이터 — sessions는 '방송 일수'(그 달 방송한 날짜 수, 월간 daysWithBroadcast와 동일 기준). 하루 2회 방송도 1일. 월끼리는 날짜가 안 겹치므로 월별 합 = 연간 일수.
       const daySet = new Set();
       (ms.sessions || []).forEach(s => {
@@ -4375,14 +4381,14 @@ function annualMonthsToLoad(year, maxMonth) {
 }
 
 function renderStatsAnnual(body) {
-  const now = new Date();
-  if (!statsState.viewYear) statsState.viewYear = now.getFullYear();
+  const now = kstNow();
+  if (!statsState.viewYear) statsState.viewYear = now.getUTCFullYear();
   const year = statsState.viewYear;
-  const isCurrentYear = (year === now.getFullYear());
+  const isCurrentYear = (year === now.getUTCFullYear());
   const isStartYear = (year === STATS_START_YEAR);
 
   // 해당 연도 모든 월이 로드됐는지 확인, 없으면 로드 후 재렌더
-  const maxMonth = isCurrentYear ? now.getMonth() + 1 : 12;
+  const maxMonth = isCurrentYear ? now.getUTCMonth() + 1 : 12;
   const monthsToLoad = annualMonthsToLoad(year, maxMonth);
   if (monthsToLoad.length > 0) {
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>연간 통계 불러오는 중...</div></div>';
@@ -4458,7 +4464,7 @@ function renderStatsAnnual(body) {
   body.querySelectorAll('.stats-month-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const dir = btn.dataset.dir;
-      statsState.viewYear = (statsState.viewYear || now.getFullYear()) + (dir === 'prev' ? -1 : 1);
+      statsState.viewYear = (statsState.viewYear || now.getUTCFullYear()) + (dir === 'prev' ? -1 : 1);
       renderStatsBody();
     });
   });
@@ -4480,12 +4486,12 @@ function renderStatsAnnual(body) {
 
 function renderStatsAll(body) {
   if (!statsState.viewMonth) {
-    const now = new Date();
-    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+    const now = kstNow();
+    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
   }
   const { year, month } = statsState.viewMonth;
-  const now = new Date();
-  const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
+  const now = kstNow();
+  const isCurrentMonth = (year === now.getUTCFullYear() && month === now.getUTCMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_ALL_START_MONTH);
   const allSums = {};
   MEMBERS.forEach(m => {
@@ -4566,8 +4572,8 @@ function renderStatsAll(body) {
       } else {
         mo += 1; if (mo > 12) { mo = 1; y += 1; }
       }
-      const nowD = new Date();
-      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime()) return;
+      const nowD = kstNow();
+      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getUTCFullYear(), nowD.getUTCMonth(), 1).getTime()) return;
       statsState.viewMonth = { year: y, month: mo };
       renderStatsBody();
     });
@@ -4584,14 +4590,14 @@ function renderStatsMember(body, memberId) {
   const m = MEMBER_BY_ID[memberId];
   if (!m) { body.innerHTML = ''; return; }
   if (!statsState.viewMonth) {
-    const now = new Date();
-    statsState.viewMonth = { year: now.getFullYear(), month: now.getMonth() + 1 };
+    const now = kstNow();
+    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
   }
   const { year, month } = statsState.viewMonth;
   const ms = getMemberStatsForView(memberId);
   const sum = computeMonthSummary(ms, year, month);
-  const now = new Date();
-  const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
+  const now = kstNow();
+  const isCurrentMonth = (year === now.getUTCFullYear() && month === now.getUTCMonth() + 1);
   const isStartMonth = (year === STATS_START_YEAR && month === STATS_START_MONTH);
   const heatHtml = renderTimeOfDayHeatmap(year, month, sum, isCurrentMonth);
 
@@ -4673,8 +4679,8 @@ function renderStatsMember(body, memberId) {
       } else {
         mo += 1; if (mo > 12) { mo = 1; y += 1; }
       }
-      const nowD = new Date();
-      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime()) return;
+      const nowD = kstNow();
+      if (new Date(y, mo - 1, 1).getTime() > new Date(nowD.getUTCFullYear(), nowD.getUTCMonth(), 1).getTime()) return;
       statsState.viewMonth = { year: y, month: mo };
       statsState.selectedDate = null;
       statsState.medals = null;
@@ -4765,9 +4771,9 @@ function openStatGraphModal(memberId, metricKey) {
   const m = MEMBER_BY_ID[memberId];
   const metric = GRAPH_METRICS.find(g => g.key === metricKey);
   if (!m || !metric) return;
-  const now = new Date();
-  const year = statsState.viewYear || now.getFullYear();
-  const maxMonth = (year === now.getFullYear()) ? now.getMonth() + 1 : 12;
+  const now = kstNow();
+  const year = statsState.viewYear || now.getUTCFullYear();
+  const maxMonth = (year === now.getUTCFullYear()) ? now.getUTCMonth() + 1 : 12;
   const ov = document.getElementById('statGraphOverlay');
   const head = document.getElementById('statGraphHead');
   const wrap = document.getElementById('statGraphBody');
@@ -5042,8 +5048,8 @@ async function loadStatsMonth(yyyymm) {
 
 async function loadStats() {
   try {
-    const now = new Date();
-    const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const now = kstNow();
+    const cur = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     await Promise.all([loadStatsMonth(cur), loadFancnt()]);
     if (currentPage === 'stats') renderStatsBody();
     lastStatsUpdate = new Date();
@@ -5736,8 +5742,8 @@ function hallSumMonths(monthList) {
   MEMBERS.forEach(m => { sums[m.id] = { sessions: 0, totalDurationMs: 0, postCount: 0, cafeCount: 0, youtubeCount: 0 }; });
   for (const ym of monthList) {
     const [y, mo] = ym.split('-').map(Number);
-    const monthStart = new Date(y, mo - 1, 1).getTime();
-    const monthEnd = new Date(y, mo, 1).getTime();
+    const monthStart = kstMonthStartMs(y, mo);
+    const monthEnd = kstMonthStartMs(y, mo + 1);
     MEMBERS.forEach(m => {
       const ms = statsState.data[ym]?.[m.id];
       if (!ms) return;
@@ -5769,13 +5775,13 @@ function hallSumMonths(monthList) {
 function renderHall() {
   const body = document.getElementById('hallBody');
   if (!body) return;
-  const now = new Date();
-  const year = now.getFullYear();
+  const now = kstNow();
+  const year = now.getUTCFullYear();
   // 역대 집계(개근·마라톤)를 위해 통계 개시(2026-01)부터 현재까지 전 월을 적재 (과거 월은 localStorage 캐시)
   const monthsToLoad = [];
   const allMonths = [];
   for (let y = STATS_START_YEAR; y <= year; y++) {
-    const maxMo = (y === year) ? now.getMonth() + 1 : 12;
+    const maxMo = (y === year) ? now.getUTCMonth() + 1 : 12;
     for (let mo = 1; mo <= maxMo; mo++) {
       const ym = `${y}-${String(mo).padStart(2,'0')}`;
       allMonths.push(ym);

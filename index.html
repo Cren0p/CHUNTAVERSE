@@ -709,7 +709,7 @@
   @media (max-width: 480px) {
     .event-time-abs .ev-abs-d { display: block; }
   }
-  /* 채팅 묶음: 같은 채널에서 감지 주기 연속(20초 이내)으로 이어진 대화를 한 아이템으로. 내부는 과거→최신, 클릭 없이 전체 노출 */
+  /* 채팅 묶음: 같은 채널에서 감지 주기 연속(25초 이내)으로 이어진 대화를 한 아이템으로. 내부는 과거→최신, 클릭 없이 전체 노출 */
   .chat-bundle-rows {
     margin-top: 6px;
     display: flex; flex-direction: column; gap: 3px;
@@ -717,11 +717,12 @@
   .chat-bundle-row {
     display: flex; align-items: baseline; gap: 8px;
     font-size: 12px; line-height: 1.45;
+    color: inherit; text-decoration: none;
   }
+  .chat-bundle-row:hover .cbr-msg { color: var(--accent2); }
   .cbr-time { color: var(--muted); font-size: 11px; flex-shrink: 0; }
   .cbr-name { font-weight: 700; flex-shrink: 0; }
   .cbr-msg { color: #94a3b8; min-width: 0; overflow-wrap: anywhere; }
-  .cbr-msg .cbr-link { color: var(--accent); }
   .cbr-don { display: inline-flex; align-items: center; gap: 4px; color: var(--time); font-weight: 700; }
   .cbr-don svg { width: 12px; height: 12px; }
   .cbr-chan { text-decoration: none; }
@@ -3830,8 +3831,8 @@ function renderEvent(e, allEvents) {
 
 // 채팅 묶음 gap — "감지 주기 연속" 규칙의 시간 근사: 같은 채널의 직전 채팅과 이 간격 이내면 같은 대화, 넘으면 종결.
 // 채팅 시각은 Oracle 수신 순간 기준이고 폴링(10초) 배치 경계는 클라이언트가 알 수 없어, 배치 규칙
-// "다음 감지에 이어지면 붙이고 빈 주기가 나오면 종결"을 시간으로 옮기면 10~20초 범위 → 상단값 20초.
-const CHAT_BUNDLE_GAP_MS = 20 * 1000;
+// "다음 감지에 이어지면 붙이고 빈 주기가 나오면 종결"을 시간으로 옮기면 10~20초 범위지만 짧은 쉼까지 넉넉히 묶으려 25초.
+const CHAT_BUNDLE_GAP_MS = 25 * 1000;
 
 // 채팅류(chat/chat_emoticon/donation)를 채널 단위로 묶어 타임라인 아이템 목록을 만든다.
 // 같은 채널의 직전 채팅과 CHAT_BUNDLE_GAP_MS 이내면 같은 묶음 — 사이에 낀 다른 채널 채팅·비채팅 이벤트는 묶음을 끊지 않음(채널별 독립).
@@ -3881,19 +3882,19 @@ function renderChatBundle(items, allEvents) {
   }).join('·');
   const el = getBroadcastElapsed(first, allEvents || []);
   const absRange = formatAbsTime(first.time) + (formatHHMM(last.time) !== formatHHMM(first.time) ? ` ~ ${formatHHMM(last.time)}` : '');
+  const liveUrl = `https://play.sooplive.co.kr/${first.channel_id}`;
   const rows = items.map(i => {
     const m = findMember(i.member_id);
-    let msg;
+    let msg, rowUrl = liveUrl;   // 개별 채팅과 동일 동선: 행 전체가 방송으로 이동, 메시지가 http 링크로 시작하면 그 링크로
     if (i.type === 'donation') msg = `<span class="cbr-don">${SVG_ICONS.starBalloon}별풍선 ${i.amount || ''}개</span>`;
     else if (i.type === 'chat_emoticon') msg = '(이모티콘)';
     else {
       msg = escapeHtml(i.message || '');
-      const um = (i.message || '').match(/^(https?:\/\/\S+)/);   // 개별 채팅과 동일: 링크로 시작하면 그 링크로
-      if (um) msg = `<a class="cbr-link" href="${escapeHtml(um[1])}" target="_blank" rel="noopener">${msg}</a>`;
+      const um = (i.message || '').match(/^(https?:\/\/\S+)/);
+      if (um) rowUrl = um[1];
     }
-    return `<div class="chat-bundle-row"><span class="cbr-time">${formatHHMM(i.time)}</span><span class="cbr-name" style="color: ${m ? m.color : '#fff'}">${escapeHtml(i.member_name || '')}</span><span class="cbr-msg">${msg}</span></div>`;
+    return `<a class="chat-bundle-row" href="${escapeHtml(rowUrl)}" target="_blank" rel="noopener"><span class="cbr-time">${formatHHMM(i.time)}</span><span class="cbr-name" style="color: ${m ? m.color : '#fff'}">${escapeHtml(i.member_name || '')}</span><span class="cbr-msg">${msg}</span></a>`;
   }).join('');
-  const liveUrl = `https://play.sooplive.co.kr/${first.channel_id}`;
   // 아바타 = 발화자들(첫 발화 순, 헤더 이름 나열과 동일 순서) 세로 나열 — 단건 채팅(발화자 사진)과 의미 통일. 장소(채널)는 헤더의 '(X 방송)' 링크가 담당
   const avatarsHtml = senderIds.map(id => {
     const m = findMember(id);
@@ -4510,46 +4511,46 @@ function renderStatsAll(body) {
     const md = medals[m.id];
     const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
     return `
-      <button class="stats-card" data-member="${m.id}">
-        <div class="stats-card-header">
+      <div class="stats-card" data-member="${m.id}">
+        <div class="stats-card-header" data-cal="${m.id}">
           <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
         <div class="stats-card-rows">
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="broadcastDays">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
             <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="broadcastTime">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
             <span class="stats-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="fan">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
             <span class="stats-card-value">${fanCellMonth(m.id, year, month)}</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="peakViewer">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
             <span class="stats-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="avgViewer">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
             <span class="stats-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="post">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
             <span class="stats-card-value">${mv('postCount')}${sum.postCount}개</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="cafe">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
             <span class="stats-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
           </div>
-          <div class="stats-card-row">
+          <div class="stats-card-row stats-card-row-link" data-metric="youtube">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
             <span class="stats-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
           </div>
         </div>
-      </button>
+      </div>
     `;
   }).join('');
   body.innerHTML = `
@@ -4578,10 +4579,13 @@ function renderStatsAll(body) {
       renderStatsBody();
     });
   });
-  body.querySelectorAll('.stats-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const memberId = card.dataset.member;
-      if (memberId) selectStatsTab(memberId);
+  body.querySelectorAll('.stats-card-header[data-cal]').forEach(h => {
+    h.addEventListener('click', () => selectStatsTab(h.dataset.cal));
+  });
+  body.querySelectorAll('.stats-card-row-link[data-metric]').forEach(row => {
+    row.addEventListener('click', () => {
+      const card = row.closest('.stats-card');
+      if (card) openStatGraphModal(card.dataset.member, row.dataset.metric);
     });
   });
 }
@@ -4766,13 +4770,15 @@ function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
   wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="graph-svg" preserveAspectRatio="xMidYMid meet">${grid}${line}${marks}${vlabels}${xlab}</svg>`;
 }
 
-// 연간 카드의 지표 행 클릭 → 그 멤버 × 그 지표의 그 해 월별 추이를 모달로. 연도는 연간 탭(viewYear) 기준.
+// 연간·월간 카드의 지표 행 클릭 → 그 멤버 × 그 지표의 그 해 월별 추이를 모달로. 연도는 현재 탭 기준(연간=viewYear, 월간=viewMonth.year). 비special 지표는 그 해 월들을 로드 후 그림.
 function openStatGraphModal(memberId, metricKey) {
   const m = MEMBER_BY_ID[memberId];
   const metric = GRAPH_METRICS.find(g => g.key === metricKey);
   if (!m || !metric) return;
   const now = kstNow();
-  const year = statsState.viewYear || now.getUTCFullYear();
+  const year = statsState.selectedTab === 'annual'
+    ? (statsState.viewYear || now.getUTCFullYear())
+    : (statsState.viewMonth ? statsState.viewMonth.year : now.getUTCFullYear());
   const maxMonth = (year === now.getUTCFullYear()) ? now.getUTCMonth() + 1 : 12;
   const ov = document.getElementById('statGraphOverlay');
   const head = document.getElementById('statGraphHead');
@@ -4780,11 +4786,16 @@ function openStatGraphModal(memberId, metricKey) {
   if (!ov || !head || !wrap) return;
   head.innerHTML = `<span><span class="sg-dot" style="background:${m.color}"></span>${m.name} · ${metric.label} · ${year}년</span><button class="lr-close" type="button" onclick="closeStatGraph()">✕</button>`;
   ov.hidden = false;
-  if (metric.special && !statsState.fancnt) {
+  const draw = () => { if (!ov.hidden) drawGraphChart(wrap, memberId, year, maxMonth, metric); };
+  // special(애청자)=fancnt, 그 외=그 해 월별 stats. 없으면 로드 후 그림(연간탭은 이미 로드돼 no-op).
+  const pending = metric.special
+    ? (statsState.fancnt ? [] : [loadFancnt()])
+    : annualMonthsToLoad(year, maxMonth).map(ym => loadStatsMonth(ym));
+  if (pending.length) {
     wrap.innerHTML = '<div class="lr-msg">불러오는 중...</div>';
-    loadFancnt().then(() => { if (!ov.hidden) drawGraphChart(wrap, memberId, year, maxMonth, metric); });
+    Promise.all(pending).then(draw);
   } else {
-    drawGraphChart(wrap, memberId, year, maxMonth, metric);
+    draw();
   }
 }
 function closeStatGraph() {

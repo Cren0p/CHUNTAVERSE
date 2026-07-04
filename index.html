@@ -3896,7 +3896,7 @@ function buildTimelineItems(filtered, all) {
   const chatFam = [];
   const battleSeen = new Set();   // 필터를 통과한 대결 key만 노출 대상
   for (const e of filtered) {
-    if (e.type === 'battle_notice') { battleSeen.add(e.mkey); continue; }
+    if (e.type === 'battle_notice') { if (e.mkey != null) battleSeen.add(e.mkey); continue; }   // mkey 결손분은 조인 불가 — undefined끼리 허위 조인 방지
     if ((e.type === 'chat' || e.type === 'chat_emoticon' || e.type === 'donation' || e.type === 'sanction' || e.type === 'mission_gift') && e.channel_id) chatFam.push(e);
     else { const t = new Date(e.time).getTime() || 0; items.push({ ev: e, aAsc: t, aDesc: t }); }
   }

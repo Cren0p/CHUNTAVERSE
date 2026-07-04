@@ -1164,6 +1164,7 @@
     text-align: center;
     vertical-align: top;
   }
+  .links-table td.td-bottom { vertical-align: bottom; }   /* 노래책 단독 셀: 행 바닥 정렬로 노래책 줄 통일(rowEtc에서 부여) */
   .links-table th:last-child, .links-table td:last-child { border-right: none; }
   .links-table tr:last-child td { border-bottom: none; }
   .links-table th {
@@ -5147,7 +5148,7 @@ function renderLinks() {
     const iconStyle = bg ? `color: ${color}; background: ${bg}; padding: 2px;` : `color: ${color};`;
     return `<td><a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener"><span class="link-icon" style="${iconStyle}">${icon}</span><span class="link-label">${escapeHtml(label)}</span></a></td>`;
   }
-  function multiIconLinkCell(items) {
+  function multiIconLinkCell(items, tdClass) {
     if (!items || items.length === 0) return emptyCell;
     const btns = items.map(it => {
       const icon = ICON_FOR[it.kind] || '';
@@ -5156,7 +5157,7 @@ function renderLinks() {
       const iconStyle = bg ? `color: ${color}; background: ${bg}; padding: 2px;` : `color: ${color};`;
       return `<a class="link-btn" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="link-icon" style="${iconStyle}">${icon}</span><span class="link-label">${escapeHtml(it.label)}</span></a>`;
     }).join('');
-    return `<td><div class="links-cell">${btns}</div></td>`;
+    return `<td${tdClass ? ` class="${tdClass}"` : ''}><div class="links-cell">${btns}</div></td>`;
   }
   function inferKindFromLabel(label) {
     if (label === '인스타그램') return 'instagram';
@@ -5233,7 +5234,8 @@ function renderLinks() {
   }).join('');
   const rowEtc = MEMBERS.map(m => {
     const items = (MEMBER_LINKS[m.id]?.etc || []).map(it => ({ kind: inferKindFromLabel(it.label), label: it.label, url: it.url }));
-    return multiIconLinkCell(items);
+    // 노래책만 있는 셀은 아래 정렬(td-bottom) — 2단(일정표류+노래책) 셀이 잡아둔 행 높이의 바닥에 붙여 노래책 줄을 전 멤버 정렬(위는 자연히 빈공간). PC 전용: 이 표 자체가 모바일에선 숨김
+    return multiIconLinkCell(items, items.length === 1 && items[0].kind === 'music' ? 'td-bottom' : '');
   }).join('');
   const rowOgq = MEMBERS.map(m => {
     const ogq = MEMBER_LINKS[m.id]?.ogq || [];

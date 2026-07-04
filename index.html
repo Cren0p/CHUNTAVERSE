@@ -2604,6 +2604,18 @@ const filterState = {
 let allEvents = [];
 let eventSortAsc = false;
 
+// 대결 종료(battle_notice)는 참가 멤버 채널 수만큼 저장되지만 사용자 경험상 한 사건 —
+// 건 단위 소비 지점(알림·미읽음 카운트)에서 mkey당 1건으로 축약. 타임라인 표시는 buildTimelineItems의 조인이 담당.
+function dedupBattleNotices(list) {
+  const seen = new Set();
+  return list.filter(e => {
+    if (e.type !== 'battle_notice') return true;
+    if (seen.has(e.mkey)) return false;
+    seen.add(e.mkey);
+    return true;
+  });
+}
+
 function typeToCat(et) {
   if (et === 'post' || et === 'comment_recommend') return 'post';
   if (et === 'youtube') return 'youtube';
@@ -3291,7 +3303,7 @@ function stopTitleFlash() {
 }
 function updateTabTitle() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
-  const unreadCount = allEvents.filter(e => {
+  const unreadCount = dedupBattleNotices(allEvents.filter(e => {
     const t = new Date(e.time).getTime();
     if (isNaN(t) || t <= lastSeen) return false;
     const cat = typeToCat(e.type);
@@ -3300,7 +3312,7 @@ function updateTabTitle() {
     const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
-  }).length;
+  })).length;
   const base = unreadCount > 0 ? `${BASE_TITLE} (${unreadCount})` : BASE_TITLE;
   if (unreadCount === 0 && titleFlashTimer) {
     clearInterval(titleFlashTimer);
@@ -3333,6 +3345,9 @@ function sendBrowserNotification(ev) {
     case 'chat':       body = `${memberName} 채팅 (${ev.channel_name || ''}) — ${ev.message || ''}`; break;
     case 'chat_emoticon': body = `${memberName} 채팅 (${ev.channel_name || ''}) — (이모티콘)`; break;
     case 'donation':   body = `${memberName} 후원 (${ev.channel_name || ''}) — 별풍선 ${ev.amount || ''}개`; break;
+    case 'sanction':   body = `${memberName} ${ev.kind === 'kick' ? '강제퇴장' : `채팅금지 ${ev.seconds || 0}초`} (${ev.channel_name || ''} 방송)`; break;
+    case 'mission_gift': body = `${memberName} ${ev.mission === 'battle' ? '대결' : '도전'}미션 후원 ${ev.amount || 0}개 (${ev.channel_name || ''} 방송)`; break;
+    case 'battle_notice': body = `${memberName} 대결미션 종료${ev.title ? ' — ' + ev.title : ''}`; break;
     default:           body = `${memberName} ${ev.type}`;
   }
   try {
@@ -3373,14 +3388,14 @@ function processNewEventsForNotification(events) {
   const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)) && (nowMs - new Date(e.time).getTime()) < NOTIFY_RECENT_MS);
   lastSeenEventKeys = new Set(events.map(eventKey));
   if (newOnes.length === 0) return;
-  const filtered = newOnes.filter(e => {
+  const filtered = dedupBattleNotices(newOnes.filter(e => {
     const cat = typeToCat(e.type);
     if (!filterState.types.has(cat)) return false;
     const memberMatch = filterState.members.has(e.member_id);
     const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
-  });
+  }));
   if (filtered.length === 0) return;
   if (notifyEnabled) {
     const userIsViewingEvents = (document.visibilityState === 'visible' && currentPage === 'events');
@@ -3393,7 +3408,7 @@ function processNewEventsForNotification(events) {
 
 function refreshUnreadIndicator() {
   const lastSeen = new Date(getLastSeenTime()).getTime();
-  const unread = allEvents.filter(e => {
+  const unread = dedupBattleNotices(allEvents.filter(e => {
     const t = new Date(e.time).getTime();
     if (isNaN(t) || t <= lastSeen) return false;
     const cat = typeToCat(e.type);
@@ -3402,7 +3417,7 @@ function refreshUnreadIndicator() {
     const channelMatch = e.channel_id && filterState.members.has(e.channel_id);
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
-  });
+  }));
   const count = unread.length;
   updateTabTitle();
   const badge = document.getElementById('navBadge');

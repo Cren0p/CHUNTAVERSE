@@ -536,7 +536,8 @@
     display: grid; grid-template-columns: 1fr 280px;
     gap: 20px; align-items: start;
   }
-  @media (max-width: 900px) {
+  /* 1100px: 채팅 묶음 도입 후 타임라인 실폭 기준 상향 — 900px에선 필터를 내리기 직전 타임라인이 ~350px까지 좁아짐(사이드바 200+패딩 48+필터 280+갭 20 차감). 1100px 전환이면 최소 ~550px 확보. 1100은 탭 접힘과 같은 기존 브레이크포인트 어휘 */
+  @media (max-width: 1100px) {
     .events-wrap { grid-template-columns: 1fr; }
     .filter-panel { position: static !important; order: -1; }   /* 최신순(기본): 필터를 이벤트 위로 */
     .events-wrap.evt-sort-asc .filter-panel { order: 0; }        /* 오래된순: 필터를 아래로(DOM 순서 복귀) */
@@ -581,7 +582,7 @@
   .filter-toggle-all:hover { border-color: var(--accent); }
 
   .filter-members { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
-  @media (max-width: 900px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일 strip: 6열(12명=6×2) */
+  @media (max-width: 1100px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 상단 strip: 6열(12명=6×2) — 필터 상단 전환(1100px)과 한 세트 */
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -618,7 +619,7 @@
   .filter-type .filter-icon { width: 55%; height: 55%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .filter-type .filter-icon svg { width: 100%; height: 100%; }   /* SVG에 박힌 width/height 무시하고 셀 비례로 스케일(비율은 meet로 유지) */
   /* 모바일 strip: 종류도 멤버와 동일 6열(5종 + 우측 빈칸 1) */
-  @media (max-width: 900px) { .filter-types { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 1fr은 나머지 1px를 일부 칸에만 줘 박스 크기가 갈림 → 모든 칸 동일 calc값으로 고정(gap 6px×5=30px). 남는 px는 우측 여백 */
+  @media (max-width: 1100px) { .filter-types { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 필터 상단 전환(1100px)과 한 세트. 1fr은 나머지 1px를 일부 칸에만 줘 박스 크기가 갈림 → 모든 칸 동일 calc값으로 고정(gap 6px×5=30px). 남는 px는 우측 여백 */
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
   .filter-type[data-type="post"] .filter-icon { color: var(--ev-post); }
@@ -667,6 +668,14 @@
   .event-icon.chat { background: rgba(167,139,250,0.15); color: #a78bfa; }
   .event-icon.chat_emoticon { background: rgba(167,139,250,0.15); color: #a78bfa; }
   .event-icon.donation { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .event-icon.sanction { background: rgba(255,169,77,0.15); color: #FFA94D; }
+  .event-icon.mission_gift { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .event-icon.battle { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .battle-result { font-size: 13px; }
+  .battle-sep { color: var(--muted); }
+  .battle-win { color: #34D399; font-weight: 700; }
+  .battle-lose { color: #F87171; font-weight: 700; }
+  .battle-draw { color: var(--muted); font-weight: 700; }
   .event a.event-link { color: inherit; text-decoration: none; display: contents; }
   .event a.event-link:hover .event-detail { color: var(--accent2); }
   .event-avatar { width: 28px; height: 28px; object-fit: cover; flex-shrink: 0; }
@@ -723,8 +732,13 @@
   .cbr-time { color: var(--muted); font-size: 11px; flex-shrink: 0; }
   .cbr-name { font-weight: 700; flex-shrink: 0; }
   .cbr-msg { color: #94a3b8; min-width: 0; overflow-wrap: anywhere; }
-  .cbr-don { display: inline-flex; align-items: center; gap: 4px; color: var(--time); font-weight: 700; }
+  .cbr-don { display: inline-flex; align-items: center; gap: 4px; color: #a78bfa; font-weight: 700; }   /* 후원 계열 보라 — 노란색 비선호(Crenop) */
   .cbr-don svg { width: 12px; height: 12px; }
+  .cbr-sanction { display: inline-flex; align-items: center; gap: 4px; color: #FFA94D; font-weight: 700; }
+  .cbr-sanction svg { width: 12px; height: 12px; }
+  .cbr-mission { display: inline-flex; align-items: center; gap: 4px; color: #a78bfa; font-weight: 700; }
+  .cbr-mission svg { width: 12px; height: 12px; }
+  .cbr-mtitle { color: var(--muted); }
   .cbr-chan { text-decoration: none; }
   .cbr-chan:hover { text-decoration: underline; }
   .event.chat-bundle { align-items: flex-start; }   /* 다행 묶음: center면 아이콘·아바타·시간이 세로 중앙에 떠 헤더와 분리돼 보임 */
@@ -2544,6 +2558,9 @@ const SVG_ICONS = {
   people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2z"/></svg>`,
   trophy: `<svg viewBox="-0.03 -0.67 24 24" width="16" height="16"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/></g><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22 H17 c0-1.76-.85-3.25-2.03-3.79C14.47 17.98 14 17.55 14 17 V14.66 Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
   flame: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+  ban: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  kickOut: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+  swords: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="4" x2="15" y2="15"/><line x1="20" y1="4" x2="9" y2="15"/><line x1="3" y1="18" x2="7" y2="14"/><line x1="21" y1="18" x2="17" y2="14"/><line x1="5" y1="21" x2="8" y2="18"/><line x1="19" y1="21" x2="16" y2="18"/></svg>`,
   hourglass: `<svg viewBox="-0.03 0.60 24 24" width="14" height="14"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></g><path d="M7.7 7H16.3L12 12Z" fill="currentColor" stroke="none"/><path d="M7.586 16.414H16.414L17 17.828V22H7V17.828Z" fill="currentColor" stroke="none"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="5.4" fill="currentColor"/><circle cx="12" cy="2.4" r="1.6" fill="currentColor"/><circle cx="18.4" cy="5.6" r="1.6" fill="currentColor"/><circle cx="21.6" cy="12" r="1.6" fill="currentColor"/><circle cx="18.4" cy="18.4" r="1.6" fill="currentColor"/><circle cx="12" cy="21.6" r="1.6" fill="currentColor"/><circle cx="5.6" cy="18.4" r="1.6" fill="currentColor"/><circle cx="2.4" cy="12" r="1.6" fill="currentColor"/><circle cx="5.6" cy="5.6" r="1.6" fill="currentColor"/></svg>`,
   moon: `<svg viewBox="-1.47 1.40 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
@@ -2591,7 +2608,7 @@ function typeToCat(et) {
   if (et === 'post' || et === 'comment_recommend') return 'post';
   if (et === 'youtube') return 'youtube';
   if (et === 'cafe_post') return 'cafe';
-  if (et === 'chat' || et === 'chat_emoticon' || et === 'donation') return 'chat';
+  if (et === 'chat' || et === 'chat_emoticon' || et === 'donation' || et === 'sanction' || et === 'mission_gift' || et === 'battle_notice') return 'chat';
   return 'soop';
 }
 
@@ -3729,7 +3746,7 @@ function getBroadcastElapsed(e, allEvents) {
   if (e.broad_start) {
     startTime = new Date(e.broad_start).getTime();
   } else {
-    const isChat = ['chat', 'chat_emoticon', 'donation'].includes(e.type);
+    const isChat = ['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type);
     const targetMemberId = isChat ? e.channel_id : e.member_id;
     let startEv = null;
     for (const ev of allEvents) {
@@ -3756,7 +3773,7 @@ function renderEvent(e, allEvents) {
     post: SVG_ICONS.board, comment_recommend: SVG_ICONS.thumbsup,
     youtube: SVG_ICONS.youtube, cafe_post: SVG_ICONS.coffee,
     chat: SVG_ICONS.chatBubble, chat_emoticon: SVG_ICONS.chatBubble,
-    donation: SVG_ICONS.starBalloon,
+    donation: SVG_ICONS.starBalloon, mission_gift: SVG_ICONS.flame,
   };
   const actionMap = {
     start: '방송 시작', end: '방송 종료',
@@ -3766,6 +3783,10 @@ function renderEvent(e, allEvents) {
     chat: '채팅', chat_emoticon: '채팅',
     donation: '후원',
   };
+  // 제재·미션은 kind/필드에 따라 라벨이 달라 정적 맵 대신 계산 — 문구는 "내용 (XX 방송)" 확정 문법
+  let actionLabel = actionMap[e.type] || e.type;
+  if (e.type === 'sanction') actionLabel = e.kind === 'kick' ? '강제퇴장' : `채팅금지 ${e.seconds || 0}초`;
+  else if (e.type === 'mission_gift') actionLabel = `${e.mission === 'battle' ? '대결' : '도전'}미션 후원 ${e.amount || 0}개`;
   const member = findMember(e.member_id);
   const avatarSrc = member ? member.img : '';
   const memberColor = member ? member.color : '#fff';
@@ -3782,7 +3803,7 @@ function renderEvent(e, allEvents) {
   if (e.type === 'cafe_post' && e.cafe_name) {
     targetTag = `<span class="event-target">(${escapeHtml(e.cafe_name)})</span>`;
   }
-  if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_name) {
+  if (['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type) && e.channel_name) {
     const channelMember = MEMBERS.find(m => m.id === e.channel_id);
     const channelColor = channelMember ? channelMember.color : '#cbd5e1';
     targetTag = `<span class="event-target">(<span style="color: ${channelColor}">${escapeHtml(e.channel_name)}</span> 방송)</span>`;
@@ -3815,19 +3836,21 @@ function renderEvent(e, allEvents) {
     detail = `<div class="event-detail">(이모티콘)</div>`;
   } else if (e.type === 'donation' && e.amount) {
     detail = `<div class="event-detail">별풍선 ${e.amount}개</div>`;
+  } else if (e.type === 'mission_gift' && e.title) {
+    detail = `<div class="event-detail">“${escapeHtml(e.title)}”</div>`;
   }
   if (e.type === 'end' && !e.url && e.member_id) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
   }
   const eventTime = new Date(e.time).getTime() || 0;
-  const iconHtml = iconMap[e.type] || '•';
+  const iconHtml = e.type === 'sanction' ? (e.kind === 'kick' ? SVG_ICONS.kickOut : SVG_ICONS.ban) : (iconMap[e.type] || '•');
   const inner = `
     <div class="event-icon ${e.type}">${iconHtml}</div>
     ${avatarSrc ? `<img class="event-avatar" src="${avatarSrc}" alt="${escapeHtml(e.member_name)}">` : ''}
     <div class="event-body">
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
-        <span class="event-action"><span class="event-action-label">${actionMap[e.type] || e.type}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
+        <span class="event-action"><span class="event-action-label">${actionLabel}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
         ${targetTag}
       </div>
       ${detail}
@@ -3842,7 +3865,7 @@ function renderEvent(e, allEvents) {
     const liveUrl = `https://play.sooplive.co.kr/${e.member_id}`;
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
   }
-  if (['chat', 'chat_emoticon', 'donation'].includes(e.type) && e.channel_id) {
+  if (['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type) && e.channel_id) {
     // 채팅 본문이 http(s) 링크로 시작하면 방송이 아니라 그 링크로 연결 (뒤에 글자가 붙어 있으면 앞 URL 토큰만)
     if (e.type === 'chat' && e.message) {
       const urlMatch = e.message.match(/^(https?:\/\/\S+)/);
@@ -3868,12 +3891,29 @@ const CHAT_BUNDLE_GAP_MS = 25 * 1000;
 // 같은 채널의 직전 채팅과 CHAT_BUNDLE_GAP_MS 이내면 같은 묶음 — 사이에 낀 다른 채널 채팅·비채팅 이벤트는 묶음을 끊지 않음(채널별 독립).
 // 필터 통과분만 받으므로 필터와 정방향으로 맞물린다. 2건부터 묶음, 1건은 개별 표시.
 // 정렬 앵커: 개별=자기 시각, 묶음=오래된순이면 첫 채팅·최신순이면 마지막 채팅 시각(마지막 활동 위치에 노출).
-function buildTimelineItems(filtered) {
+function buildTimelineItems(filtered, all) {
   const items = [];
   const chatFam = [];
+  const battleSeen = new Set();   // 필터를 통과한 대결 key만 노출 대상
   for (const e of filtered) {
-    if ((e.type === 'chat' || e.type === 'chat_emoticon' || e.type === 'donation') && e.channel_id) chatFam.push(e);
+    if (e.type === 'battle_notice') { battleSeen.add(e.mkey); continue; }
+    if ((e.type === 'chat' || e.type === 'chat_emoticon' || e.type === 'donation' || e.type === 'sanction' || e.type === 'mission_gift') && e.channel_id) chatFam.push(e);
     else { const t = new Date(e.time).getTime() || 0; items.push({ ev: e, aAsc: t, aDesc: t }); }
+  }
+  // 대결 종료: 같은 key의 NOTICE(참가 멤버 채널마다 1건)를 조인해 한 아이템으로.
+  // 참가 명단은 전체 이벤트 기준(멤버 필터로 일부 참가자가 가려져도 명단은 불변), 노출 여부는 필터 통과분 기준.
+  // 멤버 2인 이상만 이벤트화 — 1인은 외부인과의 대결(범위 밖)이거나 수신 누락 케이스라 미발화가 안전.
+  if (battleSeen.size > 0) {
+    const byKey = {};
+    for (const e of (all || filtered)) {
+      if (e.type === 'battle_notice' && battleSeen.has(e.mkey)) (byKey[e.mkey] = byKey[e.mkey] || []).push(e);
+    }
+    for (const key in byKey) {
+      const g = byKey[key];
+      if (new Set(g.map(e => e.member_id)).size < 2) continue;
+      const ts = g.map(e => new Date(e.time).getTime() || 0);
+      items.push({ battle: g, aAsc: Math.min(...ts), aDesc: Math.max(...ts) });
+    }
   }
   chatFam.sort((a, b) => new Date(a.time) - new Date(b.time));
   const open = {};   // channel_id → { t: 마지막 채팅 시각, arr: 진행 중 묶음 }
@@ -3901,9 +3941,6 @@ function renderChatBundle(items, allEvents) {
   const first = items[0], last = items[items.length - 1];
   const channelMember = MEMBERS.find(m => m.id === first.channel_id);
   const channelColor = channelMember ? channelMember.color : '#cbd5e1';
-  const donCnt = items.filter(i => i.type === 'donation').length;
-  const chatCnt = items.length - donCnt;
-  const label = [chatCnt ? `채팅 ${chatCnt}건` : '', donCnt ? `후원 ${donCnt}건` : ''].filter(Boolean).join(' · ');   // 후원 연타만 묶이면 "채팅 0건" 없이 "후원 N건"
   const senderIds = [...new Set(items.map(i => i.member_id))];
   const senderHtml = senderIds.map(id => {
     const m = findMember(id);
@@ -3917,6 +3954,10 @@ function renderChatBundle(items, allEvents) {
     const m = findMember(i.member_id);
     let msg, rowUrl = liveUrl;   // 개별 채팅과 동일 동선: 행 전체가 방송으로 이동, 메시지가 http 링크로 시작하면 그 링크로
     if (i.type === 'donation') msg = `<span class="cbr-don">${SVG_ICONS.starBalloon}별풍선 ${i.amount || ''}개</span>`;
+    else if (i.type === 'sanction') msg = i.kind === 'kick'
+      ? `<span class="cbr-sanction">${SVG_ICONS.kickOut}강제퇴장</span>`
+      : `<span class="cbr-sanction">${SVG_ICONS.ban}채팅금지 ${i.seconds || 0}초</span>`;
+    else if (i.type === 'mission_gift') msg = `<span class="cbr-mission">${SVG_ICONS.flame}${i.mission === 'battle' ? '대결' : '도전'}미션 후원 ${i.amount || 0}개</span>${i.title ? ` <span class="cbr-mtitle">“${escapeHtml(i.title)}”</span>` : ''}`;
     else if (i.type === 'chat_emoticon') msg = '(이모티콘)';
     else {
       msg = escapeHtml(i.message || '');
@@ -3936,7 +3977,7 @@ function renderChatBundle(items, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member">${senderHtml}</span>
-        <span class="event-action"><span class="event-action-label">${label}</span>${el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''}</span>
+        <span class="event-action">${el ? `<span class="event-elapsed">⏱ ${el}</span>` : ''}</span>
         <span class="event-target">(<a class="cbr-chan" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener" style="color: ${channelColor}">${escapeHtml(first.channel_name || '')}</a> 방송)</span>
       </div>
       <div class="chat-bundle-rows">${rows}</div>
@@ -3947,6 +3988,46 @@ function renderChatBundle(items, allEvents) {
     </div>
   `;
   return `<div class="event chat-bundle" data-time="${new Date(last.time).getTime() || 0}">${inner}</div>`;
+}
+
+// 대결 종료 아이템: 같은 key의 NOTICE 묶음(참가 멤버 채널당 1건) → "[팀별 멤버] 승/패(또는 무승부)" 한 행.
+// 표시는 감지된 멤버만(외부 참가자는 원리적으로 비가시). 여러 채널에 걸친 사건이라 (XX 방송) 표기는 예외적으로 생략(확정).
+function renderBattleItem(g) {
+  const first = g[0];
+  const teams = {};   // 팀명 → 멤버 id들(채널 내 중복 수신 대비 중복 제거)
+  for (const e of g) {
+    if (!teams[e.my_team]) teams[e.my_team] = [];
+    if (!teams[e.my_team].includes(e.member_id)) teams[e.my_team].push(e.member_id);
+  }
+  const nameHtml = id => { const m = findMember(id); return `<span style="color: ${m ? m.color : '#fff'}">${escapeHtml(m ? m.name : id)}</span>`; };
+  const teamHtml = ids => ids.map(nameHtml).join('·');
+  let resultHtml;
+  if (first.draw) {
+    resultHtml = Object.values(teams).map(teamHtml).join(' <span class="battle-sep">/</span> ') + ' <span class="battle-draw">무승부</span>';
+  } else {
+    const win = [], lose = [];
+    for (const t in teams) (t === first.winner ? win : lose).push(...teams[t]);
+    const parts = [];
+    if (win.length) parts.push(`${teamHtml(win)} <span class="battle-win">승</span>`);
+    if (lose.length) parts.push(`${teamHtml(lose)} <span class="battle-lose">패</span>`);
+    resultHtml = parts.join(' <span class="battle-sep">/</span> ');
+  }
+  const last = g.reduce((a, b) => new Date(a.time) > new Date(b.time) ? a : b);
+  const t = new Date(last.time).getTime() || 0;
+  return `<div class="event" data-time="${t}">
+    <div class="event-icon battle">${SVG_ICONS.swords}</div>
+    <div class="event-body">
+      <div>
+        <span class="event-action"><span class="event-action-label">대결미션 종료</span></span>
+        <span class="battle-result">— ${resultHtml}</span>
+      </div>
+      ${first.title ? `<div class="event-detail">“${escapeHtml(first.title)}”</div>` : ''}
+    </div>
+    <div class="event-time">
+      <span class="event-time-rel">${formatRelTime(last.time)}</span>
+      <span class="event-time-abs">${formatAbsTime(last.time)}</span>
+    </div>
+  </div>`;
 }
 
 function initFilterUI() {
@@ -4074,9 +4155,9 @@ function applyFilter() {
       ? new Date(a.time) - new Date(b.time)
       : new Date(b.time) - new Date(a.time));
     // 채팅류는 채널 단위 묶음으로 변환 후 앵커 시각으로 정렬. sorted는 renderEvent의 종료 제목·⏱ 경과 조회용 원본 유지.
-    const items = buildTimelineItems(filtered);
+    const items = buildTimelineItems(filtered, allEvents);
     items.sort((a, b) => eventSortAsc ? a.aAsc - b.aAsc : b.aDesc - a.aDesc);
-    tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : renderEvent(it.ev, sorted)).join('') + footerHtml;
+    tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('') + footerHtml;
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
     btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });

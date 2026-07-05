@@ -898,16 +898,9 @@
     border: 1px solid var(--border);
     padding: 16px;
     display: flex; flex-direction: column; gap: 12px;
-    cursor: pointer;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     text-align: left;
     font-family: inherit;
     color: inherit;
-  }
-  .stats-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent);
-    box-shadow: 0 6px 16px rgba(97,255,236,0.15);
   }
   .stats-card-header { display: flex; align-items: center; gap: 10px; }
   .stats-card-avatar {
@@ -964,9 +957,9 @@
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
   .stats-summary-value { font-size: 14px; font-weight: 700; }
-  /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프) */
-  .stats-summary-item[data-metric] { cursor: pointer; padding: 2px 6px; margin: -2px -6px; transition: background 0.15s; }
-  .stats-summary-item[data-metric]:hover { background: var(--surface2); }
+  /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
+  .stats-summary-item[data-metric] { cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .stats-summary-item[data-metric]:hover { background: var(--surface2); border-color: var(--accent); }
   /* 일별 요약 세션의 시청자(최고·평균) — 시간 우측 인라인, 글씨는 시간과 동일 톤(아이콘만 색) */
   .day-session-viewer { font-size: 12px; color: var(--text); font-weight: 600; white-space: nowrap; }
   .day-session-viewer .stats-row-icon { margin-right: 3px; }
@@ -1047,6 +1040,9 @@
   .toh-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
   .toh-title { font-size: 12px; font-weight: 600; color: #cbd5e1; }
   .toh-sub { font-size: 11px; color: var(--muted); }
+  .toh-headright { display: inline-flex; align-items: center; gap: 10px; }
+  .toh-tendency { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }   /* 성향 라벨: 아이콘·텍스트 단일 색 통일(여기 한 줄로 조절) */
+  .toh-tendency svg { width: 12px; height: 12px; }
   .toh-body { display: flex; align-items: flex-start; padding: 7px 0; }
   .toh-yaxis { position: relative; width: 22px; flex: none; }
   .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--muted); }
@@ -1295,13 +1291,6 @@
   }
   .link-btn.ogq-btn:hover .ogq-platform { color: var(--accent); }
   .link-btn.ogq-btn:hover .ogq-platform .link-icon { color: var(--accent) !important; }
-  .link-empty {
-    color: var(--muted);
-    font-size: 11px;
-    opacity: 0.4;
-    padding: 6px 8px;
-    text-align: center;
-  }
   /* 모바일: 멤버 가로 매트릭스 대신 멤버별 세로 블록 (가로 스크롤 제거). 데스크톱은 .links-table-wrap 유지 */
   .links-mobile { display: none; }
   .links-m-block {
@@ -1862,23 +1851,23 @@
   .members-quick-btn {
     width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
+    background: rgba(97,255,236,0.08);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     text-decoration: none;
     cursor: pointer;
     transition: all 0.15s;
     padding: 0;
     font-family: inherit;
   }
-  .members-quick-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(97,255,236,0.08);
-  }
-  .members-quick-btn.quick-soop:hover { border-color: #0388FF; color: #0388FF; background: rgba(3,136,255,0.10); }
-  .members-quick-btn.quick-youtube:hover { border-color: #FF0000; color: #FF0000; background: rgba(255,0,0,0.10); }
-  .members-quick-btn.quick-naver:hover { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
+  /* 상시 유색(브랜드색, 관련링크 버튼은 위 기본=민트) — hover는 배경 농도만 상승(클릭 가능 피드백) */
+  .members-quick-btn:hover { background: rgba(97,255,236,0.18); }
+  .members-quick-btn.quick-soop { border-color: #0388FF; color: #0388FF; background: rgba(3,136,255,0.10); }
+  .members-quick-btn.quick-soop:hover { background: rgba(3,136,255,0.22); }
+  .members-quick-btn.quick-youtube { border-color: #FF0000; color: #FF0000; background: rgba(255,0,0,0.10); }
+  .members-quick-btn.quick-youtube:hover { background: rgba(255,0,0,0.22); }
+  .members-quick-btn.quick-naver { border-color: #03C75A; color: #03C75A; background: rgba(3,199,90,0.10); }
+  .members-quick-btn.quick-naver:hover { background: rgba(3,199,90,0.22); }
   .members-quick-btn svg { width: 16px; height: 16px; display: block; }
   @container (max-width: 520px) { .members-profile-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 정보 컬럼 ≤520px면(폰/태블릿 2단 무관) 이름 우측 버튼 2×2 */
   .members-info-section {
@@ -2001,10 +1990,10 @@
     .grid, .events-wrap, .stats-wrap, .chem-wrap, .content-wrap, .members-wrap, .hall-wrap { padding: 16px; }
     .stats-tabs-members, .stats-tabs-side { display: contents; }
   }
-  /* 연간 카드: 헤더 클릭=달력, 지표 행 클릭=그래프 모달 */
-  .stats-card-header[data-cal] { cursor:pointer; }
-  .stats-card-row-link { cursor:pointer; }
-  .stats-card-row-link:hover { background:var(--surface2); }
+  /* 통합탭 카드: 지표 행 클릭=그래프 모달 (헤더→멤버 이동은 폐지 — 멤버 상세는 상단 아바타 탭이 유일 동선).
+     hover 민트 테두리 = 사이트 공통 '클릭 가능' 문법. 투명 기본 테두리+마진 보정으로 레이아웃 시프트 없음 */
+  .stats-card-row-link { cursor:pointer; padding:2px 6px; margin:-3px -7px; border:1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .stats-card-row-link:hover { background:var(--surface2); border-color:var(--accent); }
   /* 차트(SVG) — 그래프 모달에서 사용 */
   .graph-svg { width:100%; height:auto; display:block; }
   .g-grid { stroke:rgba(255,255,255,0.08); stroke-width:1; }
@@ -2564,6 +2553,7 @@ const SVG_ICONS = {
   hourglass: `<svg viewBox="-0.03 0.60 24 24" width="14" height="14"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></g><path d="M7.7 7H16.3L12 12Z" fill="currentColor" stroke="none"/><path d="M7.586 16.414H16.414L17 17.828V22H7V17.828Z" fill="currentColor" stroke="none"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="5.4" fill="currentColor"/><circle cx="12" cy="2.4" r="1.6" fill="currentColor"/><circle cx="18.4" cy="5.6" r="1.6" fill="currentColor"/><circle cx="21.6" cy="12" r="1.6" fill="currentColor"/><circle cx="18.4" cy="18.4" r="1.6" fill="currentColor"/><circle cx="12" cy="21.6" r="1.6" fill="currentColor"/><circle cx="5.6" cy="18.4" r="1.6" fill="currentColor"/><circle cx="2.4" cy="12" r="1.6" fill="currentColor"/><circle cx="5.6" cy="5.6" r="1.6" fill="currentColor"/></svg>`,
   moon: `<svg viewBox="-1.47 1.40 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="miter" stroke-miterlimit="10"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  help: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>`,
   send: `<svg viewBox="0.60 -0.67 24 24" width="14" height="14"><path d="M22 2 15 22l-4-9-9-4z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" mask="url(#mics)"/></svg>`,
   heartBubble: `<svg viewBox="-0.47 -1.52 24 24" width="14" height="14"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" mask="url(#mich)"/></svg>`,
   bell: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path class="ring-wave" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M3.5 7a5 5 0 0 0 0 5"/><path class="ring-wave" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M20.5 7a5 5 0 0 1 0 5"/><path d="M12 2.5c-.83 0-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5c0-3.08-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5z"/><path d="M9.4 18.8a2.6 2.6 0 0 0 5.2 0z"/></svg>`,
@@ -3951,7 +3941,7 @@ function buildTimelineItems(filtered, all) {
 }
 
 // 채팅 묶음 아이템 — 클릭 펼침 없이 내용 전체를 인라인 노출, 내부는 과거→최신 고정(확정 사양).
-// 헤더는 개별 이벤트와 같은 골격: [채팅 아이콘][채널 아바타][발화자들 · 채팅 N건 (⏱) (채널 방송)][시간].
+// 헤더는 개별 이벤트와 같은 골격: [채팅 아이콘][발화자 아바타들][발화자들 채팅 (⏱) (채널 방송)][시간]. 라벨은 "채팅"만(건수 없음 — 확정).
 function renderChatBundle(items, allEvents) {
   const first = items[0], last = items[items.length - 1];
   const channelMember = MEMBERS.find(m => m.id === first.channel_id);
@@ -3992,7 +3982,7 @@ function renderChatBundle(items, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member">${senderHtml}</span>
-        <span class="event-action">${el ? `<span class="event-elapsed">⏱ ${el}</span>` : ''}</span>
+        <span class="event-action"><span class="event-action-label">채팅</span>${el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''}</span>
         <span class="event-target">(<a class="cbr-chan" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener" style="color: ${channelColor}">${escapeHtml(first.channel_name || '')}</a> 방송)</span>
       </div>
       <div class="chat-bundle-rows">${rows}</div>
@@ -4599,7 +4589,7 @@ function renderStatsAnnual(body) {
     const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
     return `
       <div class="stats-card" data-member="${m.id}">
-        <div class="stats-card-header" data-cal="${m.id}">
+        <div class="stats-card-header">
           <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
@@ -4646,13 +4636,7 @@ function renderStatsAnnual(body) {
     <div class="stats-grid">${cards}</div>
   `;
   bindPeriodSelector(body, true);
-  // 헤더(이름/이미지) 클릭 → 그 멤버 달력 탭으로
-  body.querySelectorAll('.stats-card-header[data-cal]').forEach(h => {
-    h.addEventListener('click', () => {
-      selectStatsTab(h.dataset.cal);
-    });
-  });
-  // 지표 행 클릭 → 그 멤버 × 그 지표의 월별 추이 그래프 모달
+  // 지표 행 클릭 → 그 멤버 × 그 지표의 월별 추이 그래프 모달 (헤더 클릭→멤버 이동은 폐지)
   body.querySelectorAll('.stats-card-row-link[data-metric]').forEach(row => {
     row.addEventListener('click', () => {
       const card = row.closest('.stats-card');
@@ -4685,7 +4669,7 @@ function renderStatsAll(body) {
     const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
     return `
       <div class="stats-card" data-member="${m.id}">
-        <div class="stats-card-header" data-cal="${m.id}">
+        <div class="stats-card-header">
           <img class="stats-card-avatar" src="${m.img}" alt="${m.name}">
           <div class="stats-card-name" style="color: ${m.color}">${m.name}</div>
         </div>
@@ -4731,9 +4715,6 @@ function renderStatsAll(body) {
     <div class="stats-grid">${cards}</div>
   `;
   bindPeriodSelector(body, true);
-  body.querySelectorAll('.stats-card-header[data-cal]').forEach(h => {
-    h.addEventListener('click', () => selectStatsTab(h.dataset.cal));
-  });
   body.querySelectorAll('.stats-card-row-link[data-metric]').forEach(row => {
     row.addEventListener('click', () => {
       const card = row.closest('.stats-card');
@@ -5112,6 +5093,43 @@ function computeTimeOfDayMinutes(sessionsByDate, year, month1, isCurrentMonth) {
   return grid;
 }
 
+// 방송 성향(월별): 방송 시간을 KST 시각 기준 3구간(새벽 1~9 / 낮 9~17 / 저녁 17~익일 1)에 분 단위 배분 —
+// computeTimeOfDayMinutes와 동일한 세션 클립 규칙(진행 중 세션은 현재 월만 now까지, 과거 월 고아 제외, 타월 분 미산입)을 1시간 경계로 걷는다.
+// 우세 구간이 그 달 방송 시간의 과반(50%) 이상이면 그 성향, 미만(동률 포함)이면 무작위형. 방송 0분이면 null(라벨 미표시).
+function computeBroadcastTendency(sessionsByDate, year, month1, isCurrentMonth) {
+  const buckets = { dawn: 0, day: 0, evening: 0 };
+  const nowMs = Date.now();
+  for (const arr of Object.values(sessionsByDate || {})) {
+    for (const s of arr) {
+      const startMs = new Date(s.start).getTime();
+      if (isNaN(startMs)) continue;
+      let endMs;
+      if (s.end) endMs = new Date(s.end).getTime();
+      else if (isCurrentMonth) endMs = nowMs;
+      else continue;
+      if (isNaN(endMs) || endMs <= startMs) continue;
+      let cursor = startMs;
+      let guard = 0;
+      while (cursor < endMs && guard < 999) {
+        guard++;
+        const k = new Date(cursor + 9 * 3600 * 1000);   // KST 벽시계 성분
+        const yr = k.getUTCFullYear(), mo = k.getUTCMonth() + 1, hr = k.getUTCHours();
+        const boundaryKst = Date.UTC(yr, mo - 1, k.getUTCDate(), hr + 1, 0, 0);
+        const segEnd = Math.min(endMs, boundaryKst - 9 * 3600 * 1000);   // 다음 정시(KST)까지
+        if (yr === year && mo === month1) {
+          const key = (hr >= 1 && hr < 9) ? 'dawn' : (hr >= 9 && hr < 17) ? 'day' : 'evening';
+          buckets[key] += (segEnd - cursor) / 60000;
+        }
+        cursor = segEnd;
+      }
+    }
+  }
+  const total = buckets.dawn + buckets.day + buckets.evening;
+  if (total <= 0) return null;
+  const top = Object.entries(buckets).sort((a, b) => b[1] - a[1])[0];
+  return top[1] / total >= 0.5 ? top[0] : 'random';
+}
+
 // 히트맵 렌더: 가로=일(월별, 1fr로 폭은 달력에 맞춤), 세로=3시간 8밴드(경계눈금 00..24), 농도=선형 min(분/180,1).
 // 주말만 날짜를 색으로 표기(토 파랑·일 빨강), 간격 없이 연속. 세션이 전혀 없는 달은 '' 반환(숨김).
 function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
@@ -5143,7 +5161,19 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
     xa += `<div class="toh-xlabel" style="color:${c || 'transparent'};">${c ? d : ''}</div>`;
   }
   xa += `</div>`;
-  return `<div class="toh-head"><span class="toh-title">시간대별 방송 분포</span><span class="toh-sub">방송시간 기준</span></div><div class="toh-body">${yc}<div class="toh-right">${cells}${xa}</div></div>`;
+  // 방송 성향 라벨 — 비활성화(2026-07-04, Crenop): 실데이터가 거의 전원 저녁형이라 변별력 없음. 컷오프 재설계 시 재활성 후보라 계산 함수·아이콘·CSS 포함 보존.
+  const tendHtml = '';
+  /*
+  const tendency = computeBroadcastTendency(sum.sessionsByDate, year, month1, isCurrentMonth);
+  const TENDENCY = {
+    dawn: { icon: SVG_ICONS.moon, label: '새벽형' },
+    day: { icon: SVG_ICONS.sun, label: '낮방형' },
+    evening: { icon: SVG_ICONS.flame, label: '저녁형' },
+    random: { icon: SVG_ICONS.help, label: '무작위형' },
+  };
+  const tendHtml = tendency ? `<span class="toh-tendency" title="새벽 1~9시 · 낮 9~17시 · 저녁 17~익일 1시 — 방송 시간의 과반을 차지한 구간">${TENDENCY[tendency].icon}${TENDENCY[tendency].label}</span>` : '';
+  */
+  return `<div class="toh-head"><span class="toh-title">시간대별 방송 분포</span><span class="toh-headright">${tendHtml}<span class="toh-sub">방송시간 기준</span></span></div><div class="toh-body">${yc}<div class="toh-right">${cells}${xa}</div></div>`;
 }
 
 async function loadEvents() {
@@ -5264,7 +5294,7 @@ function renderLinks() {
     naverOgq:'#03C75A', soopOgq:'#60a5fa',
   };
   const ICON_BG = { x:'#000000', fancim:'#000000' };
-  const emptyCell = `<td><div class="link-empty">-</div></td>`;
+  const emptyCell = `<td></td>`;   // 빈 항목은 표기 없이 빈 셀(구 '-' 표기 제거)
   const ICON_FOR = {
     soop: SVG_ICONS.soop, youtube: SVG_ICONS.youtube, cafe: SVG_ICONS.coffee,
     namuwiki: SVG_ICONS.book, instagram: SVG_ICONS.instagram, x: SVG_ICONS.x,

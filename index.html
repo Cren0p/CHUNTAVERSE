@@ -400,6 +400,7 @@
     font-size: 11px;
     opacity: 0.75;
   }
+  .hc-stale { color: #FFA94D; }   /* 감지 지연 경고 — 기존 팔레트의 경고 주황(cbr-sanction과 동일 계열) */
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
@@ -2561,6 +2562,8 @@ const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 �
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
+let lastServerDetect = null;   // 서버 감지 심장박동(/ 응답 last_detect_at) — 클라이언트 fetch 시각과 별개(worker가 응답해도 감지 계층이 죽어 있을 수 있음)
+const DETECT_STALE_MS = 5 * 60 * 1000;   // 정상 겉보기 나이 최대 ~3분(감지 10s + Cron 폴백 60s + KV 콜로캐시·전파 ≤120s) 위 마진
 let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let lastChemistryUpdate = null;
@@ -3488,12 +3491,19 @@ function updateHeaderCenter() {
   } else if (currentPage === 'members') {
     topLine = '';
   }
+  // 감지 지연 경고: 심장박동(last_detect_at)이 임계 이상 늙으면 감지가 시간 단위로 도는 4탭의 주기 문구를 교체.
+  // 시각도 클라이언트 fetch 시각 대신 서버 마지막 감지 시각으로(감지가 죽어도 fetch는 성공해 시각이 계속 새것처럼 보이는 문제 방지).
+  const detectWarn = !!lastServerDetect && (Date.now() - lastServerDetect.getTime() > DETECT_STALE_MS)
+    && ['live', 'events', 'stats', 'chemistry'].includes(currentPage);
+  if (detectWarn) {
+    topLine = '감지 지연 중 · ' + lastServerDetect.toLocaleTimeString('ko-KR') + ' 기준';
+  }
   // topLine은 "{주기} · {시각} 기준" 형태. 모바일에서 '·' 기준 2줄 분리를 위해 주기/시각을 스팬으로 감쌈(PC는 inline이라 1줄 동일).
   let topLineHtml = '';
   if (topLine) {
     const sepIdx = topLine.indexOf(' · ');
     topLineHtml = sepIdx >= 0
-      ? `<div class="header-center-line"><span class="hc-period">${topLine.slice(0, sepIdx)}</span><span class="hc-mid"> · </span><span class="hc-stamp">${topLine.slice(sepIdx + 3)}</span></div>`
+      ? `<div class="header-center-line"><span class="hc-period${detectWarn ? ' hc-stale' : ''}">${topLine.slice(0, sepIdx)}</span><span class="hc-mid"> · </span><span class="hc-stamp">${topLine.slice(sepIdx + 3)}</span></div>`
       : `<div class="header-center-line">${topLine}</div>`;
   }
   el.innerHTML = `
@@ -5267,6 +5277,7 @@ async function loadLive() {
       liveBadge.classList.toggle('off', liveCount === 0);
     }
     lastLiveUpdate = new Date();
+    if (data.last_detect_at) lastServerDetect = new Date(data.last_detect_at);
     updateHeaderCenter();
   } catch (e) {
     // 일시적 폴링 실패: 이미 카드 그리드가 그려져 있으면 유지하고 이번 실패는 무시
@@ -5275,6 +5286,7 @@ async function loadLive() {
       app.innerHTML = '<div class="loading"><div>데이터를 불러올 수 없어요</div></div>';
     }
     console.error(e);
+    updateHeaderCenter();   // fetch 자체가 죽어도 10초마다 감지 지연 판정이 다시 그려지게(성공 경로에만 있으면 경고가 안 뜸)
   }
 }
 

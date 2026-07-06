@@ -2010,7 +2010,6 @@
   .graph-modal-panel .lr-head { color:var(--text); font-size:14px; padding:14px 18px; }
   .graph-modal-panel .lr-body { padding:22px 20px; }
   .graph-modal-panel .sg-dot { width:11px; height:11px; display:inline-block; }
-  .graph-modal-panel .stats-row-icon { margin-right: 4px; }   /* 카드 라벨의 gap:4px에 대응 — 제목은 인라인이라 여백으로 재현 */
   /* 그래프 모달 본문: [‹][차트][›] — ‹›는 한 달 이동(기간줄 스테퍼와 동일 버튼 문법) */
   .graph-modal-panel .lr-body { display: flex; align-items: center; gap: 2px; }
   .graph-modal-panel .sg-chart { flex: 1; min-width: 0; }
@@ -2910,6 +2909,7 @@ async function openLikeRequests() {
   if (!ov || !body) return;
   head.innerHTML = `<span>${SVG_ICONS.thumbsup}멤버들의 좋아요 요청 모아보기</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
   ov.hidden = false;
+  syncBodyScrollLock();
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   try {
     // hover로 이미 받는 중/받아둔 게 있으면 그걸, 아니면 지금 시작. 숨김목록을 손에 쥔 뒤 렌더하므로 "보였다 사라짐" 없음.
@@ -2930,9 +2930,17 @@ async function openLikeRequests() {
     body.innerHTML = '<div class="lr-msg">불러오기에 실패했습니다. 잠시 후 다시 시도해주세요.</div>';
   }
 }
+// 모달 열림 중 배경 스크롤 잠금 — 열린 오버레이(lrOverlay=좋아요·일정 공용, statGraphOverlay=그래프)가
+// 하나라도 있으면 body 스크롤 차단, 모두 닫히면 복원. open/close 5지점에서 호출.
+function syncBodyScrollLock() {
+  const anyOpen = ['lrOverlay', 'statGraphOverlay'].some(id => { const el = document.getElementById(id); return el && !el.hidden; });
+  document.body.style.overflow = anyOpen ? 'hidden' : '';
+}
+
 function closeLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   if (ov) ov.hidden = true;
+  syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기
 }
@@ -3151,6 +3159,7 @@ async function openSchedule() {
   if (!ov || !body) return;
   head.innerHTML = `<span style="color:var(--accent)">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
   ov.hidden = false;
+  syncBodyScrollLock();
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   const rows = await preloadSchedule();  // hover로 미리 받아둔 게 있으면 그것, 없으면 지금 받음
   if (rows) { lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows)); scheduleData = parseScheduleRows(rows); updatePageTitle(); }
@@ -3574,6 +3583,7 @@ function switchPage(page) {
       loadContent();
     } else renderContent();
   }
+  window.scrollTo(0, 0);   // 탭 전환은 항상 최상단에서 — 이전 탭의 스크롤 깊이가 새 탭에 이월되는 것 방지
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -4978,6 +4988,7 @@ function openStatGraphModal(memberId, metricKey) {
   const body = document.getElementById('statGraphBody');
   if (!ov || !head || !body) return;
   ov.hidden = false;   // clientWidth 측정을 위해 먼저 표시
+  syncBodyScrollLock();
   const chevSvg = (pts) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="${pts}"/></svg>`;
   body.innerHTML = `
     <button class="stats-month-btn sg-nav" data-dir="-1" type="button">${chevSvg('15 18 9 12 15 6')}</button>
@@ -5008,7 +5019,7 @@ function openStatGraphModal(memberId, metricKey) {
     // 'yyyy-mm' 사전순 = 시간순이라 문자열 비교로 경계 판정
     btns[0].disabled = range[0] <= minYm;
     btns[1].disabled = range[range.length - 1] >= maxYm;
-    head.innerHTML = `<span><span class="sg-dot" style="background:${m.color}"></span>${m.name} · <span class="stats-row-icon" style="color:${metric.icColor}">${iconSvg}</span>${metric.label} · ${range[0].replace('-', '.')} ~ ${range[range.length - 1].replace('-', '.')}</span><button class="lr-close" type="button" onclick="closeStatGraph()">✕</button>`;
+    head.innerHTML = `<span><span class="sg-dot" style="background:${m.color}"></span><span>${m.name}</span><span>·</span><span class="stats-row-icon" style="color:${metric.icColor}">${iconSvg}</span><span>${metric.label}</span><span>·</span><span>${range[0].replace('-', '.')} ~ ${range[range.length - 1].replace('-', '.')}</span></span><button class="lr-close" type="button" onclick="closeStatGraph()">✕</button>`;
   };
   const draw = () => {
     if (ov.hidden) return;
@@ -5037,6 +5048,7 @@ function openStatGraphModal(memberId, metricKey) {
 function closeStatGraph() {
   const ov = document.getElementById('statGraphOverlay');
   if (ov) ov.hidden = true;
+  syncBodyScrollLock();
 }
 
 // 축 눈금 간격을 보기 좋은 값(1·2·2.5·5·10 ×10ⁿ)으로

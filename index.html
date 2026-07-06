@@ -830,7 +830,7 @@
     border: 1.5px solid transparent;
     color: var(--muted);
     font-family: inherit; font-size: 12px; font-weight: 700;
-    padding: 7px 0; cursor: pointer;
+    padding: 0; min-height: 32px; cursor: pointer;   /* 스테퍼 박스와 32px 통일. height 고정 금지 — [전체]의 2행 스팬(<1100px) stretch가 깨짐 */
     transition: all 0.15s;
   }
   .stats-period-btn:hover { color: var(--accent); }
@@ -932,6 +932,7 @@
     padding: 0 8px;
     box-sizing: border-box;
     height: 100%;
+    min-height: 32px;   /* <1100px 세로 배치에선 height:100%가 auto(콘텐츠 30px)로 무력화 — 월 버튼(min-height:32)과 높이 통일 */
     justify-content: center;
   }
   .stats-month-btn {

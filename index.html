@@ -14,6 +14,8 @@
 <meta property="og:locale" content="ko_KR">
 <link rel="canonical" href="https://chuntaverse.com">
 <link rel="icon" type="image/webp" href="Favicon.webp">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#070a14">
 <style>
   :root {
     --bg: #070a14;
@@ -2008,6 +2010,12 @@
   .graph-modal-panel .lr-head { color:var(--text); font-size:14px; padding:14px 18px; }
   .graph-modal-panel .lr-body { padding:22px 20px; }
   .graph-modal-panel .sg-dot { width:11px; height:11px; display:inline-block; }
+  .graph-modal-panel .stats-row-icon { margin-right: 4px; }   /* 카드 라벨의 gap:4px에 대응 — 제목은 인라인이라 여백으로 재현 */
+  /* 그래프 모달 본문: [‹][차트][›] — ‹›는 한 달 이동(기간줄 스테퍼와 동일 버튼 문법) */
+  .graph-modal-panel .lr-body { display: flex; align-items: center; gap: 2px; }
+  .graph-modal-panel .sg-chart { flex: 1; min-width: 0; }
+  .graph-modal-panel .sg-nav { flex-shrink: 0; }
+  .graph-modal-panel .sg-nav:disabled { color: var(--border); cursor: not-allowed; }
   /* 차트가 뷰포트 높이를 넘지 않게(세로 스크롤 방지). meet라 비율 유지하며 축소 */
   .graph-modal-panel .graph-svg { max-height: calc(90vh - 100px); }
 </style>
@@ -3547,13 +3555,24 @@ function switchPage(page) {
     renderChemistry();
   }
   if (page === 'banner') {
-    renderBanners();
+    // 데이터 없음 = 첫 로드 실패(시트 간헐 오류 등) 상태 — 재진입을 재시도 기회로. 결과 렌더는 loadBanners 내부가 수행
+    // (bannerData 선언은 이 함수의 초기 호출보다 앞이라 TDZ 없음. 로드 성공 후 진짜 0건이면 loadBanners가 '없어요'를 그림)
+    if (bannerData.length === 0) {
+      const body = document.getElementById('bannerBody');
+      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>현수막 데이터 불러오는 중...</div></div>';
+      loadBanners();
+    } else renderBanners();
   }
   if (page === 'hall') {
     renderHall();
   }
   if (page === 'content') {
-    renderContent();
+    // banner와 동일: 데이터 없음 = 첫 로드 실패 상태 — 재진입 재시도, 결과 렌더는 loadContent 내부가 수행
+    if (contentData.length === 0) {
+      const body = document.getElementById('contentBody');
+      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>컨텐츠 데이터 불러오는 중...</div></div>';
+      loadContent();
+    } else renderContent();
   }
 }
 
@@ -4303,14 +4322,15 @@ function fancntYearEnd(memberId, year) {
 }
 // 그래프 종류(메트릭) 정의. fan은 fancnt에서 별도 산출(special), 나머지는 computeMonthSummary 결과에서.
 const GRAPH_METRICS = [
-  { key: 'broadcastDays', label: '방송 일수',   unit: '일', get: s => s.daysWithBroadcast },
-  { key: 'broadcastTime', label: '방송 시간',   unit: '시간', get: s => s.totalDurationMs / 3600000, fmt: v => formatDuration(v * 3600000) },
-  { key: 'fan',           label: '애청자',      unit: '명', special: true },
-  { key: 'peakViewer',    label: '최고 시청자', unit: '명', get: s => s.viewerPeak },
-  { key: 'avgViewer',     label: '평균 시청자', unit: '명', get: s => s.viewerCount > 0 ? Math.round(s.viewerSum / s.viewerCount) : 0 },
-  { key: 'post',          label: '숲 게시글',   unit: '개', get: s => s.postCount },
-  { key: 'cafe',          label: '카페',        unit: '개', get: s => s.cafeCount },
-  { key: 'youtube',       label: '유튜브',      unit: '개', get: s => s.youtubeCount },
+  // ic/icColor = 카드 지표행과 동일한 아이콘·색(모달 제목용). fan은 SVG_ICONS가 아닌 FAN_ICON(조회 시 분기)
+  { key: 'broadcastDays', label: '방송 일수',   unit: '일', ic: 'calendar',  icColor: 'var(--ev-start)',   get: s => s.daysWithBroadcast },
+  { key: 'broadcastTime', label: '방송 시간',   unit: '시간', ic: 'clockTime', icColor: 'var(--ev-start)',   get: s => s.totalDurationMs / 3600000, fmt: v => formatDuration(v * 3600000) },
+  { key: 'fan',           label: '애청자',      unit: '명', ic: 'fan',       icColor: '#FFC94D',           special: true },
+  { key: 'peakViewer',    label: '최고 시청자', unit: '명', ic: 'arrowUp',   icColor: '#FF8C00',           get: s => s.viewerPeak },
+  { key: 'avgViewer',     label: '평균 시청자', unit: '명', ic: 'barChart',  icColor: '#FF8C00',           get: s => s.viewerCount > 0 ? Math.round(s.viewerSum / s.viewerCount) : 0 },
+  { key: 'post',          label: '숲 게시글',   unit: '개', ic: 'board',     icColor: 'var(--ev-post)',    get: s => s.postCount },
+  { key: 'cafe',          label: '카페',        unit: '개', ic: 'coffee',    icColor: '#03C75A',           get: s => s.cafeCount },
+  { key: 'youtube',       label: '유튜브',      unit: '개', ic: 'youtube',   icColor: 'var(--ev-youtube)', get: s => s.youtubeCount },
 ];
 const FAN_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
@@ -4848,25 +4868,49 @@ function renderStatsMember(body, memberId) {
   });
 }
 
+// ── 그래프 표시 범위 산정 (순수 함수 — verify_graph_range 스위트가 검증) ──
+function ymShift(ym, k) {   // 'yyyy-mm'을 k개월 이동(음수 가능)
+  const [y, m] = ym.split('-').map(Number);
+  const t = y * 12 + (m - 1) + k;
+  return `${Math.floor(t / 12)}-${String(((t % 12) + 12) % 12 + 1).padStart(2, '0')}`;
+}
+function ymDiff(a, b) {   // a - b (개월 수)
+  const [ay, am] = a.split('-').map(Number), [by, bm] = b.split('-').map(Number);
+  return (ay * 12 + am) - (by * 12 + bm);
+}
+// 그래프에 표시할 연속 n개월 산정. 연 단위로 자르지 않음(추세 연속성) — 2026-07-06 확정.
+// anchor: { center: ym } 선택 달 중심(경계에 닿으면 시프트) | { end: ym } 그 달을 오른쪽 끝으로(왼쪽을 과거 달로 채움 — '전체'용)
+// n: 표시 개수(화면 폭에서 산정). 가용(minYm~maxYm) 총 개월이 n 미만이면 전부 반환.
+function computeGraphRange(anchor, n, minYm, maxYm) {
+  const total = ymDiff(maxYm, minYm) + 1;
+  if (n > total) n = total;
+  let start = anchor.center
+    ? ymShift(anchor.center, -Math.floor((n - 1) / 2))
+    : ymShift(anchor.end, -(n - 1));
+  if (ymDiff(ymShift(start, n - 1), maxYm) > 0) start = ymShift(maxYm, -(n - 1));   // 우경계 초과 → 좌로 밀기
+  if (ymDiff(start, minYm) < 0) start = minYm;                                      // 좌경계 미달 → min으로
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(ymShift(start, i));
+  return out;
+}
+
 // 그래프 탭: 멤버 다중 필터 + 종류 단일 필터 → 켠 멤버들의 월별 추이 라인(SVG). 연 단위.
-// 월별 추이 라인 차트(SVG). 단일 멤버 라인(멤버 색). x=월(1~maxMonth), y=메트릭값. 값 없는 월은 라인 끊김. (그래프 모달에서 호출)
-function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
+// 월별 추이 라인 차트(SVG). 단일 멤버 라인(멤버 색). x=range의 연속 개월('yyyy-mm' 배열, 해 걸침 가능), y=메트릭값. 값 없는 월은 라인 끊김. (그래프 모달에서 호출)
+function drawGraphChart(wrap, memberId, range, metric) {
   if (!wrap) return;
   const id = memberId;
   const m = MEMBER_BY_ID[id];
   if (!m) { wrap.innerHTML = ''; return; }
   const color = m.color;
 
-  const months = [];
-  for (let mo = 1; mo <= maxMonth; mo++) months.push(mo);
-  const valueOf = (mo) => {
-    if (metric.special) return fancntMonthEnd(id, year, mo);   // 애청자(월말 누적), 없으면 null → 라인 끊김
-    const ym = `${year}-${String(mo).padStart(2, '0')}`;
+  const valueOf = (ym) => {
+    const [y, mo] = ym.split('-').map(Number);
+    if (metric.special) return fancntMonthEnd(id, y, mo);   // 애청자(월말 누적), 없으면 null → 라인 끊김
     const ms = statsState.data[ym] && statsState.data[ym][id];
     if (!ms) return 0;
-    return metric.get(computeMonthSummary(ms, year, mo));
+    return metric.get(computeMonthSummary(ms, y, mo));
   };
-  const pts = months.map(mo => valueOf(mo));
+  const pts = range.map(ym => valueOf(ym));
   const showVal = (v) => metric.fmt ? metric.fmt(v) : (v.toLocaleString() + (metric.unit || ''));
 
   // Y축: 데이터 min~max 기준으로 살짝 여유(변화폭 강조). 최소값이 0보다 높게 잡힐 수 있음.
@@ -4881,11 +4925,13 @@ function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
   if (yMin < 0) yMin = 0;
   if (yMax <= yMin) yMax = yMin + step;
 
-  const narrow = typeof window !== 'undefined' && window.innerWidth <= 900;
-  const W = narrow ? 380 : 720, H = narrow ? 300 : 380;
+  // 폭 실측(viewBox 1:1) — 표시 개수(n)는 호출부가 같은 폭으로 산정했으므로 라벨은 솎지 않고 전 표시
+  const W = wrap.clientWidth || (typeof window !== 'undefined' && window.innerWidth <= 900 ? 380 : 720);
+  const narrow = W < 500;
+  const H = narrow ? 300 : 380;
   const padL = narrow ? 16 : 32, padR = narrow ? 16 : 32, padT = narrow ? 22 : 30, padB = 36;
   const plotW = W - padL - padR, plotH = H - padT - padB;
-  const xOf = (i) => months.length <= 1 ? padL + plotW / 2 : padL + (i / (months.length - 1)) * plotW;
+  const xOf = (i) => range.length <= 1 ? padL + plotW / 2 : padL + (i / (range.length - 1)) * plotW;
   const yOf = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
 
   // 그리드 가로선만(Y축 숫자는 없음 — 값은 점마다 표기)
@@ -4894,8 +4940,14 @@ function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
     const y = yOf(v);
     grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" class="g-grid"/>`;
   }
+  // X라벨: 범위가 해를 걸치면 1월(및 첫 점)에 연도 병기("'27 1월") — 어느 해인지 모호함 방지
+  const spansYears = range[0].slice(0, 4) !== range[range.length - 1].slice(0, 4);
   let xlab = '';
-  months.forEach((mo, i) => { xlab += `<text x="${xOf(i).toFixed(1)}" y="${H - padB + 22}" class="g-xlabel">${mo}월</text>`; });
+  range.forEach((ym, i) => {
+    const [y, mo] = ym.split('-').map(Number);
+    const withYear = spansYears && (mo === 1 || i === 0);
+    xlab += `<text x="${xOf(i).toFixed(1)}" y="${H - padB + 22}" class="g-xlabel">${withYear ? `'${String(y).slice(2)} ` : ''}${mo}월</text>`;
+  });
 
   // 라인 + 각진 마커 + 값 텍스트(멤버색, 상시 표시). 양끝 점은 앵커로 잘림 방지.
   let d = '', started = false, marks = '', vlabels = '';
@@ -4905,7 +4957,7 @@ function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
     d += (started ? ' L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
     started = true;
     marks += `<rect x="${(x - 3).toFixed(1)}" y="${(y - 3).toFixed(1)}" width="6" height="6" fill="${color}"/>`;
-    const anchor = i === 0 ? 'start' : (i === months.length - 1 ? 'end' : 'middle');
+    const anchor = i === 0 ? 'start' : (i === range.length - 1 ? 'end' : 'middle');
     vlabels += `<text x="${x.toFixed(1)}" y="${(y - 11).toFixed(1)}" text-anchor="${anchor}" class="g-vlabel" fill="${color}">${showVal(v)}</text>`;
   });
   const line = d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : '';
@@ -4913,31 +4965,74 @@ function drawGraphChart(wrap, memberId, year, maxMonth, metric) {
   wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="graph-svg" preserveAspectRatio="xMidYMid meet">${grid}${line}${marks}${vlabels}${xlab}</svg>`;
 }
 
-// 카드 지표 행·멤버탭 요약 항목 클릭 → 그 멤버 × 그 지표의 그 해 월별 추이를 모달로. 연도는 viewMonth.year(전체/월간/멤버탭 공유). 비special 지표는 그 해 월들을 로드 후 그림.
+// 카드 지표 행·멤버탭 요약 항목 클릭 → 그 멤버 × 그 지표의 월별 추이 모달. 연 단위로 자르지 않음(2026-07-06 확정):
+// 표시 개수 n = 화면 폭에서 산정(점 간격이 값 라벨 최악 폭 이상 — 라벨 솎기 없이 데이터 개수 자체를 줄임).
+// 앵커 = 월 선택 상태면 그 달 중심 / '전체'(통합탭 연간 뷰)면 그 연도 마지막 가용 달을 오른쪽 끝으로(부족분은 과거 달로 채움).
+// 그래프 좌우 ‹ ›로 한 달씩 이동(가용 경계에서 disabled).
 function openStatGraphModal(memberId, metricKey) {
   const m = MEMBER_BY_ID[memberId];
   const metric = GRAPH_METRICS.find(g => g.key === metricKey);
   if (!m || !metric) return;
-  const now = kstNow();
-  const year = statsState.viewMonth ? statsState.viewMonth.year : now.getUTCFullYear();
-  const maxMonth = (year === now.getUTCFullYear()) ? now.getUTCMonth() + 1 : 12;
   const ov = document.getElementById('statGraphOverlay');
   const head = document.getElementById('statGraphHead');
-  const wrap = document.getElementById('statGraphBody');
-  if (!ov || !head || !wrap) return;
-  head.innerHTML = `<span><span class="sg-dot" style="background:${m.color}"></span>${m.name} · ${metric.label} · ${year}년</span><button class="lr-close" type="button" onclick="closeStatGraph()">✕</button>`;
-  ov.hidden = false;
-  const draw = () => { if (!ov.hidden) drawGraphChart(wrap, memberId, year, maxMonth, metric); };
-  // special(애청자)=fancnt, 그 외=그 해 월별 stats. 없으면 로드 후 그림(연간탭은 이미 로드돼 no-op).
-  const pending = metric.special
-    ? (statsState.fancnt ? [] : [loadFancnt()])
-    : annualMonthsToLoad(year, maxMonth).map(ym => loadStatsMonth(ym));
-  if (pending.length) {
-    wrap.innerHTML = '<div class="lr-msg">불러오는 중...</div>';
-    Promise.all(pending).then(draw);
-  } else {
+  const body = document.getElementById('statGraphBody');
+  if (!ov || !head || !body) return;
+  ov.hidden = false;   // clientWidth 측정을 위해 먼저 표시
+  const chevSvg = (pts) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="${pts}"/></svg>`;
+  body.innerHTML = `
+    <button class="stats-month-btn sg-nav" data-dir="-1" type="button">${chevSvg('15 18 9 12 15 6')}</button>
+    <div class="sg-chart"></div>
+    <button class="stats-month-btn sg-nav" data-dir="1" type="button">${chevSvg('9 18 15 12 9 6')}</button>`;
+  const chart = body.querySelector('.sg-chart');
+
+  // 표시 개수: 점 간격(plotW/(n-1))이 슬롯 폭 이상이 되는 최대 n. 슬롯 = 값 라벨 최악 "12,345"(6자)의
+  // 근사 폭(폰트×0.6×6: 14px≈50 / 12px≈43) + 최소 간극 8. 폰트 분기는 g-vlabel 미디어쿼리(900px)와 동일 기준.
+  const narrow = window.innerWidth <= 900;
+  const SLOT = narrow ? 58 : 51;
+  const cw = chart.clientWidth || (narrow ? 380 : 720);
+  const plotW = cw - (cw < 500 ? 16 : 32) * 2;
+  const n = Math.max(3, Math.min(12, Math.floor(plotW / SLOT) + 1));
+
+  const now = kstNow();
+  const maxYm = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+  const minYm = `${STATS_START_YEAR}-${String(STATS_START_MONTH).padStart(2, '0')}`;
+  const vm = statsState.viewMonth || { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
+  const isAll = statsState.periodAll && statsState.selectedTab === 'all';
+  let range = isAll
+    ? computeGraphRange({ end: vm.year >= now.getUTCFullYear() ? maxYm : `${vm.year}-12` }, n, minYm, maxYm)
+    : computeGraphRange({ center: `${vm.year}-${String(vm.month).padStart(2, '0')}` }, n, minYm, maxYm);
+
+  const iconSvg = metric.key === 'fan' ? FAN_ICON : SVG_ICONS[metric.ic];
+  const btns = body.querySelectorAll('.sg-nav');
+  const sync = () => {
+    // 'yyyy-mm' 사전순 = 시간순이라 문자열 비교로 경계 판정
+    btns[0].disabled = range[0] <= minYm;
+    btns[1].disabled = range[range.length - 1] >= maxYm;
+    head.innerHTML = `<span><span class="sg-dot" style="background:${m.color}"></span>${m.name} · <span class="stats-row-icon" style="color:${metric.icColor}">${iconSvg}</span>${metric.label} · ${range[0].replace('-', '.')} ~ ${range[range.length - 1].replace('-', '.')}</span><button class="lr-close" type="button" onclick="closeStatGraph()">✕</button>`;
+  };
+  const draw = () => {
+    if (ov.hidden) return;
+    sync();
+    // special(애청자)=fancnt 전체 1회, 그 외=범위 내 미보유 월만 로드(해 걸침 가능 — annualMonthsToLoad 대신 범위 기반)
+    const pending = metric.special
+      ? (statsState.fancnt ? [] : [loadFancnt()])
+      : range.filter(ym => !statsState.data[ym] && !statsState.loadingMonths.has(ym)).map(ym => loadStatsMonth(ym));
+    if (pending.length) {
+      chart.innerHTML = '<div class="lr-msg">불러오는 중...</div>';
+      const cur = range;
+      Promise.all(pending).then(() => { if (!ov.hidden && range === cur) drawGraphChart(chart, memberId, range, metric); });
+    } else {
+      drawGraphChart(chart, memberId, range, metric);
+    }
+  };
+  btns.forEach(b => b.addEventListener('click', () => {
+    const d = Number(b.dataset.dir);
+    const s2 = ymShift(range[0], d);
+    if (ymDiff(s2, minYm) < 0 || ymDiff(ymShift(s2, range.length - 1), maxYm) > 0) return;
+    range = range.map(ym => ymShift(ym, d));
     draw();
-  }
+  }));
+  draw();
 }
 function closeStatGraph() {
   const ov = document.getElementById('statGraphOverlay');
@@ -5580,7 +5675,13 @@ async function loadBanners() {
     lastBannerUpdate = new Date();
     if (currentPage === 'banner') renderBanners();
     if (currentPage === 'hall') renderHall();
-  } catch (e) {}
+  } catch (e) {
+    // 첫 방문(캐시·데이터 없음) + 시트 실패면 초기 스피너가 영구 고정 — 실패 메시지로 교체. 캐시 표시 중이면 그대로 둠
+    if (bannerData.length === 0) {
+      const body = document.getElementById('bannerBody');
+      if (body) body.innerHTML = '<div class="loading"><div>현수막 데이터를 불러올 수 없어요</div></div>';
+    }
+  }
 }
 
 function renderBanners() {
@@ -5661,7 +5762,13 @@ async function loadContent() {
     lastContentUpdate = new Date();
     if (currentPage === 'content') renderContent();
     if (currentPage === 'hall') renderHall();
-  } catch (e) {}
+  } catch (e) {
+    // 첫 방문(캐시·데이터 없음) + 시트 실패면 초기 스피너가 영구 고정 — 실패 메시지로 교체. 캐시 표시 중이면 그대로 둠
+    if (contentData.length === 0) {
+      const body = document.getElementById('contentBody');
+      if (body) body.innerHTML = '<div class="loading"><div>컨텐츠 데이터를 불러올 수 없어요</div></div>';
+    }
+  }
 }
 
 function renderContent() {

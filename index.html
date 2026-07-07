@@ -3616,6 +3616,7 @@ function switchPage(page) {
     } else renderBanners();
   }
   if (page === 'hall') {
+    refreshHallChem();   // '열람 시 갱신' 정합: 캐시로 즉시 렌더하고 현재 기간 채팅 데이터를 배경 재조회(도착분이 다르면 재렌더)
     renderHall();
   }
   if (page === 'content') {
@@ -4348,12 +4349,16 @@ function findLatestActivityDate(memberId) {
 }
 
 // 애청자(즐겨찾기) 일별 누적을 /fancnt에서 1회 로드. 카드 표시·그래프 공용.
+let fancntLoadedDate = null;   // 로드 시점의 KST 날짜 — 자정 넘겨 열어둔 탭에서 팬 수가 하루 낡는 것 방지(날짜 바뀌면 1회 재조회)
 async function loadFancnt() {
-  if (statsState.fancnt) return;
+  const today = kstNow().toISOString().slice(0, 10);
+  if (statsState.fancnt && fancntLoadedDate === today) return;
   try {
     const res = await fetch(WORKER_URL + '/fancnt');
-    statsState.fancnt = res.ok ? (await res.json()) : {};
-  } catch (e) { statsState.fancnt = {}; }
+    if (res.ok) statsState.fancnt = await res.json();
+    else if (!statsState.fancnt) statsState.fancnt = {};   // 재조회 실패는 기존 값 유지({}로 덮지 않음)
+  } catch (e) { if (!statsState.fancnt) statsState.fancnt = {}; }
+  fancntLoadedDate = today;   // 실패 포함 — 기존처럼 같은 날 재시도 없음(다음 날짜 전환 때 1회 재시도)
 }
 // 해당 멤버·해당 월의 월말 누적 애청자(그 달 일별 중 가장 늦은 날짜 값). 없으면 null.
 function fancntMonthEnd(memberId, year, month1) {
@@ -5406,10 +5411,13 @@ async function loadStats() {
     const cur = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     await Promise.all([loadStatsMonth(cur), loadFancnt()]);
     // 무변화 스킵: 현재월 데이터가 직전 렌더 시점과 같으면 재구축 생략(타임라인·배너와 정책 통일 — 무변화 틱마다 텍스트 선택 풀림·DOM 낭비 방지).
-    // 방송 중엔 뷰어 표본(60초)으로 sig가 매분 바뀌어 기존처럼 렌더됨. sig는 stats 탭에 있을 때만 갱신 —
+    // 미종료 세션이 있으면 분 버킷을 sig에 섞음 — '진행 중' 시간 합계는 렌더 시점 now까지 집계라, 뷰어 표본이 안 잡히는 방송
+    // (fetchStationInfo null 지속)이나 전월 시작 자정 걸친 방송(표본이 전월 키에 기록돼 당월 무변)에서 표시가 동결되는 것 방지.
+    // 즉 생방송 중엔 기존처럼 매 틱 렌더, 전원 오프라인일 때만 스킵. sig는 stats 탭에 있을 때만 갱신 —
     // 탭 밖에서의 변화를 재진입 후 첫 틱이 감지해 렌더(switchPage는 stats 재진입 시 렌더하지 않고 DOM 유지에 의존).
     if (currentPage === 'stats') {
-      const sig = JSON.stringify(statsState.data[cur] || null);
+      const hasOpen = Object.values(statsState.data[cur] || {}).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
+      const sig = JSON.stringify(statsState.data[cur] || null) + (hasOpen ? '|' + Math.floor(Date.now() / 60000) : '');
       if (sig !== lastStatsSig) renderStatsBody();
       lastStatsSig = sig;
     }
@@ -6115,6 +6123,26 @@ async function loadHallChem(period) {
     const res = await fetch(url);
     hallChemCache[period] = res.ok ? await res.json() : {};
   } catch (e) { hallChemCache[period] = {}; }
+}
+
+// 탭 진입 시 현재 기간 재조회('열람 시 갱신') — loadHallChem을 재사용하지 않는 이유: 저 함수는 실패 시 캐시를 {}로
+// 덮는 첫 조회 전용 설계(renderHall 스피너 무한루프 방지)라, 재조회 실패가 멀쩡한 캐시를 지우면 안 됨. 미보유 기간은
+// renderHall의 기존 로딩 경로가 담당. URL 산식은 loadHallChem과 반드시 동일하게 유지할 것.
+async function refreshHallChem() {
+  const period = hallPeriod;
+  const cached = hallChemCache[period];
+  if (!cached) return;
+  let url = WORKER_URL + '/chat-counts';
+  if (period === 'h1') url += '?month=' + HALL_H1_CHAT_MONTH;
+  else if (period === 'h2') url += '?from=' + HALL_H2_START_MONTH;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return;   // 실패 시 기존 캐시 유지
+    const fresh = await res.json();
+    if (JSON.stringify(fresh) === JSON.stringify(cached)) return;   // 무변화면 재렌더 생략
+    hallChemCache[period] = fresh;
+    if (currentPage === 'hall' && hallPeriod === period) renderHall();
+  } catch (e) {}
 }
 
 // 기간 월 목록의 월 stats 합산 (연간탭 computeAnnualSums와 동일 월별 산식 — viewer 제외 + seed 포함)

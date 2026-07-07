@@ -2718,22 +2718,22 @@ let crewActs = [];       // [{section, date, text, tag}] — 시트 행 순서 =
 let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러올 수 없어요' 구분
 let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, vote} }
 
-// 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 1행은 헤더라 건너뜀.
+// 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 헤더 스킵은 행 위치가 아니라 내용 기반(케미 파서 관례) — 시트에 헤더 행이 없어도 첫 데이터 행을 삼키지 않음.
 function parseCrewActRows(rows) {
-  return rows.slice(1).filter(r => r[0] && r[2]).map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '' }));
+  return rows.filter(r => r[0] && r[2] && r[0] !== '섹션').map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '' }));
 }
 function parseMemberInfoRows(rows) {
   const o = {};
-  rows.slice(1).forEach(r => {
-    const m = MEMBERS.find(x => x.name === r[0]);   // A열 = 멤버 이름(케미·배너 등 다른 시트와 동일 관례) — 내부 키는 id
+  rows.forEach(r => {
+    const m = MEMBERS.find(x => x.name === (r[0] || '').trim());   // A열 = 멤버 이름(케미·배너 등 다른 시트와 동일 관례) — 미등록 이름(헤더 포함)은 자연 무시, 내부 키는 id
     if (m) o[m.id] = { engName: r[1] || '', fanName: r[2] || '', age: r[3] || '', height: r[4] || '', mbti: r[5] || '', group: r[6] || '', firstStream: r[7] || '', vote: r[8] || '' };
   });
   return o;
 }
 function parseVacationRows(rows) {
   const o = {};
-  rows.slice(1).forEach(r => {
-    const m = MEMBERS.find(x => x.name === r[0]);   // A열 = 멤버 이름(동일 관례)
+  rows.forEach(r => {
+    const m = MEMBERS.find(x => x.name === (r[0] || '').trim());   // A열 = 멤버 이름(동일 관례)
     if (m && r[2]) o[m.id] = { img: r[1] || '', until: r[2] };
   });
   return o;

@@ -2008,6 +2008,7 @@
   /* 그래프 모달 (좋아요 모달 lr-panel 골격 재사용, 폭·글씨 키움) */
   .graph-modal-panel { max-width:740px; max-height:90vh; }
   .graph-modal-panel .lr-head { color:var(--text); font-size:14px; padding:14px 18px; }
+  .graph-modal-panel .lr-head > span:first-child { flex-wrap: wrap; row-gap: 2px; min-width: 0; }   /* 제목(이름·지표·기간)이 좁은 폭에서 ✕를 밀지 않고 줄바꿈되게 */
   .graph-modal-panel .lr-body { padding:22px 20px; }
   .graph-modal-panel .sg-dot { width:11px; height:11px; display:inline-block; }
   /* 그래프 모달 본문: [‹][차트][›] — ‹›는 한 달 이동(기간줄 스테퍼와 동일 버튼 문법) */
@@ -2249,13 +2250,13 @@ const MEMBER_BIRTHDAYS = {
 // [index.html]
 //  ① MEMBERS: id · name · img(members/NN.webp) · color(캐릭터 아트 실측, 대비보다 아트 충실도 우선)
 //  ② MEMBER_LINKS: 방송국·유튜브(들)·팬카페·나무위키·인스타·X·팬심/디코·기타·OGQ
-//  ③ MEMBER_INFO: engName·fanName·age·height·mbti·group·firstStream·vote
+//  ③ 시트 '멤버정보' 탭에 행 추가: 이름·engName·fanName·age·height·mbti·group·firstStream·vote (코드 아님 — 2026-07 시트 이관)
 //  ④ MEMBER_BIRTHDAYS: month·day·display·file(birthday/NAME.webp) — 단일 소스(로고 교체·프로필·기념일 공용)
 //  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
 //  ⑥ 문서 상단 meta description 멤버 명단
 //  ⑦ CSS 열수: .stats-tabs-wrap repeat(13 = 통합+멤버수) · .members-tabs-wrap repeat(13 = 크루+멤버수)
 //     + 1100px 미디어쿼리의 repeat(7) 배치 확인 · .links-table min-width(720px)와 링크탭 모바일 전환 임계(@container 740px)
-//  ⑧ (해당 시) VACATION
+//  ⑧ (해당 시) 시트 '휴방' 탭에 행 추가: 이름·이미지 링크·until (코드 아님 — 2026-07 시트 이관)
 // [worker.js] MEMBERS(id·name·nick·yt 채널ID 배열) · CAFES(공용 카페 2곳 닉 매핑 + 개인 팬카페 블록)
 // [index.js]  MEMBERS(id·name·nick) · (봇 닉이 있으면) getMember 봇 제외
 // [데이터]    과거 통계가 있으면 /seed-stats(방송 일수는 '날짜 수' 기준)·/seed-fancnt로 시딩
@@ -2275,8 +2276,9 @@ const MEMBERS = [
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
-// 휴방 표시: { memberId: { img, until: 'YYYY-MM-DD' } } — until(KST)까지 오프라인 카드에 휴방 이미지. 만료 항목은 삭제(나나문 ~6/30 사용)
-const VACATION = {};
+// 휴방 표시: { memberId: { img, until: 'YYYY-MM-DD' } } — until(KST)까지 오프라인 카드에 휴방 이미지.
+// 2026-07 시트 이관: '휴방' 탭이 소스(loadCrewSheets), until 경과 행은 자동 무시라 시트에서 안 지워도 됨.
+let VACATION = {};
 
 const MEMBER_LINKS = {
   '243000': {
@@ -2705,20 +2707,57 @@ const membersState = {
   selectedTab: 'crew',
 };
 
-const MEMBER_INFO = {
-  '243000': { engName: 'CHUNYANG', fanName: '블롭단', age: '1994년생', height: '178cm', mbti: 'INTP', group: '패러블 · 신스멀게동', firstStream: '2009년 (정확한 날짜는 알려져 있지 않음)', vote: '수장이라서 해당 없음' },
-  'madaomm': { engName: 'MADAOMM', fanName: '당고단', age: '1998년생', height: '152cm', mbti: 'INFP', group: '맏쎄이', firstStream: '2021년 7월 3일', vote: '내정자라서 해당 없음' },
-  'nanamoon777': { engName: 'NANAMOON', fanName: '제냥이', age: '700살', height: '155.8cm', mbti: 'ISTP', group: '아카이브 스튜디오', firstStream: '2023년 1월 23일', vote: '894표 / 73.7%' },
-  'imha22': { engName: 'IMHAMING', fanName: '고구밍', age: '2000년생', height: '168cm', mbti: 'ISFP', group: '없음', firstStream: '2022년 3월 28일', vote: '583표 / 48.1%' },
-  'doormomo': { engName: 'MOONMOMO', fanName: '곰탕이', age: '1998년생', height: '153cm', mbti: 'INTP', group: '블리즈 · 브품동', firstStream: '2023년 11월 25일', vote: '777표 / 64.1%' },
-  'kappuchan': { engName: 'KAPPU', fanName: '울푸단', age: '비공개', height: '비공개', mbti: 'ISTP', group: '시뮬동', firstStream: '2023년 11월 18일', vote: '313표 / 25.8%' },
-  'kyaang123': { engName: 'KYAANG', fanName: '마늘', age: '1997년생', height: '159cm', mbti: 'ENTP', group: '도파민', firstStream: '2022년 10월 10일', vote: '740표 / 61.0%' },
-  'wellro314': { engName: 'WELLRO', fanName: '구론단', age: '비공개', height: '162cm', mbti: 'INTP', group: '없음', firstStream: '2024년 2월 24일', vote: '604표 / 49.8%' },
-  'mocamu2': { engName: 'MOCA', fanName: '초코', age: '2003년생', height: '155.1cm', mbti: 'ENTP', group: 'UR:L', firstStream: '2024년 7월 9일', vote: '808표 / 66.6%' },
-  'dalta20': { engName: 'DALTA', fanName: '꿀즙이', age: '비공개', height: '162cm', mbti: 'INFP', group: '시그널', firstStream: '2022년 10월 7일', vote: '657표 / 54.2%' },
-  'chebi2': { engName: 'CHEBI', fanName: '젤비', age: '2005년생', height: '153cm', mbti: 'ESTP', group: '없음', firstStream: '2024년 2월 12일', vote: '추가멤버라서 해당 없음' },
-  'plincess': { engName: 'PLI', fanName: '별님', age: '비공개', height: '비공개', mbti: 'INTJ', group: '러비타 · 왁치동2', firstStream: '2023년 9월 20일', vote: '추가멤버라서 해당 없음' },
-};
+// ── 시트 이관 데이터(2026-07-07): 크루 활동·멤버 프로필 정보·휴방 — 시트 단일 소스(LS 캐시 선표시 + 실패 시 기존 유지) ──
+const CREW_ACT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1295776995';
+const MEMBER_INFO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=446600674';
+const VACATION_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=964295196';
+const LS_CREWACT_CACHE = 'chuntaverse_crewact_cache_v1';
+const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v1';
+const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
+let crewActs = [];       // [{section, date, text, tag}] — 시트 행 순서 = 표시 순서
+let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러올 수 없어요' 구분
+let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, vote} }
+
+// 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 1행은 헤더라 건너뜀.
+function parseCrewActRows(rows) {
+  return rows.slice(1).filter(r => r[0] && r[2]).map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '' }));
+}
+function parseMemberInfoRows(rows) {
+  const o = {};
+  rows.slice(1).forEach(r => {
+    const m = MEMBERS.find(x => x.name === r[0]);   // A열 = 멤버 이름(케미·배너 등 다른 시트와 동일 관례) — 내부 키는 id
+    if (m) o[m.id] = { engName: r[1] || '', fanName: r[2] || '', age: r[3] || '', height: r[4] || '', mbti: r[5] || '', group: r[6] || '', firstStream: r[7] || '', vote: r[8] || '' };
+  });
+  return o;
+}
+function parseVacationRows(rows) {
+  const o = {};
+  rows.slice(1).forEach(r => {
+    const m = MEMBERS.find(x => x.name === r[0]);   // A열 = 멤버 이름(동일 관례)
+    if (m && r[2]) o[m.id] = { img: r[1] || '', until: r[2] };
+  });
+  return o;
+}
+
+async function loadCrewSheets() {
+  // 캐시 선표시(재방문 첫 페인트) — 배너 패턴과 동일
+  try { const c = JSON.parse(lsGet(LS_CREWACT_CACHE, 'null')); if (c) crewActs = parseCrewActRows(c); } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_MEMBERINFO_CACHE, 'null')); if (c) MEMBER_INFO = parseMemberInfoRows(c); } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_VACATION_CACHE, 'null')); if (c) VACATION = parseVacationRows(c); } catch (e) {}
+  if (currentPage === 'members') renderMembersBody();
+  // 최신 fetch(병렬, 실패 격리) — 실패 시 캐시본 유지(확정: 시트 단일 소스, 첫 방문+장애 조합만 해당 섹션 공백)
+  const pull = (url, lsKey, apply) => fetch(url)
+    .then(r => { if (!r.ok) throw new Error('no data'); return r.text(); })
+    .then(t => { const rows = parseCSV(t); lsSet(lsKey, JSON.stringify(rows)); apply(rows); });
+  await Promise.allSettled([
+    pull(CREW_ACT_SHEET_URL, LS_CREWACT_CACHE, rows => { crewActs = parseCrewActRows(rows); }),
+    pull(MEMBER_INFO_SHEET_URL, LS_MEMBERINFO_CACHE, rows => { MEMBER_INFO = parseMemberInfoRows(rows); }),
+    pull(VACATION_SHEET_URL, LS_VACATION_CACHE, rows => { VACATION = parseVacationRows(rows); }),   // 카드 반영은 다음 loadLive 폴링(≤10초)
+  ]);
+  crewSheetsDone = true;
+  if (currentPage === 'members') renderMembersBody();
+  updatePageTitle();   // 상단바 축하 박스(N번째 생일·방송 N주년)가 MEMBER_INFO를 읽음 — 시트 도착 후 재구성
+}
 
 function calcAge(memberId, ageStr) {
   if (!ageStr) return '';
@@ -5591,6 +5630,7 @@ loadChemistry();
 loadChemNames();
 loadContent();
 loadBanners();
+loadCrewSheets();
 loadSchedule();
 loadLikeReqForDot();   // 좋아요 빨간 점용 목록 1회 로드
 setInterval(loadLive, 10 * 1000);
@@ -6344,9 +6384,30 @@ function renderMembersBody() {
   }
 }
 
+// 크루탭 활동 리스트(시트 '크루활동' 탭 소스). 태그가 YYYY-MM-DD 날짜면 오늘(KST)까지 경과일을 (D+N일)로 동적 표기 — 결성 D+ 산식과 동일.
+function crewTagHtml(tag) {
+  if (!tag) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(tag)) {
+    const k = new Date(Date.now() + 9 * 3600 * 1000);
+    const days = Math.floor((Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - Date.parse(tag)) / 86400000);
+    return days > 0 ? ` <span class="tag">(D+${days}일)</span>` : '';
+  }
+  return ` <span class="tag">${escapeHtml(tag)}</span>`;
+}
+
 function renderMembersCrew(body) {
-  const k = new Date(Date.now() + 9 * 3600 * 1000);
-  const ctDays = Math.floor((Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - CT_FORMATION.getTime()) / 86400000);   // 출범(2025-11-30) 경과일 — getTodayCelebrations와 동일 산식
+  // 데이터 없음 = 아직 로드 전('불러오는 중') 또는 실패('불러올 수 없어요' + 재진입을 재시도 기회로)
+  let actsHtml = '';
+  if (crewActs.length === 0) {
+    if (crewSheetsDone) { crewSheetsDone = false; loadCrewSheets(); }
+    actsHtml = '<div class="crew-act-li"><span>크루 활동 불러오는 중...</span></div>';
+  } else {
+    let lastSec = '';
+    crewActs.forEach(a => {
+      if (a.section !== lastSec) { actsHtml += `<div class="crew-act-sub">${escapeHtml(a.section)}</div>`; lastSec = a.section; }
+      actsHtml += `<div class="crew-act-li"><span class="dot">•</span><span>${a.date ? `<span class="d">${escapeHtml(a.date)}</span> — ` : ''}${escapeHtml(a.text)}${crewTagHtml(a.tag)}</span></div>`;
+    });
+  }
   body.innerHTML = `
     <div class="members-crew">
       <div class="members-crew-intro">
@@ -6354,19 +6415,7 @@ function renderMembersCrew(body) {
         <p>천타버스는 원래 천양님이 크루 콘텐츠에 참가하기 위해 결성한 '위장 크루'로 시작했으나<br><br>지속적인 합방과 다채로운 자체 콘텐츠를 통해<br><br>이제는 그 누구도 대체할 수 없는 독보적인 매력을 뽐내는 버추얼 크루로 당당히 성장해 나가는 중입니다.</p>
       </div>
       <div class="members-crew-activities">
-        <div class="crew-act-sub">주요 일정</div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2025년 11월 30일</span> — 결성${ctDays > 0 ? ` <span class="tag">(D+${ctDays}일)</span>` : ''}</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 6월 27일</span> — 추가멤버 면접</span></div>
-        <div class="crew-act-sub">정기 활동</div>
-        <div class="crew-act-li"><span class="dot">•</span><span>매월 초 — 천타버스 티타임 <span class="tag">(2026년 1월~)</span></span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span>매월 후반 — 강제 모캡합방 <span class="tag">(2026년 3월~)</span></span></div>
-        <div class="crew-act-sub">비정기 활동</div>
-        <div class="crew-act-li"><span class="dot">•</span><span>VRChat · 풀트래킹 합방</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span>디코 · 종겜 합방 등</span></div>
-        <div class="crew-act-sub">크루 대전 전적</div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 1월 10일</span> — vs 털즈란 패배 (VRC 야구)</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 1월 15일</span> — vs 버인협회 패배 (롤)</span></div>
-        <div class="crew-act-li"><span class="dot">•</span><span><span class="d">2026년 7월 3일</span> — vs 버인협회 승리 (몸으로 말해요)</span></div>
+        ${actsHtml}
         <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>

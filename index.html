@@ -5417,7 +5417,7 @@ async function loadStats() {
     // 탭 밖에서의 변화를 재진입 후 첫 틱이 감지해 렌더(switchPage는 stats 재진입 시 렌더하지 않고 DOM 유지에 의존).
     if (currentPage === 'stats') {
       const hasOpen = Object.values(statsState.data[cur] || {}).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
-      const sig = JSON.stringify(statsState.data[cur] || null) + (hasOpen ? '|' + Math.floor(Date.now() / 60000) : '');
+      const sig = JSON.stringify(statsState.data[cur] || null) + '|' + fancntLoadedDate + (hasOpen ? '|' + Math.floor(Date.now() / 60000) : '');   // fancntLoadedDate: 자정 fancnt 재조회가 sig를 1회 바꿔 애청자 셀·그래프에 반영되게(월 데이터만 보면 fancnt 갱신이 화면에 안 실림)
       if (sig !== lastStatsSig) renderStatsBody();
       lastStatsSig = sig;
     }

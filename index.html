@@ -585,7 +585,7 @@
   .filter-toggle-all:hover { border-color: var(--accent); }
 
   .filter-members { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
-  @media (max-width: 1100px) { .filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 상단 strip: 6열(12명=6×2) — 필터 상단 전환(1100px)과 한 세트 */
+  @media (max-width: 1100px) { .filter-members { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 상단 strip: 6열(12명=6×2) — 필터 상단 전환(1100px)과 한 세트. 종류 필터와 동일한 calc 고정(1fr은 배율에 따라 칸별 1px 차 발생 + 같은 패널의 종류 그리드와 셀 폭 어긋남) */
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -1357,7 +1357,7 @@
     gap: 6px;
     flex: 1; min-width: 0;
   }
-  @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(6, 1fr); } }   /* 모바일 strip: 6열 */
+  @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 모바일 strip: 6열 — 이벤트 필터와 동일한 calc 고정(1fr 배율 라운딩 차단) */
   .chem-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -2636,6 +2636,7 @@ const statsState = {
   selectedDate: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
+let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
 const LS_STATS_PREFIX = 'chuntaverse_stats_v10_';   // v10: 1~5월 과거 세션 시딩(소프트콘 CSV) KV 반영 — v9 캐시(시딩 전 데이터) 무효화
 // 버전 범프로 사장된 구버전 캐시(v8_/v9_ 등) 잔존 키 정리 — 방문자 LS 용량 회수. 프리픽스 기준이라 이후 범프에도 재작업 불필요.
 try {
@@ -2648,6 +2649,7 @@ try {
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
 const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
+let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — 동일하면 재구축 스킵(lastTimelineSig와 동일 취지)
 
 // 케미명·그룹은 구글 시트에서 로드 (A열 케미명, B~L열 멤버 이름 — 2명 행은 쌍, 3명 이상 행은 그룹)
 const CHEM_NAME_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=574378390';
@@ -3034,7 +3036,7 @@ document.addEventListener('click', (e) => {
   if (item && item.dataset.lrkey) dismissLikeRequest(item.dataset.lrkey);
 });
 
-// ── 다가오는 일정 (구글 시트 gid=1374057594) ──
+// ── 다가오는 일정 (구글 시트 gid=2043421724 — 컨텐츠와 통합 시트) ──
 // 열: A=YYYY-MM-DD(또는 YYMMDD) / B=HH:MM(빈칸 가능) / C=링크(빈칸 가능) / D=간략제목(버튼용·빈칸 가능) / E=상세제목(모달용). D·E 중 하나라도 있으면 행 유지(버튼=D 우선, 모달=E 우선, 한쪽 비면 다른 쪽). 모든 시각은 KST 기준.
 // 상단바 버튼: 가장 임박한 일정 1개만 표시 — 당일이고 시간 있으면 D-time(D-HH:MM:SS 초 카운트다운), 그 외(미래 날짜)는 D-day.
 // 숨김 기준: 시간 유무와 무관하게 그날 자정(KST)을 넘겨야 빠짐. 시간 있는 일정도 그 시각이 지나면 사라지지 않고 D-DAY로 그날 자정까지 유지(시간 없는 일정과 동일·합방 중에도 상단 노출) → 자정 넘으면 다음 일정으로. 시트 행은 그대로 둠.
@@ -3824,7 +3826,7 @@ function buildCard(m, info) {
 }
 
 function getBroadcastElapsed(e, allEvents) {
-  const targets = ['title', 'category', 'mode_change', 'end', 'chat', 'chat_emoticon', 'donation'];
+  const targets = ['title', 'category', 'mode_change', 'end', 'chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'];   // 제재·미션도 broad_start를 수집하므로 채팅류와 동일하게 ⏱ 표시(묶음 첫 이벤트가 제재일 때의 비대칭 해소)
   if (!targets.includes(e.type)) return '';
   const evTime = new Date(e.time).getTime();
   let startTime = null;
@@ -5403,7 +5405,14 @@ async function loadStats() {
     const now = kstNow();
     const cur = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     await Promise.all([loadStatsMonth(cur), loadFancnt()]);
-    if (currentPage === 'stats') renderStatsBody();
+    // 무변화 스킵: 현재월 데이터가 직전 렌더 시점과 같으면 재구축 생략(타임라인·배너와 정책 통일 — 무변화 틱마다 텍스트 선택 풀림·DOM 낭비 방지).
+    // 방송 중엔 뷰어 표본(60초)으로 sig가 매분 바뀌어 기존처럼 렌더됨. sig는 stats 탭에 있을 때만 갱신 —
+    // 탭 밖에서의 변화를 재진입 후 첫 틱이 감지해 렌더(switchPage는 stats 재진입 시 렌더하지 않고 DOM 유지에 의존).
+    if (currentPage === 'stats') {
+      const sig = JSON.stringify(statsState.data[cur] || null);
+      if (sig !== lastStatsSig) renderStatsBody();
+      lastStatsSig = sig;
+    }
     lastStatsUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {
@@ -5874,11 +5883,15 @@ async function loadChemistry() {
     }
     const res = await fetch(WORKER_URL + '/chat-counts');
     if (!res.ok) throw new Error('no data');
-    chemCounts = await res.json();
-    lsSet(LS_CHEM_CACHE, JSON.stringify(chemCounts));
-    lastChemistryUpdate = new Date();
+    const text = await res.text();
+    lastChemistryUpdate = new Date();   // 폴링 성공 시각(상단바 '기준')은 렌더 스킵과 무관하게 갱신
+    if (text === lastChemText) return;  // 무변화 스킵 — 타임라인·배너·컨텐츠와 동일 정책(조용한 시간대에 60초마다 전체 재구축 방지)
+    chemCounts = JSON.parse(text);
+    lastChemText = text;
+    lsSet(LS_CHEM_CACHE, text);
     if (currentPage === 'chemistry') renderChemistry();
-    if (currentPage === 'hall') renderHall();
+    // (renderHall 호출 제거 — renderHall은 chemCounts가 아닌 hallChemCache를 읽어 기간 분할 도입 전의 잔재였고,
+    //  hall 체류 중 매분 무의미한 전체 재구축만 유발. 명전은 라벨대로 '열람 시 갱신': 탭 진입 renderHall + 데이터 도착 시(loadBanners/loadContent) 렌더)
   } catch (e) {}
 }
 
@@ -6088,9 +6101,9 @@ const HALL_PERIODS = [
 ];
 const HALL_H1_CHAT_MONTH  = '2026-06';                 // 상반기 채팅 버킷(채팅 수집 6/5 개시 → 6월=상반기 전체)
 const HALL_H2_START_MONTH = '2026-07';                 // 하반기 채팅 버킷 시작월(from)
-const HALL_H1_LO = new Date(2026, 0, 1).getTime();     // 2026-01-01 (세션·시트 상반기 하한)
-const HALL_H2_LO = new Date(2026, 6, 1).getTime();     // 2026-07-01 (상/하반기 경계)
-const HALL_H2_HI = new Date(2027, 0, 1).getTime();     // 2027-01-01 (하반기 상한)
+const HALL_H1_LO = kstMonthStartMs(2026, 1);           // 2026-01-01 KST 자정 (세션·시트 상반기 하한) — 로컬 Date 생성자는 뷰어 TZ에 따라 경계가 밀려 금지(KST 정렬 정책)
+const HALL_H2_LO = kstMonthStartMs(2026, 7);           // 2026-07-01 KST 자정 (상/하반기 경계)
+const HALL_H2_HI = kstMonthStartMs(2027, 1);           // 2027-01-01 KST 자정 (하반기 상한)
 const hallChemCache = {};
 
 // 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-06 버킷, h2=2026-07~현재 합산. 기간별 캐시.

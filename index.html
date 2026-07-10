@@ -361,6 +361,20 @@
   }
   a.sch-item-title:hover { color: var(--accent); }
   .sch-item-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
+  .sch-item-members {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    max-width: 132px;   /* 20px×6 + gap 2px×5 = 130 → 7명째부터 2행 (컨텐츠·현수막 카드와 동일, 7명+는 membersRowStyle이 인라인으로 좁힘) */
+    margin-left: auto;  /* 멤버 블록을 D-day 쪽으로 붙임 — 제목이 짧아도 오른쪽 정렬 유지 */
+  }
+  .sch-item-members img {
+    width: 20px; height: 20px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
   .sch-item-dday {
     font-size: 13px; color: var(--accent); font-weight: 700;
     white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
@@ -3085,7 +3099,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ── 다가오는 일정 (구글 시트 gid=2043421724 — 컨텐츠와 통합 시트) ──
-// 열: A=YYYY-MM-DD(또는 YYMMDD) / B=HH:MM(빈칸 가능) / C=링크(빈칸 가능) / D=간략제목(버튼용·빈칸 가능) / E=상세제목(모달용). D·E 중 하나라도 있으면 행 유지(버튼=D 우선, 모달=E 우선, 한쪽 비면 다른 쪽). 모든 시각은 KST 기준.
+// 열: A=YYYY-MM-DD(또는 YYMMDD) / B=HH:MM(빈칸 가능) / C=링크(빈칸 가능) / D=간략제목(버튼용·빈칸 가능) / E=상세제목(모달용) / F~=참가 멤버 이름(컨텐츠 행과 동일 열·빈칸 가능 — 모달에서 아바타로 표시). D·E 중 하나라도 있으면 행 유지(버튼=D 우선, 모달=E 우선, 한쪽 비면 다른 쪽). 모든 시각은 KST 기준.
 // 상단바 버튼: 가장 임박한 일정 1개만 표시 — 당일이고 시간 있으면 D-time(D-HH:MM:SS 초 카운트다운), 그 외(미래 날짜)는 D-day.
 // 숨김 기준: 시간 유무와 무관하게 그날 자정(KST)을 넘겨야 빠짐. 시간 있는 일정도 그 시각이 지나면 사라지지 않고 D-DAY로 그날 자정까지 유지(시간 없는 일정과 동일·합방 중에도 상단 노출) → 자정 넘으면 다음 일정으로. 시트 행은 그대로 둠.
 // CSV: 페이지 로드 시 1회(버튼 표시용) + 모달 열 때 재풀링(최신 반영). 좋아요 모달과 동일한 lrOverlay·선로딩 패턴 재사용.
@@ -3119,6 +3133,7 @@ function parseScheduleRows(rows) {
       title: detail || brief,        // 모달·기준 제목(상세 우선)
       shortTitle: brief || detail,   // 버튼 제목(간략 우선)
       link: (r[2] || '').trim(),     // C=링크
+      members: r.slice(5).filter(c => c.length > 0),  // F~ 멤버 (loadContent와 동일 열·동일 방식)
       hasTime, target,
       hideAfter: dayStart + 86400000,  // 시간 유무 무관 그날 자정까지 유지(시간 지나면 D-DAY로 표기)
     });
@@ -3270,7 +3285,14 @@ function renderScheduleItem(item) {
   const titleEl = item.link
     ? `<a class="sch-item-title" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${inner}</a>`
     : `<span class="sch-item-title">${inner}</span>`;
-  return `<div class="sch-item"><div class="sch-item-main"><span class="sch-item-when">${when}</span>${titleEl}</div><span class="sch-item-dday">${ddayText(item)}</span></div>`;
+  // 참가 멤버 아바타(F~열) — 컨텐츠 카드와 동일 스타일. 6명 초과 시 max-width+wrap으로 2행(membersRowStyle 공용).
+  // 멤버 없는 행은 div 자체를 생략 — 빈 div가 끼면 flex gap(12px)이 이중으로 붙어 제목~D-day 간격이 벌어짐.
+  const memberImgs = (item.members || []).map(name => {
+    const m = MEMBERS.find(x => x.name === name);
+    return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
+  }).join('');
+  const membersEl = memberImgs ? `<div class="sch-item-members"${membersRowStyle(item.members.length)}>${memberImgs}</div>` : '';
+  return `<div class="sch-item"><div class="sch-item-main"><span class="sch-item-when">${when}</span>${titleEl}</div>${membersEl}<span class="sch-item-dday">${ddayText(item)}</span></div>`;
 }
 
 const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=0';

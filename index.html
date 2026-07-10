@@ -16,6 +16,9 @@
 <link rel="icon" type="image/webp" href="Favicon.webp">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#070a14">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- Pretendard Variable: 다이내믹 서브셋(화면에 쓰인 글자의 woff2만 로드) — 기기별 시스템 한글폰트 메트릭 차이(배지 세로정렬 등) 제거 목적. CDN 장애 시 아래 스택의 시스템 폰트로 폴백(font-display: swap). -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <style>
   :root {
     --bg: #070a14;
@@ -55,7 +58,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Pretendard Variable', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     min-height: 100vh;
   }
@@ -706,7 +709,8 @@
   .event-mode-tag {
     display: inline-flex; align-items: center; justify-content: center;
     margin-left: 0; margin-right: 6px;
-    padding: 2px 6px 3px; font-size: 11px; min-width: 46px; box-sizing: border-box;
+    padding: 0 6px; height: 19px; font-size: 11px; min-width: 46px; box-sizing: border-box;
+    /* 세로 중앙은 flex가 담당 — 비대칭 패딩(구 2px/3px)은 PC 폰트 기준 광학 보정이라 삼성인터넷 등 타 폰트에서 위로 치우쳐 보임 */
     font-weight: 700; letter-spacing: 0.3px;
     background: transparent; border: 1.5px solid currentColor;
     line-height: 1; vertical-align: 1px;

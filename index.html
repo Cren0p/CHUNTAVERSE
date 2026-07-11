@@ -5741,11 +5741,24 @@ setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정
 // 원리: line-height:1 라인박스(11px)에서 베이스라인 = 하프리딩 + ascent. 잉크 중심과 라인박스 중심(5.5px)의 차가 곧 필요 이동량.
 function calibrateBadgeNudge() {
   try {
+    const fam = getComputedStyle(document.body).fontFamily;
     const ctx = document.createElement('canvas').getContext('2d');
-    ctx.font = `700 11px ${getComputedStyle(document.body).fontFamily}`;   // 배지와 동일 폰트 지정(웨이트·크기·스택)
+    ctx.font = `700 11px ${fam}`;   // 배지와 동일 폰트 지정(웨이트·크기·스택)
     const m = ctx.measureText(Object.values(MODE_LABEL).join(''));         // 실제 배지 라벨 전체의 잉크 합집합 기준
-    if (m.fontBoundingBoxAscent === undefined || m.actualBoundingBoxAscent === undefined) return;   // 구형 브라우저: 대칭 폴백
-    const baseline = (11 - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent;
+    if (m.actualBoundingBoxAscent === undefined) return;                   // 구형 브라우저: 대칭 폴백
+    // 라인박스 내 베이스라인은 캔버스 fontBoundingBox로 계산하지 않고 레이아웃에서 직접 측정 —
+    // Windows에서 캔버스 폰트메트릭과 레이아웃 메트릭의 출처가 달라 ~0.7px 오차 실측됨(잉크 기반 v축은 수렴, fontBoundingBox 기반 s축만 이탈).
+    // 기법: line-height:1 프로브 안의 빈 inline-block 하단 = 그 줄의 베이스라인.
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;top:-9999px;display:inline-block;line-height:1;font-weight:700;font-size:11px;';
+    probe.style.fontFamily = fam;
+    probe.textContent = '구독';
+    const mark = document.createElement('span');
+    mark.style.cssText = 'display:inline-block;width:0;height:0;';
+    probe.appendChild(mark);
+    document.body.appendChild(probe);
+    const baseline = mark.getBoundingClientRect().bottom - probe.getBoundingClientRect().top;
+    probe.remove();
     const inkCenter = baseline + (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2;
     const s = Math.max(-3, Math.min(3, 5.5 - inkCenter));                  // 잉크가 아래로 처졌으면 음수(위로), 위로 떴으면 양수(아래로)
     document.documentElement.style.setProperty('--badge-vnudge', s.toFixed(2) + 'px');
@@ -5753,7 +5766,7 @@ function calibrateBadgeNudge() {
     // 내부 보정 후 "박스 중심 = 배지 잉크 중심"이므로, 박스 중심을 제목 잉크 중심에 맞추는 vertical-align은
     // (배지 글자의 베이스라인 대비 잉크중심) − (제목 글자의 동일 값) 으로 결정 — fontBoundingBox·s와 무관.
     const badgeInkOff = (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2;
-    ctx.font = `400 12px ${getComputedStyle(document.body).fontFamily}`;   // .event-detail과 동일 폰트 지정(12px·일반 웨이트) — CSS 변경 시 함께 갱신
+    ctx.font = `400 12px ${fam}`;   // .event-detail과 동일 폰트 지정(12px·일반 웨이트) — CSS 변경 시 함께 갱신
     const t = ctx.measureText('방송제목가힣');                              // 제목 대표 한글 잉크
     if (t.actualBoundingBoxAscent === undefined) return;
     const v = Math.max(-3, Math.min(3, badgeInkOff - (t.actualBoundingBoxDescent - t.actualBoundingBoxAscent) / 2));

@@ -1943,6 +1943,18 @@
     font-size: 14px; color: var(--text); font-weight: 700;
     text-align: right; white-space: normal; line-height: 20px;
   }
+  /* 항목 모아보기: data-mi 행 클릭 → 모달. hover 링은 box-shadow(inset) — border를 쓰면 쇼트핸드가 행 구분선(border-bottom)을 지움 */
+  .members-info-row[data-mi], .members-info-row-full[data-mi] {
+    cursor: pointer; padding-left: 6px; padding-right: 6px; margin-left: -6px; margin-right: -6px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .members-info-row[data-mi]:hover, .members-info-row-full[data-mi]:hover { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent); }
+  .mi-collect-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .mi-collect-row:last-child { border-bottom: none; }
+  .mi-collect-row img { width: 26px; height: 26px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .mi-collect-name { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .mi-collect-val { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--text); text-align: right; }
+  .mi-collect-row.me { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }   /* 현재 보던 멤버 강조 — 좌측 민트 바 */
 
   /* 프로필/통계 상단 셀렉터: 1행(11~12칸, max-width 800/880)이 폭 좁아지면 버튼이 ~67px 밑으로 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버=크루(좌측 2행)+12를 7열, 통계=연간/월간 좌측 세로 스택 */
   @media (max-width: 1100px) {
@@ -6588,6 +6600,73 @@ function renderMembersCrew(body) {
   `;
 }
 
+// ── 프로필 항목 모아보기: 행(data-mi) 클릭 → 전 멤버의 해당 항목을 lrOverlay(좋아요·일정 공용)에 정렬 표시 ──
+// 정렬은 원문 문자열만으로 판정하는 순수 함수(verify_mi_collect 스위트가 검증). 파싱 불가값(비공개·해당 없음·불참 등)은 하단, 각 구간 내 멤버 기본순(안정 정렬).
+function miSortKey(kind, raw) {
+  if (!raw) return null;
+  if (kind === 'age') {
+    if (raw === '700살') return -Infinity;   // 컨셉 존중 — 최연장자로 최상단
+    const m = raw.match(/^(\d{4})년생$/); return m ? +m[1] : null;   // 출생연도 오름차순 = 연장자부터
+  }
+  if (kind === 'height') { const m = raw.match(/([\d.]+)\s*cm/); return m ? -parseFloat(m[1]) : null; }   // 내림차순
+  if (kind === 'date') { const m = raw.match(/(\d{4})년(?:\s*(\d{1,2})월)?(?:\s*(\d{1,2})일)?/); return m ? +m[1] * 10000 + (+m[2] || 1) * 100 + (+m[3] || 1) : null; }   // 고참순(연도만 있으면 1/1 취급)
+  if (kind === 'rank') { const m = raw.match(/(\d+)\s*위/); return m ? +m[1] : null; }
+  if (kind === 'birthday') { const m = raw.match(/(\d{1,2})월\s*(\d{1,2})일/); return m ? +m[1] * 100 + +m[2] : null; }   // 달력순
+  return null;
+}
+function buildMiCollect(kind, entries) {
+  // entries: [{raw, base, ...}] — base = 멤버 기본순 인덱스
+  if (kind === 'mbti') {
+    // 같은 유형끼리 묶음 — 묶음 순서는 인원 내림차순(동수는 첫 등장 기본순), 묶음 내부는 기본순, 값 없음은 하단
+    const groups = new Map();
+    entries.forEach(e => { const t = (e.raw || '').trim(); if (!groups.has(t)) groups.set(t, []); groups.get(t).push(e); });
+    const order = [...groups.entries()].filter(([t]) => t).sort((a, b) => b[1].length - a[1].length || a[1][0].base - b[1][0].base);
+    return order.flatMap(([, g]) => g).concat(groups.get('') || []);
+  }
+  if (!kind) return entries.slice();   // 자유 텍스트(팬네임·소속 등) = 기본순
+  return entries.slice().sort((a, b) => {
+    const ka = miSortKey(kind, a.raw), kb = miSortKey(kind, b.raw);
+    if (ka === null && kb === null) return a.base - b.base;
+    if (ka === null) return 1;
+    if (kb === null) return -1;
+    return ka - kb || a.base - b.base;
+  });
+}
+const MI_COLLECT_FIELDS = {
+  age:          { label: '나이', kind: 'age', raw: (id, i) => i.age, display: (id, i) => calcAge(id, i.age) },
+  birthday:     { label: '생일', kind: 'birthday', raw: id => (MEMBER_BIRTHDAYS[id] || {}).display || '', display: id => (MEMBER_BIRTHDAYS[id] || {}).display || '' },
+  height:       { label: '키', kind: 'height', raw: (id, i) => i.height, display: (id, i) => i.height },
+  mbti:         { label: 'MBTI', kind: 'mbti', raw: (id, i) => i.mbti, display: (id, i) => i.mbti },
+  fanName:      { label: '팬네임', kind: null, raw: (id, i) => i.fanName, display: (id, i) => i.fanName },
+  group:        { label: '다른 소속', kind: null, raw: (id, i) => i.group, display: (id, i) => i.group },
+  firstStream:  { label: '첫 방송일', kind: 'date', raw: (id, i) => i.firstStream, display: (id, i) => calcDaysSince(i.firstStream) },   // 완전한 날짜만 (D+N일) 자동 병기(calcDaysSince 재사용)
+  vote:         { label: '면접 득표수/득표율', kind: 'rank', raw: (id, i) => i.vote, display: (id, i) => i.vote },
+  election2026: { label: '2026 반장선거 득표수/득표율', kind: 'rank', raw: (id, i) => i.election2026, display: (id, i) => i.election2026 },
+};
+function openMiCollect(fieldKey, currentId) {
+  const f = MI_COLLECT_FIELDS[fieldKey];
+  const ov = document.getElementById('lrOverlay');
+  const head = document.getElementById('lrHead');
+  const body = document.getElementById('lrBody');
+  if (!f || !ov || !body) return;
+  const entries = MEMBERS.map((m, base) => {
+    const info = MEMBER_INFO[m.id] || {};
+    return { m, base, info, raw: (f.raw(m.id, info) || '').trim() };
+  });
+  const ordered = buildMiCollect(f.kind, entries);
+  head.innerHTML = `<span style="color:var(--accent)">${escapeHtml(f.label)}</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  body.innerHTML = ordered.map(e => {
+    const disp = e.raw ? (f.display(e.m.id, e.info) || e.raw) : '—';
+    return `<div class="mi-collect-row${e.m.id === currentId ? ' me' : ''}">
+      <img src="${e.m.img}" alt="${escapeHtml(e.m.name)}">
+      <span class="mi-collect-name" style="color:${e.m.color}">${escapeHtml(e.m.name)}</span>
+      <span class="mi-collect-val">${escapeHtml(disp)}</span>
+    </div>`;
+  }).join('');
+  ov.hidden = false;
+  syncBodyScrollLock();
+}
+
 function renderMembersProfile(body, memberId) {
   const m = MEMBER_BY_ID[memberId];
   if (!m) { body.innerHTML = '<div class="loading"><div>멤버 정보를 찾을 수 없어요</div></div>'; return; }
@@ -6623,18 +6702,18 @@ function renderMembersProfile(body, memberId) {
   if (info) {
     const skip = v => !v || v.includes('해당없음') || v.includes('알려져있지');
     const pairedRows = [
-      ['나이', calcAge(memberId, info.age)],
-      ['생일', bd ? bd.display : ''],
-      ['키', info.height],
-      ['MBTI', info.mbti],
-      ['팬네임', info.fanName],
-      ['다른 소속', info.group],
-    ].filter(r => !skip(r[1]));
+      ['나이', 'age', calcAge(memberId, info.age)],
+      ['생일', 'birthday', bd ? bd.display : ''],
+      ['키', 'height', info.height],
+      ['MBTI', 'mbti', info.mbti],
+      ['팬네임', 'fanName', info.fanName],
+      ['다른 소속', 'group', info.group],
+    ].filter(r => !skip(r[2]));
     const firstStreamVal = calcDaysSince(info.firstStream);
-    const pairedHtml = pairedRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
-    const firstStreamHtml = !skip(firstStreamVal) ? `<div class="members-info-row-full"><span class="members-info-label">첫 방송일</span><span class="members-info-value">${escapeHtml(firstStreamVal)}</span></div>` : '';
-    const interviewHtml = info.vote ? `<div class="members-info-row-full"><span class="members-info-label">면접 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.vote)}</span></div>` : '';
-    const electionHtml = info.election2026 ? `<div class="members-info-row-full"><span class="members-info-label">2026 반장선거 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.election2026)}</span></div>` : '';
+    const pairedHtml = pairedRows.map(([label, key, value]) => `<div class="members-info-row" data-mi="${key}"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
+    const firstStreamHtml = !skip(firstStreamVal) ? `<div class="members-info-row-full" data-mi="firstStream"><span class="members-info-label">첫 방송일</span><span class="members-info-value">${escapeHtml(firstStreamVal)}</span></div>` : '';
+    const interviewHtml = info.vote ? `<div class="members-info-row-full" data-mi="vote"><span class="members-info-label">면접 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.vote)}</span></div>` : '';
+    const electionHtml = info.election2026 ? `<div class="members-info-row-full" data-mi="election2026"><span class="members-info-label">2026 반장선거 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.election2026)}</span></div>` : '';
     infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${pairedHtml}${firstStreamHtml}${interviewHtml}${electionHtml}</div></div>`;
   }
 
@@ -6651,6 +6730,7 @@ function renderMembersProfile(body, memberId) {
 
   const goLinksBtn = document.getElementById('membersGoLinks');
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { history.replaceState(null, '', '#links'); switchPage('links'); });
+  body.querySelectorAll('[data-mi]').forEach(row => row.addEventListener('click', () => openMiCollect(row.dataset.mi, memberId)));   // 항목 모아보기
 }
 </script>
 

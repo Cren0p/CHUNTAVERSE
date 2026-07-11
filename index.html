@@ -355,6 +355,7 @@
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
+    min-height: 66px;   /* 아바타 최대 2행(42) + 상하 패딩 24 — 멤버 0·1·2행 무관 행 높이 고정(content/banner-card-info와 동일 사유) */
     border-bottom: 1px solid var(--border);
   }
   .sch-item:last-child { border-bottom: none; }
@@ -986,8 +987,9 @@
   /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
   .stats-summary-item[data-metric] { cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
   .stats-summary-item[data-metric]:hover { background: var(--surface2); border-color: var(--accent); }
-  /* 일별 요약 세션의 시청자(최고·평균) — 시간 우측 인라인, 글씨는 시간과 동일 톤(아이콘만 색) */
-  .day-session-viewer { font-size: 12px; color: var(--text); font-weight: 600; white-space: nowrap; }
+  /* 일별 요약 세션의 시청자(최고·평균) — 시간 우측 인라인, 글씨는 시간과 동일 톤(아이콘만 색).
+     inline-flex 중앙정렬 = 카드 라벨(stats-card-label)과 동일 패턴 — 아이콘이 텍스트 흐름의 vertical-align:middle(x-height 의존)로 앉으면 폰트 따라 틀어짐 */
+  .day-session-viewer { display: inline-flex; align-items: center; font-size: 12px; color: var(--text); font-weight: 600; white-space: nowrap; }
   .day-session-viewer .stats-row-icon { margin-right: 3px; }
 
   .stats-member-header {
@@ -1161,6 +1163,7 @@
   }
   .day-session:hover { border-color: var(--accent); }
   .day-session-time {
+    display: inline-flex; align-items: center;   /* 시계 아이콘을 flex 중앙으로 — vertical-align(x-height 의존) 탈피, day-session-viewer와 동일 사유 */
     font-size: 12px; color: var(--text);
     font-weight: 600;
   }
@@ -1530,6 +1533,7 @@
   }
   .content-card-info {
     padding: 10px 12px;
+    min-height: 62px;   /* 아바타 최대 2행(20+2+20=42) + 상하 패딩 20 — 멤버 0·1·2행 무관 하단바 높이 고정(banner-card-info와 동일) */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1611,6 +1615,7 @@
   }
   .banner-card-info {
     padding: 10px 12px;
+    min-height: 62px;   /* 아바타 최대 2행 기준 고정 — content-card-info와 동일 사유 */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1681,7 +1686,7 @@
   .hall-wrap.show-ranks .hall-v { display: none; }
   .hall-wrap.show-ranks .hall-h { display: flex; }
   /* 끔: 세로 (사진 + 이름 + 설명:값) — 기존의 그 화면 */
-  .hall-v { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .hall-v { display: flex; flex-direction: column; align-items: center; gap: 10px; }   /* 이름블록↔값 간격 — 실측 값 텍스트 위8px/아래17px 불균형이라 5→10으로 균형(13/12) */
   .hall-v-winners { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: flex-end; }
   .hall-v-w { display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .hall-v-w img { object-fit: cover; box-sizing: border-box; border: 2px solid var(--time); }
@@ -4769,7 +4774,7 @@ function renderStatsAnnual(body) {
   const cards = MEMBERS.map(m => {
     const sum = annualSums[m.id];
     const md = medals[m.id];
-    const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+    const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
     return `
       <div class="stats-card" data-member="${m.id}">
         <div class="stats-card-header">
@@ -4849,7 +4854,7 @@ function renderStatsAll(body) {
   const cards = MEMBERS.map(m => {
     const sum = allSums[m.id];
     const md = medals[m.id];
-    const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+    const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
     return `
       <div class="stats-card" data-member="${m.id}">
         <div class="stats-card-header">
@@ -4938,7 +4943,7 @@ function renderStatsMember(body, memberId) {
       <div class="stats-detail-summary">
         ${(() => {
           const md = (statsState.medals && statsState.medals[memberId]) || {};
-          const mv = (k) => md[k] ? `<span style="margin-right:3px">${md[k]}</span>` : '';
+          const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
           return `
         <div class="stats-summary-item" data-metric="broadcastDays">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>

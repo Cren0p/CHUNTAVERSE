@@ -2275,7 +2275,7 @@ const MEMBER_BIRTHDAYS = {
 // [index.html]
 //  ① MEMBERS: id · name · img(members/NN.webp) · color(캐릭터 아트 실측, 대비보다 아트 충실도 우선)
 //  ② MEMBER_LINKS: 방송국·유튜브(들)·팬카페·나무위키·인스타·X·팬심/디코·기타·OGQ
-//  ③ 시트 '멤버정보' 탭에 행 추가: 이름·engName·fanName·age·height·mbti·group·firstStream·vote (코드 아님 — 2026-07 시트 이관)
+//  ③ 시트 '멤버정보' 탭에 행 추가: 이름·engName·fanName·age·height·mbti·group·firstStream·vote·election2026(J: 2026 반장선거) (코드 아님 — 2026-07 시트 이관)
 //  ④ MEMBER_BIRTHDAYS: month·day·display·file(birthday/NAME.webp) — 단일 소스(로고 교체·프로필·기념일 공용)
 //  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
 //  ⑥ 문서 상단 meta description 멤버 명단
@@ -2747,7 +2747,7 @@ const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v1';
 const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
 let crewActs = [];       // [{section, date, text, tag}] — 시트 행 순서 = 표시 순서
 let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러올 수 없어요' 구분
-let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, vote} }
+let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, vote, election2026} }
 
 // 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 헤더 스킵은 행 위치가 아니라 내용 기반(케미 파서 관례) — 시트에 헤더 행이 없어도 첫 데이터 행을 삼키지 않음.
 function parseCrewActRows(rows) {
@@ -2757,7 +2757,7 @@ function parseMemberInfoRows(rows) {
   const o = {};
   rows.forEach(r => {
     const m = MEMBERS.find(x => x.name === (r[0] || '').trim());   // A열 = 멤버 이름(케미·배너 등 다른 시트와 동일 관례) — 미등록 이름(헤더 포함)은 자연 무시, 내부 키는 id
-    if (m) o[m.id] = { engName: r[1] || '', fanName: r[2] || '', age: r[3] || '', height: r[4] || '', mbti: r[5] || '', group: r[6] || '', firstStream: r[7] || '', vote: r[8] || '' };
+    if (m) o[m.id] = { engName: r[1] || '', fanName: r[2] || '', age: r[3] || '', height: r[4] || '', mbti: r[5] || '', group: r[6] || '', firstStream: r[7] || '', vote: r[8] || '', election2026: r[9] || '' };   // J열 = 2026 반장선거 득표수/득표율
   });
   return o;
 }
@@ -6634,7 +6634,8 @@ function renderMembersProfile(body, memberId) {
     const pairedHtml = pairedRows.map(([label, value]) => `<div class="members-info-row"><span class="members-info-label">${escapeHtml(label)}</span><span class="members-info-value">${escapeHtml(value)}</span></div>`).join('');
     const firstStreamHtml = !skip(firstStreamVal) ? `<div class="members-info-row-full"><span class="members-info-label">첫 방송일</span><span class="members-info-value">${escapeHtml(firstStreamVal)}</span></div>` : '';
     const interviewHtml = info.vote ? `<div class="members-info-row-full"><span class="members-info-label">면접 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.vote)}</span></div>` : '';
-    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${pairedHtml}${firstStreamHtml}${interviewHtml}</div></div>`;
+    const electionHtml = info.election2026 ? `<div class="members-info-row-full"><span class="members-info-label">2026 반장선거 득표수/득표율</span><span class="members-info-value">${escapeHtml(info.election2026)}</span></div>` : '';
+    infoHtml = `<div class="members-info-section"><div class="members-info-title">프로필</div><div class="members-info-grid">${pairedHtml}${firstStreamHtml}${interviewHtml}${electionHtml}</div></div>`;
   }
 
   const photoSrc = m.img.replace('members/', 'profile/');

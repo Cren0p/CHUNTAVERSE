@@ -23,6 +23,7 @@
   :root {
     --badge-vnudge: 0px;   /* 모드 배지 글자 세로 광학 보정 — calibrateBadgeNudge()가 기기 실측값 주입(+=아래로). JS 실패 시 0(대칭, 최대 ~1px 오차) */
     --badge-valign: 1px;   /* 타임라인 모드 배지의 줄 정렬(vertical-align) — calibrateBadgeNudge()가 실측 주입. 폴백 1px = 구 수동 튜닝값 */
+    --navbadge-vnudge: 0px;   /* nav 안읽음 배지 숫자 세로 보정 — calibrateBadgeNudge()가 실측 주입(+=아래로). 폴백 0 = 대칭 */
     --bg: #070a14;
     --surface: #0d1120;
     --surface2: #131929;
@@ -134,7 +135,7 @@
     color: var(--bg);
     font-size: 10px;
     font-weight: 700;
-    padding: 1px 5px;
+    padding: calc(1px + var(--navbadge-vnudge)) 5px calc(1px - var(--navbadge-vnudge));   /* 대칭(1/1) + 실측 비대칭 = 숫자 세로 이동(총높이 불변) — 모드 배지와 동일 원리 */
     min-width: 16px;
     text-align: center;
     line-height: 1.2;
@@ -5782,30 +5783,41 @@ function scanInkCenter(fontDecl, text, fontPx) {
   if (top < 0) return null;
   return (top + bot + 1) / 2 / SCALE - baselineY;
 }
+// 주어진 폰트·라인높이에서 "렌더 잉크 중심이 라인박스 중심에서 벗어난 양"(CSS px, +=아래)을 실측.
+// 베이스라인·라인박스 높이 = DOM 프로브(레이아웃 실측), 잉크 = 캔버스 렌더 픽셀 스캔 — 폰트메트릭 API를 신뢰하지 않음.
+function measureLineInkOffset(fam, weight, fontPx, lineHeightCss, sample) {
+  const ink = scanInkCenter(`${weight} ${fontPx}px ${fam}`, sample, fontPx);
+  if (ink === null) return null;
+  const probe = document.createElement('span');
+  probe.style.cssText = `position:absolute;visibility:hidden;top:-9999px;display:inline-block;line-height:${lineHeightCss};font-weight:${weight};font-size:${fontPx}px;`;
+  probe.style.fontFamily = fam;
+  probe.textContent = sample.slice(0, 2);
+  const mark = document.createElement('span');
+  mark.style.cssText = 'display:inline-block;width:0;height:0;';
+  probe.appendChild(mark);
+  document.body.appendChild(probe);
+  const pr = probe.getBoundingClientRect();
+  const baseline = mark.getBoundingClientRect().bottom - pr.top;   // 빈 inline-block 하단 = 그 줄의 베이스라인
+  const lineBoxH = pr.bottom - pr.top;
+  probe.remove();
+  return (baseline + ink) - lineBoxH / 2;
+}
 function calibrateBadgeNudge() {
   try {
     const fam = getComputedStyle(document.body).fontFamily;
-    const badgeInk = scanInkCenter(`700 11px ${fam}`, Object.values(MODE_LABEL).join(''), 11);   // 실제 배지 라벨 전체의 잉크 합집합
-    if (badgeInk === null) return;   // 계측 실패: CSS 기본값(대칭+1px) 유지
-    // 라인박스 내 베이스라인은 레이아웃에서 직접 측정 — 캔버스 폰트메트릭과 레이아웃 메트릭의 출처 불일치 회피(기법: line-height:1 프로브 안의 빈 inline-block 하단 = 그 줄의 베이스라인)
-    const probe = document.createElement('span');
-    probe.style.cssText = 'position:absolute;visibility:hidden;top:-9999px;display:inline-block;line-height:1;font-weight:700;font-size:11px;';
-    probe.style.fontFamily = fam;
-    probe.textContent = '구독';
-    const mark = document.createElement('span');
-    mark.style.cssText = 'display:inline-block;width:0;height:0;';
-    probe.appendChild(mark);
-    document.body.appendChild(probe);
-    const baseline = mark.getBoundingClientRect().bottom - probe.getBoundingClientRect().top;
-    probe.remove();
-    const inkCenter = baseline + badgeInk;   // 라인박스 상단 기준 실측 잉크 중심 = 레이아웃 베이스라인 + 렌더 잉크 오프셋
-    const s = Math.max(-3, Math.min(3, 5.5 - inkCenter));                  // 잉크가 아래로 처졌으면 음수(위로), 위로 떴으면 양수(아래로)
-    document.documentElement.style.setProperty('--badge-vnudge', s.toFixed(2) + 'px');
-    // ── 줄 정렬 축: 배지는 inline-flex라 내부 글자 베이스라인으로 바깥 줄에 정렬됨 → 내부 보정(s)이 박스를 반대로 밀기 때문에 이 축도 함께 계측해야 완결.
+    // ① 모드 배지 내부(700·11px·line-height:1) — 보정 = 이탈량의 반대 방향 이동
+    const off = measureLineInkOffset(fam, 700, 11, '11px', Object.values(MODE_LABEL).join(''));
+    if (off === null) return;   // 계측 실패: CSS 기본값(대칭+1px) 유지
+    document.documentElement.style.setProperty('--badge-vnudge', Math.max(-3, Math.min(3, -off)).toFixed(2) + 'px');
+    // ② nav 안읽음 배지(700·10px·line-height:1.2=12px·숫자만) — 같은 원리, 별도 폰트기하라 별도 계측
+    const offNav = measureLineInkOffset(fam, 700, 10, '12px', '0123456789');
+    if (offNav !== null) document.documentElement.style.setProperty('--navbadge-vnudge', Math.max(-3, Math.min(3, -offNav)).toFixed(2) + 'px');
+    // ── ③ 줄 정렬 축: 배지는 inline-flex라 내부 글자 베이스라인으로 바깥 줄에 정렬됨 → 내부 보정이 박스를 반대로 밀기 때문에 이 축도 함께 계측해야 완결.
     // 내부 보정 후 "박스 중심 = 배지 잉크 중심"이므로, 박스 중심을 제목 잉크 중심에 맞추는 vertical-align은
-    // (배지 글자의 베이스라인 대비 잉크중심) − (제목 글자의 동일 값) 으로 결정 — s와 무관, 양쪽 다 렌더 픽셀 실측.
+    // (배지 글자의 베이스라인 대비 잉크중심) − (제목 글자의 동일 값) 으로 결정 — 양쪽 다 렌더 픽셀 실측이라 힌팅차 상쇄.
+    const badgeInk = scanInkCenter(`700 11px ${fam}`, Object.values(MODE_LABEL).join(''), 11);
     const titleInk = scanInkCenter(`400 12px ${fam}`, '방송제목가힣', 12);   // .event-detail과 동일 폰트 지정(12px·일반 웨이트) — CSS 변경 시 함께 갱신
-    if (titleInk === null) return;
+    if (badgeInk === null || titleInk === null) return;
     const v = Math.max(-3, Math.min(3, badgeInk - titleInk));
     document.documentElement.style.setProperty('--badge-valign', v.toFixed(2) + 'px');
   } catch (e) { /* 계측 실패 시 CSS 기본값(대칭) 유지 */ }

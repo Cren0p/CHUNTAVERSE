@@ -1730,7 +1730,7 @@
     border: 1px solid var(--border);
     padding: 8px;
     margin: 0 auto 16px;
-    max-width: 920px;
+    max-width: 980px;   /* 통계 스트립과 동일값 통일(2026-07-13) — 쌍둥이 컴포넌트인데 근거 없이 920으로 달랐던 표류 해소. 두 스트립은 1100px 미디어쿼리도 공유하므로 이제 전 폭에서 동일 반응 */
   }
   .members-tab {
     position: relative;
@@ -1953,7 +1953,7 @@
   .mi-collect-val { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--text); text-align: right; }
   .mi-collect-row.me { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }   /* 현재 보던 멤버 강조 — 좌측 민트 바 */
 
-  /* 프로필/통계 상단 셀렉터: 1행(11~12칸, max-width 800/880)이 폭 좁아지면 버튼이 ~67px 밑으로 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버=크루(좌측 2행)+12를 7열, 통계=연간/월간 좌측 세로 스택 */
+  /* 프로필/통계 상단 셀렉터: 1행(13칸, max-width 980 공통)이 폭 좁아지면 버튼이 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버=크루(좌측 2행)+12를 7열, 통계=연간/월간 좌측 세로 스택 */
   @media (max-width: 1100px) {
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(7, 1fr); }

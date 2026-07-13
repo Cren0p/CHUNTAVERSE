@@ -946,7 +946,6 @@
   .stats-row-icon svg { width: 11px; height: 11px; display: block; vertical-align: middle; }
   .medal-ico svg { width: 13px; height: 13px; vertical-align: -2px; }   /* 지표값 옆 순위 트로피(구 🥇🥈🥉 이모지) — 금·은·동은 명전 순위색 */
   .stats-card-value { color: var(--text); font-weight: 700; flex-shrink: 0; }
-  .stats-card-value.accent { color: var(--accent); }
 
   .stats-detail-month {
     display: flex; align-items: center; gap: 4px;
@@ -2663,7 +2662,7 @@ function modeBadgeSvg(part) {
     y0 = Math.min(y0, g.y0); y1 = Math.max(y1, g.y1);
   });
   const H = 19, W = Math.max(46, awu * s + 15);   // 좌우 패딩 6×2 + 테두리 1.5×2
-  const yBase = H / 2 + (y0 + y1) / 2 * s;   // 라벨 잉크 중심 = 박스 중심
+  const yBase = H / 2 + (y0 + y1) / 2 * s - 0.5;   // 라벨 잉크(bbox) 중심 = 박스 중심, 거기서 0.5px 광학 리프트(2026-07-13 실기기 판정: 한글 윗획 끝이 가늘어 bbox 정중앙이 눈에는 +0.3~0.5px 낮게 보임). SVG 좌표계 상수라 배지와 함께 선형 스케일 — 배율 안전. 과/부족하면 이 숫자만 조정
   let xu = ((W - awu * s) / 2) / s;
   const paths = chars.map(ch => {
     const g = BADGE_GLYPHS.g[ch];
@@ -4864,7 +4863,7 @@ function renderStatsAnnual(body) {
         <div class="stats-card-rows">
           <div class="stats-card-row stats-card-row-link" data-metric="broadcastDays">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-            <span class="stats-card-value accent">${mv('sessions')}${sum.sessions}일</span>
+            <span class="stats-card-value">${mv('sessions')}${sum.sessions}일</span>
           </div>
           <div class="stats-card-row stats-card-row-link" data-metric="broadcastTime">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
@@ -4944,7 +4943,7 @@ function renderStatsAll(body) {
         <div class="stats-card-rows">
           <div class="stats-card-row stats-card-row-link" data-metric="broadcastDays">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-            <span class="stats-card-value accent">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+            <span class="stats-card-value">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
           </div>
           <div class="stats-card-row stats-card-row-link" data-metric="broadcastTime">
             <span class="stats-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
@@ -5027,7 +5026,7 @@ function renderStatsMember(body, memberId) {
           return `
         <div class="stats-summary-item" data-metric="broadcastDays">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-          <span class="stats-summary-value" style="color: var(--accent)">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
+          <span class="stats-summary-value">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
         </div>
         <div class="stats-summary-item" data-metric="broadcastTime">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>

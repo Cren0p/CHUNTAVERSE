@@ -23,7 +23,6 @@
   :root {
     --badge-vnudge: 0px;   /* 모드 배지 글자 세로 광학 보정 — calibrateBadgeNudge()가 기기 실측값 주입(+=아래로). JS 실패 시 0(대칭, 최대 ~1px 오차) */
     --badge-valign: 1px;   /* 타임라인 모드 배지의 줄 정렬(vertical-align) — calibrateBadgeNudge()가 실측 주입. 폴백 1px = 구 수동 튜닝값 */
-    --navbadge-vnudge: 0px;   /* nav 안읽음 배지 숫자 세로 보정 — calibrateBadgeNudge()가 실측 주입(+=아래로). 폴백 0 = 대칭 */
     --bg: #070a14;
     --surface: #0d1120;
     --surface2: #131929;
@@ -128,18 +127,16 @@
   }
   .nav-icon svg { width: 16px; height: 16px; display: block; vertical-align: middle; }
   .nav-events-label { position: relative; display: inline-flex; align-items: center; }
+  /* 안읽음 숫자 배지: SVG 도형 렌더(2026-07-13) — 박스(rect)와 숫자(패스)가 한 좌표계의 기하라 배율 무관 정중앙.
+     폰트 텍스트는 글리프 힌팅이 ppem마다 착지를 ±1px 스냅(배율 따라 반전 실측 — geometricPrecision 실험도 무효)해 어떤 보정으로도 불가했음.
+     크기 문법(높이14=구 lh12+상하패딩2 · min-width16 · 좌우패딩5 · 숫자 10px 상당)은 navBadgeSvg()가 동일 유지. */
   .nav-badge {
     position: absolute;
     top: -6px; right: -10px;   /* 라벨 우상단 위로(superscript) — 흐름을 차지하지 않아 라벨이 밀리거나 줄바꿈되지 않음 */
-    background: var(--ev-unread);
-    color: var(--bg);
-    font-size: 10px;
-    font-weight: 700;
-    padding: calc(1px + var(--navbadge-vnudge)) 5px calc(1px - var(--navbadge-vnudge));   /* 대칭(1/1) + 실측 비대칭 = 숫자 세로 이동(총높이 불변) — 모드 배지와 동일 원리 */
-    min-width: 16px;
-    text-align: center;
-    line-height: 1.2;
   }
+  .nav-badge svg { display: block; }
+  .nav-badge rect { fill: var(--ev-unread); }
+  .nav-badge path { fill: var(--bg); }
   .nav-live-badge {
     margin-left: auto;
     display: inline-flex;
@@ -147,11 +144,13 @@
     gap: 5px;
     padding: 2px 8px;
     background: var(--surface2);
-    font-size: 11px;
-    font-weight: 700;
+    min-height: 17px;   /* 구 높이 앵커 — 텍스트 라인박스(11px×lh normal≈13)+패딩4가 만들던 17px을, 숫자가 SVG(≈8px)로 바뀌며 명시값으로 대체 */
     color: var(--muted);
     transition: color 0.15s;
   }
+  /* 카운트 숫자 = SVG 도형(nav-badge와 동일 사유). SVG 박스=숫자 잉크 경계라 flex 중앙정렬이 곧 잉크 중앙정렬. 색은 currentColor로 on/off 상태 상속 */
+  .nav-live-count svg { display: block; }
+  .nav-live-count path { fill: currentColor; }
   .nav-live-dot {
     width: 7px;
     height: 7px;
@@ -2083,7 +2082,7 @@
       <span>생방송</span>
       <span class="nav-live-badge off" id="navLiveBadge">
         <span class="nav-live-dot"></span>
-        <span class="nav-live-count" id="navLiveCount">0</span>
+        <span class="nav-live-count" id="navLiveCount" role="img" aria-label="방송 중 0명"></span>
       </span>
       <span class="nav-live-dot-m"></span>
     </button>
@@ -2091,7 +2090,7 @@
       <span class="nav-icon" id="navEventsIcon"></span>
       <span class="nav-events-label">
         <span class="nav-label-pc">최근 이벤트</span><span class="nav-label-mb">이벤트</span>
-        <span class="nav-badge" id="navBadge" style="display:none">0</span>
+        <span class="nav-badge" id="navBadge" role="img" style="display:none"></span>
       </span>
       <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="새 이벤트 알림 — 필터에서 선택한 멤버·종류만 알림됩니다"></span>
     </button>
@@ -2609,6 +2608,45 @@ const SVG_ICONS = {
   birthday: `<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" mask="url(#mica)"><rect x="3" y="16" width="18" height="6" rx="1.5"/><rect x="6" y="11" width="12" height="5" rx="1.5"/><line x1="12" y1="7" x2="12" y2="11"/><circle cx="12" cy="5.5" r="1.5"/></g></svg>`,
   chuntaverse: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>`,
 };
+
+// ── nav 숫자 배지 SVG 렌더(2026-07-13) — 민트 안읽음(navBadgeSvg)·빨강 라이브 카운트(liveCountSvg) ──
+// 폰트 텍스트는 글리프 힌팅이 ppem(글자px×배율×DPR)마다 세로 착지를 ±1px 스냅해(배율 따라 반전 실측,
+// 캘리브레이션·geometricPrecision 모두 무효) 도형 렌더로 전환: 박스·숫자가 한 SVG 좌표계의 순수 기하 → 모든 배율 선형·정중앙.
+// 아웃라인 출처: Pretendard Variable 1.3.9(사이트 로드본과 동일)를 wght=700 인스턴스화 후 fonttools로 추출(upem 2048, 좌표 정수 반올림 — 10px 렌더 오차 0.005px).
+// top/bot = 0~9 union 잉크 경계(라이닝 숫자·오버슈트 포함): 전 숫자가 한 베이스라인을 공유해 값이 바뀌어도 세로 위치 불변.
+// 폰트 파일 교체 시(사실상 없음) 재추출 필요. 모드 배지는 폰트 텍스트+캘리브레이션(--badge-vnudge/--badge-valign) 현행 유지.
+const NAV_DIGITS = {"upem":2048,"top":1468,"bot":-20,"adv":{"0":1352,"1":960,"2":1251,"3":1309,"4":1346,"5":1284,"6":1317,"7":1179,"8":1317,"9":1317},"d":{"0":"M95 724Q95 959 165 1126Q234 1293 365 1381Q496 1468 676 1468Q856 1468 987 1381Q1118 1293 1188 1126Q1258 958 1258 724Q1258 488 1188 321Q1119 154 988 67Q857 -20 676 -20Q495 -20 365 67Q234 154 165 322Q95 489 95 724ZM950 724Q950 886 917 998Q884 1109 822 1165Q760 1221 676 1221Q592 1221 530 1165Q469 1109 435 998Q401 886 401 724Q401 561 435 449Q468 338 530 283Q592 228 676 228Q760 228 823 283Q885 338 918 449Q951 561 950 724Z","1":"M737 0H435V1162H427L96 952V1220L454 1448H737Z","2":"M112 217 633 696Q710 770 753 818Q796 867 819 917Q841 966 841 1022Q841 1084 811 1131Q781 1179 729 1204Q677 1229 611 1229Q544 1229 492 1202Q441 1175 413 1124Q386 1072 386 1004H100Q100 1143 165 1249Q229 1354 346 1411Q462 1468 614 1468Q767 1468 884 1414Q1001 1360 1066 1263Q1130 1166 1130 1041Q1130 956 1098 877Q1065 798 983 702Q902 606 752 470L531 257V247H1151V0H113Z","3":"M99 408H402Q405 357 438 316Q471 275 527 252Q583 229 651 229Q722 229 780 255Q837 280 868 324Q899 369 898 426Q899 485 866 531Q833 577 771 602Q708 628 624 628H489V850H624Q695 850 751 875Q807 899 837 943Q867 987 866 1043Q867 1098 841 1140Q815 1183 766 1206Q717 1229 654 1229Q590 1229 537 1206Q484 1184 451 1142Q419 1101 416 1046H128Q132 1169 201 1265Q270 1361 388 1414Q507 1468 654 1468Q803 1468 917 1415Q1031 1362 1094 1269Q1157 1176 1155 1061Q1157 982 1123 917Q1088 852 1025 811Q963 769 881 754V743Q987 730 1062 685Q1136 639 1174 568Q1212 497 1210 406Q1212 285 1140 188Q1068 90 940 35Q812 -20 651 -20Q493 -20 368 34Q243 88 172 186Q102 284 99 408Z","4":"M90 494 702 1448H906V1118H784L394 510V498H1263V256H90ZM793 329 797 434V1448H1080V0H793Z","5":"M118 408H409Q414 352 446 309Q479 266 532 242Q584 217 646 217Q720 217 779 250Q837 283 870 341Q903 400 903 474Q903 551 869 610Q836 668 776 702Q717 735 641 735Q560 736 504 706Q448 676 415 614H142L221 1448H1112V1201H469L429 836H440Q482 891 560 925Q638 959 731 959Q862 959 969 898Q1075 838 1134 729Q1194 620 1193 482Q1194 338 1125 223Q1055 109 931 44Q807 -20 646 -20Q498 -20 378 35Q258 90 190 188Q121 286 118 408Z","6":"M90 691Q90 932 164 1108Q237 1283 371 1376Q506 1468 686 1468Q829 1468 941 1413Q1054 1358 1123 1262Q1192 1166 1207 1046H910Q898 1097 867 1134Q837 1172 791 1191Q745 1210 686 1210Q589 1210 522 1154Q456 1099 421 996Q386 893 385 749H397Q431 813 488 858Q544 904 617 928Q689 953 768 953Q897 953 1001 893Q1105 833 1164 726Q1222 620 1222 485Q1222 339 1153 224Q1085 109 960 45Q836 -20 675 -20Q514 -19 383 51Q252 121 171 280Q90 439 90 691ZM930 476Q930 549 897 608Q864 667 806 700Q748 733 675 733Q603 733 544 699Q485 665 451 606Q417 547 415 475Q416 406 450 347Q483 288 542 252Q600 217 673 217Q746 217 804 252Q863 286 897 346Q930 405 930 476Z","7":"M780 1192V1201H70V1448H1092V1197L481 0H171Z","8":"M91 390Q91 479 133 557Q175 634 248 684Q320 734 409 747V758Q333 773 273 819Q213 864 179 932Q145 1000 145 1078Q145 1189 212 1279Q279 1368 396 1418Q513 1468 658 1468Q804 1468 922 1418Q1039 1368 1105 1279Q1172 1189 1172 1078Q1172 1000 1137 932Q1103 864 1043 819Q984 773 907 758V747Q996 734 1068 684Q1141 634 1184 557Q1227 479 1227 390Q1227 274 1153 180Q1080 86 950 33Q821 -20 658 -20Q496 -20 367 33Q237 86 164 180Q91 274 91 390ZM913 419Q913 482 880 532Q847 582 789 610Q731 638 658 638Q586 638 528 610Q470 582 437 532Q404 482 405 419Q404 359 436 311Q468 263 526 236Q584 209 658 209Q733 209 791 236Q849 263 881 311Q913 359 913 419ZM878 1047Q878 1104 850 1148Q823 1192 772 1216Q722 1241 658 1241Q595 1241 545 1216Q494 1192 467 1148Q439 1104 439 1047Q439 991 468 947Q496 902 546 877Q596 851 658 851Q721 851 772 877Q822 902 850 947Q878 991 878 1047Z","9":"M1227 762Q1228 519 1155 343Q1082 167 947 73Q813 -20 631 -20Q489 -20 376 36Q263 92 194 188Q125 285 110 407H406Q419 354 449 316Q480 278 526 258Q573 238 631 238Q728 238 796 294Q864 350 898 455Q933 559 933 704H920Q886 642 830 596Q774 550 702 525Q629 501 549 501Q421 501 317 561Q214 621 155 727Q96 834 95 966Q95 1111 164 1226Q232 1340 357 1404Q482 1469 643 1468Q804 1468 935 1398Q1066 1329 1147 1171Q1227 1012 1227 762ZM388 975Q389 904 422 846Q455 788 512 754Q570 720 641 720Q714 720 774 755Q833 790 868 849Q903 909 902 977Q902 1046 868 1105Q834 1163 776 1198Q718 1232 644 1232Q572 1232 513 1198Q454 1163 421 1105Q388 1046 388 975Z"}};
+// numStr을 advance 폭대로 나열한 <g>. s=CSSpx/upem, (x0,yBase)=SVG 좌표의 시작 x·베이스라인 y(SVG는 y-down이라 scale Y 반전)
+function navDigitsGroup(numStr, s, x0, yBase) {
+  let x = 0;
+  const parts = [];
+  for (const ch of String(numStr)) {
+    parts.push(`<path d="${NAV_DIGITS.d[ch]}"${x ? ` transform="translate(${x} 0)"` : ''}/>`);
+    x += NAV_DIGITS.adv[ch];
+  }
+  return `<g transform="translate(${x0.toFixed(3)} ${yBase.toFixed(3)}) scale(${s} ${-s})">${parts.join('')}</g>`;
+}
+// 민트 안읽음 배지 전체(rect 박스 + 숫자). 크기 문법은 구 CSS 동일: 높이14 · min-width16 · 좌우패딩5 · 숫자 10px 상당. 색은 CSS(.nav-badge rect/path)가 담당.
+function navBadgeSvg(n) {
+  const s = 10 / NAV_DIGITS.upem;
+  const str = String(n);
+  let aw = 0;
+  for (const ch of str) aw += NAV_DIGITS.adv[ch];
+  const H = 14;
+  const W = Math.max(16, aw * s + 10);
+  const yBase = H / 2 + (NAV_DIGITS.top + NAV_DIGITS.bot) / 2 * s;   // 잉크(union) 중심 = 박스 중심
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true"><rect width="${W.toFixed(2)}" height="${H}"/>${navDigitsGroup(str, s, (W - aw * s) / 2, yBase)}</svg>`;
+}
+// 빨강 라이브 카운트(숫자만, 11px 상당). SVG 박스 = 잉크 경계 그 자체 → 컨테이너 flex 중앙정렬이 곧 잉크 중앙정렬(점과 중심 일치).
+function liveCountSvg(n) {
+  const s = 11 / NAV_DIGITS.upem;
+  const str = String(n);
+  let aw = 0;
+  for (const ch of str) aw += NAV_DIGITS.adv[ch];
+  const w = (aw * s).toFixed(2);
+  const h = ((NAV_DIGITS.top - NAV_DIGITS.bot) * s).toFixed(2);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${navDigitsGroup(str, s, 0, NAV_DIGITS.top * s)}</svg>`;
+}
 
 const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
@@ -3569,7 +3607,8 @@ function refreshUnreadIndicator() {
   if (badge) {
     if (count > 0) {
       badge.style.display = '';
-      badge.textContent = count;
+      badge.innerHTML = navBadgeSvg(count);
+      badge.setAttribute('aria-label', `새 이벤트 ${count}건`);
     } else {
       badge.style.display = 'none';
     }
@@ -5550,7 +5589,8 @@ async function loadLive() {
     const liveBadge = document.getElementById('navLiveBadge');
     const liveCountEl = document.getElementById('navLiveCount');
     if (liveBadge && liveCountEl) {
-      liveCountEl.textContent = liveCount;
+      liveCountEl.innerHTML = liveCountSvg(liveCount);
+      liveCountEl.setAttribute('aria-label', `방송 중 ${liveCount}명`);
       liveBadge.classList.toggle('on', liveCount > 0);
       liveBadge.classList.toggle('off', liveCount === 0);
     }
@@ -5809,9 +5849,7 @@ function calibrateBadgeNudge() {
     const off = measureLineInkOffset(fam, 700, 11, '11px', Object.values(MODE_LABEL).join(''));
     if (off === null) return;   // 계측 실패: CSS 기본값(대칭+1px) 유지
     document.documentElement.style.setProperty('--badge-vnudge', Math.max(-3, Math.min(3, -off)).toFixed(2) + 'px');
-    // ② nav 안읽음 배지(700·10px·line-height:1.2=12px·숫자만) — 같은 원리, 별도 폰트기하라 별도 계측
-    const offNav = measureLineInkOffset(fam, 700, 10, '12px', '0123456789');
-    if (offNav !== null) document.documentElement.style.setProperty('--navbadge-vnudge', Math.max(-3, Math.min(3, -offNav)).toFixed(2) + 'px');
+    // (구 ②축 nav 안읽음 배지 계측은 SVG 숫자 전환(2026-07-13)으로 제거 — 폰트 텍스트가 아니게 되어 계측 대상 자체가 소멸)
     // ── ③ 줄 정렬 축: 배지는 inline-flex라 내부 글자 베이스라인으로 바깥 줄에 정렬됨 → 내부 보정이 박스를 반대로 밀기 때문에 이 축도 함께 계측해야 완결.
     // 내부 보정 후 "박스 중심 = 배지 잉크 중심"이므로, 박스 중심을 제목 잉크 중심에 맞추는 vertical-align은
     // (배지 글자의 베이스라인 대비 잉크중심) − (제목 글자의 동일 값) 으로 결정 — 양쪽 다 렌더 픽셀 실측이라 힌팅차 상쇄.

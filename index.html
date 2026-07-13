@@ -21,8 +21,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <style>
   :root {
-    --badge-vnudge: 0px;   /* 모드 배지 글자 세로 광학 보정 — calibrateBadgeNudge()가 기기 실측값 주입(+=아래로). JS 실패 시 0(대칭, 최대 ~1px 오차) */
-    --badge-valign: 1px;   /* 타임라인 모드 배지의 줄 정렬(vertical-align) — calibrateBadgeNudge()가 실측 주입. 폴백 1px = 구 수동 튜닝값 */
+    --tag-valign: -6px;      /* 타임라인 모드 배지(19px SVG) 줄 정렬 — 배지 박스 중심을 제목(400·12px) 잉크 중심에. calibrateBadgeValign() 실측 주입, 폴백은 정적 근사 */
+    --daytag-valign: -5.5px; /* 통계 일별 모드 배지 줄 정렬 — 제목(600·13px) 문맥. 상동 */
     --bg: #070a14;
     --surface: #0d1120;
     --surface2: #131929;
@@ -487,14 +487,15 @@
     color: var(--muted); letter-spacing: 0.5px;
     text-align: center;
   }
+  /* 모드 배지 3종(.badge-mode/.event-mode-tag/.day-session-mode): SVG 도형 렌더(2026-07-13) — nav 숫자 배지와 동일 사유.
+     테두리(rect)·글자(패스)가 한 SVG 좌표계의 기하라 배율 무관 정중앙이며, 각 배지가 자기 라벨의 잉크를 박스 중앙에 둠(라벨별 광학 중앙 — 확정).
+     크기도 3곳 통일: 높이19 · min-width46 · 글자 11px 상당 · 테두리1.5 · 자간0.3 (구 3종은 20/19/~15px로 근거 없이 달랐음 — 통합 확정, 산정은 modeBadgeSvg()).
+     색은 기존 색 클래스(currentColor 상속) 그대로. */
   .badge-mode {
     position: absolute; top: 10px; right: 10px;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px; padding: calc(3px + var(--badge-vnudge)) 8px calc(3px - var(--badge-vnudge)); min-width: 46px; box-sizing: border-box;   /* event-mode-tag와 동일 기하(11px·lh1·flex중앙) — 같은 --badge-vnudge 실측 보정 공유, 총높이 불변 */
-    background: transparent; border: 1.5px solid currentColor;
-    display: inline-flex; align-items: center; justify-content: center;
-    line-height: 1;
+    display: inline-block;
   }
+  .badge-mode svg, .event-mode-tag svg, .day-session-mode svg { display: block; }
   .badge-mode.adult { color: var(--mode-adult); }
   .badge-mode.subscription { color: var(--mode-subscription); }
   .badge-mode.copyright { color: var(--mode-copyright); }
@@ -525,6 +526,7 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     min-width: 0;
   }
+  .card-btime svg { width: 12px; height: 12px; }   /* 시계 아이콘(구 ⏱) — flex 중앙정렬이라 오프셋 불요 */
   .card-btime {
     font-size: 11px;
     color: var(--time);
@@ -705,18 +707,15 @@
   .event-body { flex: 1; min-width: 0; font-size: 14px; min-height: 38px; display: flex; flex-direction: column; justify-content: center; }
   .event-member { font-weight: 700; margin-right: 6px; }
   .event-elapsed { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .event-elapsed svg { width: 12px; height: 12px; vertical-align: -1.5px; }   /* 시계 아이콘(구 ⏱) — 인라인 흐름 유지(밖 텍스트와 베이스라인 공유), 아이콘만 눈맞춤 오프셋 */
   .event-action { color: var(--muted); }
   .event-target { color: #cbd5e1; margin-left: 4px; display: inline-block; }   /* 괄호는 하나의 덩어리 — inline이면 앞 텍스트와 섞여 중간에서 끊기므로 inline-block으로 묶음. 한 줄에 안 들어가면 통째로 다음 줄로, 카페명처럼 길면 본문 폭 안에서 덩어리 내부 줄바꿈(좁은 모바일 가로 overflow 방지). 짧은 '(X 방송)'은 공간 되면 앞 조각과 같은 줄. */
   /* 멤버명·액션라벨·경과시간은 짧으니 각각 한 줄 고정(조각 내부 중간이 안 끊김). */
   .event-member, .event-action-label, .event-elapsed { white-space: nowrap; }
   .event-mode-tag {
-    display: inline-flex; align-items: center; justify-content: center;
+    display: inline-block;
     margin-left: 0; margin-right: 6px;
-    padding: calc(2.5px + var(--badge-vnudge)) 6px calc(2.5px - var(--badge-vnudge)); height: 19px; font-size: 11px; min-width: 46px; box-sizing: border-box;
-    /* 기본 대칭(2.5/2.5) + --badge-vnudge 비대칭 = 글자 세로 이동(총높이 불변). 값은 calibrateBadgeNudge()가 플랫폼별 실측(같은 Pretendard도 OS별 ascent/descent 해석이 달라 삼성 +0.95px↑/PC -0.2px↓ 실측됨) */
-    font-weight: 700; letter-spacing: 0.3px;
-    background: transparent; border: 1.5px solid currentColor;
-    line-height: 1; vertical-align: var(--badge-valign);
+    vertical-align: var(--tag-valign);   /* 배지 박스 중심 = 제목(12px) 잉크 중심 — calibrateBadgeValign()이 실측 주입 */
   }
   .event-mode-tag.adult { color: var(--mode-adult); }
   .event-mode-tag.subscription { color: var(--mode-subscription); }
@@ -945,6 +944,7 @@
   .stats-card-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
   .stats-row-icon { display: inline-flex; align-items: center; flex-shrink: 0; vertical-align: middle; }
   .stats-row-icon svg { width: 11px; height: 11px; display: block; vertical-align: middle; }
+  .medal-ico svg { width: 13px; height: 13px; vertical-align: -2px; }   /* 지표값 옆 순위 트로피(구 🥇🥈🥉 이모지) — 금·은·동은 명전 순위색 */
   .stats-card-value { color: var(--text); font-weight: 700; flex-shrink: 0; }
   .stats-card-value.accent { color: var(--accent); }
 
@@ -1170,10 +1170,8 @@
   .day-session-time .stats-row-icon { margin-right: 4px; }
   .day-session-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
   .day-session-mode {
-    display: inline-block; text-align: center;
-    padding: 1px 6px; font-size: 10px; min-width: 44px; box-sizing: border-box;
-    font-weight: 700; letter-spacing: 0.3px; margin-right: 6px;
-    background: transparent; border: 1.5px solid currentColor;
+    display: inline-block; margin-right: 6px;
+    vertical-align: var(--daytag-valign);   /* 배지 박스 중심 = 세션 제목(600·13px) 잉크 중심 — calibrateBadgeValign()이 실측 주입 */
   }
   .day-session-mode.adult { color: var(--mode-adult); }
   .day-session-mode.subscription { color: var(--mode-subscription); }
@@ -2038,8 +2036,8 @@
   .g-grid { stroke:rgba(255,255,255,0.08); stroke-width:1; }
   .g-xlabel { fill:var(--muted); font-size:12px; text-anchor:middle; }
   .g-vlabel { font-size:12px; font-weight:700; paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; }
-  /* 이벤트 종류 필터: 좁을 때(1행) 2/3용 빈칸 숨김 */
-  @media (max-width:900px){ .evt-type-spacer { display:none; } }
+  /* 이벤트 종류 필터: 6열(1행) 전환 시 2/3행 그룹용 빈칸 숨김 — 그리드 전환(1100px)과 반드시 한 세트(900px이던 시절 900~1100 구간에서 1행 중간에 구멍 잔존 버그, 2026-07-13 수정) */
+  @media (max-width:1100px){ .evt-type-spacer { display:none; } }
   /* 모바일(narrow viewBox 380×300): 차트 월·값 글씨 키움(작은 화면 가독성) */
   @media (max-width:900px){ .g-xlabel { font-size:14px; } .g-vlabel { font-size:14px; } }
   /* 그래프 모달 (좋아요 모달 lr-panel 골격 재사용, 폭·글씨 키움) */
@@ -2609,43 +2607,72 @@ const SVG_ICONS = {
   chuntaverse: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>`,
 };
 
-// ── nav 숫자 배지 SVG 렌더(2026-07-13) — 민트 안읽음(navBadgeSvg)·빨강 라이브 카운트(liveCountSvg) ──
+// ── 배지 SVG 렌더(2026-07-13) — nav 숫자 배지(navBadgeSvg·liveCountSvg) + 모드 배지 3종(modeBadgeSvg) ──
 // 폰트 텍스트는 글리프 힌팅이 ppem(글자px×배율×DPR)마다 세로 착지를 ±1px 스냅해(배율 따라 반전 실측,
-// 캘리브레이션·geometricPrecision 모두 무효) 도형 렌더로 전환: 박스·숫자가 한 SVG 좌표계의 순수 기하 → 모든 배율 선형·정중앙.
-// 아웃라인 출처: Pretendard Variable 1.3.9(사이트 로드본과 동일)를 wght=700 인스턴스화 후 fonttools로 추출(upem 2048, 좌표 정수 반올림 — 10px 렌더 오차 0.005px).
-// top/bot = 0~9 union 잉크 경계(라이닝 숫자·오버슈트 포함): 전 숫자가 한 베이스라인을 공유해 값이 바뀌어도 세로 위치 불변.
-// 폰트 파일 교체 시(사실상 없음) 재추출 필요. 모드 배지는 폰트 텍스트+캘리브레이션(--badge-vnudge/--badge-valign) 현행 유지.
-const NAV_DIGITS = {"upem":2048,"top":1468,"bot":-20,"adv":{"0":1352,"1":960,"2":1251,"3":1309,"4":1346,"5":1284,"6":1317,"7":1179,"8":1317,"9":1317},"d":{"0":"M95 724Q95 959 165 1126Q234 1293 365 1381Q496 1468 676 1468Q856 1468 987 1381Q1118 1293 1188 1126Q1258 958 1258 724Q1258 488 1188 321Q1119 154 988 67Q857 -20 676 -20Q495 -20 365 67Q234 154 165 322Q95 489 95 724ZM950 724Q950 886 917 998Q884 1109 822 1165Q760 1221 676 1221Q592 1221 530 1165Q469 1109 435 998Q401 886 401 724Q401 561 435 449Q468 338 530 283Q592 228 676 228Q760 228 823 283Q885 338 918 449Q951 561 950 724Z","1":"M737 0H435V1162H427L96 952V1220L454 1448H737Z","2":"M112 217 633 696Q710 770 753 818Q796 867 819 917Q841 966 841 1022Q841 1084 811 1131Q781 1179 729 1204Q677 1229 611 1229Q544 1229 492 1202Q441 1175 413 1124Q386 1072 386 1004H100Q100 1143 165 1249Q229 1354 346 1411Q462 1468 614 1468Q767 1468 884 1414Q1001 1360 1066 1263Q1130 1166 1130 1041Q1130 956 1098 877Q1065 798 983 702Q902 606 752 470L531 257V247H1151V0H113Z","3":"M99 408H402Q405 357 438 316Q471 275 527 252Q583 229 651 229Q722 229 780 255Q837 280 868 324Q899 369 898 426Q899 485 866 531Q833 577 771 602Q708 628 624 628H489V850H624Q695 850 751 875Q807 899 837 943Q867 987 866 1043Q867 1098 841 1140Q815 1183 766 1206Q717 1229 654 1229Q590 1229 537 1206Q484 1184 451 1142Q419 1101 416 1046H128Q132 1169 201 1265Q270 1361 388 1414Q507 1468 654 1468Q803 1468 917 1415Q1031 1362 1094 1269Q1157 1176 1155 1061Q1157 982 1123 917Q1088 852 1025 811Q963 769 881 754V743Q987 730 1062 685Q1136 639 1174 568Q1212 497 1210 406Q1212 285 1140 188Q1068 90 940 35Q812 -20 651 -20Q493 -20 368 34Q243 88 172 186Q102 284 99 408Z","4":"M90 494 702 1448H906V1118H784L394 510V498H1263V256H90ZM793 329 797 434V1448H1080V0H793Z","5":"M118 408H409Q414 352 446 309Q479 266 532 242Q584 217 646 217Q720 217 779 250Q837 283 870 341Q903 400 903 474Q903 551 869 610Q836 668 776 702Q717 735 641 735Q560 736 504 706Q448 676 415 614H142L221 1448H1112V1201H469L429 836H440Q482 891 560 925Q638 959 731 959Q862 959 969 898Q1075 838 1134 729Q1194 620 1193 482Q1194 338 1125 223Q1055 109 931 44Q807 -20 646 -20Q498 -20 378 35Q258 90 190 188Q121 286 118 408Z","6":"M90 691Q90 932 164 1108Q237 1283 371 1376Q506 1468 686 1468Q829 1468 941 1413Q1054 1358 1123 1262Q1192 1166 1207 1046H910Q898 1097 867 1134Q837 1172 791 1191Q745 1210 686 1210Q589 1210 522 1154Q456 1099 421 996Q386 893 385 749H397Q431 813 488 858Q544 904 617 928Q689 953 768 953Q897 953 1001 893Q1105 833 1164 726Q1222 620 1222 485Q1222 339 1153 224Q1085 109 960 45Q836 -20 675 -20Q514 -19 383 51Q252 121 171 280Q90 439 90 691ZM930 476Q930 549 897 608Q864 667 806 700Q748 733 675 733Q603 733 544 699Q485 665 451 606Q417 547 415 475Q416 406 450 347Q483 288 542 252Q600 217 673 217Q746 217 804 252Q863 286 897 346Q930 405 930 476Z","7":"M780 1192V1201H70V1448H1092V1197L481 0H171Z","8":"M91 390Q91 479 133 557Q175 634 248 684Q320 734 409 747V758Q333 773 273 819Q213 864 179 932Q145 1000 145 1078Q145 1189 212 1279Q279 1368 396 1418Q513 1468 658 1468Q804 1468 922 1418Q1039 1368 1105 1279Q1172 1189 1172 1078Q1172 1000 1137 932Q1103 864 1043 819Q984 773 907 758V747Q996 734 1068 684Q1141 634 1184 557Q1227 479 1227 390Q1227 274 1153 180Q1080 86 950 33Q821 -20 658 -20Q496 -20 367 33Q237 86 164 180Q91 274 91 390ZM913 419Q913 482 880 532Q847 582 789 610Q731 638 658 638Q586 638 528 610Q470 582 437 532Q404 482 405 419Q404 359 436 311Q468 263 526 236Q584 209 658 209Q733 209 791 236Q849 263 881 311Q913 359 913 419ZM878 1047Q878 1104 850 1148Q823 1192 772 1216Q722 1241 658 1241Q595 1241 545 1216Q494 1192 467 1148Q439 1104 439 1047Q439 991 468 947Q496 902 546 877Q596 851 658 851Q721 851 772 877Q822 902 850 947Q878 991 878 1047Z","9":"M1227 762Q1228 519 1155 343Q1082 167 947 73Q813 -20 631 -20Q489 -20 376 36Q263 92 194 188Q125 285 110 407H406Q419 354 449 316Q480 278 526 258Q573 238 631 238Q728 238 796 294Q864 350 898 455Q933 559 933 704H920Q886 642 830 596Q774 550 702 525Q629 501 549 501Q421 501 317 561Q214 621 155 727Q96 834 95 966Q95 1111 164 1226Q232 1340 357 1404Q482 1469 643 1468Q804 1468 935 1398Q1066 1329 1147 1171Q1227 1012 1227 762ZM388 975Q389 904 422 846Q455 788 512 754Q570 720 641 720Q714 720 774 755Q833 790 868 849Q903 909 902 977Q902 1046 868 1105Q834 1163 776 1198Q718 1232 644 1232Q572 1232 513 1198Q454 1163 421 1105Q388 1046 388 975Z"}};
+// 캘리브레이션·geometricPrecision 모두 무효) 도형 렌더로 전환: 박스·글자가 한 SVG 좌표계의 순수 기하 → 모든 배율 선형·정중앙.
+// 아웃라인 출처: Pretendard Variable 1.3.9(사이트 로드본과 동일)를 wght=700 인스턴스화 후 fonttools로 추출(upem 2048, 좌표 정수 반올림 — 11px 렌더 오차 0.005px).
+// 글리프 = 숫자 0~9 + 모드 라벨 전 글자(일반·19+·구독+·저작권·비번·기타). 각 글리프에 잉크 상하한(y0/y1) 동봉.
+// 폰트 파일 교체 시(사실상 없음) 재추출 필요. 라벨 추가 시 해당 글자 추출 추가 필요.
+const BADGE_GLYPHS = {"upem":2048,"g":{"0":{"d":"M95 724Q95 959 165 1126Q234 1293 365 1381Q496 1468 676 1468Q856 1468 987 1381Q1118 1293 1188 1126Q1258 958 1258 724Q1258 488 1188 321Q1119 154 988 67Q857 -20 676 -20Q495 -20 365 67Q234 154 165 322Q95 489 95 724ZM950 724Q950 886 917 998Q884 1109 822 1165Q760 1221 676 1221Q592 1221 530 1165Q469 1109 435 998Q401 886 401 724Q401 561 435 449Q468 338 530 283Q592 228 676 228Q760 228 823 283Q885 338 918 449Q951 561 950 724Z","a":1352,"y0":-20,"y1":1468},"1":{"d":"M737 0H435V1162H427L96 952V1220L454 1448H737Z","a":960,"y0":0,"y1":1448},"2":{"d":"M112 217 633 696Q710 770 753 818Q796 867 819 917Q841 966 841 1022Q841 1084 811 1131Q781 1179 729 1204Q677 1229 611 1229Q544 1229 492 1202Q441 1175 413 1124Q386 1072 386 1004H100Q100 1143 165 1249Q229 1354 346 1411Q462 1468 614 1468Q767 1468 884 1414Q1001 1360 1066 1263Q1130 1166 1130 1041Q1130 956 1098 877Q1065 798 983 702Q902 606 752 470L531 257V247H1151V0H113Z","a":1251,"y0":0,"y1":1468},"3":{"d":"M99 408H402Q405 357 438 316Q471 275 527 252Q583 229 651 229Q722 229 780 255Q837 280 868 324Q899 369 898 426Q899 485 866 531Q833 577 771 602Q708 628 624 628H489V850H624Q695 850 751 875Q807 899 837 943Q867 987 866 1043Q867 1098 841 1140Q815 1183 766 1206Q717 1229 654 1229Q590 1229 537 1206Q484 1184 451 1142Q419 1101 416 1046H128Q132 1169 201 1265Q270 1361 388 1414Q507 1468 654 1468Q803 1468 917 1415Q1031 1362 1094 1269Q1157 1176 1155 1061Q1157 982 1123 917Q1088 852 1025 811Q963 769 881 754V743Q987 730 1062 685Q1136 639 1174 568Q1212 497 1210 406Q1212 285 1140 188Q1068 90 940 35Q812 -20 651 -20Q493 -20 368 34Q243 88 172 186Q102 284 99 408Z","a":1309,"y0":-20,"y1":1468},"4":{"d":"M90 494 702 1448H906V1118H784L394 510V498H1263V256H90ZM793 329 797 434V1448H1080V0H793Z","a":1346,"y0":0,"y1":1448},"5":{"d":"M118 408H409Q414 352 446 309Q479 266 532 242Q584 217 646 217Q720 217 779 250Q837 283 870 341Q903 400 903 474Q903 551 869 610Q836 668 776 702Q717 735 641 735Q560 736 504 706Q448 676 415 614H142L221 1448H1112V1201H469L429 836H440Q482 891 560 925Q638 959 731 959Q862 959 969 898Q1075 838 1134 729Q1194 620 1193 482Q1194 338 1125 223Q1055 109 931 44Q807 -20 646 -20Q498 -20 378 35Q258 90 190 188Q121 286 118 408Z","a":1284,"y0":-20,"y1":1448},"6":{"d":"M90 691Q90 932 164 1108Q237 1283 371 1376Q506 1468 686 1468Q829 1468 941 1413Q1054 1358 1123 1262Q1192 1166 1207 1046H910Q898 1097 867 1134Q837 1172 791 1191Q745 1210 686 1210Q589 1210 522 1154Q456 1099 421 996Q386 893 385 749H397Q431 813 488 858Q544 904 617 928Q689 953 768 953Q897 953 1001 893Q1105 833 1164 726Q1222 620 1222 485Q1222 339 1153 224Q1085 109 960 45Q836 -20 675 -20Q514 -19 383 51Q252 121 171 280Q90 439 90 691ZM930 476Q930 549 897 608Q864 667 806 700Q748 733 675 733Q603 733 544 699Q485 665 451 606Q417 547 415 475Q416 406 450 347Q483 288 542 252Q600 217 673 217Q746 217 804 252Q863 286 897 346Q930 405 930 476Z","a":1317,"y0":-20,"y1":1468},"7":{"d":"M780 1192V1201H70V1448H1092V1197L481 0H171Z","a":1179,"y0":0,"y1":1448},"8":{"d":"M91 390Q91 479 133 557Q175 634 248 684Q320 734 409 747V758Q333 773 273 819Q213 864 179 932Q145 1000 145 1078Q145 1189 212 1279Q279 1368 396 1418Q513 1468 658 1468Q804 1468 922 1418Q1039 1368 1105 1279Q1172 1189 1172 1078Q1172 1000 1137 932Q1103 864 1043 819Q984 773 907 758V747Q996 734 1068 684Q1141 634 1184 557Q1227 479 1227 390Q1227 274 1153 180Q1080 86 950 33Q821 -20 658 -20Q496 -20 367 33Q237 86 164 180Q91 274 91 390ZM913 419Q913 482 880 532Q847 582 789 610Q731 638 658 638Q586 638 528 610Q470 582 437 532Q404 482 405 419Q404 359 436 311Q468 263 526 236Q584 209 658 209Q733 209 791 236Q849 263 881 311Q913 359 913 419ZM878 1047Q878 1104 850 1148Q823 1192 772 1216Q722 1241 658 1241Q595 1241 545 1216Q494 1192 467 1148Q439 1104 439 1047Q439 991 468 947Q496 902 546 877Q596 851 658 851Q721 851 772 877Q822 902 850 947Q878 991 878 1047Z","a":1317,"y0":-20,"y1":1468},"9":{"d":"M1227 762Q1228 519 1155 343Q1082 167 947 73Q813 -20 631 -20Q489 -20 376 36Q263 92 194 188Q125 285 110 407H406Q419 354 449 316Q480 278 526 258Q573 238 631 238Q728 238 796 294Q864 350 898 455Q933 559 933 704H920Q886 642 830 596Q774 550 702 525Q629 501 549 501Q421 501 317 561Q214 621 155 727Q96 834 95 966Q95 1111 164 1226Q232 1340 357 1404Q482 1469 643 1468Q804 1468 935 1398Q1066 1329 1147 1171Q1227 1012 1227 762ZM388 975Q389 904 422 846Q455 788 512 754Q570 720 641 720Q714 720 774 755Q833 790 868 849Q903 909 902 977Q902 1046 868 1105Q834 1163 776 1198Q718 1232 644 1232Q572 1232 513 1198Q454 1163 421 1105Q388 1046 388 975Z","a":1317,"y0":-20,"y1":1468},"+":{"d":"M544 1078H793V80H544ZM169 703H1169V454H169Z","a":1338,"y0":80,"y1":1078},"일":{"d":"M1058 1167Q1058 1049 995 954Q932 859 820 806Q709 753 571 753Q433 753 321 806Q209 859 146 954Q82 1049 82 1167Q82 1287 146 1382Q209 1476 321 1529Q433 1583 571 1583Q709 1583 820 1529Q932 1476 995 1382Q1058 1287 1058 1167ZM330 1167Q330 1104 361 1056Q392 1009 447 984Q502 959 571 958Q641 959 696 984Q750 1009 781 1056Q812 1104 812 1167Q812 1231 781 1278Q750 1325 696 1349Q641 1374 571 1374Q502 1374 447 1349Q392 1325 361 1278Q330 1231 330 1167ZM1577 724H1322V1638H1577ZM1577 154H610V-68H361V340H1323V452H357V649H1577ZM1627 -164H361V37H1627Z","a":1770,"y0":-164,"y1":1638},"반":{"d":"M1498 293H1243V1634H1498ZM1744 912H1424V1121H1744ZM1563 -153H317V53H1563ZM572 9H317V431H572ZM361 1241H734V1505H990V584H108V1505H361ZM734 785V1046H361V785Z","a":1770,"y0":-153,"y1":1634},"구":{"d":"M1398 1327H244V1529H1398ZM1715 549H55V755H1715ZM1004 -186H748V612H1004ZM1447 632 1195 660Q1228 802 1244 926Q1259 1049 1262 1144Q1265 1239 1265 1366V1529H1520V1367Q1520 1229 1516 1133Q1513 1037 1497 909Q1480 782 1447 632Z","a":1770,"y0":-186,"y1":1529},"독":{"d":"M1715 551H55V755H1715ZM1011 688H755V1050H1011ZM1517 -190H1266V226H238V426H1517ZM1536 917H256V1120H1536ZM1518 1362H510V1009H256V1563H1518Z","a":1770,"y0":-190,"y1":1563},"저":{"d":"M1592 -189H1336V1638H1592ZM1399 794H1009V1001H1399ZM177 154 25 355Q174 425 276 553Q378 681 429 843Q480 1004 480 1180V1353H683V1180Q683 954 626 752Q570 550 456 393Q342 236 177 154ZM1196 393 1047 191Q881 269 767 420Q653 571 597 765Q540 960 540 1180V1353H741V1180Q741 1013 792 858Q843 704 946 580Q1048 456 1196 393ZM1120 1256H102V1460H1120Z","a":1770,"y0":-189,"y1":1638},"작":{"d":"M162 571 28 768Q173 816 272 905Q371 993 420 1104Q468 1214 468 1332V1450H677V1332Q677 1158 619 1005Q562 853 446 740Q331 628 162 571ZM1149 799 1021 602Q855 656 743 765Q630 875 574 1019Q518 1164 518 1330V1450H726V1330Q726 1219 771 1115Q817 1012 912 929Q1007 846 1149 799ZM1089 1326H97V1530H1089ZM1498 538H1243V1638H1498ZM1744 983H1426V1195H1744ZM1498 -184H1243V257H273V460H1498Z","a":1770,"y0":-184,"y1":1638},"권":{"d":"M781 379H527V792H781ZM1611 263H1351V1634H1611ZM1651 -153H294V53H1651ZM551 1H294V405H551ZM1222 1006 1240 826Q971 778 678 762Q385 745 73 745L43 945Q297 948 466 952Q635 956 839 969Q1042 982 1222 1006ZM1409 465H995V665H1409ZM987 1343H206V1546H987ZM1033 906 784 924Q813 1099 820 1227Q828 1356 828 1478V1546H1082V1478Q1082 1352 1074 1218Q1066 1083 1033 906Z","a":1770,"y0":-153,"y1":1634},"비":{"d":"M1578 -189H1319V1638H1578ZM400 1048H793V1491H1044V237H145V1491H400ZM793 445V850H400V445Z","a":1770,"y0":-189,"y1":1638},"번":{"d":"M1396 947H922V1152H1396ZM1588 292H1334V1634H1588ZM1627 -153H376V53H1627ZM634 -64H376V426H634ZM388 1237H746V1515H999V579H131V1515H388ZM746 781V1042H388V781Z","a":1770,"y0":-153,"y1":1634},"기":{"d":"M1584 -184H1325V1638H1584ZM194 128 60 332Q323 456 482 611Q641 766 713 959Q785 1152 785 1401V1446H1039Q1039 1153 960 915Q882 676 695 477Q508 277 194 128ZM902 1245H157V1446H902Z","a":1770,"y0":-184,"y1":1638},"타":{"d":"M1101 486 1124 281Q932 252 741 242Q550 231 280 229H126V433H280Q531 433 718 445Q905 456 1101 486ZM989 1278H384V369H126V1486H989ZM961 777H322V978H961ZM1490 -184H1234V1638H1490ZM1760 733H1434V945H1760Z","a":1770,"y0":-184,"y1":1638}}};
+// 숫자 union 잉크 경계(라이닝·오버슈트 포함) — 전 숫자가 한 베이스라인을 공유해 값이 바뀌어도 세로 위치 불변
+const DIGIT_INK = (() => { let y0 = Infinity, y1 = -Infinity; for (const c of '0123456789') { y0 = Math.min(y0, BADGE_GLYPHS.g[c].y0); y1 = Math.max(y1, BADGE_GLYPHS.g[c].y1); } return { y0, y1 }; })();
 // numStr을 advance 폭대로 나열한 <g>. s=CSSpx/upem, (x0,yBase)=SVG 좌표의 시작 x·베이스라인 y(SVG는 y-down이라 scale Y 반전)
 function navDigitsGroup(numStr, s, x0, yBase) {
   let x = 0;
   const parts = [];
   for (const ch of String(numStr)) {
-    parts.push(`<path d="${NAV_DIGITS.d[ch]}"${x ? ` transform="translate(${x} 0)"` : ''}/>`);
-    x += NAV_DIGITS.adv[ch];
+    parts.push(`<path d="${BADGE_GLYPHS.g[ch].d}"${x ? ` transform="translate(${x} 0)"` : ''}/>`);
+    x += BADGE_GLYPHS.g[ch].a;
   }
   return `<g transform="translate(${x0.toFixed(3)} ${yBase.toFixed(3)}) scale(${s} ${-s})">${parts.join('')}</g>`;
 }
 // 민트 안읽음 배지 전체(rect 박스 + 숫자). 크기 문법은 구 CSS 동일: 높이14 · min-width16 · 좌우패딩5 · 숫자 10px 상당. 색은 CSS(.nav-badge rect/path)가 담당.
 function navBadgeSvg(n) {
-  const s = 10 / NAV_DIGITS.upem;
+  const s = 10 / BADGE_GLYPHS.upem;
   const str = String(n);
   let aw = 0;
-  for (const ch of str) aw += NAV_DIGITS.adv[ch];
+  for (const ch of str) aw += BADGE_GLYPHS.g[ch].a;
   const H = 14;
   const W = Math.max(16, aw * s + 10);
-  const yBase = H / 2 + (NAV_DIGITS.top + NAV_DIGITS.bot) / 2 * s;   // 잉크(union) 중심 = 박스 중심
+  const yBase = H / 2 + (DIGIT_INK.y0 + DIGIT_INK.y1) / 2 * s;   // 잉크(union) 중심 = 박스 중심
   return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true"><rect width="${W.toFixed(2)}" height="${H}"/>${navDigitsGroup(str, s, (W - aw * s) / 2, yBase)}</svg>`;
 }
 // 빨강 라이브 카운트(숫자만, 11px 상당). SVG 박스 = 잉크 경계 그 자체 → 컨테이너 flex 중앙정렬이 곧 잉크 중앙정렬(점과 중심 일치).
 function liveCountSvg(n) {
-  const s = 11 / NAV_DIGITS.upem;
+  const s = 11 / BADGE_GLYPHS.upem;
   const str = String(n);
   let aw = 0;
-  for (const ch of str) aw += NAV_DIGITS.adv[ch];
+  for (const ch of str) aw += BADGE_GLYPHS.g[ch].a;
   const w = (aw * s).toFixed(2);
-  const h = ((NAV_DIGITS.top - NAV_DIGITS.bot) * s).toFixed(2);
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${navDigitsGroup(str, s, 0, NAV_DIGITS.top * s)}</svg>`;
+  const h = ((DIGIT_INK.y1 - DIGIT_INK.y0) * s).toFixed(2);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${navDigitsGroup(str, s, 0, DIGIT_INK.y1 * s)}</svg>`;
+}
+// 모드 배지 1개 전체(테두리 rect + 라벨 패스). 각 배지가 자기 라벨의 잉크 union을 박스 정중앙에(라벨별 광학 중앙 — 확정).
+// 크기 문법(3곳 공통 통일): 높이19 · min-width46 · 글자 11px 상당 · 좌우패딩6 · 테두리1.5(stroke는 중앙정렬이라 rect를 0.75 인셋) · 자간0.3px(글자 사이만 — CSS와 달리 끝 자간 없음, 중앙정렬에 유리).
+// 각진 모서리(rx 없음) = 사각 박스 정책 그대로. 색은 rect stroke·글자 fill 모두 currentColor(기존 색 클래스 상속).
+function modeBadgeSvg(part) {
+  const label = MODE_LABEL[part] || '';
+  const s = 11 / BADGE_GLYPHS.upem;
+  const LSU = 0.3 / s;   // 자간 0.3px의 폰트단위 환산
+  let awu = 0, y0 = Infinity, y1 = -Infinity;
+  const chars = [...label];
+  chars.forEach((ch, i) => {
+    const g = BADGE_GLYPHS.g[ch];
+    if (!g) return;
+    awu += g.a + (i < chars.length - 1 ? LSU : 0);
+    y0 = Math.min(y0, g.y0); y1 = Math.max(y1, g.y1);
+  });
+  const H = 19, W = Math.max(46, awu * s + 15);   // 좌우 패딩 6×2 + 테두리 1.5×2
+  const yBase = H / 2 + (y0 + y1) / 2 * s;   // 라벨 잉크 중심 = 박스 중심
+  let xu = ((W - awu * s) / 2) / s;
+  const paths = chars.map(ch => {
+    const g = BADGE_GLYPHS.g[ch];
+    if (!g) return '';
+    const p = `<path d="${g.d}"${xu ? ` transform="translate(${xu.toFixed(1)} 0)"` : ''}/>`;
+    xu += g.a + LSU;
+    return p;
+  }).join('');
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true"><rect x="0.75" y="0.75" width="${(W - 1.5).toFixed(2)}" height="${H - 1.5}" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor" transform="translate(0 ${yBase.toFixed(3)}) scale(${s} ${-s})">${paths}</g></svg>`;
 }
 
 const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };
@@ -3926,7 +3953,7 @@ function buildCard(m, info) {
   let modeBadge = '';
   if (info.live && mode && mode !== 'normal') {
     const parts = modeParts(mode);
-    const spans = parts.map(p => `<span class="badge-mode ${p}">${MODE_LABEL[p] || ''}</span>`).join('');
+    const spans = parts.map(p => `<span class="badge-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('');
     modeBadge = parts.length > 1 ? `<span class="badge-mode-wrap">${spans}</span>` : spans;
   }
   const profileUrl = soopProfileUrl(m.id);
@@ -3938,7 +3965,7 @@ function buildCard(m, info) {
   else if (info.title) titleText = info.title;
   else if (mode && mode !== 'normal') titleText = modePlaceholder(mode) || '방송 중';
   else titleText = '방송 중';
-  const btimeHtml = btime ? `<span class="card-btime"><span>⏱</span><span>${btime}</span></span>` : '';
+  const btimeHtml = btime ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${btime}</span></span>` : '';   // 시계 = SVG 아이콘(구 ⏱ 이모지 — 이모지 배제, 2026-07-13)
   const nameColorStyle = info.live ? `color: ${m.color}` : '';
   card.innerHTML = `
     <div class="card-thumb">
@@ -4015,7 +4042,7 @@ function renderEvent(e, allEvents) {
   let modeTag = '';
   if ((e.type === 'start' || e.type === 'end') && e.mode && e.mode !== 'normal') {
     modeTag = modeParts(e.mode)
-      .map(p => { const label = MODE_LABEL[p] || ''; return label ? `<span class="event-mode-tag ${p}">${label}</span>` : ''; })
+      .map(p => { const label = MODE_LABEL[p] || ''; return label ? `<span class="event-mode-tag ${p}" role="img" aria-label="${label}">${modeBadgeSvg(p)}</span>` : ''; })
       .join('');
   }
   let targetTag = '';
@@ -4072,7 +4099,7 @@ function renderEvent(e, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
-        <span class="event-action"><span class="event-action-label">${actionLabel}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''; })()}</span>
+        <span class="event-action"><span class="event-action-label">${actionLabel}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''; })()}</span>
         ${targetTag}
       </div>
       ${detail}
@@ -4199,7 +4226,7 @@ function renderChatBundle(items, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member">${senderHtml}</span>
-        <span class="event-action"><span class="event-action-label">채팅</span>${el ? ` <span class="event-elapsed">⏱ ${el}</span>` : ''}</span>
+        <span class="event-action"><span class="event-action-label">채팅</span>${el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''}</span>
         <span class="event-target">(<a class="cbr-chan" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener" style="color: ${channelColor}">${escapeHtml(first.channel_name || '')}</a> 방송)</span>
       </div>
       <div class="chat-bundle-rows">${rows}</div>
@@ -4528,9 +4555,10 @@ const FAN_ICON = SVG_ICONS.fan;   // 실물은 SVG_ICONS.fan으로 통합(산포
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
 function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
 
-// 메달(🥇🥈🥉) 계산 — 월간 전체탭·멤버탭·연간탭 공용(과거 3중 복사 → 단일화). dense rank: 값 같으면 공동, 0은 무메달.
+// 메달 계산 — 월간 전체탭·멤버탭·연간탭 공용(과거 3중 복사 → 단일화). dense rank: 값 같으면 공동, 0은 무메달.
+// 표기는 트로피 SVG 3색(명전 순위색 재사용 — 금·은·동). 구 🥇🥈🥉 이모지는 이모지 배제 방침으로 교체(2026-07-13).
 // 키 목록만 다름: 월간=daysWithBroadcast(computeMonthSummary 결과), 연간=sessions(computeAnnualSums 결과, 의미는 동일하게 방송 일수).
-const MEDAL_EMOJI = ['🥇', '🥈', '🥉'];
+const MEDAL_ICONS = ['#fbbf24', '#cbd5e1', '#d98e4d'].map(c => `<span class="medal-ico" style="color:${c}">${SVG_ICONS.trophy}</span>`);
 const MONTHLY_MEDAL_KEYS = [
   { key: 'daysWithBroadcast', get: s => s.daysWithBroadcast },
   { key: 'totalDurationMs',   get: s => s.totalDurationMs },
@@ -4553,7 +4581,7 @@ function computeMedals(sums, medalKeys) {
     const sorted = [...new Set(vals.map(x => x.v))].sort((a, b) => b - a);
     let rank = 0;
     sorted.forEach(v => {
-      const medal = v > 0 ? (MEDAL_EMOJI[rank] || '') : '';
+      const medal = v > 0 ? (MEDAL_ICONS[rank] || '') : '';
       vals.filter(x => x.v === v).forEach(x => { medals[x.id][key] = medal; });
       if (v > 0) rank++;
     });
@@ -5331,7 +5359,7 @@ function renderDayDetail(year, month1, sum, memberId) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
         durStr = ` · ${formatDuration(ms)}`;
       }
-      const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}">${MODE_LABEL[p] || ''}</span>`).join('') : '';
+      const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
       // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
       const vp = s.viewer_peak > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>${s.viewer_peak.toLocaleString()}명</span>` : '';
       const va = s.viewer_count > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>${Math.round(s.viewer_sum / s.viewer_count).toLocaleString()}명</span>` : '';
@@ -5793,10 +5821,8 @@ setInterval(loadStats, 60 * 1000);
 setInterval(loadChemistry, 60 * 1000);
 setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지(순수 로컬 연산, 네트워크 없음)
 
-// ── 모드 배지 세로 광학 보정 자가 캘리브레이션 ──
-// 같은 웹폰트라도 OS별 ascent/descent 해석 차로 line-height:1 라인박스 안 글리프 착지가 다름(실측: 삼성 +0.95px↑, Windows -0.2px↓).
-// canvas measureText로 이 기기의 실제 착지를 재서 --badge-vnudge(+=아래로 이동)로 주입 — 배지 CSS의 패딩 비대칭이 소비.
-// 원리: line-height:1 라인박스(11px)에서 베이스라인 = 하프리딩 + ascent. 잉크 중심과 라인박스 중심(5.5px)의 차가 곧 필요 이동량.
+// ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──
+// (구 모드 배지 내부 보정(--badge-vnudge)은 2026-07-13 SVG 전환으로 소멸 — 지금은 줄 정렬 축만 이 함수를 씀)
 // 잉크 위치는 measureText(아웃라인 메트릭)를 쓰지 않고 캔버스에 실제로 그려 픽셀을 스캔 —
 // Windows에서 actualBoundingBox가 래스터라이즈 결과와 ~0.8px 어긋나는 것이 실측됨(vnudge 0.50px 주입 상태에서 잔차 -0.79px 역산).
 // 반환: 베이스라인 대비 잉크 세로중심(CSS px, +=베이스라인 아래). 실패 시 null.
@@ -5823,45 +5849,23 @@ function scanInkCenter(fontDecl, text, fontPx) {
   if (top < 0) return null;
   return (top + bot + 1) / 2 / SCALE - baselineY;
 }
-// 주어진 폰트·라인높이에서 "렌더 잉크 중심이 라인박스 중심에서 벗어난 양"(CSS px, +=아래)을 실측.
-// 베이스라인·라인박스 높이 = DOM 프로브(레이아웃 실측), 잉크 = 캔버스 렌더 픽셀 스캔 — 폰트메트릭 API를 신뢰하지 않음.
-function measureLineInkOffset(fam, weight, fontPx, lineHeightCss, sample) {
-  const ink = scanInkCenter(`${weight} ${fontPx}px ${fam}`, sample, fontPx);
-  if (ink === null) return null;
-  const probe = document.createElement('span');
-  probe.style.cssText = `position:absolute;visibility:hidden;top:-9999px;display:inline-block;line-height:${lineHeightCss};font-weight:${weight};font-size:${fontPx}px;`;
-  probe.style.fontFamily = fam;
-  probe.textContent = sample.slice(0, 2);
-  const mark = document.createElement('span');
-  mark.style.cssText = 'display:inline-block;width:0;height:0;';
-  probe.appendChild(mark);
-  document.body.appendChild(probe);
-  const pr = probe.getBoundingClientRect();
-  const baseline = mark.getBoundingClientRect().bottom - pr.top;   // 빈 inline-block 하단 = 그 줄의 베이스라인
-  const lineBoxH = pr.bottom - pr.top;
-  probe.remove();
-  return (baseline + ink) - lineBoxH / 2;
-}
-function calibrateBadgeNudge() {
+// ── 모드 배지 줄 정렬 실측 ──
+// 배지 자체는 SVG(박스 19px 고정·내부는 기하 중앙)라 내부 보정 축은 소멸(2026-07-13 SVG 전환 — 구 --badge-vnudge·measureLineInkOffset 제거).
+// 남은 축은 "배지 박스 중심을 이웃 제목 텍스트의 잉크 중심에 맞추는 vertical-align" 하나:
+// 배지(inline-block, 자식 svg는 block → 인라인 라인박스 없음)는 하단 모서리가 베이스라인 → v만큼 올리면 박스 중심 = 베이스라인 위 (v + 9.5).
+// 제목 잉크 중심(베이스라인 위) = -scanInkCenter(캔버스 y-down 부호 반전). ∴ v = -ink - 9.5.
+// 한계(정직 고지): 제목은 여전히 폰트 텍스트라 캔버스-화면 래스터 갭 ±0.5px가 남음 — 제목까지 SVG화하지 않는 한 물리적 바닥.
+function calibrateBadgeValign() {
   try {
     const fam = getComputedStyle(document.body).fontFamily;
-    // ① 모드 배지 내부(700·11px·line-height:1) — 보정 = 이탈량의 반대 방향 이동
-    const off = measureLineInkOffset(fam, 700, 11, '11px', Object.values(MODE_LABEL).join(''));
-    if (off === null) return;   // 계측 실패: CSS 기본값(대칭+1px) 유지
-    document.documentElement.style.setProperty('--badge-vnudge', Math.max(-3, Math.min(3, -off)).toFixed(2) + 'px');
-    // (구 ②축 nav 안읽음 배지 계측은 SVG 숫자 전환(2026-07-13)으로 제거 — 폰트 텍스트가 아니게 되어 계측 대상 자체가 소멸)
-    // ── ③ 줄 정렬 축: 배지는 inline-flex라 내부 글자 베이스라인으로 바깥 줄에 정렬됨 → 내부 보정이 박스를 반대로 밀기 때문에 이 축도 함께 계측해야 완결.
-    // 내부 보정 후 "박스 중심 = 배지 잉크 중심"이므로, 박스 중심을 제목 잉크 중심에 맞추는 vertical-align은
-    // (배지 글자의 베이스라인 대비 잉크중심) − (제목 글자의 동일 값) 으로 결정 — 양쪽 다 렌더 픽셀 실측이라 힌팅차 상쇄.
-    const badgeInk = scanInkCenter(`700 11px ${fam}`, Object.values(MODE_LABEL).join(''), 11);
-    const titleInk = scanInkCenter(`400 12px ${fam}`, '방송제목가힣', 12);   // .event-detail과 동일 폰트 지정(12px·일반 웨이트) — CSS 변경 시 함께 갱신
-    if (badgeInk === null || titleInk === null) return;
-    const v = Math.max(-3, Math.min(3, badgeInk - titleInk));
-    document.documentElement.style.setProperty('--badge-valign', v.toFixed(2) + 'px');
-  } catch (e) { /* 계측 실패 시 CSS 기본값(대칭) 유지 */ }
+    const evtInk = scanInkCenter(`400 12px ${fam}`, '방송제목가힣19+', 12);   // .event-detail 문맥(400·12px) — CSS 변경 시 함께 갱신
+    const dayInk = scanInkCenter(`600 13px ${fam}`, '방송제목가힣19+', 13);   // .day-session-title 문맥(600·13px)
+    if (evtInk !== null) document.documentElement.style.setProperty('--tag-valign', Math.max(-12, Math.min(0, -evtInk - 9.5)).toFixed(2) + 'px');
+    if (dayInk !== null) document.documentElement.style.setProperty('--daytag-valign', Math.max(-12, Math.min(0, -dayInk - 9.5)).toFixed(2) + 'px');
+  } catch (e) { /* 계측 실패 시 CSS 폴백(정적 근사) 유지 */ }
 }
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(calibrateBadgeNudge);   // 웹폰트 적용 후 계측(폴백 폰트 오계측 방지)
-else calibrateBadgeNudge();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(calibrateBadgeValign);   // 웹폰트 적용 후 계측(폴백 폰트 오계측 방지)
+else calibrateBadgeValign();
 
 // ── 이미지 프리로드 부팅 훅 (선언부는 switchPage 초기 호출 이전에 위치) ──
 (function bootPreload() {

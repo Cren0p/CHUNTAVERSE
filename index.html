@@ -4168,6 +4168,15 @@ const CHAT_BUNDLE_GAP_MS = 25 * 1000;
 // 같은 채널의 직전 채팅과 CHAT_BUNDLE_GAP_MS 이내면 같은 묶음 — 사이에 낀 다른 채널 채팅·비채팅 이벤트는 묶음을 끊지 않음(채널별 독립).
 // 필터 통과분만 받으므로 필터와 정방향으로 맞물린다. 2건부터 묶음, 1건은 개별 표시.
 // 정렬 앵커: 개별=자기 시각, 묶음=오래된순이면 첫 채팅·최신순이면 마지막 채팅 시각(마지막 활동 위치에 노출).
+// 타임라인 표시 순서: 앵커 시각 우선, 동시각 동률은 타입으로 — 리방 합성(같은 시각의 종료+시작)은
+// 시간 흐름상 종료→시작이므로 최신순에선 '시작'이 위(최근 쪽), 오래된순에선 '종료'가 위(2026-07-17 확정).
+// 그 외 동시각 조합(제목·카테고리 변경 쌍 등)은 랭크 0 → 안정 정렬이 기존 순서 유지. 데이터(KV) 순서는 불변 — 표시만 교정.
+function timelineOrderCompare(a, b, asc) {
+  const d = asc ? a.aAsc - b.aAsc : b.aDesc - a.aDesc;
+  if (d !== 0) return d;
+  const rank = it => it.ev ? (it.ev.type === 'start' ? 1 : it.ev.type === 'end' ? -1 : 0) : 0;
+  return asc ? rank(a) - rank(b) : rank(b) - rank(a);
+}
 function buildTimelineItems(filtered, all) {
   const items = [];
   const chatFam = [];
@@ -4451,7 +4460,7 @@ function applyFilter() {
       : new Date(b.time) - new Date(a.time));
     // 채팅류는 채널 단위 묶음으로 변환 후 앵커 시각으로 정렬. sorted는 renderEvent의 종료 제목·⏱ 경과 조회용 원본 유지.
     const items = buildTimelineItems(filtered, allEvents);
-    items.sort((a, b) => eventSortAsc ? a.aAsc - b.aAsc : b.aDesc - a.aDesc);
+    items.sort((a, b) => timelineOrderCompare(a, b, eventSortAsc));   // 동시각 동률: 리방 종료·시작 순서 교정
     tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('') + footerHtml;
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {

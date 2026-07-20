@@ -3926,9 +3926,11 @@ function isoToKstDateKey(iso) {
 // ── 방송 일수 걸침 규칙(2026-07-16 확정) ─────────────────────────────
 // 자정을 걸쳐도 24시간 미만이면 1일 — 24시간 이상 2일, 48시간 이상 3일…
 // = 시작일 + floor(방송길이/24h)개의 '다음 날짜' 키 (일반 저녁 방송의 자정 걸침은 1일 유지).
-// 진행 중 세션은 nowMs까지로 보되 48h 상한 — 종료 누락 고아 세션이 날짜를 무한히 먹는 것 방지(명전 간섭 판정과 동일 철학).
+// 진행 중 세션은 nowMs까지 경과를 그대로 인정 — 48h 상한 없음(120h+ 마라톤 실사례가 상한에 물린 2026-07-20 제보로 제거).
+// 고아 방어는 두 겹이 대신함: ① monthPrefix가 그 달 밖 날짜를 끊음(월간·연간·명전합산) ② 프리픽스 없는 스트릭 호출자는
+// 라이브 확인(broad_no 일치)으로 게이트하고, 불일치 고아에는 유사-now(시작+48h)를 넘겨 상한을 재현.
 // monthPrefix('YYYY-MM')를 주면 그 달 밖 날짜는 버림. 세션은 시작월 키에만 있어 월경계 마라톤의
-// 다음 달 조각은 다음 달이 셀 수 없는 알려진 한계(극히 드묾 — 발생 시 수동 보정).
+// 다음 달 조각은 다음 달이 셀 수 없는 알려진 한계(발생 시 수동 보정).
 function sessionDateKeys(s, monthPrefix, nowMs) {
   const t = new Date(s.start).getTime();
   if (isNaN(t)) return [];
@@ -3937,7 +3939,7 @@ function sessionDateKeys(s, monthPrefix, nowMs) {
     e = new Date(s.end).getTime();
     if (isNaN(e) || e < t) e = t;
   } else {
-    e = Math.min(nowMs, t + 48 * 3600000);
+    e = nowMs;
     if (e < t) e = t;
   }
   const keys = [];
@@ -6505,8 +6507,12 @@ function renderHall() {
         if (isNaN(t)) continue;
         const scored = inPeriodTs(t);   // 기간 편입은 시작 시각 기준(방송일수·마라톤과 동일 귀속)
         if (scored) {
-          // 연속 방송 일수: 걸침 규칙(24h당 +1일, sessionDateKeys와 동일 기준) — 스트릭은 월경계 없이 산입
-          for (const dk of sessionDateKeys(s, null, nowMs)) extra[m.id].dates.add(dk);
+          // 연속 방송 일수: 걸침 규칙(24h당 +1일) — 스트릭은 월경계 없이 산입.
+          // 프리픽스가 없어 고아가 무한히 먹을 수 있으므로, 진행 중 세션은 '지금 그 방송 중'(broad_no 일치)일 때만 진짜 now,
+          // 불일치(고아 의심)면 유사-now(시작+48h)로 상한을 재현한다.
+          const effNow = (!s.end && !(liveBn[m.id] && s.broad_no && liveBn[m.id] === String(s.broad_no)))
+            ? Math.min(nowMs, t + ORPHAN_CAP_MS) : nowMs;
+          for (const dk of sessionDateKeys(s, null, effNow)) extra[m.id].dates.add(dk);
         }
         let e = null;
         if (s.end) {

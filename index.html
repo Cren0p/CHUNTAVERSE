@@ -2939,18 +2939,22 @@ function getTodayCelebrations() {
     results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '천타버스', `${ctDays}일!`, '#61FFEC', 'members:crew'));
   }
 
+  // 방송 기산 기준이 멤버마다 다름(2026-07-31 확정): 아래 5인은 시트 firstStream이 '숲 이적일'이라 "숲 방송"으로,
+  // 그 외(마다옴·나나문·임하밍·문모모·체비·플리)는 '플랫폼 무관 첫 방송일'이라 "숲"을 빼고 "방송"으로 표기.
+  const SOOP_BASED_START = new Set(['kappuchan', 'kyaang123', 'wellro314', 'mocamu2', 'dalta20']);
   for (const m of MEMBERS) {
     const info = MEMBER_INFO[m.id];
     if (!info?.firstStream) continue;
     const match = info.firstStream.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일$/);
     if (!match) continue;
+    const bcWord = SOOP_BASED_START.has(m.id) ? '숲 방송' : '방송';
     const fy = parseInt(match[1]), fm = parseInt(match[2]), fd = parseInt(match[3]);
     if (fm === cm && fd === cd && cy > fy) {
-      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${cy - fy}주년을<br>축하합니다!`, m.name, `${cy - fy}주년!`, m.color, `members:${m.id}`));
+      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} ${cy - fy}주년을<br>축하합니다!`, m.name, `${cy - fy}주년!`, m.color, `members:${m.id}`));
     } else {
       const days = Math.floor((todayMs - Date.UTC(fy, fm - 1, fd)) / 86400000);
       if (days > 0 && days % 100 === 0) {
-        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 숲 방송 ${days}일을<br>축하합니다!`, m.name, `${days}일!`, m.color, `members:${m.id}`));
+        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} ${days}일을<br>축하합니다!`, m.name, `${days}일!`, m.color, `members:${m.id}`));
       }
     }
   }

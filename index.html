@@ -1705,7 +1705,7 @@
   .hall-desc { color: var(--muted); font-weight: 600; font-size: 11px; text-align: right; }
   .hall-row {
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
-    font-size: 13px; font-weight: 700; line-height: 1.4;
+    font-size: 13px; font-weight: 700; line-height: 18px;   /* 1.4(=18.2px 소수)면 행 피치 21.2px가 21/22px로 번갈아 라운딩 → 줄간격 비대칭(2026-08-02 스크린샷 실측). 정수 18px로 피치 21px 균일화 */
   }
   .hall-r-name { text-align: left; word-break: keep-all; }
   .hall-r-val { text-align: right; white-space: nowrap; flex-shrink: 0; }

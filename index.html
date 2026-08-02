@@ -832,7 +832,7 @@
 
   .stats-tabs-wrap {
     display: grid;
-    grid-template-columns: repeat(13, 1fr);
+    grid-template-columns: repeat(14, 1fr);   /* 통합1 + 멤버13 (2026-07-31 빙밍 합류) */
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1724,7 +1724,7 @@
   }
   .members-tabs-wrap {
     display: grid;
-    grid-template-columns: repeat(13, 1fr);
+    grid-template-columns: repeat(14, 1fr);   /* 통합1 + 멤버13 (2026-07-31 빙밍 합류) */
     gap: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -2266,6 +2266,7 @@ const MEMBER_BIRTHDAYS = {
   'dalta20':     { month: 8,  day: 20, display: '8월 20일',  file: 'birthday/DALTA.webp' },
   'chebi2':      { month: 4,  day: 25, display: '4월 25일',  file: 'birthday/CHEBI.webp' },
   'plincess':    { month: 6,  day: 30, display: '6월 30일',  file: 'birthday/PLI.webp' },
+  'tleod1818':   { month: 7,  day: 7,  display: '7월 7일',   file: 'birthday/VINGMING.webp' },
 };
 
 // 생일 로고 교체 (KST 기준)
@@ -2307,6 +2308,7 @@ const MEMBERS = [
   { id: 'dalta20',     name: '달타',   img: 'members/11.webp', color: '#F8C24F' },
   { id: 'chebi2',      name: '체비',   img: 'members/13.webp', color: '#FFFFFF' },
   { id: 'plincess',    name: '플리',   img: 'members/14.webp', color: '#A8D6FF' },
+  { id: 'tleod1818',   name: '빙밍',   img: 'members/15.webp', color: '#269695' },   // 2026-07-31 합류
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
@@ -2530,6 +2532,24 @@ const MEMBER_LINKS = {
       { name: '플리티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63db56b5a787d' },
       { name: '별님티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63c8b6fd22050' },
       { name: '별님티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63c8b6fd22050' },
+    ],
+  },
+  'tleod1818': {
+    common: {
+      방송국: 'https://www.sooplive.com/station/tleod1818',
+      유튜브: 'https://www.youtube.com/channel/UCpHTnIgmUhFnvQhcMJkPhdQ',
+      팬카페: 'https://cafe.naver.com/vmvmvmu',
+      나무위키: 'https://namu.wiki/w/%EB%B9%99%EB%B0%8D',
+    },
+    instagram: 'https://www.instagram.com/ving.______.ming/',
+    etc: [{ label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1DsRW3dQMLa83vA9pYvjjocigME9-ovw_8dh5AA7yaUU/edit' }],
+    ogq: [
+      { name: '봉밥티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=62920b9c198e4' },
+      { name: '봉밥티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62920b9c198e4' },
+      { name: '봉밥티콘 2', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6390c0c93dace' },
+      { name: '봉밥티콘 2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6390c0c93dace' },
+      { name: '나야, 봉밥이!', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=655e8d561095e' },
+      { name: '나야, 봉밥이!', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/655e8d561095e' },
     ],
   },
 };
@@ -2940,7 +2960,7 @@ function getTodayCelebrations() {
 
   // 방송 기산 기준이 멤버마다 다름(2026-07-31 확정): 아래 5인은 시트 firstStream이 '숲 이적일'이라 "숲 방송"으로,
   // 그 외(마다옴·나나문·임하밍·문모모·체비·플리)는 '플랫폼 무관 첫 방송일'이라 "숲"을 빼고 "방송"으로 표기.
-  const SOOP_BASED_START = new Set(['kappuchan', 'kyaang123', 'wellro314', 'mocamu2', 'dalta20']);
+  const SOOP_BASED_START = new Set(['kappuchan', 'kyaang123', 'wellro314', 'mocamu2', 'dalta20', 'tleod1818']);   // 빙밍: 숲 데뷔 2022-10-04 기준(2026-08-02)
   for (const m of MEMBERS) {
     const info = MEMBER_INFO[m.id];
     if (!info?.firstStream) continue;

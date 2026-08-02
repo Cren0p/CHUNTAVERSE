@@ -911,7 +911,7 @@
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);   /* 13인: 6열=6+6+1 고아 → 5열(5+5+3). 7열은 카드 라벨이 비좁아 5열 채택(2026-08-02) */
     gap: 16px;
   }
   @container (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -1378,7 +1378,7 @@
     gap: 6px;
     flex: 1; min-width: 0;
   }
-  @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 모바일 strip: 6열 — 이벤트 필터와 동일한 calc 고정(1fr 배율 라운딩 차단) */
+  @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(7, calc((100% - 36px) / 7)); } }   /* 모바일 strip: 7열(13명=7+6, 이벤트 필터와 동일 — 2026-08-02) — calc 고정(1fr 배율 라운딩 차단). gap 6px×6=36px */
   .chem-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -2309,7 +2309,7 @@ const MEMBERS = [
   { id: 'dalta20',     name: '달타',   img: 'members/11.webp', color: '#F8C24F' },
   { id: 'chebi2',      name: '체비',   img: 'members/13.webp', color: '#FFFFFF' },
   { id: 'plincess',    name: '플리',   img: 'members/14.webp', color: '#A8D6FF' },
-  { id: 'tleod1818',   name: '빙밍',   img: 'members/15.webp', color: '#30BBBA' },   // 2026-07-31 합류 · 색 2026-08-02 변경(구 #269695 — 어두움)
+  { id: 'tleod1818',   name: '빙밍',   img: 'members/15.webp', color: '#30BBBA' },   // 2026-08-02 합류 · 색 2026-08-02 변경(구 #269695 — 어두움)
 ];
 const MEMBER_BY_ID = {};
 MEMBERS.forEach(m => { MEMBER_BY_ID[m.id] = m; });
@@ -6067,8 +6067,9 @@ function renderBanners() {
 }
 
 function membersRowStyle(count) {
-  if (count >= 7 && count <= 8) return ' style="max-width:86px"';
-  if (count >= 9 && count <= 10) return ' style="max-width:108px"';
+  // 아바타 최대 2행 유지: 한 행 = ⌈count/2⌉개, 폭 = 22px×개수 − 2(아바타 20 + gap 2).
+  // 기존 구간값(7~8명=86, 9~10명=108)과 동일한 공식이며, 13명(=154, 7+6)·증원 자동 대응(2026-08-02).
+  if (count >= 7) return ` style="max-width:${22 * Math.ceil(count / 2) - 2}px"`;
   return '';
 }
 

@@ -441,6 +441,7 @@
     max-width: 1520px; width: 100%; margin: 0 auto;
     flex: 1;
   }
+  @container (min-width: 1500px) { .grid { grid-template-columns: repeat(5, 1fr); } }   /* 13인 홈 역할: 넓은 화면에서 전원 한눈에(5+5+3) — 2026-08-02 확정 */
   @container (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   @container (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @container (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
@@ -607,7 +608,7 @@
   .filter-toggle-all:hover { border-color: var(--accent); }
 
   .filter-members { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
-  @media (max-width: 1100px) { .filter-members { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 상단 strip: 6열(12명=6×2) — 필터 상단 전환(1100px)과 한 세트. 종류 필터와 동일한 calc 고정(1fr은 배율에 따라 칸별 1px 차 발생 + 같은 패널의 종류 그리드와 셀 폭 어긋남) */
+  @media (max-width: 1100px) { .filter-members { grid-template-columns: repeat(7, calc((100% - 36px) / 7)); } }   /* 상단 strip: 7열(13명=7+6, 크루 탭과 동일 줄바꿈 — 2026-08-02) — 필터 상단 전환(1100px)과 한 세트. 종류 필터와 동일한 calc 고정(1fr은 배율에 따라 칸별 1px 차 발생 + 같은 패널의 종류 그리드와 셀 폭 어긋남). gap 6px×6=36px */
   .filter-member {
     position: relative;
     aspect-ratio: 1;
@@ -644,7 +645,7 @@
   .filter-type .filter-icon { width: 55%; height: 55%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .filter-type .filter-icon svg { width: 100%; height: 100%; }   /* SVG에 박힌 width/height 무시하고 셀 비례로 스케일(비율은 meet로 유지) */
   /* 모바일 strip: 종류도 멤버와 동일 6열(5종 + 우측 빈칸 1) */
-  @media (max-width: 1100px) { .filter-types { grid-template-columns: repeat(6, calc((100% - 30px) / 6)); } }   /* 필터 상단 전환(1100px)과 한 세트. 1fr은 나머지 1px를 일부 칸에만 줘 박스 크기가 갈림 → 모든 칸 동일 calc값으로 고정(gap 6px×5=30px). 남는 px는 우측 여백 */
+  @media (max-width: 1100px) { .filter-types { grid-template-columns: repeat(7, calc((100% - 36px) / 7)); } }   /* 필터 상단 전환(1100px)과 한 세트 — 멤버 필터와 열수·calc 동일(버튼 크기 일관, 종류 5개+빈칸 2). 1fr은 나머지 1px를 일부 칸에만 줘 박스 크기가 갈림 → 모든 칸 동일 calc값으로 고정(gap 6px×6=36px). 남는 px는 우측 여백 */
   .filter-type[data-type="soop"] .filter-icon { color: var(--ev-start); }
   .filter-type[data-type="chat"] .filter-icon { color: #a78bfa; }
   .filter-type[data-type="post"] .filter-icon { color: var(--ev-post); }
@@ -1213,7 +1214,7 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    min-width: 720px;
+    min-width: 780px;   /* 열당 60px × 13명 (2026-08-02 빙밍 합류로 720→780 재계산) */
   }
   .links-table th, .links-table td {
     border-right: 1px solid var(--border);
@@ -1344,9 +1345,9 @@
     gap: 6px;
     margin-top: 6px;
   }
-  /* 표 min-width 720px + .links-wrap 좌우 패딩 48px → 뷰포트 768px 미만에서 표가 넘침. 그 지점에서 블록으로 전환 */
-  /* 콘텐츠가 테이블 최소폭(720px) 밑으로 가기 전에 모바일 세로 블록으로 전환 → 가로스크롤 방지. 멤버=열이라 멤버 증가 시 테이블 min-width와 이 임계값을 함께 올려야 함 */
-  @container (max-width: 740px) {
+  /* 표 min-width 780px + .links-wrap 좌우 패딩 48px → 뷰포트 828px 미만에서 표가 넘침. 그 지점에서 블록으로 전환 */
+  /* 콘텐츠가 테이블 최소폭(780px) 밑으로 가기 전에 모바일 세로 블록으로 전환 → 가로스크롤 방지. 멤버=열이라 멤버 증가 시 테이블 min-width와 이 임계값을 함께 올려야 함(13인: 780/800) */
+  @container (max-width: 800px) {   /* 표 min-width 780 + 여백 20 (빙밍 합류로 740→800 재계산) */
     .links-table-wrap { display: none; }
     .links-mobile { display: block; }
   }
@@ -1953,12 +1954,12 @@
   .mi-collect-val { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--text); text-align: right; }
   .mi-collect-row.me { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }   /* 현재 보던 멤버 강조 — 좌측 민트 바 */
 
-  /* 프로필/통계 상단 셀렉터: 1행(13칸, max-width 980 공통)이 폭 좁아지면 버튼이 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버=크루(좌측 2행)+12를 7열, 통계=연간/월간 좌측 세로 스택 */
+  /* 프로필/통계 상단 셀렉터: 1행(14칸, max-width 980 공통)이 폭 좁아지면 버튼이 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버/통계=크루(일반 크기)+13을 7열 2행(줄바꿈: 카푸|캬앙) */
   @media (max-width: 1100px) {
     .stats-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
     .members-tabs-wrap { grid-template-columns: repeat(7, 1fr); }
-    .stats-tab-all { grid-column: 1; grid-row: 1 / span 2; aspect-ratio: auto; }
-    .members-tab-crew { grid-column: 1; grid-row: 1 / span 2; aspect-ratio: auto; }
+    /* 크루/통합 버튼 2행 스팬 제거(2026-08-02): 12인 시절엔 스팬+12명이 7×2로 맞아떨어졌으나
+       13인부턴 스팬이 마지막 1명을 3행으로 밀어냄 → 일반 크기 14타일 = 정확히 7×2 */
     .stats-period-wrap:not(.no-all) { grid-template-columns: repeat(7, 1fr); }
     .stats-period-wrap .stats-period-btn[data-period="all"] { grid-column: 1; grid-row: 1 / span 2; }
     .stats-period-bar { flex-direction: column; align-items: stretch; }   /* 좁으면 스테퍼가 위, 버튼 그리드가 아래 */
@@ -2290,7 +2291,7 @@ const MEMBER_BIRTHDAYS = {
 //  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
 //  ⑥ 문서 상단 meta description 멤버 명단
 //  ⑦ CSS 열수: .stats-tabs-wrap repeat(13 = 통합+멤버수) · .members-tabs-wrap repeat(13 = 크루+멤버수)
-//     + 1100px 미디어쿼리의 repeat(7) 배치 확인 · .links-table min-width(720px)와 링크탭 모바일 전환 임계(@container 740px)
+//     + 1100px 미디어쿼리의 repeat(7) 배치 확인 · .links-table min-width(멤버수×60px)와 링크탭 모바일 전환 임계(@container = min-width+20) — 13인 기준 780/800
 //  ⑧ (해당 시) 시트 '휴방' 탭에 행 추가: 이름·이미지 링크·until (코드 아님 — 2026-07 시트 이관)
 // [worker.js] MEMBERS(id·name·nick·yt 채널ID 배열) · CAFES(공용 카페 2곳 닉 매핑 + 개인 팬카페 블록)
 // [index.js]  MEMBERS(id·name·nick) · (봇 닉이 있으면) getMember 봇 제외

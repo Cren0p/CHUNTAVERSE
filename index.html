@@ -3878,6 +3878,7 @@ document.addEventListener('visibilitychange', () => {
     setLastSeenToNow();
     refreshUnreadIndicator();
   }
+  applyPollingState(true);
 });
 window.addEventListener('beforeunload', () => {
   if (currentPage === 'events') setLastSeenToNow();
@@ -5881,10 +5882,35 @@ loadBanners();
 loadCrewSheets();
 loadSchedule();
 loadLikeReqForDot();   // 좋아요 빨간 점용 목록 1회 로드
-setInterval(loadLive, 10 * 1000);
-setInterval(loadEvents, 10 * 1000);
-setInterval(loadStats, 60 * 1000);
-setInterval(loadChemistry, 60 * 1000);
+// ── 폴링 제어: 숨김 탭에서 도달 경로 없는 요청 정지 ──
+// 숨김 중 사용자에게 실제로 닿는 건 탭 제목의 미읽음 수와 브라우저 알림뿐이고, 둘 다 loadEvents에서만 나온다.
+// 라이브·통계·케미는 숨김 중 표시 경로가 없으므로 알림 여부와 무관하게 멈춘다.
+//   보임 → 4개 전부 / 숨김+알림ON → loadEvents만 / 숨김+알림OFF → 전부 정지
+// 숨김 중 주기는 10초 그대로 둔다 — 브라우저가 백그라운드 타이머를 이미 분당 1회로 조이므로 별도 완화는 중복이다.
+const POLLERS = [
+  { fn: loadLive,      ms: 10 * 1000, bg: false },
+  { fn: loadEvents,    ms: 10 * 1000, bg: true  },   // bg: 알림 ON이면 숨김 중에도 유지(알림·미읽음 배지의 유일한 공급원)
+  { fn: loadStats,     ms: 60 * 1000, bg: false },
+  { fn: loadChemistry, ms: 60 * 1000, bg: false },
+];
+const pollTimers = new Map();
+
+// runNow: 정지돼 있던 폴러만 재가동 직전에 1회 즉시 실행 — 없으면 복귀 직후 최대 한 주기만큼 낡은 화면을 본다.
+function applyPollingState(runNow) {
+  const hidden = document.visibilityState === 'hidden';
+  for (const p of POLLERS) {
+    const want = !hidden || (p.bg && notifyEnabled);
+    const running = pollTimers.has(p.fn);
+    if (want && !running) {
+      if (runNow) p.fn();
+      pollTimers.set(p.fn, setInterval(p.fn, p.ms));
+    } else if (!want && running) {
+      clearInterval(pollTimers.get(p.fn));
+      pollTimers.delete(p.fn);
+    }
+  }
+}
+applyPollingState(false);   // 부트 직후 — 위에서 4개를 이미 1회씩 호출했으므로 즉시 재실행 불필요
 setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지(순수 로컬 연산, 네트워크 없음)
 
 // ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──

@@ -34,7 +34,9 @@
     --text: #e2e8f0;
     --muted: #64748b;
     --rk-in: #34d399;    /* 좋아요 순위 — 컷 위(안정권) */
-    --rk-out: #f87171;   /* 좋아요 순위 — 컷 아래. 모달 배경(#0d1120) 대비 6.79로 묻히지 않는 빨강(사이트 빨간점과 동일 색) */
+    --rk-out: #f87171;
+    --rk-cut: #f87171;              /* 컷 경계 — 이 선 아래가 탈락권이므로 탈락색과 같은 계열로 묶는다 */
+    --rk-cut-line: rgba(248,113,113,0.45);   /* 경계선은 글자보다 옅게 — 값이 아니라 기준선이라는 신호 */   /* 좋아요 순위 — 컷 아래. 모달 배경(#0d1120) 대비 6.79로 묻히지 않는 빨강(사이트 빨간점과 동일 색) */
     --time: #fbbf24;
     --ev-start: #60a5fa;
     --ev-end: #f87171;
@@ -351,8 +353,6 @@
     align-items: center; gap: 6px; padding: 3px 0; font-size: 12px;
   }
   .rk-ev.no-group .rk-row { grid-template-columns: 28px 60px 1fr 1fr 1.1fr; }
-  .rk-cut-row .rk-cut-lbl { grid-column: 1 / 5; }                 /* 전형 있음: 사진~순위를 라벨이 차지 → 값이 좋아요 열에 정렬 */
-  .rk-ev.no-group .rk-cut-row .rk-cut-lbl { grid-column: 1 / 4; }
   .rk-ev.no-group .rk-msg { grid-column: 3 / -1; }
   .rk-av { width: 28px; height: 28px; object-fit: cover; }
   .rk-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -374,11 +374,17 @@
   .rk-like { color: var(--text); }
   .rk-gap { font-size: 11px; }
   /* 컷 경계 행 — 좋아요 내림차순 목록에서 그 전형의 컷 값이 놓일 자리에 끼워 넣는다.
-     전형마다 컷이 다르므로 경계선 하나로는 표현할 수 없다(남자 1,424 / 여자 2,239) → 전형별로 각자의 자리에 한 줄씩. */
-  .rk-cut-row { color: var(--muted); font-size: 11px; padding: 2px 0; }
-  .rk-cut-lbl { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  .rk-cut-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }   /* 라벨 뒤로 이어지는 경계선 */
-  .rk-cut-row .rk-like { color: var(--muted); font-weight: 400; }
+     전형마다 컷이 다르므로 경계선 하나로는 표현할 수 없다(남자 1,424 / 여자 2,239) → 전형별로 각자의 자리에 한 줄씩.
+     높이·글씨 크기는 멤버 행과 동일하게 맞춘다(2026-08-04 지적) — 눈금이 어긋나면 표로 안 읽힌다. */
+  .rk-cut-row { min-height: 34px; position: relative; color: var(--rk-cut); }   /* 34px = 아바타 28 + 상하 여백 6 */
+  .rk-cut-row::before {   /* 행 전체를 가로지르는 경계선. 글자 칸이 배경색으로 선을 끊어 라벨이 선 위에 놓인 것처럼 보인다 */
+    content: ''; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--rk-cut-line);
+  }
+  .rk-cut-row > span { position: relative; background: var(--surface); }
+  .rk-cut-lbl { grid-column: 3 / 5; text-align: right; white-space: nowrap; padding: 0 6px; }   /* 전형~순위 칸 = 등수 열에 라벨 */
+  .rk-cut-row .rk-like { color: var(--rk-cut); font-weight: 700; padding-left: 6px; }           /* 좋아요 열에 컷 수치 */
+  .rk-ev.no-group .rk-cut-lbl { grid-column: 2 / 4; }
   .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }

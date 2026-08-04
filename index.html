@@ -381,16 +381,20 @@
     content: ''; position: absolute; left: 0; right: 0; top: 50%;
     border-top: 1px dashed var(--rk-cut-line);
   }
-  /* 좌우 여백 -3px/+3px: 인접한 글자 칸의 배경이 6px 그리드 간격에서 정확히 맞닿아 선이 끊긴다.
-     (이전엔 칸 사이로 선 토막이 비쳐 "붙었다 떨어졌다" 하는 간격이 생겼다 — 2026-08-04 지적) */
-  .rk-cut-row > span { position: relative; background: var(--surface); margin: 0 -3px; padding: 0 3px; }
+  /* 배경이 칸 전체가 아니라 글자만 감싸게 한다(justify-self로 폭=글자). 그러면 칸의 남는 공간으로 선이 지나가
+     "글씨 사이에 선"이 되고, 좌우 여백도 8px로 넉넉해진다. margin -8px은 padding을 상쇄해 글자 위치를 그대로 둔다
+     (안 하면 우측정렬이 8px 밀려 위아래 숫자와 축이 어긋난다). 2026-08-04 지적 반영. */
+  .rk-cut-row > span { position: relative; background: var(--surface); padding: 0 8px; margin: 0 -8px; }
   /* 멤버 행과 같은 클래스·같은 열을 쓴다 → 전형은 전형 칸에, "33위"는 등수 칸에, 수치는 좋아요 칸에 자동 정렬 */
-  .rk-cut-row .rk-grp { grid-column: 3; }
-  .rk-cut-row .rk-rank { grid-column: 4; }
-  .rk-cut-row .rk-like { grid-column: 5; }
+  .rk-cut-row .rk-grp { grid-column: 3; justify-self: start; }
+  .rk-cut-row .rk-rank { grid-column: 4; justify-self: end; }
+  .rk-cut-row .rk-like { grid-column: 5; justify-self: end; }
   .rk-ev.no-group .rk-cut-row .rk-rank { grid-column: 3; }
   .rk-ev.no-group .rk-cut-row .rk-like { grid-column: 4; }
-  .rk-cut-row .rk-grp, .rk-cut-row .rk-rank, .rk-cut-row .rk-like { color: var(--rk-cut); }
+  /* 색은 등수에만. 멤버 행도 색이 들어가는 곳은 등수·컷차이 두 군데뿐이고, 전형은 회색·좋아요는 흰색이다.
+     컷값을 흰색으로 두면 위아래 좋아요 숫자와 같은 축이 되어 바로 비교된다(이 행의 본래 목적).
+     컷 행에서 색이 들어가는 두 번째 자리는 경계선이 맡는다 — 멤버 행의 컷차이에 대응. */
+  .rk-cut-row .rk-rank { color: var(--rk-cut); }
   .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }

@@ -332,6 +332,20 @@
   .lr-close:hover { color: var(--text); }
   .lr-body { overflow-y: auto; }
   .lr-msg { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 12px; }
+  /* 좋아요 순위 모달 — lr-panel 골격 재사용, 내용만 표 형태 */
+  .rk-ev { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .rk-ev:last-child { border-bottom: none; }
+  .rk-ev-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .rk-ev-sub { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .rk-row { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; font-size: 12px; }
+  .rk-name { flex: 0 0 62px; color: var(--text); font-weight: 600; }
+  .rk-grp { flex: 0 0 34px; color: var(--muted); font-size: 11px; }
+  .rk-rank { flex: 0 0 52px; font-weight: 700; color: var(--ev-post); font-variant-numeric: tabular-nums; }
+  .rk-like { flex: 0 0 58px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .rk-gap { flex: 1 1 auto; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .rk-in { color: var(--ev-post); }        /* 컷 위 */
+  .rk-out { color: var(--muted); }         /* 컷 아래 — 경고색 대신 무채색(팬 대상 화면에서 탈락 강조는 과함) */
+  .rk-note { font-size: 11px; color: var(--muted); padding: 6px 16px 12px; }
   /* 좋아요 요청 개별 숨김 ✕ (카드 우상단 오버레이) */
   .lr-item { position: relative; }
   .lr-item .event { padding-right: 38px; }   /* ✕(우상단) 자리 확보 — 상대시간과 겹침 방지 */
@@ -3034,7 +3048,8 @@ function updatePageTitle() {
   const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 날짜의 일정 묶음(같은 날 2건+는 열 정렬, 데이터 전엔 셸)
   const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 요청</span><span class="tb-t-mb">좋아요</span></button>`;
   const celebrations = getTodayCelebrations();
-  el.innerHTML = scheduleBtn + likeReqBtn + topbarLinksHtml() + celebrations.join('');
+  const rankBtn = `<button class="page-title-link" id="likeRankBtn" type="button" onclick="openLikeRanking()">${SVG_ICONS.barChart}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 순위</span><span class="tb-t-mb">순위</span></button>`;
+  el.innerHTML = scheduleBtn + likeReqBtn + rankBtn + topbarLinksHtml() + celebrations.join('');
   // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
   const btn = document.getElementById('likeReqBtn');
   if (btn) {
@@ -3155,9 +3170,74 @@ function syncBodyScrollLock() {
   document.body.style.overflow = anyOpen ? 'hidden' : '';
 }
 
+// ── 좋아요 순위 모달 (2026-08-04) ────────────────────────────────────────────
+// 워커 /like-ranking은 호출될 때 그 자리에서 숲을 긁는다(상시 수집 없음). 그래서 신선도 = 이 폴링 주기.
+// 열려 있을 때만 10초로 돌리고 닫으면 완전히 멈춘다 — 백그라운드에서 볼 사람이 없는데 돌릴 이유가 없다.
+// 탭이 숨겨졌을 때도 건너뛴다(모달은 열려 있어도 화면에 없으면 마찬가지).
+let rankTimer = null;
+function stopRankPoll() { if (rankTimer) { clearInterval(rankTimer); rankTimer = null; } }
+
+async function openLikeRanking() {
+  const ov = document.getElementById('lrOverlay');
+  const head = document.getElementById('lrHead');
+  const body = document.getElementById('lrBody');
+  if (!ov || !body) return;
+  head.innerHTML = `<span>${SVG_ICONS.barChart}좋아요 순위</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  ov.hidden = false;
+  syncBodyScrollLock();
+  body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
+  await loadLikeRanking();
+  stopRankPoll();
+  rankTimer = setInterval(() => {
+    const open = !document.getElementById('lrOverlay').hidden;
+    if (!open) { stopRankPoll(); return; }                      // 다른 경로로 닫혔을 때의 안전망
+    if (document.visibilityState === 'visible') loadLikeRanking();
+  }, 10 * 1000);
+}
+
+async function loadLikeRanking() {
+  const body = document.getElementById('lrBody');
+  if (!body) return;
+  try {
+    const res = await fetch(WORKER_URL + '/like-ranking');
+    const data = await res.json();
+    const events = data.events || [];
+    if (events.length === 0) { body.innerHTML = '<div class="lr-msg">진행 중인 순위 집계가 없습니다.</div>'; return; }
+    body.innerHTML = events.map(renderRankEvent).join('');
+  } catch (err) {
+    // 폴링 중 실패는 화면을 비우지 않는다 — 직전 값을 두고 다음 주기를 기다린다(깜빡임 방지)
+    if (body.querySelector('.rk-ev')) return;
+    body.innerHTML = '<div class="lr-msg">불러오기에 실패했습니다. 잠시 후 다시 시도해주세요.</div>';
+  }
+}
+
+function renderRankEvent(ev) {
+  const rows = (ev.members || []).map(m => {
+    if (m.status === 'unknown-name') return `<div class="rk-row"><span class="rk-name">${escapeHtml(m.name)}</span><span class="rk-gap rk-out">시트 이름 확인 필요</span></div>`;
+    if (m.status !== 'ok') return `<div class="rk-row"><span class="rk-name">${escapeHtml(m.name)}</span><span class="rk-gap rk-out">댓글 미확인</span></div>`;
+    const gap = m.gap === null ? ''
+      : m.gap >= 0 ? `<span class="rk-in">컷 +${m.gap.toLocaleString()}</span>`
+                   : `<span class="rk-out">컷 ${m.gap.toLocaleString()}</span>`;
+    return `<div class="rk-row">`
+      + `<span class="rk-name">${escapeHtml(m.name)}</span>`
+      + `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>`
+      + `<span class="rk-rank">${m.rank}위</span>`
+      + `<span class="rk-like">${m.like.toLocaleString()}</span>`
+      + `<span class="rk-gap">${gap}</span></div>`;
+  }).join('');
+  // 컷 숫자만 노출 — 그 자리 주인이 누구인지는 응답에 담기지 않는다(멤버 외 정보 비노출)
+  const cuts = (ev.groups || []).filter(g => g.cut !== null).map(g => `${g.name ? g.name + ' ' : ''}${g.cut.toLocaleString()}`).join(' · ');
+  const sub = [ev.quota ? `${ev.quota}위 컷` : '', cuts].filter(Boolean).join('  ');
+  const note = ev.unclassified > 0 ? `<div class="rk-note">전형을 판별하지 못한 신청 ${ev.unclassified}건이 있어 실제 순위가 조금 더 낮을 수 있습니다.</div>` : '';
+  return `<div class="rk-ev"><div class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</div>`
+    + (sub ? `<div class="rk-ev-sub">${escapeHtml(sub)}</div>` : '')
+    + rows + note + `</div>`;
+}
+
 function closeLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   if (ov) ov.hidden = true;
+  stopRankPoll();          // 순위 모달과 오버레이를 공유 — 닫히면 폴링도 반드시 멈춘다
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기

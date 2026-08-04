@@ -339,16 +339,23 @@
   .rk-ev-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
   .rk-ev-title { font-size: 12px; font-weight: 700; color: var(--text); }
   .rk-ev-sub { font-size: 11px; color: var(--muted); }
+  /* 열 폭 고정. 이름 칸을 1fr로 두면 남는 폭을 이름이 다 먹어 전형이 멀리 밀려난다(2026-08-04 지적) →
+     좌측(사진·이름·전형)은 붙이고, 남는 폭은 숫자 블록 사이로 보낸다. 전형 없는 대회는 열 자체를 뺀다. */
   .rk-row {
     display: grid;
-    grid-template-columns: 28px 1fr 30px 40px 56px 1fr;   /* 사진 이름 전형 순위 좋아요 컷 */
+    grid-template-columns: 28px 56px 30px 44px 1fr 88px;   /* 사진 이름 전형 순위 좋아요 컷 */
     align-items: center; gap: 8px; padding: 3px 0; font-size: 12px;
   }
+  .rk-ev.no-group .rk-row { grid-template-columns: 28px 56px 44px 1fr 88px; }
+  .rk-ev.no-group .rk-msg { grid-column: 3 / -1; }
   .rk-av { width: 28px; height: 28px; object-fit: cover; }
   .rk-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rk-grp { color: var(--muted); font-size: 11px; }
   .rk-rank, .rk-like, .rk-gap { font-variant-numeric: tabular-nums; text-align: right; }
-  .rk-rank { font-weight: 700; color: var(--ev-post); }
+  .rk-rank { font-weight: 700; color: var(--rk-c, var(--ev-post)); }   /* --rk-c = 시트 H열 색(대회별). 미지정이면 기존 민트 */
+  .rk-ev-title { color: var(--rk-c, var(--text)); }
+  .rk-head-right { display: inline-flex; align-items: center; gap: 10px; }
+  .rk-refresh { font-size: 10px; font-weight: 400; color: var(--muted); white-space: nowrap; }
   .rk-like { color: var(--text); }
   .rk-gap { font-size: 11px; }
   .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
@@ -2944,6 +2951,25 @@ function calcDaysSince(dateStr) {
 
 const CT_FORMATION = new Date(Date.UTC(2025, 10, 30));
 
+// 지정색이 어두우면 '글자용'으로만 밝기를 올린다(채도·색상은 유지).
+// [배경] #FF0000은 값만 최대치지 실제 밝기는 낮다(휘도 기여 R 21%·G 72%·B 7%). 어두운 배경에서 11px 글씨로 쓰면
+//        대비가 4.66에 그치고 서브픽셀 렌더링이 붉은 테두리를 만들어 "깨져 보인다"(2026-08-04 지적).
+//        밝기를 62%까지만 올리면 #ff3d3d(대비 5.31) — 여전히 순색 계열로 읽힌다.
+// 아이콘(SVG)에는 적용하지 않는다. 큰 도형이라 가독성 문제가 없고, 브랜드 색 정체성은 아이콘이 담당한다.
+function lightenForText(hex, minL = 0.62) {
+  const h = hex.replace('#', '');
+  let r = parseInt(h.substring(0,2),16)/255, g = parseInt(h.substring(2,4),16)/255, b = parseInt(h.substring(4,6),16)/255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b), l = (mx+mn)/2;
+  if (l >= minL || mx === mn) return hex;   // 이미 밝거나 무채색이면 그대로
+  const s = (mx-mn) / (1 - Math.abs(2*l-1));
+  let hd;
+  if (mx === r) hd = ((g-b)/(mx-mn)) % 6; else if (mx === g) hd = (b-r)/(mx-mn) + 2; else hd = (r-g)/(mx-mn) + 4;
+  hd *= 60; if (hd < 0) hd += 360;
+  const c = (1 - Math.abs(2*minL - 1)) * s, x = c * (1 - Math.abs((hd/60) % 2 - 1)), m = minL - c/2;
+  const seg = [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][Math.floor(hd/60) % 6];
+  return '#' + seg.map(v => Math.round((v+m)*255).toString(16).padStart(2,'0')).join('');
+}
+
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
   return `${parseInt(h.substring(0,2),16)},${parseInt(h.substring(2,4),16)},${parseInt(h.substring(4,6),16)}`;
@@ -3087,8 +3113,10 @@ function updatePageTitle() {
   const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 날짜의 일정 묶음(같은 날 2건+는 열 정렬, 데이터 전엔 셸)
   const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 요청</span><span class="tb-t-mb">좋아요</span></button>`;
   const celebrations = getTodayCelebrations();
+  // 아이콘엔 지정색 원본(브랜드 색 정체성), 글자만 lightenForText로 보정(11px 가독성). 둘을 나누는 이유는 헬퍼 주석 참조.
+  const rankTxt = likeRankBtn ? lightenForText(likeRankBtn.hex) : '';
   const rankBtn = likeRankBtn
-    ? `<button class="page-title-link tb-sheet-btn rank-btn" id="likeRankBtn" type="button" onclick="openLikeRanking()" style="--tb-rgb:${hexToRgb(likeRankBtn.hex)};color:${likeRankBtn.hex}">${SVG_ICONS.barChart}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 순위</span><span class="tb-t-mb">순위</span></button>`
+    ? `<button class="page-title-link tb-sheet-btn rank-btn" id="likeRankBtn" type="button" onclick="openLikeRanking()" style="--tb-rgb:${hexToRgb(likeRankBtn.hex)};color:${likeRankBtn.hex}">${SVG_ICONS.barChart}<span class="tb-t-pc" style="color:${rankTxt}">천타버스 멤버들의<br>좋아요 순위</span><span class="tb-t-mb" style="color:${rankTxt}">순위</span></button>`
     : '';   // 진행 중인 대회가 없으면 버튼을 아예 띄우지 않는다(빈 모달을 열게 하지 않기 위해)
   el.innerHTML = scheduleBtn + likeReqBtn + rankBtn + topbarLinksHtml() + celebrations.join('');
   // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
@@ -3215,6 +3243,7 @@ function syncBodyScrollLock() {
 // 워커 /like-ranking은 호출될 때 그 자리에서 숲을 긁는다(상시 수집 없음). 그래서 신선도 = 이 폴링 주기.
 // 열려 있을 때만 10초로 돌리고 닫으면 완전히 멈춘다 — 백그라운드에서 볼 사람이 없는데 돌릴 이유가 없다.
 // 탭이 숨겨졌을 때도 건너뛴다(모달은 열려 있어도 화면에 없으면 마찬가지).
+const RANK_POLL_SEC = 10;   // 모달 헤더 표시와 실제 폴링이 같은 값을 쓰도록 한 곳에서 관리
 let rankTimer = null;
 function stopRankPoll() { if (rankTimer) { clearInterval(rankTimer); rankTimer = null; } }
 
@@ -3223,7 +3252,9 @@ async function openLikeRanking() {
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !body) return;
-  head.innerHTML = `<span>${SVG_ICONS.barChart}좋아요 순위</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  head.innerHTML = `<span>${SVG_ICONS.barChart}좋아요 순위</span>`
+    + `<span class="rk-head-right"><span class="rk-refresh">${RANK_POLL_SEC}초마다 갱신</span>`
+    + `<button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button></span>`;
   ov.hidden = false;
   syncBodyScrollLock();
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
@@ -3233,7 +3264,7 @@ async function openLikeRanking() {
     const open = !document.getElementById('lrOverlay').hidden;
     if (!open) { stopRankPoll(); return; }                      // 다른 경로로 닫혔을 때의 안전망
     if (document.visibilityState === 'visible') loadLikeRanking();
-  }, 10 * 1000);
+  }, RANK_POLL_SEC * 1000);
 }
 
 async function loadLikeRanking() {
@@ -3256,6 +3287,7 @@ function renderRankEvent(ev) {
   // ★ 사이트 고유 멤버 순서가 아니라 좋아요 순으로 정렬 — 순위표에서 의미 있는 배열은 성적순이다.
   //   값이 없는 항목(미확인)은 뒤로 몰아 숫자 흐름이 끊기지 않게 한다.
   const sorted = [...(ev.members || [])].sort((a, b) => (b.like ?? -1) - (a.like ?? -1));
+  const grouped = ev.grouped !== false;   // 시트 D열(전형규칙)이 비면 전형 열 자체를 그리지 않는다
   const rows = sorted.map(m => {
     const mem = findMember(m.member_id);
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '<span></span>';
@@ -3268,7 +3300,7 @@ function renderRankEvent(ev) {
       : m.gap >= 0 ? `<span class="rk-in">컷 +${m.gap.toLocaleString()}</span>`
                    : `<span class="rk-out">컷 ${m.gap.toLocaleString()}</span>`;
     return `<div class="rk-row">${av}${nm}`
-      + `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>`
+      + (grouped ? `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>` : '')
       + `<span class="rk-rank">${m.rank}위</span>`
       + `<span class="rk-like">${m.like.toLocaleString()}</span>`
       + `<span class="rk-gap">${gap}</span></div>`;
@@ -3277,7 +3309,8 @@ function renderRankEvent(ev) {
   const cuts = (ev.groups || []).filter(g => g.cut !== null).map(g => `${g.name ? g.name + ' ' : ''}${g.cut.toLocaleString()}`).join(' · ');
   const sub = [ev.quota ? `${ev.quota}위 컷` : '', cuts].filter(Boolean).join(' ');
   const note = ev.unclassified > 0 ? `<div class="rk-note">전형을 판별하지 못한 신청 ${ev.unclassified}건이 있어 실제 순위가 조금 더 낮을 수 있습니다.</div>` : '';
-  return `<div class="rk-ev"><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</span>`
+  const tone = ev.color ? ` style="--rk-c:${lightenForText(ev.color)}"` : '';   // 시트 H열 색을 제목·순위에 반영(글자라 보정본 사용)
+  return `<div class="rk-ev${grouped ? '' : ' no-group'}"${tone}><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</span>`
     + (sub ? `<span class="rk-ev-sub">${escapeHtml(sub)}</span>` : '')
     + `</div>` + rows + note + `</div>`;
 }

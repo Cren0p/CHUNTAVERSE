@@ -35,8 +35,8 @@
     --muted: #64748b;
     --rk-in: #34d399;    /* 좋아요 순위 — 컷 위(안정권) */
     --rk-out: #f87171;
-    --rk-cut: #f87171;              /* 컷 경계 — 이 선 아래가 탈락권이므로 탈락색과 같은 계열로 묶는다 */
-    --rk-cut-line: rgba(248,113,113,0.45);   /* 경계선은 글자보다 옅게 — 값이 아니라 기준선이라는 신호 */   /* 좋아요 순위 — 컷 아래. 모달 배경(#0d1120) 대비 6.79로 묻히지 않는 빨강(사이트 빨간점과 동일 색) */
+    --rk-cut: #fb923c;              /* 컷 경계 — 탈락(빨강)과 구분되는 주황. '기준선'이지 '결과'가 아니므로 색을 나눈다 */
+    --rk-cut-line: rgba(251,146,60,0.5);     /* 경계선은 글자보다 옅게 — 값이 아니라 기준선이라는 신호 */   /* 좋아요 순위 — 컷 아래. 모달 배경(#0d1120) 대비 6.79로 묻히지 않는 빨강(사이트 빨간점과 동일 색) */
     --time: #fbbf24;
     --ev-start: #60a5fa;
     --ev-end: #f87171;
@@ -381,10 +381,16 @@
     content: ''; position: absolute; left: 0; right: 0; top: 50%;
     border-top: 1px dashed var(--rk-cut-line);
   }
-  .rk-cut-row > span { position: relative; background: var(--surface); }
-  .rk-cut-lbl { grid-column: 3 / 5; text-align: right; white-space: nowrap; padding: 0 6px; }   /* 전형~순위 칸 = 등수 열에 라벨 */
-  .rk-cut-row .rk-like { color: var(--rk-cut); font-weight: 700; padding-left: 6px; }           /* 좋아요 열에 컷 수치 */
-  .rk-ev.no-group .rk-cut-lbl { grid-column: 2 / 4; }
+  /* 좌우 여백 -3px/+3px: 인접한 글자 칸의 배경이 6px 그리드 간격에서 정확히 맞닿아 선이 끊긴다.
+     (이전엔 칸 사이로 선 토막이 비쳐 "붙었다 떨어졌다" 하는 간격이 생겼다 — 2026-08-04 지적) */
+  .rk-cut-row > span { position: relative; background: var(--surface); margin: 0 -3px; padding: 0 3px; }
+  /* 멤버 행과 같은 클래스·같은 열을 쓴다 → 전형은 전형 칸에, "33위"는 등수 칸에, 수치는 좋아요 칸에 자동 정렬 */
+  .rk-cut-row .rk-grp { grid-column: 3; }
+  .rk-cut-row .rk-rank { grid-column: 4; }
+  .rk-cut-row .rk-like { grid-column: 5; }
+  .rk-ev.no-group .rk-cut-row .rk-rank { grid-column: 3; }
+  .rk-ev.no-group .rk-cut-row .rk-like { grid-column: 4; }
+  .rk-cut-row .rk-grp, .rk-cut-row .rk-rank, .rk-cut-row .rk-like { color: var(--rk-cut); }
   .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }
@@ -3100,25 +3106,30 @@ function topbarLinksHtml() {
 // 워커도 같은 시트를 읽지만 용도가 다르다(워커=수집 대상, 여기=버튼 표시). 활성 행 판정 기준(글번호 숫자·마감일)은 양쪽 동일하게 유지할 것.
 const LIKE_RANK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1784349823';
 const LS_LIKERANK_CACHE = 'chuntaverse_like_rank_btn_v1';
-let likeRankBtn = null;   // { hex } — 활성 대회가 없으면 null이라 버튼 자체가 안 뜬다
+// 활성 대회 목록. 대회마다 버튼이 하나씩 생기고, 버튼은 자기 대회만 연다.
+// (한 버튼에 전부 담으면 한 번 열 때 모든 대회를 긁게 되고, 버튼 이름도 하나만 적을 수 없어 구분이 안 된다)
+let likeRankBtns = [];
 
 function parseLikeRankBtnRows(rows) {
   const k = new Date(Date.now() + 9 * 3600 * 1000);   // KST 오늘(YYYY-MM-DD) — 워커의 마감 판정과 같은 기준
   const today = `${k.getUTCFullYear()}-${String(k.getUTCMonth() + 1).padStart(2, '0')}-${String(k.getUTCDate()).padStart(2, '0')}`;
-  const active = rows.filter(r => (r[0] || '').trim() && /^\d+$/.test((r[1] || '').trim()) && (!(r[6] || '').trim() || (r[6] || '').trim() >= today));
-  if (active.length === 0) return null;
-  const hex = (active.find(r => /^#[0-9a-fA-F]{6}$/.test((r[7] || '').trim())) || [])[7];
-  return { hex: (hex || '#f0abfc').trim() };   // H열 미지정 시 기본색(연보라 — 기존 버튼들과 겹치지 않는 계열)
+  return rows
+    .filter(r => (r[0] || '').trim() && /^\d+$/.test((r[1] || '').trim()) && (!(r[6] || '').trim() || (r[6] || '').trim() >= today))
+    .map(r => ({
+      titleNo: (r[1] || '').trim(),
+      label: (r[2] || '').trim() || '천타버스 멤버들의',
+      hex: /^#[0-9a-fA-F]{6}$/.test((r[7] || '').trim()) ? (r[7] || '').trim() : '#f0abfc',   // H열 미지정 시 기본색(연보라 — 기존 버튼들과 겹치지 않는 계열)
+    }));
 }
 
 async function loadLikeRankBtn() {
-  try { const c = JSON.parse(lsGet(LS_LIKERANK_CACHE, 'null')); if (c) { likeRankBtn = parseLikeRankBtnRows(c); updatePageTitle(); } } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_LIKERANK_CACHE, 'null')); if (c) { likeRankBtns = parseLikeRankBtnRows(c); updatePageTitle(); } } catch (e) {}
   try {
     const res = await fetch(LIKE_RANK_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     const rows = parseCSV(await res.text());
     lsSet(LS_LIKERANK_CACHE, JSON.stringify(rows));
-    likeRankBtn = parseLikeRankBtnRows(rows);
+    likeRankBtns = parseLikeRankBtnRows(rows);
     updatePageTitle();
   } catch (e) {}   // 실패 시 캐시본 유지 — 상단바 링크 시트와 동일 정책
 }
@@ -3142,10 +3153,12 @@ function updatePageTitle() {
   const likeReqBtn = `<button class="page-title-link like-req-btn" id="likeReqBtn" type="button" onclick="openLikeRequests()">${SVG_ICONS.thumbsup}<span class="tb-t-pc">천타버스 멤버들의<br>좋아요 요청</span><span class="tb-t-mb">좋아요</span></button>`;
   const celebrations = getTodayCelebrations();
   // 아이콘엔 지정색 원본(브랜드 색 정체성), 글자만 lightenForText로 보정(11px 가독성). 둘을 나누는 이유는 헬퍼 주석 참조.
-  const rankTxt = likeRankBtn ? lightenForText(likeRankBtn.hex) : '';
-  const rankBtn = likeRankBtn
-    ? `<button class="page-title-link tb-sheet-btn rank-btn" id="likeRankBtn" type="button" onclick="openLikeRanking()" style="--tb-rgb:${hexToRgb(likeRankBtn.hex)};color:${likeRankBtn.hex}">${SVG_ICONS.barChart}<span class="tb-t-pc" style="color:${rankTxt}">천타버스 멤버들의<br>좋아요 순위</span><span class="tb-t-mb" style="color:${rankTxt}">순위</span></button>`
-    : '';   // 진행 중인 대회가 없으면 버튼을 아예 띄우지 않는다(빈 모달을 열게 하지 않기 위해)
+  // 대회 1건 = 버튼 1개. 진행 중인 대회가 없으면 버튼이 아예 안 뜬다(빈 모달을 열게 하지 않기 위해).
+  // 모바일은 폭이 좁아 대회명을 못 넣는다 → 문구는 통일하고 구분은 색으로 유도(2026-08-04 확정).
+  const rankBtn = likeRankBtns.map(b => {
+    const tx = lightenForText(b.hex);   // 아이콘엔 지정색 원본, 글자만 보정 — 헬퍼 주석 참조
+    return `<button class="page-title-link tb-sheet-btn rank-btn" type="button" onclick="openLikeRanking('${escapeHtml(b.titleNo)}')" style="--tb-rgb:${hexToRgb(b.hex)};color:${b.hex}">${SVG_ICONS.barChart}<span class="tb-t-pc" style="color:${tx}">${escapeHtml(b.label)}<br>좋아요 순위</span><span class="tb-t-mb" style="color:${tx}">좋아요 순위</span></button>`;
+  }).join('');
   el.innerHTML = scheduleBtn + likeReqBtn + rankBtn + topbarLinksHtml() + celebrations.join('');
   // 모달 열기 전 숨김목록을 미리 선로딩(느린 시트 왕복을 클릭 전에 벌어둠). hover/터치 시작 시 1회.
   const btn = document.getElementById('likeReqBtn');
@@ -3275,17 +3288,21 @@ const RANK_POLL_SEC = 10;   // 모달 헤더 표시와 실제 폴링이 같은 �
 let rankTimer = null;
 function stopRankPoll() { if (rankTimer) { clearInterval(rankTimer); rankTimer = null; } }
 
-async function openLikeRanking() {
+let rankOpenPost = null;   // 현재 모달이 보고 있는 대회(글번호). 폴링이 같은 대회를 계속 갱신하도록 붙잡아 둔다
+
+async function openLikeRanking(titleNo) {
   const ov = document.getElementById('lrOverlay');
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !body) return;
+  rankOpenPost = titleNo || null;
+  const btn = likeRankBtns.find(b => b.titleNo === rankOpenPost) || likeRankBtns[0] || null;
   const panel = ov.querySelector('.lr-panel');
-  if (panel) {   // 테두리·헤더가 버튼과 같은 색을 쓰도록. 다른 모달과 오버레이를 공유하므로 닫을 때 반드시 되돌린다.
+  if (panel) {   // 테두리·헤더가 그 대회 버튼과 같은 색을 쓰도록. 다른 모달과 오버레이를 공유하므로 닫을 때 반드시 되돌린다.
     panel.classList.add('rk-modal');
-    if (likeRankBtn) {
-      panel.style.setProperty('--rk-c', lightenForText(likeRankBtn.hex));   // 글자용(밝기 보정본)
-      panel.style.setProperty('--rk-rgb', hexToRgb(likeRankBtn.hex));       // 테두리용(원색을 40%로 깔기 위해 rgb 삼원색)
+    if (btn) {
+      panel.style.setProperty('--rk-c', lightenForText(btn.hex));   // 글자용(밝기 보정본)
+      panel.style.setProperty('--rk-rgb', hexToRgb(btn.hex));       // 테두리용(원색을 40%로 깔기 위해 rgb 삼원색)
     }
   }
   head.innerHTML = `<span>${SVG_ICONS.barChart}좋아요 순위</span>`
@@ -3297,8 +3314,10 @@ async function openLikeRanking() {
   await loadLikeRanking();
   stopRankPoll();
   rankTimer = setInterval(() => {
-    const open = !document.getElementById('lrOverlay').hidden;
-    if (!open) { stopRankPoll(); return; }                      // 다른 경로로 닫혔을 때의 안전망
+    // lrOverlay는 좋아요 요청·일정·항목 모아보기와 공유한다. '열려 있는지'만 보면 다른 모달이 떠 있을 때
+    // 순위 데이터가 그 내용을 덮어쓴다 → 순위 모달임을 표시하는 rk-modal 클래스로 판정한다.
+    const p = document.querySelector('#lrOverlay .lr-panel');
+    if (document.getElementById('lrOverlay').hidden || !p || !p.classList.contains('rk-modal')) { stopRankPoll(); return; }
     if (document.visibilityState === 'visible') loadLikeRanking();
   }, RANK_POLL_SEC * 1000);
 }
@@ -3307,7 +3326,9 @@ async function loadLikeRanking() {
   const body = document.getElementById('lrBody');
   if (!body) return;
   try {
-    const res = await fetch(WORKER_URL + '/like-ranking');
+    // no-store: 응답에 max-age=10이 붙어 있어 기본 모드면 브라우저 캐시가 10초 더 붙잡는다(엣지 10초 + 브라우저 10초 = 최대 20초 지연).
+    // 엣지 캐시는 워커가 Cache API로 직접 조회하므로 이 옵션과 무관 — 즉 숲/유튜브 부하는 그대로 두고 신선도만 회복한다.
+    const res = await fetch(WORKER_URL + '/like-ranking' + (rankOpenPost ? `?post=${encodeURIComponent(rankOpenPost)}` : ''), { cache: 'no-store' });
     const data = await res.json();
     const events = data.events || [];
     if (events.length === 0) { body.innerHTML = '<div class="lr-msg">진행 중인 순위 집계가 없습니다.</div>'; return; }
@@ -3334,8 +3355,12 @@ function renderRankEvent(ev) {
     .sort((a, b) => ((b.like ?? -1) - (a.like ?? -1)) || ((a._cut ? 1 : 0) - (b._cut ? 1 : 0)));
   const rows = merged.map(m => {
     if (m._cut) {
-      const lbl = [m.group, ev.quota ? `${ev.quota}위 컷` : '컷'].filter(Boolean).join(' ');
-      return `<div class="rk-row rk-cut-row"><span class="rk-cut-lbl">${escapeHtml(lbl)}</span><span class="rk-like">${m.cut.toLocaleString()}</span></div>`;
+      // 멤버 행과 같은 클래스를 써서 열이 자동으로 맞는다. '컷'이라는 단어는 넣지 않는다 —
+      // 상단에 "33위 컷 기준"이 있고 색·경계선이 이미 그 뜻이라, 넣으면 등수 칸의 좌우 정렬만 깨진다.
+      return `<div class="rk-row rk-cut-row">`
+        + (grouped && m.group ? `<span class="rk-grp">${escapeHtml(m.group)}</span>` : '')
+        + `<span class="rk-rank">${ev.quota ? ev.quota + '위' : '컷'}</span>`
+        + `<span class="rk-like">${m.cut.toLocaleString()}</span></div>`;
     }
     const mem = findMember(m.member_id);
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '<span></span>';
@@ -3367,6 +3392,7 @@ function closeLikeRequests() {
   if (ov) ov.hidden = true;
   stopRankPoll();          // 순위 모달과 오버레이를 공유 — 닫히면 폴링도 반드시 멈춘다
   const rkPanel = ov && ov.querySelector('.lr-panel');
+  rankOpenPost = null;
   if (rkPanel) { rkPanel.classList.remove('rk-modal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을 물려받지 않게 원복
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로

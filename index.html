@@ -34,7 +34,7 @@
     --text: #e2e8f0;
     --muted: #64748b;
     --rk-in: #34d399;    /* 좋아요 순위 — 컷 위(안정권) */
-    --rk-out: #fb923c;   /* 좋아요 순위 — 컷 아래. 빨강은 팬 화면에 과해서 주황(경고이되 낙담시키지 않음) */
+    --rk-out: #f87171;   /* 좋아요 순위 — 컷 아래. 모달 배경(#0d1120) 대비 6.79로 묻히지 않는 빨강(사이트 빨간점과 동일 색) */
     --time: #fbbf24;
     --ev-start: #60a5fa;
     --ev-end: #f87171;
@@ -347,10 +347,12 @@
      이전엔 1fr이 좋아요 칸 하나에 몰려 순위-좋아요 사이만 벌어지고 컷은 붙어 보였다(2026-08-04 지적). */
   .rk-row {
     display: grid;
-    grid-template-columns: 28px 60px 32px 1fr 1fr 1.1fr;   /* 사진 이름 전형 | 순위 좋아요 컷 */
+    grid-template-columns: 28px 60px 32px 1fr 1fr 1.1fr;   /* 사진 이름 전형 | 순위 좋아요 컷차이 */
     align-items: center; gap: 6px; padding: 3px 0; font-size: 12px;
   }
   .rk-ev.no-group .rk-row { grid-template-columns: 28px 60px 1fr 1fr 1.1fr; }
+  .rk-cut-row .rk-cut-lbl { grid-column: 1 / 5; }                 /* 전형 있음: 사진~순위를 라벨이 차지 → 값이 좋아요 열에 정렬 */
+  .rk-ev.no-group .rk-cut-row .rk-cut-lbl { grid-column: 1 / 4; }
   .rk-ev.no-group .rk-msg { grid-column: 3 / -1; }
   .rk-av { width: 28px; height: 28px; object-fit: cover; }
   .rk-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -365,10 +367,18 @@
   .rk-head-right { display: inline-flex; align-items: center; gap: 10px; }
   .rk-refresh { font-size: 10px; font-weight: 400; color: var(--muted); white-space: nowrap; }
   /* 순위 모달일 때만 패널 테두리·헤더가 대회 색을 따른다(좋아요 요청·일정 모달은 기존 에메랄드 유지) */
-  .lr-panel.rk-modal { border-color: var(--rk-c, rgba(52,211,153,0.4)); }
-  .lr-panel.rk-modal .lr-head { color: var(--rk-c, var(--ev-post)); border-bottom-color: var(--rk-c, var(--border)); }
+  /* 테두리는 다른 모달과 같은 40% 강도로 — 원색 100%는 화면을 압도한다(2026-08-04 지적).
+     헤더 밑줄은 기본 --border 유지(색이 두 겹으로 겹치면 과해짐). 대회 색은 아이콘·제목 글자에만 남긴다. */
+  .lr-panel.rk-modal { border-color: rgba(var(--rk-rgb, 52,211,153), 0.4); }
+  .lr-panel.rk-modal .lr-head { color: var(--rk-c, var(--ev-post)); }
   .rk-like { color: var(--text); }
   .rk-gap { font-size: 11px; }
+  /* 컷 경계 행 — 좋아요 내림차순 목록에서 그 전형의 컷 값이 놓일 자리에 끼워 넣는다.
+     전형마다 컷이 다르므로 경계선 하나로는 표현할 수 없다(남자 1,424 / 여자 2,239) → 전형별로 각자의 자리에 한 줄씩. */
+  .rk-cut-row { color: var(--muted); font-size: 11px; padding: 2px 0; }
+  .rk-cut-lbl { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .rk-cut-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }   /* 라벨 뒤로 이어지는 경계선 */
+  .rk-cut-row .rk-like { color: var(--muted); font-weight: 400; }
   .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }
@@ -3267,7 +3277,10 @@ async function openLikeRanking() {
   const panel = ov.querySelector('.lr-panel');
   if (panel) {   // 테두리·헤더가 버튼과 같은 색을 쓰도록. 다른 모달과 오버레이를 공유하므로 닫을 때 반드시 되돌린다.
     panel.classList.add('rk-modal');
-    if (likeRankBtn) panel.style.setProperty('--rk-c', lightenForText(likeRankBtn.hex));
+    if (likeRankBtn) {
+      panel.style.setProperty('--rk-c', lightenForText(likeRankBtn.hex));   // 글자용(밝기 보정본)
+      panel.style.setProperty('--rk-rgb', hexToRgb(likeRankBtn.hex));       // 테두리용(원색을 40%로 깔기 위해 rgb 삼원색)
+    }
   }
   head.innerHTML = `<span>${SVG_ICONS.barChart}좋아요 순위</span>`
     + `<span class="rk-head-right"><span class="rk-refresh">${RANK_POLL_SEC}초마다 갱신</span>`
@@ -3305,7 +3318,19 @@ function renderRankEvent(ev) {
   //   값이 없는 항목(미확인)은 뒤로 몰아 숫자 흐름이 끊기지 않게 한다.
   const sorted = [...(ev.members || [])].sort((a, b) => (b.like ?? -1) - (a.like ?? -1));
   const grouped = ev.grouped !== false;   // 시트 D열(전형규칙)이 비면 전형 열 자체를 그리지 않는다
-  const rows = sorted.map(m => {
+  // 컷을 '행'으로 끼워 넣는다. 우리 멤버가 속한 전형만 — 신입처럼 아무도 없는 전형은 자리를 차지할 이유가 없다.
+  // 위치는 그 컷 값이 좋아요 내림차순에서 놓일 자리. 같은 값이면 멤버가 먼저(컷과 동점이면 통과이므로 컷 위에 있어야 한다).
+  const usedGroups = new Set(sorted.filter(m => m.status === 'ok').map(m => m.group));
+  const cutRows = (ev.groups || [])
+    .filter(g => g.cut !== null && usedGroups.has(g.name))
+    .map(g => ({ _cut: true, group: g.name, cut: g.cut, like: g.cut }));
+  const merged = [...sorted, ...cutRows]
+    .sort((a, b) => ((b.like ?? -1) - (a.like ?? -1)) || ((a._cut ? 1 : 0) - (b._cut ? 1 : 0)));
+  const rows = merged.map(m => {
+    if (m._cut) {
+      const lbl = [m.group, ev.quota ? `${ev.quota}위 컷` : '컷'].filter(Boolean).join(' ');
+      return `<div class="rk-row rk-cut-row"><span class="rk-cut-lbl">${escapeHtml(lbl)}</span><span class="rk-like">${m.cut.toLocaleString()}</span></div>`;
+    }
     const mem = findMember(m.member_id);
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '<span></span>';
     const nm = `<span class="rk-name" style="color:${mem ? mem.color : '#fff'}">${escapeHtml(m.name)}</span>`;
@@ -3322,9 +3347,8 @@ function renderRankEvent(ev) {
       + `<span class="rk-like">${m.like.toLocaleString()}</span>`
       + `<span class="rk-gap">${gap}</span></div>`;
   }).join('');
-  // 컷 숫자만 노출 — 그 자리 주인이 누구인지는 응답에 담기지 않는다(멤버 외 정보 비노출)
-  const cuts = (ev.groups || []).filter(g => g.cut !== null).map(g => `${g.name ? g.name + ' ' : ''}${g.cut.toLocaleString()}`).join(' · ');
-  const sub = [ev.quota ? `${ev.quota}위 컷` : '', cuts].filter(Boolean).join(' ');
+  // 상단에는 기준(몇 위까지 뽑는지)만. 전형별 컷 숫자는 각 멤버 행으로 내려갔다.
+  const sub = ev.quota ? `${ev.quota}위 컷 기준` : '';
   const note = ev.unclassified > 0 ? `<div class="rk-note">전형을 판별하지 못한 신청 ${ev.unclassified}건이 있어 실제 순위가 조금 더 낮을 수 있습니다.</div>` : '';
   const tone = ev.color ? ` style="--rk-c:${lightenForText(ev.color)}"` : '';   // 시트 H열 색을 제목·순위에 반영(글자라 보정본 사용)
   return `<div class="rk-ev${grouped ? '' : ' no-group'}"${tone}><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</span>`
@@ -3337,7 +3361,7 @@ function closeLikeRequests() {
   if (ov) ov.hidden = true;
   stopRankPoll();          // 순위 모달과 오버레이를 공유 — 닫히면 폴링도 반드시 멈춘다
   const rkPanel = ov && ov.querySelector('.lr-panel');
-  if (rkPanel) { rkPanel.classList.remove('rk-modal'); rkPanel.style.removeProperty('--rk-c'); }   // 좋아요 요청·일정 모달이 순위 색을 물려받지 않게 원복
+  if (rkPanel) { rkPanel.classList.remove('rk-modal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을 물려받지 않게 원복
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기

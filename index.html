@@ -3936,6 +3936,15 @@ function sendBrowserNotification(ev) {
 }
 
 const NOTIFY_RECENT_MS = 10 * 60 * 1000;   // 알림 대상 = 발생 10분 이내 이벤트만 (재편입 폭주 가드 — 아래 주석)
+// [유튜브만 넓힘 · 2026-08-07] 다른 타입은 e.time이 감지 시각과 거의 같지만(방송 시작/종료) 유튜브는
+//   '영상 게시 시각'이라 태생적으로 뒤처진다. RSS 피드에 영상이 올라오기까지 걸리는 시간이 그대로 얹히기 때문.
+//   캐시 우회(bust) 적용 후 실측 4건: 150.1 / 390.8 / 403.6 / 649.4초 — 마지막 건이 10분 창을 넘겨 알림이 빠졌다.
+//   (캐시 몫은 이제 ≤120초로 묶였다. 남은 변동은 유튜브가 자기 피드에 올리는 시간이라 우리가 못 줄인다.)
+// 30분인 이유: 최대 표본의 2.8배. 표본이 4건뿐이라 여유를 크게 잡는다.
+//   넓혀도 폭주 위험이 거의 없다 — 재편입이 나도 '30분 내에 게시된 영상'만 통과하는데, 13인이 30분 안에
+//   올리는 영상은 많아야 한두 개다. 반면 이 창을 안 넓히면 늦게 잡힌 업로드가 조용히 알림 없이 지나간다.
+const NOTIFY_RECENT_YOUTUBE_MS = 30 * 60 * 1000;
+const notifyWindowMs = (e) => (e.type === 'youtube' ? NOTIFY_RECENT_YOUTUBE_MS : NOTIFY_RECENT_MS);
 
 function processNewEventsForNotification(events) {
   // 빈 배열(KV 장애 등 일시적 빈 응답)에 키를 리셋하면 다음 정상 폴링에서 전체가 '새 이벤트'로 판정돼 알림 폭주 → 무시하고 기존 키 유지.
@@ -3955,7 +3964,7 @@ function processNewEventsForNotification(events) {
   // → 발생 시각이 최근(10분)인 것만 알림 대상. 정상 전달 지연은 감지 10s+flush 5s+폴링 10s 수준이라 충분히 관대하고,
   //   재편입분은 시간상 오래돼 자연 차단. 미확인 뱃지가 시간 기반이라 폭주 없는 것과 같은 원리.
   const nowMs = Date.now();
-  const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)) && (nowMs - new Date(e.time).getTime()) < NOTIFY_RECENT_MS);
+  const newOnes = events.filter(e => !lastSeenEventKeys.has(eventKey(e)) && (nowMs - new Date(e.time).getTime()) < notifyWindowMs(e));
   lastSeenEventKeys = new Set(events.map(eventKey));
   if (newOnes.length === 0) return;
   const filtered = dedupBattleNotices(newOnes.filter(e => {

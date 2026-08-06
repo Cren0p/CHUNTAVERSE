@@ -1888,6 +1888,37 @@
     letter-spacing: 1.5px; margin: 16px 0 7px;
   }
   .crew-act-sub:first-child { margin-top: 0; }
+  /* 프로필 하단 영상 스트립. 폭(max-width)은 인라인으로 호출부가 준다 — 크루 1300 / 멤버 1000으로 위 블록과 좌우를 맞춘다. */
+  .video-strip-section { margin: 20px auto 0; }
+  .vs-row { display: flex; align-items: center; gap: 6px; }
+  /* 스크롤바는 감춘다 — 사이트에 가로 스크롤바 관례가 없고, 늘 넘치는 목록이라 상시 노출이 지저분하다. 대신 화살표가 신호다. */
+  .vs-scroll {
+    display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth;
+    flex: 1; min-width: 0;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .vs-scroll::-webkit-scrollbar { display: none; }
+  .vs-tile { width: 200px; flex: 0 0 200px; text-decoration: none; color: inherit; }
+  .vs-thumb {
+    aspect-ratio: 16 / 9; background: var(--bg);
+    border: 1px solid var(--border); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* 대체 이미지는 아바타라 16:9에 cover로 넣으면 잘린다 → 오프라인 카드와 같은 처리(contain + 흐리게).
+     '영상 그림이 아니라 자리 채움'이 바로 읽힌다. */
+  .vs-thumb img.ph { object-fit: contain; opacity: 0.4; }
+  .vs-tile:hover .vs-thumb { border-color: var(--accent); }
+  .vs-title {
+    margin-top: 6px; font-size: 12px; line-height: 1.4; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .vs-arrow {
+    flex: 0 0 auto; width: 24px; height: 60px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-size: 16px; line-height: 1; cursor: pointer; padding: 0;
+  }
+  .vs-arrow:hover { border-color: var(--accent); color: var(--accent); }
   .crew-act-li {
     display: flex; gap: 9px;
     font-size: 14px; color: #94a3b8;
@@ -2926,14 +2957,33 @@ const membersState = {
 const CREW_ACT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1295776995';
 const MEMBER_INFO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=446600674';
 const VACATION_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=964295196';
+const PROFILE_VIDEO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1122643231';
+const LS_PROFVIDEO_CACHE = 'chuntaverse_profvideo_cache_v1';
 const LS_CREWACT_CACHE = 'chuntaverse_crewact_cache_v1';
 const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v1';
 const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
 let crewActs = [];       // [{section, date, text, tag}] — 시트 행 순서 = 표시 순서
+// 프로필 하단 영상 스트립. 시트 행 순서 = 표시 순서(정렬 안 함), 연속된 같은 목록제목이 한 덩어리.
+// 목록 개수를 2개로 고정하지 않는 이유: 제목이 시트에 있으므로 3개든 1개든 시트가 정한다.
+let profileVideos = [];   // [{target, section, title, url, img}]
 let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러올 수 없어요' 구분
 let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, vote, election2026} }
 
 // 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 헤더 스킵은 행 위치가 아니라 내용 기반(케미 파서 관례) — 시트에 헤더 행이 없어도 첫 데이터 행을 삼키지 않음.
+// 시트: 대상 | 목록제목 | 영상제목 | URL | 이미지URL(선택). 헤더 행 없음 — 1행부터 데이터다.
+// 앞 4열 중 하나라도 비면 버린다(그려도 클릭이 안 되는 타일이 되므로).
+function parseProfileVideoRows(rows) {
+  return rows
+    .map(r => ({ target: (r[0] || '').trim(), section: (r[1] || '').trim(), title: (r[2] || '').trim(), url: (r[3] || '').trim(), img: (r[4] || '').trim() }))
+    .filter(v => v.target && v.section && v.title && v.url);
+}
+
+// 유튜브 영상 ID. watch?v= / youtu.be / shorts / live 네 형태를 받는다(embed 포함).
+function youtubeVideoId(url) {
+  const m = String(url).match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : '';
+}
+
 function parseCrewActRows(rows) {
   return rows.filter(r => r[0] && r[2] && r[0] !== '섹션').map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '' }));
 }
@@ -2956,6 +3006,7 @@ function parseVacationRows(rows) {
 
 async function loadCrewSheets() {
   // 캐시 선표시(재방문 첫 페인트) — 배너 패턴과 동일
+  try { const c = JSON.parse(lsGet(LS_PROFVIDEO_CACHE, 'null')); if (c) profileVideos = parseProfileVideoRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_CREWACT_CACHE, 'null')); if (c) crewActs = parseCrewActRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_MEMBERINFO_CACHE, 'null')); if (c) MEMBER_INFO = parseMemberInfoRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_VACATION_CACHE, 'null')); if (c) VACATION = parseVacationRows(c); } catch (e) {}
@@ -2965,6 +3016,7 @@ async function loadCrewSheets() {
     .then(r => { if (!r.ok) throw new Error('no data'); return r.text(); })
     .then(t => { const rows = parseCSV(t); lsSet(lsKey, JSON.stringify(rows)); apply(rows); });
   await Promise.allSettled([
+    pull(PROFILE_VIDEO_SHEET_URL, LS_PROFVIDEO_CACHE, rows => { profileVideos = parseProfileVideoRows(rows); }),
     pull(CREW_ACT_SHEET_URL, LS_CREWACT_CACHE, rows => { crewActs = parseCrewActRows(rows); }),
     pull(MEMBER_INFO_SHEET_URL, LS_MEMBERINFO_CACHE, rows => { MEMBER_INFO = parseMemberInfoRows(rows); }),
     pull(VACATION_SHEET_URL, LS_VACATION_CACHE, rows => { VACATION = parseVacationRows(rows); }),   // 카드 반영은 다음 loadLive 폴링(≤10초)
@@ -7039,6 +7091,62 @@ function crewTagHtml(tag) {
   return ` <span class="tag">${escapeHtml(tag)}</span>`;
 }
 
+// ★ 프로필 하단 영상 스트립. 크루탭·멤버탭이 같은 함수를 쓴다 — 한 곳만 고치면 14개 하위탭이 같이 바뀐다.
+// target: '천타버스' 또는 멤버 이름(시트에 사람이 적는 값이라 id가 아니라 이름으로 맞춘다).
+// 폭은 호출부가 정한다(크루 1300 / 멤버 1000) — 위 블록과 좌우가 어긋나면 안 되므로.
+function renderVideoStrips(target, fallbackImg, maxWidth) {
+  const rows = profileVideos.filter(v => v.target === target);
+  if (rows.length === 0) return '';   // 행이 없으면 섹션 자체가 안 나온다
+  // 연속된 같은 목록제목을 한 덩어리로 — crewActs의 섹션 묶기와 같은 규칙(시트 관리 감각을 맞춘다)
+  const groups = [];
+  rows.forEach(v => {
+    const last = groups[groups.length - 1];
+    if (last && last.section === v.section) last.items.push(v);
+    else groups.push({ section: v.section, items: [v] });
+  });
+  const tiles = (items) => items.map(v => {
+    const vid = youtubeVideoId(v.url);
+    // 이미지 우선순위: 시트에 직접 넣은 것 > 유튜브 썸네일 > 멤버/크루 webp(자리 채움)
+    //   앞의 둘은 '영상 그림'이라 cover로 꽉 채우고, 마지막은 아바타라 contain+흐리게 — 오프라인 카드와 같은 처리.
+    const src = v.img || (vid ? `https://i.ytimg.com/vi/${vid}/mqdefault.jpg` : '');
+    const thumb = src
+      ? `<img src="${escapeHtml(src)}" alt="" loading="lazy" onerror="this.onerror=null;this.className='ph';this.src='${escapeHtml(fallbackImg)}'">`
+      : `<img class="ph" src="${escapeHtml(fallbackImg)}" alt="" loading="lazy">`;
+    return `<a class="vs-tile" href="${escapeHtml(v.url)}" target="_blank" rel="noopener"><div class="vs-thumb">${thumb}</div><div class="vs-title">${escapeHtml(v.title)}</div></a>`;
+  }).join('');
+  return groups.map(g => `
+    <div class="video-strip-section" style="max-width:${maxWidth}px">
+      <div class="crew-act-sub">${escapeHtml(g.section)}</div>
+      <div class="vs-row">
+        <button class="vs-arrow vs-prev" type="button" aria-label="이전" hidden>‹</button>
+        <div class="vs-scroll">${tiles(g.items)}</div>
+        <button class="vs-arrow vs-next" type="button" aria-label="다음" hidden>›</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 화살표는 '넘칠 때만' 보이고 양 끝에서 해당 방향이 사라진다 — 스크롤바가 없으니 이게 유일한 신호다.
+// 렌더할 때마다 새로 걸린다(요소가 매번 교체되므로 해제는 불필요).
+function bindVideoStrips(root) {
+  root.querySelectorAll('.vs-row').forEach(row => {
+    const sc = row.querySelector('.vs-scroll');
+    const prev = row.querySelector('.vs-prev'), next = row.querySelector('.vs-next');
+    const sync = () => {
+      const over = sc.scrollWidth - sc.clientWidth > 1;
+      prev.hidden = !over || sc.scrollLeft <= 1;
+      next.hidden = !over || sc.scrollLeft >= sc.scrollWidth - sc.clientWidth - 1;
+    };
+    const step = () => Math.max(sc.clientWidth * 0.8, 200);
+    prev.addEventListener('click', () => sc.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => sc.scrollBy({ left: step(), behavior: 'smooth' }));
+    sc.addEventListener('scroll', sync);
+    // 컨테이너 폭이 바뀌면(창 크기·탭 전환) 넘침 여부가 달라진다
+    if (window.ResizeObserver) new ResizeObserver(sync).observe(sc);
+    sync();
+  });
+}
+
 function renderMembersCrew(body) {
   // 데이터 없음 = 아직 로드 전('불러오는 중') 또는 실패('불러올 수 없어요'). 재시도 발화는 switchPage(탭 진입)에서만 —
   // 여기서 발화하면 로더 완료→재렌더→재발화의 무한 fetch 루프(시트 장애 지속 시).
@@ -7063,7 +7171,9 @@ function renderMembersCrew(body) {
         <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>
+    ${renderVideoStrips('천타버스', 'CHUNTAVERSE.webp', 1300)}
   `;
+  bindVideoStrips(body);
 }
 
 // ── 프로필 항목 모아보기: 행(data-mi) 클릭 → 전 멤버의 해당 항목을 lrOverlay(좋아요·일정 공용)에 정렬 표시 ──
@@ -7198,7 +7308,9 @@ function renderMembersProfile(body, memberId) {
         ${infoHtml}
       </div>
     </div>
+    ${renderVideoStrips(m.name, m.img, 1000)}
   `;
+  bindVideoStrips(body);
 
   const goLinksBtn = document.getElementById('membersGoLinks');
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { history.replaceState(null, '', '#links'); switchPage('links'); });

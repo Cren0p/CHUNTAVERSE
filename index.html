@@ -67,6 +67,13 @@
     font-family: 'Pretendard Variable', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     min-height: 100vh;
+    /* 어절 단위 줄바꿈(2026-08-06 전역화). 한글 기본값은 음절 단위로 끊겨 '…함께하실 분 / 을 구합니다'처럼
+       낱말이 쪼개진다. 그동안 .hall-r-name·.members-crew-intro 등 5곳에 개별로 붙여 왔는데, 새 화면을
+       만들 때마다 빠뜨렸다(좋아요 요청 카드가 그 예) — 상속되는 속성이니 뿌리에서 한 번 건다.
+       overflow-wrap을 같이 두는 이유: keep-all만 걸면 컨테이너보다 긴 낱말(URL·긴 영문)이 통째로 삐져나간다.
+       기존 개별 선언은 특이도가 높아 그대로 유효하다 — 반대 의도인 word-break: break-all(2줄 클램프 제목)도 안 덮인다. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   body::before {
     content: '';

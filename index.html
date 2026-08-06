@@ -1890,11 +1890,12 @@
   .crew-act-sub:first-child { margin-top: 0; }
   /* 프로필 하단 영상 스트립. 폭(max-width)은 인라인으로 호출부가 준다 — 크루 1300 / 멤버 1000으로 위 블록과 좌우를 맞춘다. */
   .video-strip-section { margin: 20px auto 0; }
-  .vs-row { display: flex; align-items: center; gap: 6px; }
+  /* 화살표를 absolute로 띄워 스트립 폭 바깥에 세운다 — flex 형제로 두면 등장/퇴장할 때마다
+     스크롤 영역 폭이 변해 타일이 흔들린다. 이제 .vs-scroll은 항상 온전한 폭을 쓴다. */
+  .vs-row { position: relative; }
   /* 스크롤바는 감춘다 — 사이트에 가로 스크롤바 관례가 없고, 늘 넘치는 목록이라 상시 노출이 지저분하다. 대신 화살표가 신호다. */
   .vs-scroll {
     display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth;
-    flex: 1; min-width: 0;
     scrollbar-width: none; -ms-overflow-style: none;
   }
   .vs-scroll::-webkit-scrollbar { display: none; }
@@ -1913,12 +1914,22 @@
     margin-top: 6px; font-size: 12px; line-height: 1.4; color: var(--text);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
+  /* 폭 바깥에 선다. 22px + 오프셋 22px는 .members-wrap의 좌우 패딩(24px) 안에 들어가므로
+     섹션이 컨테이너를 꽉 채워 여백이 0인 폭에서도 페이지 가로 넘침이 없다.
+     세로는 썸네일(200px의 16:9) 한가운데 — 제목 두 줄까지 포함한 타일 전체 기준이 아니다. */
   .vs-arrow {
-    flex: 0 0 auto; width: 24px; height: 60px;
+    position: absolute; top: calc((200px * 9 / 16 - 60px) / 2);
+    width: 22px; height: 60px;
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
     font-size: 16px; line-height: 1; cursor: pointer; padding: 0;
   }
+  .vs-arrow[hidden] { display: none; }
+  .vs-prev { left: -22px; }
+  .vs-next { right: -22px; }
   .vs-arrow:hover { border-color: var(--accent); color: var(--accent); }
+  /* 700px 이하에서 .members-wrap 패딩이 16px로 줄어 22px 버튼을 못 받는다. 그 폭은 터치가 주라
+     스와이프로 넘기면 되므로 화살표를 아예 숨긴다(컨테이너 900 ≈ 뷰포트 948 — 패딩 24px 구간 안). */
+  @container (max-width: 900px) { .vs-arrow { display: none; } }
   .crew-act-li {
     display: flex; gap: 9px;
     font-size: 14px; color: #94a3b8;

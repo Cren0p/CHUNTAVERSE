@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>천타버스</title>
-<meta name="description" content="천타버스(CHUNTAVERSE) 비공식 팬사이트 - 천양, 마다옴, 나나문, 임하밍, 문모모, 카푸, 캬앙, 김웰로, 모카, 달타, 체비, 플리의 생방송 현황, 최근 이벤트, 월별 통계를 한눈에 확인하세요.">
+<meta name="description" content="천타버스(CHUNTAVERSE) 비공식 팬사이트 - 천양, 마다옴, 나나문, 임하밍, 문모모, 카푸, 캬앙, 김웰로, 모카, 달타, 체비, 플리, 빙밍의 생방송 현황, 최근 이벤트, 월별 통계를 한눈에 확인하세요.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:title" content="천타버스">
@@ -419,7 +419,7 @@
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }
   .rk-note { font-size: 11px; color: var(--muted); padding: 4px 0 0; }
-  /* 순위 버튼: 색은 시트 H열 hex(tb-sheet-btn과 동일 방식). button은 기본 가운데정렬이라 text-align 명시 필요 */
+  /* 순위 버튼: 색은 시트 G열 hex(tb-sheet-btn과 동일 방식). button은 기본 가운데정렬이라 text-align 명시 필요 */
   button.page-title-link.rank-btn { cursor: pointer; font-family: inherit; text-align: left; }
   /* 좋아요 요청 개별 숨김 ✕ (카드 우상단 오버레이) */
   .lr-item { position: relative; }
@@ -3189,7 +3189,7 @@ function topbarLinksHtml() {
 }
 
 // 좋아요 순위 버튼 — 시트를 프론트에서도 읽는다.
-// 이유: 버튼 색(H열)과 '진행 중인 대회가 있는지'는 모달을 열기 전에 알아야 하는데, /like-ranking은 열 때만 호출하기 때문.
+// 이유: 버튼 색(G열)과 '진행 중인 대회가 있는지'는 모달을 열기 전에 알아야 하는데, /like-ranking은 열 때만 호출하기 때문.
 // 워커도 같은 시트를 읽지만 용도가 다르다(워커=수집 대상, 여기=버튼 표시). 활성 행 판정 기준(글번호 숫자·마감일)은 양쪽 동일하게 유지할 것.
 const LIKE_RANK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1784349823';
 const LS_LIKERANK_CACHE = 'chuntaverse_like_rank_btn_v1';
@@ -3201,14 +3201,14 @@ function parseLikeRankBtnRows(rows) {
   const k = new Date(Date.now() + 9 * 3600 * 1000);   // KST 오늘(YYYY-MM-DD) — 워커의 마감 판정과 같은 기준
   const today = `${k.getUTCFullYear()}-${String(k.getUTCMonth() + 1).padStart(2, '0')}-${String(k.getUTCDate()).padStart(2, '0')}`;
   return rows
-    .filter(r => (r[0] || '').trim() && /^\d+$/.test((r[1] || '').trim()) && (!(r[6] || '').trim() || (r[6] || '').trim() >= today))
+    .filter(r => (r[0] || '').trim() && /^\d+$/.test((r[1] || '').trim()) && (!(r[5] || '').trim() || (r[5] || '').trim() >= today))
     .map(r => ({
       titleNo: (r[1] || '').trim(),
       label: (r[2] || '').trim() || '천타버스 멤버들의',
-      hex: /^#[0-9a-fA-F]{6}$/.test((r[7] || '').trim()) ? (r[7] || '').trim() : '#f0abfc',   // H열 미지정 시 기본색(연보라 — 기존 버튼들과 겹치지 않는 계열)
-      // J열: 갱신 주기(초). 워커의 캐시 TTL과 같은 값을 써야 한다 — 폴링이 더 빠르면 캐시에 막혀 헛요청만 늘고,
+      hex: /^#[0-9a-fA-F]{6}$/.test((r[6] || '').trim()) ? (r[6] || '').trim() : '#f0abfc',   // G열 미지정 시 기본색(연보라 — 기존 버튼들과 겹치지 않는 계열)
+      // I열: 갱신 주기(초). 워커의 캐시 TTL과 같은 값을 써야 한다 — 폴링이 더 빠르면 캐시에 막혀 헛요청만 늘고,
       // 더 느리면 캐시가 놀아 신선도를 못 살린다. 범위 밖·미지정은 워커와 같은 기본값.
-      refresh: (() => { const n = parseInt(r[9], 10); return (n >= RANK_REFRESH_MIN && n <= RANK_REFRESH_MAX) ? n : RANK_REFRESH_DEFAULT; })(),
+      refresh: (() => { const n = parseInt(r[8], 10); return (n >= RANK_REFRESH_MIN && n <= RANK_REFRESH_MAX) ? n : RANK_REFRESH_DEFAULT; })(),
     }));
 }
 
@@ -3374,7 +3374,7 @@ function syncBodyScrollLock() {
 // 워커 /like-ranking은 호출될 때 그 자리에서 숲을 긁는다(상시 수집 없음). 그래서 신선도 = 이 폴링 주기.
 // 열려 있을 때만 10초로 돌리고 닫으면 완전히 멈춘다 — 백그라운드에서 볼 사람이 없는데 돌릴 이유가 없다.
 // 탭이 숨겨졌을 때도 건너뛴다(모달은 열려 있어도 화면에 없으면 마찬가지).
-// 갱신 주기는 시트 J열에서 온다(대회별). 아래는 워커와 맞춘 기본값·허용 범위 — 양쪽이 어긋나면 캐시와 폴링이 엇박이 난다.
+// 갱신 주기는 시트 I열에서 온다(대회별). 아래는 워커와 맞춘 기본값·허용 범위 — 양쪽이 어긋나면 캐시와 폴링이 엇박이 난다.
 const RANK_REFRESH_DEFAULT = 30, RANK_REFRESH_MIN = 5, RANK_REFRESH_MAX = 600;
 let rankPollSec = RANK_REFRESH_DEFAULT;   // 현재 열려 있는 대회의 주기(헤더 표시와 실제 폴링이 같은 값을 쓰도록)
 let rankOpenPost = null;                  // 현재 모달이 보고 있는 대회(글번호). 폴링이 같은 대회를 계속 갱신하도록 붙잡아 둔다
@@ -3458,7 +3458,7 @@ function renderRankEvent(ev) {
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '<span></span>';
     const nm = `<span class="rk-name" style="color:${mem ? mem.color : '#fff'}">${escapeHtml(m.name)}</span>`;
     // [상태 분기 제거 · 2026-08-07] '시트 이름 확인 필요'·'댓글 미확인' 두 줄이 있던 자리.
-    //   워커가 시트 F열이 아니라 실제 댓글에서 멤버를 찾게 바뀌어(computeLikeRanking) 두 상태가 발생하지 않는다
+    //   워커가 시트 구 F열(참여멤버)이 아니라 실제 댓글에서 멤버를 찾게 바뀌어(computeLikeRanking) 두 상태가 발생하지 않는다
     //   — 목록에 있다는 것 자체가 댓글이 있다는 뜻이다. 미신청 멤버는 아예 행이 안 생긴다.
     // 안정/탈락은 행 단위 클래스로 — 순위와 컷이 같은 의미색을 공유해야 한 눈에 읽힌다
     const zone = m.gap === null ? '' : (m.gap >= 0 ? ' in' : ' out');
@@ -3476,7 +3476,7 @@ function renderRankEvent(ev) {
   // 상단에는 기준(몇 위까지 뽑는지)만. 전형별 컷 숫자는 각 멤버 행으로 내려갔다.
   const sub = ev.quota ? `${ev.quota}위 컷 기준` : '';
   const note = ev.unclassified > 0 ? `<div class="rk-note">전형을 판별하지 못한 신청 ${ev.unclassified}건이 있어 실제 순위가 조금 더 낮을 수 있습니다.</div>` : '';
-  const tone = ev.color ? ` style="--rk-c:${lightenForText(ev.color)}"` : '';   // 시트 H열 색을 제목·순위에 반영(글자라 보정본 사용)
+  const tone = ev.color ? ` style="--rk-c:${lightenForText(ev.color)}"` : '';   // 시트 G열 색을 제목·순위에 반영(글자라 보정본 사용)
   return `<div class="rk-ev${grouped ? '' : ' no-group'}"${tone}><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</span>`
     + (sub ? `<span class="rk-ev-sub">${escapeHtml(sub)}</span>` : '')
     + `</div>` + rows + note + `</div>`;
@@ -4120,7 +4120,7 @@ function switchPage(page) {
     membersState.tabsInited = true;
   }
   if (page === 'members') {
-    preloadProfileSet();  // 크루 소개를 읽는 동안 멤버 상세 사진 11장을 백그라운드 적재
+    preloadProfileSet();  // 크루 소개를 읽는 동안 멤버 상세 사진 13장을 백그라운드 적재
     // 시트(크루활동·멤버정보·휴방) 첫 로드 실패 상태면 재진입을 재시도 기회로 — 배너·컨텐츠와 동일 패턴(진입당 1회)
     if (crewActs.length === 0 && crewSheetsDone) { crewSheetsDone = false; loadCrewSheets(); }
     renderMembersBody();
@@ -4172,7 +4172,7 @@ function parseHash(hash) {
 
 // ── 이미지 프리로드 ──
 // 정책: 홈 접속 시 모두에게 CHUNTAVERSE.webp(프로필 탭 랜딩, 첫인상) + 오늘 기념일 멤버의 프로필 사진.
-//       첫 방문자에겐 프로필 전체 11장 + 현수막·컨텐츠 상단 N장 추가(둘러볼 가능성 높음).
+//       첫 방문자에겐 프로필 전체 13장 + 현수막·컨텐츠 상단 N장 추가(둘러볼 가능성 높음).
 //       프로필 탭 진입 시엔 방문 이력 무관하게 프로필 전체 프리로드(1회).
 // ※ switchPage 초기 호출보다 반드시 앞에 선언 (TDZ 방지)
 const PRELOAD_TAB_CAP = 6;   // 첫 방문 시 현수막·컨텐츠 각각 상단 프리로드 장수
@@ -6622,7 +6622,7 @@ function renderChemistry() {
   const sec = (label, firstNoBorder, isTrack) =>
     `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div></div>`;
 
-  // 상단 트랙(모두 포함)은 2~11명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
+  // 상단 트랙(모두 포함)은 2~12명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
   const selArr = [...chemFilterMembers];
   const topActive = selArr.length >= 2 && selArr.length <= MEMBERS.length - 1;
   const allIncluded = (ids) => selArr.every(id => ids.includes(id));   // 선택집합 ⊆ 조합
@@ -6635,7 +6635,7 @@ function renderChemistry() {
     for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id])) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
     for (const g of CHEM_GROUPS) if (allIncluded(g.members)) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
     matched.sort((a, b) => a.size - b.size || b.total - a.total);
-    // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~11명에서만 발생
+    // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~12명에서만 발생
     const matchedBody = matched.length > 0
       ? matched.map(x => x.html).join('')
       : '<div class="chem-empty">조건에 맞는 케미가 없어요</div>';

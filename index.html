@@ -425,6 +425,11 @@
   .lr-item { position: relative; }
   .lr-item .event { padding-right: 38px; }   /* ✕(우상단) 자리 확보 — 상대시간과 겹침 방지 */
   .lr-item .event-icon { display: none; }   /* 모달엔 좋아요 요청만 모이므로 타입 구분용 따봉 아이콘 불필요(이벤트 탭은 유지). flex 항목 제거라 좌측 빈칸·gap 안 남음 */
+  /* 카드 높이 통일(2026-08-07): 대상 글 제목이 붙은 항목만 헤더가 2줄로 접혀 60px, 나머지는 40px이라
+     목록이 들쭉날쭉했다. 긴 쪽에 맞춰 바닥을 깔아 전부 같은 높이로 만든다(일정 모달 .sch-item과 같은 방식).
+     .event-body가 세로 가운데 정렬이라 짧은 카드는 여백이 위아래로 균등하게 나뉜다.
+     제목이 아주 길어 헤더가 3줄이 되면 그 카드만 다시 커지는데, 막으려면 제목을 잘라야 해서 두었다. */
+  .lr-item .event-body { min-height: 60px; }
   .lr-dismiss {
     position: absolute; top: 8px; right: 8px; z-index: 2;
     width: 22px; height: 22px;
@@ -473,6 +478,9 @@
   .sch-item-dday {
     font-size: 13px; color: var(--accent); font-weight: 700;
     white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
+    /* 폭 고정(2026-08-07): 'D-DAY'(5자)와 'D-1'(3자)의 폭이 18px쯤 달라 그만큼 앞의 아바타 줄이
+       좌우로 밀렸다. 가장 넓은 'D-DAY' 기준으로 바닥을 깔고 오른쪽 정렬 — 'D-999'까지 여유 있게 들어간다. */
+    min-width: 44px; text-align: right;
   }
   .celebration-box {
     display: flex;
@@ -529,6 +537,24 @@
     gap: 15px; padding: 22px 30px;
     max-width: 1520px; width: 100%; margin: 0 auto;
     flex: 1;
+  }
+  /* ── 정전 타이머(2026-08-07) — 전원 오프라인일 때 카드 묶음을 흐리고 그 위에 경과 시간을 얹는다 ──
+     흐림은 .grid에만 건다. #app에 걸면 문구까지 같이 흐려진다(문구는 .grid의 형제).
+     문구를 sticky로 두는 이유: 카드 13장이 두 화면 넘게 이어져서, 오버레이 한가운데에 두면
+     스크롤 안 한 첫 화면에서는 문구가 화면 밖에 있다. sticky면 어디를 보고 있든 화면 중앙에 붙는다. */
+  #app { position: relative; }
+  .grid.blackout { filter: blur(5px) grayscale(0.35); }
+  .blackout-overlay { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
+  .blackout-msg {
+    position: sticky; top: 42vh;
+    text-align: center; padding: 0 16px;
+    font-size: 22px; font-weight: 800; color: var(--text);
+    line-height: 1.45; text-shadow: 0 2px 14px rgba(0,0,0,0.85);
+  }
+  .blackout-time {
+    display: block; margin-top: 10px;
+    font-size: 30px; color: var(--accent);
+    font-variant-numeric: tabular-nums;   /* 초가 흘러도 글자 폭이 안 흔들리게 */
   }
   @container (min-width: 1500px) { .grid { grid-template-columns: repeat(5, 1fr); } }   /* 13인 홈 역할: 넓은 화면에서 전원 한눈에(5+5+3) — 2026-08-02 확정 */
   @container (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
@@ -1857,28 +1883,43 @@
     margin: 0 auto;
     align-items: stretch;
   }
-  /* 우측 활동/연혁 패널이 좁아져 가독성 무너지기 전에 세로 스택 — 콘텐츠 900px 밑(활동 패널 ~265px 밑)에서 전환(뷰포트 아닌 실제 폭 기준) */
+  /* 우측 활동/연혁 패널이 좁아져 가독성 무너지기 전에 세로 스택 — 콘텐츠 900px 밑(활동 패널 ~340px 밑)에서 전환(뷰포트 아닌 실제 폭 기준) */
   @container (max-width: 900px) {
     .members-crew { flex-direction: column; }
     .members-crew-intro, .members-crew-activities { flex: none; }
   }
+  /* 비율 1.6:1 (2026-08-07, 구 2.4:1) — 근거는 우측이 필요한 폭이다.
+     연혁의 현재 최장 줄이 327px인데 구 비율에선 안쪽 폭이 330px으로 여유가 3px뿐이었고,
+     반대로 좌측은 소개문 최장 줄 604px에 842px을 쓰고 있었다(238px을 못 씀).
+     1.6:1이면 우측 446px(여유 35%)·좌측 732px(여유 128px)로 양쪽이 다 맞는다.
+     ※ 구 max-width:720px(소개문)은 제거했다 — 소개문은 세 줄이 <br>로 고정돼 최장 604px이라
+       720이든 800이든 접히지 않았다. 실효 상한은 604px이고 문구는 이 파일에서만 바뀐다. */
   .members-crew-intro {
-    flex: 2.4; min-width: 0;
+    flex: 1.6; min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 28px 32px;
     text-align: center;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
   }
+  /* 로고가 남는 세로 공간을 먹는다(2026-08-07).
+     [배경] 두 패널은 stretch라 높이가 같은데, 우측 연혁은 계속 늘고 좌측은 고정이다.
+       구 방식(max-width 380 고정)은 늘어난 높이를 전부 위아래 여백으로 흘려보내, 연혁이 길어질수록
+       좌측이 비어 보였다. flex-basis를 0으로 두면 로고 상자가 '남는 높이'만 받고,
+       object-fit: contain이 가로세로비를 지킨 채 그 높이에 맞춰 로고를 키운다.
+     [지금 크기] 좌우 자연 높이가 거의 같은 현재는 남는 높이 ≈ 기존 로고 높이라 보이는 크기가 사실상 그대로다.
+     [상한] 560px — 연혁이 아주 길어져도 로고가 무한정 커지지 않게 하는 천장. */
   .members-crew-intro-img {
-    max-width: 380px;
+    flex: 1 1 0; min-height: 0;
+    object-fit: contain;
+    max-width: 560px;
     width: 100%;
     margin: 0 auto 32px;
     display: block;
   }
   .members-crew-intro p {
     font-size: 15px; color: var(--muted);
-    line-height: 1.8; max-width: 720px;
+    line-height: 1.8;
     margin: 0 auto; word-break: keep-all;
   }
   .members-crew-activities {
@@ -1943,14 +1984,6 @@
   .crew-act-li .dot { color: var(--accent); flex: none; }
   .crew-act-li .d { color: #cbd5e1; font-weight: 700; }
   .crew-act-li .tag { color: var(--muted); font-size: 12px; }
-  .crew-act-more { margin-top: auto; padding-top: 16px; text-align: right; }
-  .crew-act-more button {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 700; color: var(--accent);
-    background: rgba(97,255,236,0.08); border: 1px solid rgba(97,255,236,0.35);
-    padding: 7px 14px; cursor: pointer; font-family: inherit;
-  }
-  .crew-act-more button:hover { background: rgba(97,255,236,0.16); border-color: rgba(97,255,236,0.6); }
 
   .members-profile {
     display: grid;
@@ -2832,6 +2865,11 @@ const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 �
 const VALID_PAGES = Object.keys(PAGE_TITLES);
 
 let lastLiveUpdate = null;
+// 정전 타이머 상태 — 실물 로직은 아래 applyBlackout 블록. 선언만 여기 올린 이유는 TDZ다:
+// switchPage(initHash.page) 부팅 호출이 이 파일 중간에서 실행되는데, 그 안에서 blackoutDismissed를 건드린다.
+// 선언이 그 아래 있으면 첫 로드가 ReferenceError로 통째로 죽는다(이미지 프리로드 상수와 같은 사유).
+let blackoutDismissed = false;
+let lastLiveCount = null;   // 직전 폴링의 방송 중 인원 — 탭 재진입 때 재조회 없이 정전 판정에 재사용
 let lastServerDetect = null;   // 서버 감지 심장박동(/ 응답 last_detect_at) — 클라이언트 fetch 시각과 별개(worker가 응답해도 감지 계층이 죽어 있을 수 있음)
 const DETECT_STALE_MS = 5 * 60 * 1000;   // 정상 겉보기 나이 최대 ~3분(감지 10s + Cron 폴백 60s + KV 콜로캐시·전파 ≤120s) 위 마진
 let lastEventsUpdate = null;
@@ -4128,6 +4166,12 @@ function switchPage(page) {
   if (page === 'events') {
     stopTitleFlash();
     refreshUnreadIndicator();
+  }
+  if (page === 'live') {
+    // 생방송 탭에 다시 들어오면 정전 타이머를 되살린다(여전히 전원 오프라인일 때만).
+    // 직전 폴링 값(lastLiveCount)을 재사용하므로 재조회는 없다.
+    blackoutDismissed = false;
+    applyBlackout();
   }
   if (page === 'chemistry') {
     renderChemistry();
@@ -6013,6 +6057,62 @@ async function loadStats() {
   }
 }
 
+// ── 정전 타이머 (2026-08-07) ─────────────────────────────────────────────────
+// 전원 오프라인이면 카드 묶음을 흐리고 마지막 방송 종료 이후 경과 시간을 얹는다.
+// [기준 시각] 이벤트 목록의 가장 최근 '방송 종료'. 이미 화면이 들고 있는 데이터라 추가 조회가 없다.
+//   이벤트가 아직 안 왔거나(첫 로드) 목록에 종료가 하나도 없으면 아무것도 안 띄운다 — 카드는 평소대로.
+//   목록은 최근 1000건이라 전원이 며칠씩 안 켜면 종료 기록이 밀려날 수 있는데, 그때는 조용히 안 뜬다.
+// [해제] 아무 데나 한 번 클릭하면 사라지고 그 뒤로는 평소 동작. 생방송 탭에 다시 들어오면 되살아나고,
+//   누군가 켰다 다시 전원이 꺼져도 되살아난다(그때는 새로운 정전이므로).
+function lastEndTime() {
+  let best = null;
+  for (const e of allEvents) {
+    if (e.type !== 'end') continue;
+    const t = new Date(e.time).getTime();
+    if (!isNaN(t) && (best === null || t > best)) best = t;
+  }
+  return best;
+}
+// 24시간을 넘기면 '1일 3시간 4분 5초', 그 아래는 '3시간 4분 5초'
+function formatBlackout(ms) {
+  let sec = Math.floor(Math.max(0, ms) / 1000);
+  const d = Math.floor(sec / 86400); sec -= d * 86400;
+  const h = Math.floor(sec / 3600);  sec -= h * 3600;
+  const m = Math.floor(sec / 60);    sec -= m * 60;
+  return (d > 0 ? `${d}일 ` : '') + `${h}시간 ${m}분 ${sec}초`;
+}
+function tickBlackout() {
+  const el = document.getElementById('blackoutTime');
+  if (!el) return;
+  const t = lastEndTime();
+  if (t !== null) el.textContent = formatBlackout(Date.now() - t);
+}
+// 현재 상태에 맞춰 오버레이를 붙이거나 뗀다. loadLive 렌더 직후와 생방송 탭 진입 때 호출.
+function applyBlackout() {
+  const app = document.getElementById('app');
+  const grid = app && app.querySelector('.grid');
+  if (!grid) return;
+  const existing = document.getElementById('blackoutOverlay');
+  const t = lastEndTime();
+  if (!(lastLiveCount === 0 && t !== null && !blackoutDismissed)) {
+    if (existing) existing.remove();
+    grid.classList.remove('blackout');
+    return;
+  }
+  grid.classList.add('blackout');
+  if (existing) { tickBlackout(); return; }   // 이미 떠 있으면 숫자만 갱신
+  const ov = document.createElement('div');
+  ov.className = 'blackout-overlay';
+  ov.id = 'blackoutOverlay';
+  ov.innerHTML = `<div class="blackout-msg">천타버스 정전된지<span class="blackout-time" id="blackoutTime">${formatBlackout(Date.now() - t)}</span></div>`;
+  ov.addEventListener('click', () => {
+    blackoutDismissed = true;
+    ov.remove();
+    grid.classList.remove('blackout');
+  });
+  app.appendChild(ov);
+}
+
 async function loadLive() {
   try {
     const res = await fetch(WORKER_URL + '/');
@@ -6044,6 +6144,11 @@ async function loadLive() {
     }
     lastLiveUpdate = new Date();
     if (data.last_detect_at) lastServerDetect = new Date(data.last_detect_at);
+    // 정전 타이머: 카드 렌더 직후에 붙인다(폴링마다 #app을 새로 그리므로 매번 다시 붙여야 함).
+    // 누가 켜면 해제 상태도 푼다 — 그 방송이 끝나면 새 정전이라 다시 떠야 한다.
+    if (liveCount > 0) blackoutDismissed = false;
+    lastLiveCount = liveCount;
+    applyBlackout();
     updateHeaderCenter();
   } catch (e) {
     // 일시적 폴링 실패: 이미 카드 그리드가 그려져 있으면 유지하고 이번 실패는 무시
@@ -6264,7 +6369,7 @@ function applyPollingState(runNow) {
   }
 }
 applyPollingState(false);   // 부트 직후 — 위에서 4개를 이미 1회씩 호출했으므로 즉시 재실행 불필요
-setInterval(tickSchedule, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지(순수 로컬 연산, 네트워크 없음)
+setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간(전부 순수 로컬 연산, 네트워크 없음)
 
 // ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──
 // (구 모드 배지 내부 보정(--badge-vnudge)은 2026-07-13 SVG 전환으로 소멸 — 지금은 줄 정렬 축만 이 함수를 씀)
@@ -7192,7 +7297,6 @@ function renderMembersCrew(body) {
       </div>
       <div class="members-crew-activities">
         ${actsHtml}
-        <div class="crew-act-more"><button type="button" onclick="history.replaceState(null,'','#content');switchPage('content')">컨텐츠 더보기 →</button></div>
       </div>
     </div>
     ${renderVideoStrips('천타버스', 'CHUNTAVERSE.webp', 1300)}

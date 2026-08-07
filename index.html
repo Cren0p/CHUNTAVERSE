@@ -363,7 +363,6 @@
     align-items: center; gap: 6px; padding: 3px 0; font-size: 12px;
   }
   .rk-ev.no-group .rk-row { grid-template-columns: 28px 60px 1fr 1fr 1.1fr; }
-  .rk-ev.no-group .rk-msg { grid-column: 3 / -1; }
   .rk-av { width: 28px; height: 28px; object-fit: cover; }
   .rk-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* 댓글 바로가기: 행 전체가 링크. 호버 표시는 글씨색이 아니라 민트 테두리(2026-08-05 Crenop) —
@@ -417,7 +416,6 @@
      컷값을 흰색으로 두면 위아래 좋아요 숫자와 같은 축이 되어 바로 비교된다(이 행의 본래 목적).
      컷 행에서 색이 들어가는 두 번째 자리는 경계선이 맡는다 — 멤버 행의 컷차이에 대응. */
   .rk-cut-row .rk-rank { color: var(--rk-cut); }
-  .rk-msg { grid-column: 3 / -1; text-align: left; color: var(--muted); font-size: 11px; }   /* 미확인 행: 숫자 열을 합쳐 문구 한 칸으로 */
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }
   .rk-note { font-size: 11px; color: var(--muted); padding: 4px 0 0; }
@@ -3436,12 +3434,12 @@ async function loadLikeRanking() {
 
 function renderRankEvent(ev) {
   // ★ 사이트 고유 멤버 순서가 아니라 좋아요 순으로 정렬 — 순위표에서 의미 있는 배열은 성적순이다.
-  //   값이 없는 항목(미확인)은 뒤로 몰아 숫자 흐름이 끊기지 않게 한다.
+  //   (워커가 이미 좋아요 순으로 내려주지만, 순서를 응답에 의존하지 않는다.)
   const sorted = [...(ev.members || [])].sort((a, b) => (b.like ?? -1) - (a.like ?? -1));
   const grouped = ev.grouped !== false;   // 시트 D열(전형규칙)이 비면 전형 열 자체를 그리지 않는다
   // 컷을 '행'으로 끼워 넣는다. 우리 멤버가 속한 전형만 — 신입처럼 아무도 없는 전형은 자리를 차지할 이유가 없다.
   // 위치는 그 컷 값이 좋아요 내림차순에서 놓일 자리. 같은 값이면 멤버가 먼저(컷과 동점이면 통과이므로 컷 위에 있어야 한다).
-  const usedGroups = new Set(sorted.filter(m => m.status === 'ok').map(m => m.group));
+  const usedGroups = new Set(sorted.map(m => m.group));
   const cutRows = (ev.groups || [])
     .filter(g => g.cut !== null && usedGroups.has(g.name))
     .map(g => ({ _cut: true, group: g.name, cut: g.cut, like: g.cut }));
@@ -3459,10 +3457,9 @@ function renderRankEvent(ev) {
     const mem = findMember(m.member_id);
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '<span></span>';
     const nm = `<span class="rk-name" style="color:${mem ? mem.color : '#fff'}">${escapeHtml(m.name)}</span>`;
-    if (m.status !== 'ok') {
-      const msg = m.status === 'unknown-name' ? '시트 이름 확인 필요' : '댓글 미확인';
-      return `<div class="rk-row">${av}${nm}<span class="rk-msg">${msg}</span></div>`;
-    }
+    // [상태 분기 제거 · 2026-08-07] '시트 이름 확인 필요'·'댓글 미확인' 두 줄이 있던 자리.
+    //   워커가 시트 F열이 아니라 실제 댓글에서 멤버를 찾게 바뀌어(computeLikeRanking) 두 상태가 발생하지 않는다
+    //   — 목록에 있다는 것 자체가 댓글이 있다는 뜻이다. 미신청 멤버는 아예 행이 안 생긴다.
     // 안정/탈락은 행 단위 클래스로 — 순위와 컷이 같은 의미색을 공유해야 한 눈에 읽힌다
     const zone = m.gap === null ? '' : (m.gap >= 0 ? ' in' : ' out');
     const gap = m.gap === null ? '' : `컷 ${m.gap >= 0 ? '+' : ''}${m.gap.toLocaleString()}`;

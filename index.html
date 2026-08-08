@@ -1524,10 +1524,10 @@
      자리는 항상 확보해 높이 고정. 간격은 스샷 피드백으로 축소 — 빈 설명 줄이 여백으로 읽혀 위가 넓어 '보이는' 착시가 있어
      하단 여백은 상단(16+4)보다 살짝 좁게 잡는다. */
   .chem-desc {
-    min-height: 16px; margin-bottom: 4px;
-    font-size: 11px; color: var(--muted);
-    text-align: center; line-height: 1.5;
-    overflow: hidden;
+    height: 16px; line-height: 16px; margin-bottom: 2px;   /* 높이 완전 고정 — min-height+line-height 1.5 조합이 글이 들어오는 순간 16→16.5px로 자라 아래 카드를 밀던 버그(2026-08-08 스샷) */
+    font-size: 11px; color: var(--text); opacity: 0.85;    /* 잠깐 뜨는 글이라 가독성 우선 — 흐린 회색은 상시 노출용 톤 */
+    text-align: center; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis;          /* 긴 설명은 줄바꿈 대신 말줄임 — 두 줄이 되면 높이 고정이 깨진다 */
   }
   .chem-pad { height: 16px; }
   /* 링크 아이콘(2026-08-08 재수정): 배치 흐름 밖(absolute) — 정렬은 아이콘 없는 텍스트 기준으로 잡히고,

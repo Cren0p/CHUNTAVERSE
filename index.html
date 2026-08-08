@@ -7068,18 +7068,22 @@ function renderChemistry() {
       // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 링크로 안 만들어짐)
     });
 
-    // ── 카드 높이 고정(명전 방식 실측, 2026-08-08) ──
-    // 꺼짐·켬 두 상태를 실제로 재서 '카드 종류별' 최댓값을 공통 min-height로 — 토글해도, 같은 종류끼리도 크기가 같다.
-    // 종류 = 2인 카드 / N인 그룹 카드(멤버 수별). 전 카드 단일 통일은 7인 그룹 높이에 2인 카드까지 끌려가므로 종류별로 묶는다.
+    // ── 카드 높이 고정(명전 방식 실측, 2026-08-09 개정) ──
+    // 이름 영역은 '전 카드 공통' 최대(꺼짐·켬 중 큰 쪽), 몸통(멤버 줄)은 '카드 종류별' 최대를 확보 —
+    // 높이 차이가 시트의 항목 수 우연이 아니라 멤버 줄 수(구조)로만 남는다. 시트에 항목이 늘면 전 카드가 함께 자란다.
+    // 종류 = 2인 카드 / N인 그룹 카드(멤버 수별). (구: 종류별 '총높이' 최대 — 다항목 케미가 있는 종류만 커져 종류 간 단차)
     const cards = [...grid.querySelectorAll('.chem-card')];
     if (cards.length) {
       const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
+      const headOf = c => { const h = c.querySelector('.chem-head'); return h ? h.offsetHeight : 0; };
       const wasOn = grid.classList.contains('chem-show-desc');
-      grid.classList.remove('chem-show-desc'); const hOff = cards.map(c => c.offsetHeight);
-      grid.classList.add('chem-show-desc');    const hOn = cards.map(c => c.offsetHeight);
+      grid.classList.remove('chem-show-desc'); const hOff = cards.map(c => c.offsetHeight); const headOff = cards.map(headOf);
+      grid.classList.add('chem-show-desc');    const hOn = cards.map(c => c.offsetHeight);  const headOn = cards.map(headOf);
       grid.classList.toggle('chem-show-desc', wasOn);
-      const maxByKind = {};
-      cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i], hOn[i]); });
+      const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
+      const maxByKind = {};   // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
+      cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
+      Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
       cards.forEach(c => { c.style.minHeight = maxByKind[kindOf(c)] + 'px'; });
     }
   }

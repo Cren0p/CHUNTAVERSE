@@ -891,14 +891,11 @@
     gap: 6px;
     padding: 8px 14px;
     border-bottom: 1px solid var(--border);
-  }
-  .timeline-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    padding: 8px 14px;
-    border-top: 1px solid var(--border);
+    flex-wrap: wrap;   /* 좁은 폰: 맨 위로 추가로 4버튼이 한 줄 ~410px 필요 — 안 들어가면 우측 묶음이 다음 줄로 */
+    /* sticky(2026-08-09): 이벤트가 최대 1000건이라 중간에서도 조작 가능해야 함 — 모두 읽음·맨 위/아래·정렬이
+       스크롤 내내 상단에 붙는다. 하단바는 이걸로 완전 중복이 되어 제거(맨 위로 버튼은 이리로 이사). */
+    position: sticky; top: 0; z-index: 3;
+    background: var(--surface);
   }
   .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 6px; }
   .timeline-scroll-btn {
@@ -1494,15 +1491,13 @@
     flex: 1; min-width: 0;
   }
   @media (max-width: 900px) { .chem-filter-members { grid-template-columns: repeat(7, calc((100% - 36px) / 7)); } }   /* 모바일 strip: 7열(13명=7+6, 이벤트 필터와 동일 — 2026-08-02) — calc 고정(1fr 배율 라운딩 차단). gap 6px×6=36px */
+  /* 그리드 = 섹션(라벨+카드 묶음) 세로 스택(2026-08-09 재구성: sticky 라벨을 위해 2인·모두 포함도 N인과 같은
+     섹션 상자 구조로 통일). 카드 열수는 각 섹션 안의 .chem-group-grid가 컨테이너 쿼리로 판단한다. */
   .chem-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr;
     gap: 12px;
   }
-  /* 콘텐츠 칸 실제 폭 기준 — 필터 사이드바(280px) 제외분에 맞춰 줄어듦. 콘텐츠 최대폭이 ~1050px(1400-280-gap)라 4열은 가장 넓을 때만 */
-  @container (max-width: 1000px) { .chem-grid { grid-template-columns: repeat(3, 1fr); } }
-  @container (max-width: 700px) { .chem-grid { grid-template-columns: repeat(2, 1fr); } }
-  @container (max-width: 480px) { .chem-grid { grid-template-columns: 1fr; } }
   .chem-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1527,12 +1522,11 @@
   /* 설명 보기 토글 ON: 좌열 케미명·우열 설명 세로 나열(2026-08-08 확정, 명전 2·3위 토글 방식 이식).
      이름 우측정렬·설명 좌측정렬로 짝을 붙인다. 설명은 한 줄 말줄임(두 줄이 되면 카드 높이가 행마다 출렁임).
      카드 높이는 아래 renderChemistry 끝의 실측(꺼짐·켬 최대)으로 종류별 고정 — 토글해도 크기 불변, 내용은 flex 중앙. */
-  /* 토글 묶음(라벨+스위치): 단독 줄이 아니라 첫 섹션 라벨('모두 포함' 또는 '2인 케미') 줄 우측에 인라인 배치 */
-  .chem-bar { display: flex; align-items: center; gap: 8px; }
-  /* 토글이 든 첫 섹션 헤더: 라벨 좌·토글 우 한 줄(명전 .hall-bar와 동일 구도).
-     제목의 margin-bottom(12px)은 flex 행 안에서 세로 중앙을 틀어지게 하므로 컨테이너 margin으로 옮긴다(간격 총량 동일) */
-  .chem-sec-flex { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-  .chem-sec-flex .chem-group-title { margin-bottom: 0; }
+  /* 설명 보기 토글(2026-08-09): 라벨과 분리된 단일 sticky 오버레이 — 스크롤 내내 상단 우측에 고정.
+     height:0이라 흐름을 밀지 않고 그리드 첫 줄에 겹친다 → 안 스크롤한 상태에선 첫 라벨 좌·토글 우 한 줄로 보이고,
+     스크롤하면 아래 sticky 라벨이 교대로 붙는 동안 토글만 그 자리에 남는다. z-index는 라벨(3)보다 위. */
+  .chem-toggle-sticky { position: sticky; top: 0; z-index: 4; height: 0; display: flex; justify-content: flex-end; }
+  .chem-bar { display: flex; align-items: center; gap: 8px; padding-top: 2px; }
   /* 이름 영역(명전 메커니즘 그대로, 2026-08-08 재수정): 꺼짐(가로)·켬(2열) 두 변형을 함께 렌더해두고
      클래스(.chem-show-desc)로 전환 — 재렌더 없이 즉시 토글. 카드 높이는 렌더 뒤 두 상태를 '실측'해
      종류별 최댓값을 공통 min-height로 고정(renderChemistry 끝) — 본문 덩어리는 토글 따라 자연 이동, 카드 크기만 불변. */
@@ -1540,17 +1534,28 @@
   /* 켬 2열은 .chem-name 밖(형제)이라 폰트를 따로 명시해야 한다 — 빠뜨리면 body 기본(16px·400)으로 커지고 얇아짐 */
   .chem-nlist { display: none; font-size: 13px; font-weight: 700; color: var(--text); }
   .chem-grid.chem-show-desc .chem-head .chem-name:not(.chem-name-fallback) { display: none; }
-  /* ON 2열: 카드 중앙 블록(inline-grid) — 좌열 이름 우측정렬·우열 설명 좌측정렬로 짝을 붙인다.
+  /* ON 3열: 카드 중앙 블록(inline-grid) — [이름(우측정렬)] [아이콘 전용 칸] [설명(좌측정렬)].
+     아이콘을 별도 칸으로 빼서 이름 텍스트 오른끝이 전부 같은 선에 맞는다(이름 뒤 인라인이던 2026-08-08 방식은
+     아이콘 있는 이름만 왼쪽으로 밀려 정렬이 어긋났음). 아이콘 없는 행은 빈 칸이 폭만 유지.
      행높이·줄높이 19px 통일: 아이콘 유무로 줄간격이 흔들리지 않게. */
-  .chem-grid.chem-show-desc .chem-nlist { display: inline-grid; grid-template-columns: auto auto; grid-auto-rows: 19px; gap: 3px 8px; align-items: center; }
+  .chem-grid.chem-show-desc .chem-nlist { display: inline-grid; grid-template-columns: auto auto auto; grid-auto-rows: 19px; gap: 3px 6px; align-items: center; }
   .chem-nlist .chem-name-part { justify-self: end; text-align: right; white-space: nowrap; line-height: 19px; }
+  /* 행 래퍼(display:contents): 상자를 안 만들어 3칸이 그대로 grid에 배치되면서, 클릭·:hover는 행 전체가 한 덩어리로
+     먹는다(이름·아이콘·설명 어디에 올려도 반응). 상자가 없으니 cursor·opacity는 자식에 건다. */
+  .chem-nrow { display: contents; }
+  .chem-nrow.has-link > * { cursor: pointer; }
+  .chem-nrow.dim > * { opacity: 0.35; }
+  .chem-nicon { color: var(--muted); transition: color 0.12s; justify-self: start; }
+  .chem-nicon svg { width: 12px; height: 12px; display: block; }
+  .chem-nrow.has-link:hover .chem-name-part, .chem-nrow.has-link:hover .chem-nicon,
+  .chem-nrow.hl .chem-name-part, .chem-nrow.hl .chem-nicon { color: var(--accent); }
   .chem-ndesc {
     font-size: 11px; font-weight: 400; line-height: 19px; color: var(--text); opacity: 0.85;   /* 400 명시: 부모 .chem-nlist의 700 상속 차단 */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
   }
   /* 링크 아이콘(2026-08-08 확정): 이름 뒤 인라인 상시 표시 — 클릭 동작의 존재를 토글과 무관하게 알린다.
      구분자(·)는 별개의 것으로 그대로 유지(아이콘을 구분자로 쓰면 어느 이름 것인지 모호해진다). */
-  .chem-name-link { display: inline-block; margin-left: 3px; color: var(--muted); vertical-align: -1px; transition: color 0.12s; }
+  .chem-name-link { display: inline-block; line-height: 0; margin-left: 3px; color: var(--muted); vertical-align: -1px; transition: color 0.12s; }   /* line-height:0 — 상자를 svg 12px로 잠가 줄높이(19px)를 못 키우게. 빠뜨리면 상자가 19px가 되어 아이콘 있는 카드만 꺼짐 제목이 1~2px 커지고 토글 시 하단 사진이 움직인다 */
   .chem-name-link svg { width: 12px; height: 12px; }
   .chem-name-part.has-link:hover .chem-name-link, .chem-name-part.hl .chem-name-link { color: var(--accent); }
   /* 연관 케미 도착 강조: 민트 테두리 잠깐 — transition으로 자연 소멸(제거 시 원색 복귀) */
@@ -1609,7 +1614,13 @@
     font-weight: 700;
     color: var(--muted);
     letter-spacing: 1px;
-    margin-bottom: 12px;
+    /* sticky(2026-08-09): 스크롤 시 현재 섹션 라벨이 상단에 붙고, 다음 섹션 라벨이 올라오면 밀어내며 교체 —
+       "2인 케미 구간을 지나 3인 구간이 되면 라벨이 3인 케미로 바뀌는" 동작이 CSS만으로 나온다.
+       라벨이 카드 묶음(.chem-group-grid)과 같은 섹션 상자 안에 있어야 붙을 구간이 생긴다(renderChemistry의 secBlock).
+       기존 margin-bottom 12px는 padding으로 전환 — 마진은 배경 밖이라 붙었을 때 그 틈으로 카드가 비친다. */
+    position: sticky; top: 0; z-index: 3;
+    background: var(--bg);
+    margin-bottom: 0; padding: 4px 0 12px;
   }
   /* 트랙 헤더(모두 포함·일부 포함): 하위 섹션 라벨(2인/3인 케미)보다 위계 ↑ — 더 크고 밝게 + 민트 바 */
   .chem-track-title {
@@ -1632,9 +1643,12 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
   }
-  @media (max-width: 1100px) { .chem-group-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 800px) { .chem-group-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .chem-group-grid { grid-template-columns: 1fr; } }
+  /* 열수는 콘텐츠 칸 실제 폭 기준(컨테이너 쿼리) — 필터 사이드바(280px) 제외분에 맞춰 줄어듦. 콘텐츠 최대폭이
+     ~1050px(1400-280-gap)라 4열은 가장 넓을 때만. (구: 뷰포트 @media 1100/800/500 — 사이드바 폭을 무시해
+     .chem-grid의 컨테이너 쿼리와 기준이 갈렸음. 2026-08-09 전 섹션 통일하며 컨테이너 쿼리로 일원화) */
+  @container (max-width: 1000px) { .chem-group-grid { grid-template-columns: repeat(3, 1fr); } }
+  @container (max-width: 700px) { .chem-group-grid { grid-template-columns: repeat(2, 1fr); } }
+  @container (max-width: 480px) { .chem-group-grid { grid-template-columns: 1fr; } }
   .chem-group-members {
     display: flex;
     align-items: center;
@@ -4988,8 +5002,9 @@ function applyFilter() {
   const scrollUpSvg = SVG_ICONS.chevronsUp;
   const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync">${arrowSvg}<span>${sortLabel}</span></button>`;
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
-  const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div></div>`;
-  const footerHtml = `<div class="timeline-footer"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button>${sortBtnHtml}</div></div>`;
+  // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
+  // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
+  const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div></div>`;
   if (filtered.length === 0) {
     tl.innerHTML = headerHtml + (allEvents.length === 0
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없어요<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
@@ -5001,7 +5016,7 @@ function applyFilter() {
     // 채팅류는 채널 단위 묶음으로 변환 후 앵커 시각으로 정렬. sorted는 renderEvent의 종료 제목·⏱ 경과 조회용 원본 유지.
     const items = buildTimelineItems(filtered, allEvents);
     items.sort((a, b) => timelineOrderCompare(a, b, eventSortAsc));   // 동시각 동률: 리방 종료·시작 순서 교정
-    tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('') + footerHtml;
+    tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('');
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
     btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
@@ -6817,25 +6832,30 @@ function renderChemistry() {
   for (const arr of Object.values(CHEM_NAMES)) arr.forEach(e => allEntryNames.add(e.name));
   CHEM_GROUPS.forEach(g => g.entries.forEach(e => allEntryNames.add(e.name)));
 
-  // 이름 영역(2026-08-08 확정): 설명은 상단 '설명 보기' 토글 소관 — OFF는 케미명 가로 나열·가운데 정렬(구분자 ·),
-  // ON은 좌열 케미명(우측 정렬)·우열 설명(좌측 정렬) 세로 나열, 전부 동시 표시(오버 전환 불필요).
+  // 이름 영역(2026-08-09 개정): 설명은 상단 '설명 보기' 토글 소관 — OFF는 케미명 가로 나열·가운데 정렬(구분자 ·, 아이콘은 이름 뒤 인라인),
+  // ON은 [이름(우측정렬)] [아이콘 칸] [설명(좌측정렬)] 3열 — 아이콘을 칸으로 빼 이름 끝선을 맞춘다. 행 전체(이름·아이콘·설명)가 클릭·오버 대상.
   // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink)·실존 케미명이면 연관 케미(link), 오타는 링크 강등.
-  // 아이콘은 이름 뒤 인라인 상시 표시(클릭 가능 표시). 종류 필터 밖 이름·설명은 흐림.
-  const partSpan = (e) => {
-    const active = e.types.some(t => chemFilterTypes.has(t));
+  const linkInfo = (e) => {
     const isUrl = /^https?:\/\//i.test(e.clip);
     const isRef = !isUrl && !!e.clip && allEntryNames.has(e.clip);
-    const link = (isUrl || isRef) ? e.clip : '';
+    return { isUrl, link: (isUrl || isRef) ? e.clip : '' };
+  };
+  const partSpan = (e) => {   // OFF 가로 나열용 조각(아이콘 인라인)
+    const active = e.types.some(t => chemFilterTypes.has(t));
+    const { isUrl, link } = linkInfo(e);
     const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
     return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };
+  };
+  const rowHtml = (e) => {   // ON 3열용 행 — 래퍼(display:contents)가 데이터·클릭·오버를 행 단위로 담당
+    const active = e.types.some(t => chemFilterTypes.has(t));
+    const { isUrl, link } = linkInfo(e);
+    const ico = link ? `<span class="chem-nicon">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '<span class="chem-nicon"></span>';
+    return `<span class="chem-nrow${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}"><span class="chem-name-part">${escapeHtml(e.name)}</span>${ico}<span class="chem-ndesc">${escapeHtml(e.desc)}</span></span>`;
   };
   const nameRowHtml = (entries) => {
     if (!entries) return null;
     const nameLine = `<div class="chem-name">${entries.map(e => partSpan(e).html).join('<span class="chem-name-sep"> · </span>')}</div>`;
-    const rows = entries.map(e => {
-      const sp = partSpan(e);
-      return `${sp.html}<span class="chem-ndesc${sp.active ? '' : ' dim'}">${escapeHtml(e.desc)}</span>`;
-    }).join('');
+    const rows = entries.map(rowHtml).join('');
     return nameLine + `<div class="chem-nlist">${rows}</div>`;   // 두 변형 공존 — 표시는 클래스가 결정
   };
 
@@ -6874,12 +6894,14 @@ function renderChemistry() {
     return `<div class="chem-card"><div class="chem-head">${nameRowHtml(g.entries) || ''}</div><div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div></div>`;
   };
 
-  // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)
-  // extra: 우측에 끼울 HTML(설명 보기 토글) — 있으면 라벨 좌·토글 우 한 줄(.chem-sec-flex, 명전 .hall-bar 구도)
-  const sec = (label, firstNoBorder, isTrack, extra) =>
-    `<div class="chem-group-section${extra ? ' chem-sec-flex' : ''}"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div>${extra || ''}</div>`;
-  // 설명 보기 토글(명전 2·3위 토글과 동일 부품): 단독 줄이 아니라 화면 첫 섹션 라벨과 같은 줄 우측에 배치.
-  // 첫 섹션 = 상단 트랙이 뜨면 '모두 포함', 아니면 '2인 케미' — 아래 topHtml/botHtml에서 그 한 곳에만 넣는다.
+  // 섹션 조립(2026-08-09 통일): secBlock = 라벨 + 카드 묶음(.chem-group-grid)을 한 상자에 — 라벨 sticky가 붙을 구간.
+  // sec = 카드 없는 우산 라벨('일부 포함') 전용 — 붙을 구간이 없어 sticky 실질 미발동(구분선 역할만).
+  const sec = (label, firstNoBorder, isTrack) =>
+    `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div></div>`;
+  const secBlock = (label, cardsHtml, firstNoBorder, isTrack) =>
+    `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div><div class="chem-group-grid">${cardsHtml}</div></div>`;
+  // 설명 보기 토글(명전 2·3위 토글과 동일 부품): 라벨과 분리된 단일 sticky 오버레이(.chem-toggle-sticky)에 담겨
+  // 스크롤 내내 상단 우측에 남는다 — 어느 섹션 라벨이 붙어 있든 그 줄 오른쪽에 토글이 보인다.
   const descBar = `<div class="chem-bar"><span class="hall-bar-label">설명 보기</span><button class="notify-switch ${chemShowDesc ? 'on' : ''}" id="chemDescToggle" type="button" aria-label="설명 보기"></button></div>`;
 
   // 상단 트랙(모두 포함)은 2~12명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
@@ -6899,7 +6921,7 @@ function renderChemistry() {
     const matchedBody = matched.length > 0
       ? matched.map(x => x.html).join('')
       : '<div class="chem-empty">조건에 맞는 케미가 없어요</div>';
-    topHtml = sec('모두 포함', true, true, descBar) + matchedBody;
+    topHtml = secBlock('모두 포함', matchedBody, true, true);
   }
 
   // ── 하단: 일부 포함 — 기존 OR 결과(상단에 올라간 카드는 제외). 우산 라벨은 상단이 떴을 때만. ──
@@ -6911,13 +6933,12 @@ function renderChemistry() {
       .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)) && !excluded(g.members) && typeMatch(groupTypes(g)))
       .sort((a, b) => groupChatTotal(b) - groupChatTotal(a));   // 2인 케미와 동일하게 주고받은 채팅 합 내림차순
     if (groups.length === 0) return '';
-    return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groups.map(groupCardHtml).join('')}</div></div>`;
+    return secBlock(`${n}인 케미`, groups.map(groupCardHtml).join(''), false, false);
   }).join('');
 
   let botHtml = '';
   if (topActive) botHtml += sec('일부 포함', false, true);   // 우산 라벨(상단과 구분하는 트랙 구분선)
-  botHtml += sec('2인 케미', true, false, topActive ? '' : descBar);   // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거. 토글은 화면 첫 헤더에만
-  botHtml += (botPairCards.length > 0 ? botPairCards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>');
+  botHtml += secBlock('2인 케미', botPairCards.length > 0 ? botPairCards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>', true, false);   // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거
   botHtml += botGroupSections;
 
   const allOn = chemFilterMembers.size === MEMBERS.length;
@@ -6940,6 +6961,7 @@ function renderChemistry() {
 
   body.innerHTML = `
     <div class="chem-content">
+      <div class="chem-toggle-sticky">${descBar}</div>
       <div class="chem-grid${chemShowDesc ? ' chem-show-desc' : ''}">
         ${topHtml}
         ${botHtml}
@@ -7001,22 +7023,26 @@ function renderChemistry() {
 
   // ── 케미명 클릭 = 링크 이동'만'(2026-08-08 확정) ──
   // 설명 표시는 상단 '설명 보기' 토글이 전담한다(오버 공개·클릭 고정 전부 폐지, PC·모바일 동일 규칙).
-  // 링크 있는 이름(.has-link) 클릭: 외부 URL은 새 탭, 케미명 참조는 그 카드로 즉시 점프 + 민트 플래시 + 이름 강조.
+  // 클릭 대상: OFF는 링크 있는 이름(.chem-name-part.has-link), ON은 행 전체(.chem-nrow.has-link — 이름·아이콘·설명 어디든).
+  // 외부 URL은 새 탭, 케미명 참조는 그 카드로 즉시 점프 + 민트 플래시 + 이름 강조.
   const grid = body.querySelector('.chem-grid');
   if (grid) {
     grid.addEventListener('click', e => {
-      const part = e.target.closest('.chem-name-part.has-link');
+      const part = e.target.closest('.chem-name-part.has-link') || e.target.closest('.chem-nrow.has-link');
       if (!part) return;
       const clip = part.dataset.clip || '';
       if (/^https?:\/\//i.test(clip)) { window.open(clip, '_blank', 'noopener'); return; }
-      const target = [...grid.querySelectorAll('.chem-name-part')].find(x => x.dataset.cname === clip && x !== part);
-      if (target) {
-        const tcard = target.closest('.chem-card');
+      // 같은 케미명은 꺼짐 이름·켬 행 두 변형으로 존재 — 대상 카드를 찾은 뒤 그 카드 안 변형 전부에 강조를 걸어야
+      // 어느 토글 상태에서도 보이는 쪽이 강조된다(과거엔 첫 매치=꺼짐 변형에만 걸려 켬 상태에선 강조가 안 보였음)
+      const targets = [...grid.querySelectorAll('[data-cname]')].filter(x => x.dataset.cname === clip && x !== part);
+      if (targets.length) {
+        const tcard = targets[0].closest('.chem-card');
         if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일
         tcard.classList.remove('chem-flash'); void tcard.offsetWidth;          // 연타 시 강조 재시작
         tcard.classList.add('chem-flash');
-        target.classList.add('hl');   // 어느 이름으로 왔는지 표시 — 설명 강제 표시는 안 함(설명은 토글 소관)
-        setTimeout(() => { tcard.classList.remove('chem-flash'); target.classList.remove('hl'); }, 1400);
+        const marks = targets.filter(x => tcard.contains(x));
+        marks.forEach(x => x.classList.add('hl'));   // 어느 이름으로 왔는지 표시 — 설명 강제 표시는 안 함(설명은 토글 소관)
+        setTimeout(() => { tcard.classList.remove('chem-flash'); marks.forEach(x => x.classList.remove('hl')); }, 1400);
       }
       // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 링크로 안 만들어짐)
     });

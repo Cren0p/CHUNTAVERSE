@@ -1509,38 +1509,36 @@
     padding: 14px;
   }
   .chem-name {
-    font-size: 13px; font-weight: 700;
-    text-align: center; margin-bottom: 10px;
+    font-size: 13px; font-weight: 700; line-height: 19px;
+    text-align: center;
     color: var(--text);
   }
   /* 케미명 조각(2026-08-08): 이름마다 오버/클릭 대상. 강조는 사이트 규약대로 민트, 종류 필터 밖 이름은 흐림 */
-  .chem-name-part { cursor: pointer; transition: color 0.12s; }
-  .chem-name-part:hover, .chem-name-part.hl { color: var(--accent); }
-  .chem-name-part.inert { cursor: default; }
-  .chem-name-part.inert:hover { color: var(--text); }   /* 보여줄 게 없는 이름은 민트 강조도 없음 */
+  /* 케미명(2026-08-08 확정 체계): 설명은 상단 '설명 보기' 토글 소관 — 오버 공개·클릭 고정 전부 폐지.
+     클릭은 링크 있는 이름(.has-link)에서만 동작하므로 그 이름만 손가락 커서·민트 오버. */
+  .chem-name-part { transition: color 0.12s; }
+  .chem-name-part.has-link { cursor: pointer; }
+  .chem-name-part.has-link:hover, .chem-name-part.hl { color: var(--accent); }
   .chem-name-part.dim { opacity: 0.35; }
-  .chem-name-sep { color: var(--muted); font-weight: 400; padding: 0 2px; transition: opacity 0.12s; }
-  /* 링크 이름 오버·고정 시 뒤따르는 구분자(·)를 숨기고 아이콘이 그 자리를 차지 — 다음 이름과의 겹침 해소(2026-08-08).
-     이름이 몇 개든 각자 자기 뒤 구분자를 쓰므로 3개 이상에서도 성립. 마지막 이름은 오른쪽이 빈 공간이라 겹칠 대상 없음. */
-  .chem-name-part.has-link:hover + .chem-name-sep,
-  .chem-name-part.has-link.hl + .chem-name-sep,
-  .chem-name-part.has-link.pin + .chem-name-sep { opacity: 0; }
-  /* 설명 줄: 케미명 위 어깨글(2026-08-08 확정 — 이름 밑은 오버 중 커서에 가리고, 카드 하단은 이름과 멀어짐).
-     자리는 항상 확보해 높이 고정. 간격은 스샷 피드백으로 축소 — 빈 설명 줄이 여백으로 읽혀 위가 넓어 '보이는' 착시가 있어
-     하단 여백은 상단(16+4)보다 살짝 좁게 잡는다. */
-  .chem-desc {
-    height: 16px; line-height: 16px; margin-bottom: 2px;   /* 높이 완전 고정 — min-height+line-height 1.5 조합이 글이 들어오는 순간 16→16.5px로 자라 아래 카드를 밀던 버그(2026-08-08 스샷) */
-    font-size: 11px; color: var(--text); opacity: 0.85;    /* 잠깐 뜨는 글이라 가독성 우선 — 흐린 회색은 상시 노출용 톤 */
-    text-align: center; overflow: hidden;
-    white-space: nowrap; text-overflow: ellipsis;          /* 긴 설명은 줄바꿈 대신 말줄임 — 두 줄이 되면 높이 고정이 깨진다 */
+  .chem-name-sep { color: var(--muted); font-weight: 400; }
+  /* 설명 보기 토글 ON: 좌열 케미명·우열 설명 세로 나열(2026-08-08 확정, 명전 2·3위 토글 방식 이식).
+     이름 우측정렬·설명 좌측정렬로 짝을 붙인다. 설명은 한 줄 말줄임(두 줄이 되면 카드 높이가 행마다 출렁임).
+     카드 높이는 동적 — 다중 이름 카드만 행 수만큼 늘어난다(대부분 1이름이라 미세). */
+  .chem-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 10px; }
+  /* 이름 영역 높이 고정(명전 방식): 가장 행이 많은 카드의 ON 높이(--chem-rows는 전체 데이터 기준)로 전 카드 공통 예약
+     — 토글·필터로 카드 크기가 절대 안 변한다. OFF의 한 줄은 영역 상단 정렬(1행 위치가 전 카드 동일). */
+  .chem-head { min-height: calc(var(--chem-rows, 1) * 19px + (var(--chem-rows, 1) - 1) * 3px); margin-bottom: 10px; }
+  .chem-nlist { display: grid; grid-template-columns: auto 1fr; grid-auto-rows: 19px; gap: 3px 8px; align-items: center; }
+  .chem-nlist .chem-name-part { justify-self: end; text-align: right; white-space: nowrap; }
+  .chem-ndesc {
+    font-size: 11px; line-height: 16px; color: var(--text); opacity: 0.85;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   }
-  .chem-pad { height: 16px; }
-  /* 링크 아이콘(2026-08-08 재수정): 배치 흐름 밖(absolute) — 정렬은 아이콘 없는 텍스트 기준으로 잡히고,
-     오버·고정 시에만 이름 오른쪽에 겹쳐 나타난다. 자리 차지가 없으니 등장해도 아무것도 안 밀린다. */
-  .chem-name-part { position: relative; }
-  .chem-name-link { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 2px; opacity: 0; transition: opacity 0.12s; pointer-events: none; }
-  .chem-name-link svg { width: 12px; height: 12px; display: block; }
-  .chem-name-part:hover .chem-name-link, .chem-name-part.hl .chem-name-link, .chem-name-part.pin .chem-name-link { opacity: 1; }
+  /* 링크 아이콘(2026-08-08 확정): 이름 뒤 인라인 상시 표시 — 클릭 동작의 존재를 토글과 무관하게 알린다.
+     구분자(·)는 별개의 것으로 그대로 유지(아이콘을 구분자로 쓰면 어느 이름 것인지 모호해진다). */
+  .chem-name-link { display: inline-block; margin-left: 3px; color: var(--muted); vertical-align: -1px; transition: color 0.12s; }
+  .chem-name-link svg { width: 12px; height: 12px; }
+  .chem-name-part.has-link:hover .chem-name-link, .chem-name-part.hl .chem-name-link { color: var(--accent); }
   /* 연관 케미 도착 강조: 민트 테두리 잠깐 — transition으로 자연 소멸(제거 시 원색 복귀) */
   .chem-card { transition: border-color 0.35s, box-shadow 0.35s; }
   .chem-card.chem-flash { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -2945,9 +2943,40 @@ function lsSetSet(key, set) {
   try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
 }
 
+// 이벤트 탭 필터 저장도 제외(_off) 방식으로 통일(2026-08-08, 케미 탭과 동일) — 켠 목록 저장은 이후 합류한
+// 멤버가 저장본에 없어 조용히 숨는 잠복 이슈가 있었다(빙밍 8/2 합류 이전 저장분 실존).
+// 1회 이관: 구 형식(켠 목록)이 있으면 제외 목록으로 변환. 단 빙밍(tleod1818)은 합류 이전 저장분일 수 있어
+// 제외로 간주하지 않는다 — 일부러 껐던 사용자는 한 번만 다시 끄면 되고, 잠복 숨김 구제가 우선.
+const LS_FILTER_MEMBERS_OFF = 'chuntaverse_filter_members_off';
+const LS_FILTER_TYPES_OFF = 'chuntaverse_filter_types_off';
+(() => {
+  try {
+    if (localStorage.getItem(LS_FILTER_MEMBERS_OFF) === null) {
+      const old = localStorage.getItem(LS_FILTER_MEMBERS);
+      if (old !== null) {
+        const a = JSON.parse(old); const inc = new Set(Array.isArray(a) ? a : []);
+        lsSetSet(LS_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => id !== 'tleod1818' && !inc.has(id))));
+      }
+    }
+    if (localStorage.getItem(LS_FILTER_TYPES_OFF) === null) {
+      const old = localStorage.getItem(LS_FILTER_TYPES);
+      if (old !== null) {
+        const a = JSON.parse(old); const inc = new Set(Array.isArray(a) ? a : []);
+        lsSetSet(LS_FILTER_TYPES_OFF, new Set(ALL_TYPE_KEYS.filter(t => !inc.has(t))));
+      }
+    }
+    localStorage.removeItem(LS_FILTER_MEMBERS); localStorage.removeItem(LS_FILTER_TYPES);
+  } catch (e) {}
+})();
+const _evMemOff = lsGetSet(LS_FILTER_MEMBERS_OFF, []);
+const _evTypeOff = lsGetSet(LS_FILTER_TYPES_OFF, []);
 const filterState = {
-  members: lsGetSet(LS_FILTER_MEMBERS, MEMBERS.map(m => m.id)),
-  types: lsGetSet(LS_FILTER_TYPES, ALL_TYPE_KEYS),
+  members: new Set(MEMBERS.map(m => m.id).filter(id => !_evMemOff.has(id))),
+  types: new Set(ALL_TYPE_KEYS.filter(t => !_evTypeOff.has(t))),
+};
+const saveEventFilters = () => {
+  lsSetSet(LS_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => !filterState.members.has(id))));
+  lsSetSet(LS_FILTER_TYPES_OFF, new Set(ALL_TYPE_KEYS.filter(t => !filterState.types.has(t))));
 };
 let allEvents = [];
 let eventSortAsc = false;
@@ -2994,7 +3023,7 @@ try {
 } catch (e) {}
 
 let chemCounts = {};
-const CHEM_TYPES = ['컨텐츠', '프로필', '기타', '미분류'];   // 필터 표시 순서(미분류는 시트가 아니라 판정으로만 존재)   // ※ 아래 필터 초기화가 참조하므로 반드시 이 위에 선언(2026-08-08 부팅 TDZ 사고 재발 방지)
+const CHEM_TYPES = ['프로필', '컨텐츠', '기타', '미분류'];   // 필터 표시 순서 = 사이드바 탭 순서(프로필→컨텐츠) 정합, 2026-08-08. 미분류는 시트가 아니라 판정으로만 존재   // ※ 아래 필터 초기화가 참조하므로 반드시 이 위에 선언(부팅 TDZ 사고 재발 방지)
 // 케미탭 필터 저장(2026-08-08): 이벤트 탭과 달리 '꺼둔 것(제외)'을 저장한다 — 켠 목록을 저장하면
 // 저장 이후 합류한 새 멤버가 목록에 없어 조용히 숨는 잠복 이슈가 생긴다(이벤트 탭에 실존, 빙밍 합류 전 저장분).
 // 제외 목록은 새 멤버·새 종류가 자동으로 켜진 채 시작한다. 탈퇴 멤버의 잔재 id는 무시되므로 무해.
@@ -3004,6 +3033,7 @@ const _chemMemOff = lsGetSet(LS_CHEM_FILTER_MEMBERS_OFF, []);
 const _chemTypeOff = lsGetSet(LS_CHEM_FILTER_TYPES_OFF, []);
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id).filter(id => !_chemMemOff.has(id)));
 let chemFilterTypes = new Set(CHEM_TYPES.filter(t => !_chemTypeOff.has(t)));
+let chemShowDesc = false;   // '설명 보기' 토글(2026-08-08) — 명전 2·3위 토글과 동일하게 비저장(새로고침 시 꺼짐)
 const saveChemFilters = () => {
   lsSetSet(LS_CHEM_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => !chemFilterMembers.has(id))));
   lsSetSet(LS_CHEM_FILTER_TYPES_OFF, new Set(CHEM_TYPES.filter(t => !chemFilterTypes.has(t))));
@@ -4831,7 +4861,7 @@ function initFilterUI() {
         if (filterState.members.has(id)) filterState.members.delete(id);
         else filterState.members.add(id);
         btn.classList.toggle('on', filterState.members.has(id));
-        lsSetSet(LS_FILTER_MEMBERS, filterState.members);
+        saveEventFilters();
         updateMemberAllToggle();
         applyFilter();
       });
@@ -4843,7 +4873,7 @@ function initFilterUI() {
     mAll.addEventListener('click', () => {
       const allSelected = filterState.members.size === MEMBERS.length;
       filterState.members = allSelected ? new Set() : new Set(MEMBERS.map(m => m.id));
-      lsSetSet(LS_FILTER_MEMBERS, filterState.members);
+      saveEventFilters();
       mc.querySelectorAll('.filter-member').forEach(b => {
         b.classList.toggle('on', filterState.members.has(b.dataset.id));
       });
@@ -4872,7 +4902,7 @@ function initFilterUI() {
         if (filterState.types.has(type)) filterState.types.delete(type);
         else filterState.types.add(type);
         btn.classList.toggle('on', filterState.types.has(type));
-        lsSetSet(LS_FILTER_TYPES, filterState.types);
+        saveEventFilters();
         updateTypeAllToggle();
         applyFilter();
       });
@@ -4884,7 +4914,7 @@ function initFilterUI() {
     tAll.addEventListener('click', () => {
       const allSelected = filterState.types.size === ALL_TYPE_KEYS.length;
       filterState.types = allSelected ? new Set() : new Set(ALL_TYPE_KEYS);
-      lsSetSet(LS_FILTER_TYPES, filterState.types);
+      saveEventFilters();
       tc.querySelectorAll('.filter-type').forEach(b => {
         const t = b.dataset.type;
         if (t === 'all') return;
@@ -6768,26 +6798,36 @@ function renderChemistry() {
   const groupTypes = (g) => { const s = new Set(); g.entries.forEach(e => e.types.forEach(t => s.add(t))); return [...s]; };
   const typeMatch = (types) => types.some(t => chemFilterTypes.has(t));   // 합집합 판정 — 하나라도 켜진 종류를 가지면 카드 표시
 
+  // 카드 높이 고정(명전 방식): 이름 영역을 '가장 행이 많은 카드'의 ON 높이로 전 카드 공통 예약.
+  // 필터 조작에도 안 흔들리게 화면이 아니라 전체 데이터 기준으로 계산한다.
+  const chemMaxRows = Math.max(1, ...Object.values(CHEM_NAMES).map(a => a.length), ...CHEM_GROUPS.map(g => g.entries.length));
+
   // 연관 케미 참조 검증용 — 시트에 실존하는 케미명 전체(2026-08-08: D열에 URL 대신 케미명을 적으면 그 카드로 연결)
   const allEntryNames = new Set();
   for (const arr of Object.values(CHEM_NAMES)) arr.forEach(e => allEntryNames.add(e.name));
   CHEM_GROUPS.forEach(g => g.entries.forEach(e => allEntryNames.add(e.name)));
 
-  // 이름 줄(2026-08-08 피드백 반영): 이름마다 오버/클릭 대상. 순서는 시트 그대로, 필터는 색만 바꾼다(안 걸린 이름 흐림).
-  // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink 아이콘·새 탭), 실존 케미명이면 연관 케미(link 아이콘·그 카드로 이동).
-  // 실존하지 않는 이름(오타)은 링크로 만들지 않아 죽은 링크가 생길 수 없다. 아이콘은 상시 표시(회색→오버 시 민트).
+  // 이름 영역(2026-08-08 확정): 설명은 상단 '설명 보기' 토글 소관 — OFF는 케미명 가로 나열·가운데 정렬(구분자 ·),
+  // ON은 좌열 케미명(우측 정렬)·우열 설명(좌측 정렬) 세로 나열, 전부 동시 표시(오버 전환 불필요).
+  // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink)·실존 케미명이면 연관 케미(link), 오타는 링크 강등.
+  // 아이콘은 이름 뒤 인라인 상시 표시(클릭 가능 표시). 종류 필터 밖 이름·설명은 흐림.
+  const partSpan = (e) => {
+    const active = e.types.some(t => chemFilterTypes.has(t));
+    const isUrl = /^https?:\/\//i.test(e.clip);
+    const isRef = !isUrl && !!e.clip && allEntryNames.has(e.clip);
+    const link = (isUrl || isRef) ? e.clip : '';
+    const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
+    return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };
+  };
   const nameRowHtml = (entries) => {
     if (!entries) return null;
-    const parts = entries.map((e) => {
-      const active = e.types.some(t => chemFilterTypes.has(t));
-      const isUrl = /^https?:\/\//i.test(e.clip);
-      const isRef = !isUrl && !!e.clip && allEntryNames.has(e.clip);
-      const link = (isUrl || isRef) ? e.clip : '';
-      const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
-      const inert = !e.desc && !link;   // 설명도 링크도 없는 이름 — 오버·클릭에 반응할 이유가 없다(거짓 클릭 신호 방지)
-      return `<span class="chem-name-part${active ? '' : ' dim'}${inert ? ' inert' : ''}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>`;
-    });
-    return `<div class="chem-name">${parts.join('<span class="chem-name-sep"> · </span>')}</div>`;
+    if (chemShowDesc) {
+      return `<div class="chem-nlist">${entries.map(e => {
+        const sp = partSpan(e);
+        return `${sp.html}<span class="chem-ndesc${sp.active ? '' : ' dim'}">${escapeHtml(e.desc)}</span>`;
+      }).join('')}</div>`;
+    }
+    return `<div class="chem-name">${entries.map(e => partSpan(e).html).join('<span class="chem-name-sep"> · </span>')}</div>`;
   };
 
   // 카드 HTML 빌더 — 상단(모두 포함)·하단(일부 포함) 두 트랙이 동일 카드를 쓰도록 분리(두 경로 드리프트 방지)
@@ -6796,8 +6836,7 @@ function renderChemistry() {
     const fallback = `<div class="chem-name">${escapeHtml(p.m1.name)} × ${escapeHtml(p.m2.name)}</div>`;
     return `
     <div class="chem-card">
-      <div class="chem-desc"></div>
-      ${nameRowHtml(entries) || fallback}
+      <div class="chem-head">${nameRowHtml(entries) || fallback}</div>
       <div class="chem-body">
         <div class="chem-member">
           <img src="${p.m1.img}" alt="${escapeHtml(p.m1.name)}">
@@ -6812,7 +6851,6 @@ function renderChemistry() {
           <span class="chem-member-name" style="color:${p.m2.color}">${escapeHtml(p.m2.name)}</span>
         </div>
       </div>
-      <div class="chem-pad"></div>
     </div>
   `;
   };
@@ -6824,7 +6862,7 @@ function renderChemistry() {
     }).join('');
     const memN = g.members.length;
     const memCls = memN >= 7 ? ' large' : memN === 6 ? ' large cols3' : memN === 4 ? ' large n4' : '';
-    return `<div class="chem-card"><div class="chem-desc"></div>${nameRowHtml(g.entries) || ''}<div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div><div class="chem-pad"></div></div>`;
+    return `<div class="chem-card"><div class="chem-head">${nameRowHtml(g.entries) || ''}</div><div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div></div>`;
   };
 
   // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)
@@ -6889,7 +6927,11 @@ function renderChemistry() {
 
   body.innerHTML = `
     <div class="chem-content">
-      <div class="chem-grid">
+      <div class="chem-bar">
+        <span class="hall-bar-label">설명 보기</span>
+        <button class="notify-switch ${chemShowDesc ? 'on' : ''}" id="chemDescToggle" type="button" aria-label="설명 보기"></button>
+      </div>
+      <div class="chem-grid" style="--chem-rows:${chemMaxRows}">
         ${topHtml}
         ${botHtml}
       </div>
@@ -6940,64 +6982,29 @@ function renderChemistry() {
     saveChemFilters();
     renderChemistry();
   });
+  const descToggle = document.getElementById('chemDescToggle');
+  if (descToggle) descToggle.addEventListener('click', () => { chemShowDesc = !chemShowDesc; renderChemistry(); });
 
-  // ── 케미명 오버/클릭 → 설명 줄·링크(2026-08-08, 같은 날 피드백 반영) ──
-  // 위임 하나로 처리(카드가 많아 개별 바인딩은 낭비). 오버는 떼면 복귀, 고정(.pin)은 재렌더마다 자연 초기화.
-  // 클립 버튼은 폐지 — 오버 대상(이름)에서 버튼으로 마우스를 옮기는 순간 오버가 풀려 버튼이 사라지는 구조적 문제.
-  // 대신 케미명 자체가 링크다: 링크 있는 이름은 우측 아이콘이 오버 시 나타나고,
-  //   · 호버 기기(PC): 클릭 즉시 새 탭 이동(오버로 이미 설명을 봤으므로)
-  //   · 터치 기기: 첫 탭 = 설명 고정, 둘째 탭 = 이동(탭하면 바로 떠나버려 설명을 못 보는 문제 방지)
-  // ※ 흐린(.dim) 이름도 오버/클릭이 정상 동작한다(2026-08-08 확정 — 필터는 보는 범위를 좁힐 뿐,
-  //   화면에 있는 정보를 잠그면 불편으로 느껴진다는 실사용 판단).
-  const descFor = (part) => escapeHtml(part.dataset.desc || '');
-  const setDesc = (card, html, activePart) => {
-    const el = card.querySelector('.chem-desc');
-    if (el) el.innerHTML = html;
-    card.querySelectorAll('.chem-name-part.hl').forEach(x => x.classList.remove('hl'));
-    if (activePart) activePart.classList.add('hl');
-  };
+  // ── 케미명 클릭 = 링크 이동'만'(2026-08-08 확정) ──
+  // 설명 표시는 상단 '설명 보기' 토글이 전담한다(오버 공개·클릭 고정 전부 폐지, PC·모바일 동일 규칙).
+  // 링크 있는 이름(.has-link) 클릭: 외부 URL은 새 탭, 케미명 참조는 그 카드로 즉시 점프 + 민트 플래시 + 이름 강조.
   const grid = body.querySelector('.chem-grid');
   if (grid) {
-    grid.addEventListener('mouseover', e => {
-      const part = e.target.closest('.chem-name-part');
-      if (!part || part.classList.contains('inert')) return;
-      setDesc(part.closest('.chem-card'), descFor(part), part);
-    });
-    grid.addEventListener('mouseout', e => {
-      const part = e.target.closest('.chem-name-part');
-      if (!part || part.classList.contains('inert')) return;
-      const card = part.closest('.chem-card');
-      const pinned = card.querySelector('.chem-name-part.pin');
-      if (pinned) setDesc(card, descFor(pinned), pinned);
-      else setDesc(card, '', null);
-    });
     grid.addEventListener('click', e => {
-      const part = e.target.closest('.chem-name-part');
-      if (!part || part.classList.contains('inert')) return;
-      const card = part.closest('.chem-card');
+      const part = e.target.closest('.chem-name-part.has-link');
+      if (!part) return;
       const clip = part.dataset.clip || '';
-      // 링크 있는 이름: 호버 기기는 즉시 이동, 터치 기기는 고정된 상태에서의 탭만 이동
-      // (canHover는 핸들러 안에서 매번 계산 — 기기 전환·테스트 주입 대응, 비용 무시 가능)
-      const canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover)').matches;
-      if (clip && (canHover || part.classList.contains('pin'))) {
-        if (/^https?:\/\//i.test(clip)) { window.open(clip, '_blank', 'noopener'); return; }
-        // 연관 케미로 이동: D열에 적힌 케미명의 카드로 스크롤 + 민트 플래시 + 그 이름 강조·설명 표시
-        const target = [...grid.querySelectorAll('.chem-name-part')].find(x => x.dataset.cname === clip && x !== part);
-        if (target) {
-          const tcard = target.closest('.chem-card');
-          if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일(스크롤 애니메이션 없음, 2026-08-08)
-          tcard.classList.remove('chem-flash'); void tcard.offsetWidth;   // 연타 시 강조 재시작
-          tcard.classList.add('chem-flash');
-          setTimeout(() => tcard.classList.remove('chem-flash'), 1400);
-          setDesc(tcard, descFor(target), target);   // 도착지에 어느 이름으로 왔는지 표시(고정은 아님)
-        }
-        return;   // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 링크로 안 만들어짐)
+      if (/^https?:\/\//i.test(clip)) { window.open(clip, '_blank', 'noopener'); return; }
+      const target = [...grid.querySelectorAll('.chem-name-part')].find(x => x.dataset.cname === clip && x !== part);
+      if (target) {
+        const tcard = target.closest('.chem-card');
+        if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일
+        tcard.classList.remove('chem-flash'); void tcard.offsetWidth;          // 연타 시 강조 재시작
+        tcard.classList.add('chem-flash');
+        target.classList.add('hl');   // 어느 이름으로 왔는지 표시 — 설명 강제 표시는 안 함(설명은 토글 소관)
+        setTimeout(() => { tcard.classList.remove('chem-flash'); target.classList.remove('hl'); }, 1400);
       }
-      const wasPinned = part.classList.contains('pin');
-      card.querySelectorAll('.chem-name-part.pin').forEach(x => x.classList.remove('pin'));
-      if (wasPinned) { setDesc(card, '', null); return; }   // 같은 이름 재탭(링크 없음) → 고정 해제
-      part.classList.add('pin');
-      setDesc(card, descFor(part), part);
+      // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 링크로 안 만들어짐)
     });
   }
 }

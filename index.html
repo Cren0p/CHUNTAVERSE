@@ -900,7 +900,7 @@
     background: var(--surface);
     border-top: 1px solid var(--border);
   }
-  .timeline-header::before { content: ''; position: absolute; left: -1px; right: -1px; top: -21px; height: 21px; background: var(--bg); }
+  .timeline-header::before { content: ''; position: absolute; left: -1px; right: -1px; top: -21px; height: 20px; background: var(--bg); }   /* 좌표는 패딩 박스 기준: top -21 = 테두리(1px) 위 20px 지점부터, height 20 = 테두리 직전까지. 21로 두면 border-top을 덮어 윗변이 사라진다 */
   .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 6px; }
   .timeline-scroll-btn {
     display: inline-flex;
@@ -1619,7 +1619,14 @@
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+    /* 라벨 핸드오프 연속화(2026-08-09): sticky 라벨이 붙어 있는 범위 = 이 상자의 콘텐츠 박스라서,
+       카드가 끝나면 다음 라벨이 도착하기 전에 먼저 밀려나갔다(섹션 사이 간격만큼 이른 이탈).
+       ::after 스페이서로 콘텐츠 박스를 다음 라벨 시작점까지 연장하고 margin-bottom으로 상쇄 —
+       배치는 픽셀 동일, 라벨만 들어오는 라벨에 직접 밀려나는 연속 열차가 된다.
+       49 = 그리드 gap 12 + margin-top 20 + 테두리 1 + padding-top 16. 이 값들이 바뀌면 함께 갱신. */
+    margin-bottom: -49px;
   }
+  .chem-group-section::after { content: ''; display: block; height: 49px; }
   .chem-group-title {
     font-size: 12px;
     font-weight: 700;
@@ -1634,6 +1641,7 @@
     position: sticky; top: 20px; z-index: 3;
     height: 34px; display: flex; align-items: center;
     margin-bottom: 0;
+    pointer-events: none;   /* 라벨은 블록이라 폭이 그리드 전체 — 이 투명 상자(z3)가 스트립(z2) 안 토글을 덮어 클릭을 삼킨다. 라벨은 비인터랙티브라 통과시켜도 잃는 게 없다 */
   }
   /* 트랙 헤더(모두 포함·일부 포함): 하위 섹션 라벨(2인/3인 케미)보다 위계 ↑ — 더 크고 밝게 + 민트 바 */
   .chem-track-title {

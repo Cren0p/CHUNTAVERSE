@@ -1510,8 +1510,37 @@
   }
   .chem-name {
     font-size: 13px; font-weight: 700;
-    text-align: center; margin-bottom: 12px;
+    text-align: center; margin-bottom: 2px;
     color: var(--text);
+  }
+  /* 케미명 조각(2026-08-08): 이름마다 오버/클릭 대상. 강조는 사이트 규약대로 민트, 종류 필터 밖 이름은 흐림 */
+  .chem-name-part { cursor: pointer; transition: color 0.12s; }
+  .chem-name-part:hover, .chem-name-part.hl { color: var(--accent); }
+  .chem-name-part.dim { opacity: 0.35; }
+  .chem-name-sep { color: var(--muted); font-weight: 400; }
+  /* 설명 줄: 자리는 항상 확보(빈칸) — 오버/클릭 때만 내용이 생겨도 카드 높이가 안 출렁이게 */
+  .chem-desc {
+    min-height: 17px; margin-bottom: 8px;
+    font-size: 11px; color: var(--muted);
+    text-align: center; line-height: 1.5;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    overflow: hidden;
+  }
+  .chem-desc:empty { visibility: hidden; }   /* 빈 줄도 min-height는 유지 */
+  .chem-clip-btn {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    background: rgba(97,255,236,0.08); border: 1px solid rgba(97,255,236,0.35);
+    padding: 1px 6px; text-decoration: none; flex-shrink: 0;
+  }
+  .chem-clip-btn:hover { background: rgba(97,255,236,0.16); border-color: rgba(97,255,236,0.6); }
+  .chem-clip-btn svg { width: 10px; height: 10px; }
+  /* 종류 필터(2026-08-08): 이벤트 탭 .filter-type 재사용. 3열에 2×2 + 우측 열 빈칸, 아이콘은 전부 흰색 */
+  .chem-filter-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; min-width: 0; }
+  .chem-filter-types .filter-type .filter-icon { color: var(--text); }
+  @media (max-width: 900px) {
+    .chem-filter-types { grid-template-columns: repeat(7, calc((100% - 36px) / 7)); }   /* 멤버 strip과 버튼 크기 통일 */
+    .chem-filter-types .chem-type-spacer { display: none; }   /* 한 줄 전환 시 빈칸 없이 4개 연속 */
   }
   .chem-body {
     display: flex; align-items: center;
@@ -1967,8 +1996,10 @@
     position: absolute; top: calc((200px * 9 / 16 - 60px) / 2);
     width: 22px; height: 60px;
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
-    font-size: 16px; line-height: 1; cursor: pointer; padding: 0;
+    cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;   /* 텍스트 ‹›→SVG 전환(2026-08-08)에 맞춘 중앙 정렬 */
   }
+  .vs-arrow svg { width: 15px; height: 15px; }
   .vs-arrow[hidden] { display: none; }
   .vs-prev { left: -22px; }
   .vs-next { right: -22px; }
@@ -2230,6 +2261,7 @@
 <mask id="mich"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/><path d="M12 14 C 10.2 12.2, 8 10.8, 8 9 C 8 7.7, 9 7, 10 7 C 10.9 7, 11.6 7.5, 12 8.1 C 12.4 7.5, 13.1 7, 14 7 C 15 7, 16 7.7, 16 9 C 16 10.8, 13.8 12.2, 12 14 Z" fill="black"/></mask>
 <mask id="mica"><rect x="3" y="16" width="18" height="6" rx="1.5" fill="white"/><rect x="6" y="11" width="12" height="5" rx="1.5" fill="white"/><line x1="12" y1="7" x2="12" y2="11" stroke="white" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="5.5" r="1.5" fill="white"/><line x1="6.5" y1="16" x2="17.5" y2="16" stroke="black" stroke-width="1.8"/></mask>
 <mask id="mical"><rect x="0" y="0" width="24" height="24" fill="white"/><rect x="13.8" y="14.3" width="4.2" height="4.2" rx="1" fill="black"/></mask>
+<mask id="mitag"><path d="M20.6 9.4 14.6 3.4a2 2 0 0 0-2.8 0L4 11.2V20h8.8l7.8-7.8a2 2 0 0 0 0-2.8z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/><circle cx="9" cy="15" r="1.9" fill="black"/></mask>
 </defs></svg>
 
 <aside class="sidebar">
@@ -2288,7 +2320,7 @@
     <div class="page-title" id="pageTitle"></div>
     <div class="header-center" id="headerCenter"></div>
     <!-- 사용 가이드(팬카페 글) — 상단바 우측 상시 노출. 좌측 버튼들과 동일한 .page-title-link 기본(파랑) 스타일 재사용 -->
-    <a class="page-title-link" href="https://cafe.naver.com/cyhistory/185386" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg><span class="tb-t-pc">사용<br>가이드</span><span class="tb-t-mb">가이드</span></a>
+    <a class="page-title-link" href="https://cafe.naver.com/cyhistory/185386" target="_blank" rel="noopener"><span id="guideIcon"></span><span class="tb-t-pc">사용<br>가이드</span><span class="tb-t-mb">가이드</span></a>
   </div>
 
   <div class="page" id="page-members">
@@ -2772,6 +2804,14 @@ const SVG_ICONS = {
   arrowUp: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 2l9 9.5h-5V21H8v-9.5H3z"/></svg>`,
   barChart: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><rect x="3" y="11" width="5" height="10" rx="1"/><rect x="9.5" y="3" width="5" height="18" rx="1"/><rect x="16" y="13" width="5" height="8" rx="1"/></svg>`,
   chemistry: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><polyline points="16,5 20,9"/><line x1="20" y1="15" x2="4" y2="15"/><polyline points="8,19 4,15"/></svg>`,
+  tagFilled: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M20.6 9.4 14.6 3.4a2 2 0 0 0-2.8 0L4 11.2V20h8.8l7.8-7.8a2 2 0 0 0 0-2.8z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" mask="url(#mitag)"/></svg>`,
+  tagOutline: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="2.6 2.6" stroke-linejoin="round"><path d="M20.6 9.4 14.6 3.4a2 2 0 0 0-2.8 0L4 11.2V20h8.8l7.8-7.8a2 2 0 0 0 0-2.8z"/></svg>`,
+  chevronLeft: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
+  chevronRight: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  arrowLineDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 12 19"/><polyline points="5 12 12 19 19 12"/></svg>`,
+  arrowLineUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 19 12 5"/><polyline points="5 12 12 5 19 12"/></svg>`,
+  chevronsDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>`,
+  chevronsUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>`,
   film: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,3 6,21 20,12" fill="currentColor" stroke="currentColor"/></svg>`,
   flag: `<svg viewBox="-1.23 -0.67 24 24" width="16" height="16"><line x1="4" y1="2" x2="4" y2="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4h16l-3 5 3 5H4z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
   people: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2z"/></svg>`,
@@ -2946,14 +2986,19 @@ try {
 
 let chemCounts = {};
 let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
+let chemFilterTypes = new Set(['컨텐츠', '프로필', '기타', '미분류']);   // 종류 필터(2026-08-08) — 기본 전체 켜짐
 const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
 let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — 동일하면 재구축 스킵(lastTimelineSig와 동일 취지)
 
-// 케미명·그룹은 구글 시트에서 로드 (A열 케미명, B~L열 멤버 이름 — 2명 행은 쌍, 3명 이상 행은 그룹)
+// 케미명·종류·설명·클립은 구글 시트에서 로드 — 열: A케미명 B종류 C설명 D클립URL E~멤버 이름 (2026-08-08 개편, 구형은 B~가 멤버)
+// 종류 값: 컨텐츠·프로필·기타(다중은 | 구분, 빈 칸·미상 값은 기타). '미분류'는 시트에 적지 않는다 — 행이 없는 쌍을 코드가 미분류로 판정.
+// ※ 배포 순서: 시트 먼저 → 코드 배포. 구코드는 멤버를 '이름 매칭'으로 찾아 새 열(종류·설명·URL)을 그냥 지나치므로 새 시트에서도 동작한다.
+//   반대로 신코드는 E열부터만 멤버로 읽으므로 구 시트에서는 케미명이 전부 사라진다.
 const CHEM_NAME_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=574378390';
-const LS_CHEMNAME_CACHE = 'chuntaverse_chem_names_v1';
-let CHEM_NAMES = {};
-let CHEM_GROUPS = [];
+const LS_CHEMNAME_CACHE = 'chuntaverse_chem_names_v2';   // v1은 구 형식 행 캐시 — 신 파서가 읽으면 오독하므로 키를 올려 자연 폐기
+const CHEM_TYPES = ['컨텐츠', '프로필', '기타', '미분류'];   // 필터 표시 순서(미분류는 시트가 아니라 판정으로만 존재)
+let CHEM_NAMES = {};    // '아이디1:아이디2' → [{name, types[], desc, clip}] — 같은 쌍의 여러 행이 배열로 쌓임(행 순서 유지)
+let CHEM_GROUPS = [];   // [{members:[아이디...], entries:[{name, types[], desc, clip}]}]
 function applyChemNameRows(rows) {
   const names = {};
   const groups = [];
@@ -2962,22 +3007,28 @@ function applyChemNameRows(rows) {
   for (const r of (rows || [])) {
     const name = (r[0] || '').trim().replace(/\s*,\s*/g, ' · ');  // 시트엔 쉼표로 적고 표시는 사이트 규약인 가운뎃점
     if (!name || name === '케미명') continue;  // 빈 행·헤더 행 무시
-    // B열~ 멤버 칸: 현수막·컨텐츠와 동일하게 칸에 적힌 이름으로 멤버 매칭(열 위치 무관, 빈 칸·미상 이름은 스킵)
-    const ids = r.slice(1)
+    // B열 종류: | 구분 다중 허용, 유효값만 통과. 빈 칸·오타는 기타로 흘림(이름이 있는데 미분류일 수는 없음 — 미분류는 '행 없음'의 뜻)
+    const types = (r[1] || '').split('|').map(t => t.trim()).filter(t => ['컨텐츠', '프로필', '기타'].includes(t));
+    if (types.length === 0) types.push('기타');
+    const desc = (r[2] || '').trim();
+    const clip = (r[3] || '').trim();
+    // E열~ 멤버 칸: 칸에 적힌 이름으로 멤버 매칭(빈 칸·미상 이름은 스킵)
+    const ids = r.slice(4)
       .map(c => (c || '').trim())
       .filter(c => c.length > 0)
       .map(nm => (MEMBERS.find(x => x.name === nm) || {}).id)
       .filter(Boolean);
     // 쌍 키는 renderChemistry의 케미 카드 조회 키(`m1.id:m2.id`, MEMBERS 순서라 i<j)와 맞아야 하므로 MEMBERS 인덱스 순으로 정렬
     ids.sort((a, b) => memberIndex[a] - memberIndex[b]);
+    const entry = { name, types, desc, clip };
     if (ids.length === 2) {
       const k = `${ids[0]}:${ids[1]}`;
-      names[k] = names[k] ? names[k] + ' · ' + name : name;   // 같은 쌍 여러 행 → 가운뎃점 나열
+      (names[k] = names[k] || []).push(entry);   // 같은 쌍 여러 행 → 배열에 순서대로(표시는 가운뎃점 나열)
     } else if (ids.length >= 3) {
       const gkey = ids.join(':');
       const ex = groups.find(g => g.members.join(':') === gkey);
-      if (ex) ex.name += ' · ' + name;   // 같은 조합 여러 행 → 가운뎃점 나열
-      else groups.push({ members: ids, name });
+      if (ex) ex.entries.push(entry);
+      else groups.push({ members: ids, entries: [entry] });
     }
   }
   CHEM_NAMES = names;
@@ -4087,6 +4138,7 @@ if (notifyBellEl) {
     navBannerIcon: SVG_ICONS.flag,
     navHallIcon: SVG_ICONS.trophy,
     notifyBell: SVG_ICONS.bell,
+    guideIcon: SVG_ICONS.help,   // 사용 가이드 물음표 — 마크업에 path 복제본이 박혀 있던 걸 여기로 통합(2026-08-08)
   };
   for (const [id, html] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -4866,11 +4918,9 @@ function applyFilter() {
     return memberMatch;
   });
   const sortLabel = eventSortAsc ? '오래된순' : '최신순';
-  const arrowSvg = eventSortAsc
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 12 19"/><polyline points="5 12 12 19 19 12"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 19 12 5"/><polyline points="5 12 12 5 19 12"/></svg>';
-  const scrollDownSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
-  const scrollUpSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>';
+  const arrowSvg = eventSortAsc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp;   // SVG_ICONS로 통합(2026-08-08)
+  const scrollDownSvg = SVG_ICONS.chevronsDown;
+  const scrollUpSvg = SVG_ICONS.chevronsUp;
   const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync">${arrowSvg}<span>${sortLabel}</span></button>`;
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button>${sortBtnHtml}</div></div>`;
@@ -5144,8 +5194,8 @@ function periodSelectorHtml(includeAll) {
   const maxM = (year === curY) ? curM : 12;
   const minM = (year === STATS_START_YEAR) ? periodStartMonth(includeAll) : 1;
   const isAll = includeAll && statsState.periodAll;
-  const chevPrev = `<button class="stats-month-btn" data-ydir="prev" ${year <= STATS_START_YEAR ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>`;
-  const chevNext = `<button class="stats-month-btn" data-ydir="next" ${year >= curY ? 'disabled' : ''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+  const chevPrev = `<button class="stats-month-btn" data-ydir="prev" ${year <= STATS_START_YEAR ? 'disabled' : ''}>${SVG_ICONS.chevronLeft}</button>`;
+  const chevNext = `<button class="stats-month-btn" data-ydir="next" ${year >= curY ? 'disabled' : ''}>${SVG_ICONS.chevronRight}</button>`;
   const btns = [];
   if (includeAll) btns.push(`<button class="stats-period-btn${isAll ? ' active' : ''}" data-period="all">전체</button>`);
   for (let mo = 1; mo <= 12; mo++) {
@@ -5663,11 +5713,10 @@ function openStatGraphModal(memberId, metricKey) {
   if (!ov || !head || !body) return;
   ov.hidden = false;   // clientWidth 측정을 위해 먼저 표시
   syncBodyScrollLock();
-  const chevSvg = (pts) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="${pts}"/></svg>`;
   body.innerHTML = `
-    <button class="stats-month-btn sg-nav" data-dir="-1" type="button">${chevSvg('15 18 9 12 15 6')}</button>
+    <button class="stats-month-btn sg-nav" data-dir="-1" type="button">${SVG_ICONS.chevronLeft}</button>
     <div class="sg-chart"></div>
-    <button class="stats-month-btn sg-nav" data-dir="1" type="button">${chevSvg('9 18 15 12 9 6')}</button>`;
+    <button class="stats-month-btn sg-nav" data-dir="1" type="button">${SVG_ICONS.chevronRight}</button>`;
   const chart = body.querySelector('.sg-chart');
 
   // 표시 개수: 점 간격(plotW/(n-1))이 슬롯 폭 이상이 되는 최대 n. 슬롯 = 값 라벨 최악 "12,345"(6자)의
@@ -6687,14 +6736,35 @@ function renderChemistry() {
     return t;
   };
 
+  // ── 종류 판정(2026-08-08) ──
+  // 쌍의 종류 = 그 쌍에 붙은 모든 이름의 종류 합집합. 이름이 하나도 없으면 미분류(시트에 행이 없다는 뜻).
+  const pairTypes = (p) => {
+    const entries = CHEM_NAMES[`${p.m1.id}:${p.m2.id}`];
+    if (!entries) return ['미분류'];
+    const s = new Set(); entries.forEach(e => e.types.forEach(t => s.add(t)));
+    return [...s];
+  };
+  const groupTypes = (g) => { const s = new Set(); g.entries.forEach(e => e.types.forEach(t => s.add(t))); return [...s]; };
+  const typeMatch = (types) => types.some(t => chemFilterTypes.has(t));   // 합집합 판정 — 하나라도 켜진 종류를 가지면 카드 표시
+
+  // 이름 줄 + 설명 줄(2026-08-08): 이름마다 오버/클릭 대상. 순서는 시트 그대로, 필터는 색만 바꾼다(안 걸린 이름 흐림).
+  // 설명·클립은 data 속성으로 심고 위임 리스너가 .chem-desc를 채운다. 설명 줄 자리는 항상 확보(카드 높이 고정).
+  const nameRowHtml = (entries, fallback) => {
+    if (!entries) return `<div class="chem-name">${fallback}</div><div class="chem-desc"></div>`;
+    const parts = entries.map((e, i) => {
+      const active = e.types.some(t => chemFilterTypes.has(t));
+      return `<span class="chem-name-part${active ? '' : ' dim'}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(e.clip)}">${escapeHtml(e.name)}</span>`;
+    });
+    return `<div class="chem-name">${parts.join('<span class="chem-name-sep"> · </span>')}</div><div class="chem-desc"></div>`;
+  };
+
   // 카드 HTML 빌더 — 상단(모두 포함)·하단(일부 포함) 두 트랙이 동일 카드를 쓰도록 분리(두 경로 드리프트 방지)
   const pairCardHtml = (p) => {
-    const chemKey = `${p.m1.id}:${p.m2.id}`;
-    const customName = CHEM_NAMES[chemKey];
-    const displayName = customName || `${escapeHtml(p.m1.name)} × ${escapeHtml(p.m2.name)}`;
+    const entries = CHEM_NAMES[`${p.m1.id}:${p.m2.id}`];
+    const fallback = `${escapeHtml(p.m1.name)} × ${escapeHtml(p.m2.name)}`;
     return `
     <div class="chem-card">
-      <div class="chem-name">${customName ? escapeHtml(customName) : displayName}</div>
+      ${nameRowHtml(entries, fallback)}
       <div class="chem-body">
         <div class="chem-member">
           <img src="${p.m1.img}" alt="${escapeHtml(p.m1.name)}">
@@ -6720,7 +6790,7 @@ function renderChemistry() {
     }).join('');
     const memN = g.members.length;
     const memCls = memN >= 7 ? ' large' : memN === 6 ? ' large cols3' : memN === 4 ? ' large n4' : '';
-    return `<div class="chem-card"><div class="chem-name">${escapeHtml(g.name)}</div><div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div></div>`;
+    return `<div class="chem-card">${nameRowHtml(g.entries, '')}<div class="chem-body"><div class="chem-group-members${memCls}">${membersHtml}</div></div></div>`;
   };
 
   // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)
@@ -6737,8 +6807,8 @@ function renderChemistry() {
   let topHtml = '';
   if (topActive) {
     const matched = [];
-    for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id])) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
-    for (const g of CHEM_GROUPS) if (allIncluded(g.members)) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
+    for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id]) && typeMatch(pairTypes(p))) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
+    for (const g of CHEM_GROUPS) if (allIncluded(g.members) && typeMatch(groupTypes(g))) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
     matched.sort((a, b) => a.size - b.size || b.total - a.total);
     // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~12명에서만 발생
     const matchedBody = matched.length > 0
@@ -6749,11 +6819,11 @@ function renderChemistry() {
 
   // ── 하단: 일부 포함 — 기존 OR 결과(상단에 올라간 카드는 제외). 우산 라벨은 상단이 떴을 때만. ──
   const botPairCards = pairs
-    .filter(p => (chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id)) && !excluded([p.m1.id, p.m2.id]))
+    .filter(p => (chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id)) && !excluded([p.m1.id, p.m2.id]) && typeMatch(pairTypes(p)))
     .map(pairCardHtml).join('');
   const botGroupSections = [...new Set(CHEM_GROUPS.map(g => g.members.length))].sort((a, b) => a - b).map(n => {
     const groups = CHEM_GROUPS
-      .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)) && !excluded(g.members))
+      .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)) && !excluded(g.members) && typeMatch(groupTypes(g)))
       .sort((a, b) => groupChatTotal(b) - groupChatTotal(a));   // 2인 케미와 동일하게 주고받은 채팅 합 내림차순
     if (groups.length === 0) return '';
     return `<div class="chem-group-section"><div class="chem-group-title">${n}인 케미</div><div class="chem-group-grid">${groups.map(groupCardHtml).join('')}</div></div>`;
@@ -6772,6 +6842,17 @@ function renderChemistry() {
     </button>
   `).join('');
 
+  // 종류 필터 버튼(2026-08-08): 이벤트 탭 .filter-type 재사용, 아이콘 전부 흰색.
+  // 3열에 2×2 + 우측 열 spacer(이벤트 탭 evt-type-spacer와 같은 수법) — 모바일 한 줄에선 spacer가 사라져 4개 연속.
+  const typeIcon = { '컨텐츠': SVG_ICONS.film, '프로필': SVG_ICONS.people, '기타': SVG_ICONS.tagFilled, '미분류': SVG_ICONS.tagOutline };
+  const typeSpacer = '<span class="filter-type chem-type-spacer" style="visibility:hidden;pointer-events:none"></span>';
+  const typeBtns = CHEM_TYPES.map((t, i) => `
+    <button class="filter-type ${chemFilterTypes.has(t) ? 'on' : ''}" data-ctype="${t}" title="${t}">
+      <span class="filter-icon">${typeIcon[t]}</span>
+    </button>${i === 1 ? typeSpacer : ''}
+  `).join('') + typeSpacer;
+  const allTypesOn = chemFilterTypes.size === CHEM_TYPES.length;
+
   body.innerHTML = `
     <div class="chem-content">
       <div class="chem-grid">
@@ -6780,7 +6861,12 @@ function renderChemistry() {
       </div>
     </div>
     <div class="chem-filter-panel">
-      <div class="filter-title">멤버</div>
+      <div class="filter-title">종류</div>
+      <div class="filter-row">
+        <button class="filter-toggle-all" id="chemTypeToggle">${allTypesOn ? '모두 해제' : '모두 선택'}</button>
+        <div class="chem-filter-types" id="chemFilterTypes">${typeBtns}</div>
+      </div>
+      <div class="filter-title" style="margin-top:14px">멤버</div>
       <div class="filter-row">
         <button class="filter-toggle-all" id="chemFilterToggle">${allOn ? '모두 해제' : '모두 선택'}</button>
         <div class="chem-filter-members" id="chemFilterMembers">${memberBtns}</div>
@@ -6800,6 +6886,63 @@ function renderChemistry() {
     if (chemFilterMembers.size === MEMBERS.length) chemFilterMembers.clear(); else MEMBERS.forEach(m => chemFilterMembers.add(m.id));
     renderChemistry();
   });
+  body.querySelectorAll('#chemFilterTypes .filter-type[data-ctype]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.ctype;
+      if (chemFilterTypes.has(t)) chemFilterTypes.delete(t); else chemFilterTypes.add(t);
+      renderChemistry();
+    });
+  });
+  const typeToggleBtn = document.getElementById('chemTypeToggle');
+  if (typeToggleBtn) typeToggleBtn.addEventListener('click', () => {
+    if (chemFilterTypes.size === CHEM_TYPES.length) chemFilterTypes.clear(); else CHEM_TYPES.forEach(t => chemFilterTypes.add(t));
+    renderChemistry();
+  });
+
+  // ── 케미명 오버/클릭 → 설명 줄(2026-08-08) ──
+  // 위임 하나로 처리(카드가 많아 개별 바인딩은 낭비). 오버는 떼면 복귀, 클릭은 고정(.pin) — 같은 이름 재클릭이나
+  // 다른 이름 클릭으로 바뀔 때까지 유지. 고정 상태는 DOM 클래스로만 들고 있어 재렌더(필터 조작)마다 자연 초기화된다.
+  // ※ 흐린(.dim) 이름도 오버/클릭이 동작한다 — 죽일지 살릴지 미정이라 일단 살려둠. 죽이려면 아래 두 핸들러
+  //   시작부에 `if (part.classList.contains('dim')) return;` 한 줄이면 된다.
+  const descFor = (part) => {
+    const d = part.dataset.desc || '';
+    const clip = part.dataset.clip || '';
+    const clipHtml = clip ? `<a class="chem-clip-btn" href="${escapeHtml(clip)}" target="_blank" rel="noopener">${SVG_ICONS.film}클립</a>` : '';
+    return (d ? escapeHtml(d) : '') + clipHtml;
+  };
+  const setDesc = (card, html, activePart) => {
+    const el = card.querySelector('.chem-desc');
+    if (el) el.innerHTML = html;
+    card.querySelectorAll('.chem-name-part.hl').forEach(x => x.classList.remove('hl'));
+    if (activePart) activePart.classList.add('hl');
+  };
+  const grid = body.querySelector('.chem-grid');
+  if (grid) {
+    grid.addEventListener('mouseover', e => {
+      const part = e.target.closest('.chem-name-part');
+      if (!part) return;
+      setDesc(part.closest('.chem-card'), descFor(part), part);
+    });
+    grid.addEventListener('mouseout', e => {
+      const part = e.target.closest('.chem-name-part');
+      if (!part) return;
+      const card = part.closest('.chem-card');
+      const pinned = card.querySelector('.chem-name-part.pin');
+      if (pinned) setDesc(card, descFor(pinned), pinned);
+      else setDesc(card, '', null);
+    });
+    grid.addEventListener('click', e => {
+      if (e.target.closest('.chem-clip-btn')) return;   // 클립 링크는 그대로 통과
+      const part = e.target.closest('.chem-name-part');
+      if (!part) return;
+      const card = part.closest('.chem-card');
+      const wasPinned = part.classList.contains('pin');
+      card.querySelectorAll('.chem-name-part.pin').forEach(x => x.classList.remove('pin'));
+      if (wasPinned) { setDesc(card, '', null); return; }   // 같은 이름 재클릭 → 고정 해제
+      part.classList.add('pin');
+      setDesc(card, descFor(part), part);
+    });
+  }
 }
 
 // ── 명예의 전당 ── 전 항목 통산(개시 이래) 집계. 연간 경쟁은 통계 탭 연간 메달이 담당.
@@ -7247,9 +7390,9 @@ function renderVideoStrips(target, fallbackImg, maxWidth) {
     <div class="video-strip-section" style="max-width:${maxWidth}px">
       <div class="crew-act-sub">${escapeHtml(g.section)}</div>
       <div class="vs-row">
-        <button class="vs-arrow vs-prev" type="button" aria-label="이전" hidden>‹</button>
+        <button class="vs-arrow vs-prev" type="button" aria-label="이전" hidden>${SVG_ICONS.chevronLeft}</button>
         <div class="vs-scroll">${tiles(g.items)}</div>
-        <button class="vs-arrow vs-next" type="button" aria-label="다음" hidden>›</button>
+        <button class="vs-arrow vs-next" type="button" aria-label="다음" hidden>${SVG_ICONS.chevronRight}</button>
       </div>
     </div>
   `).join('');

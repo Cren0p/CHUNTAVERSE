@@ -1507,6 +1507,9 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 14px;
+    /* 내용 세로 중앙(명전 .hall-content와 동일): 높이는 아래 실측 min-height로 고정되므로
+       꺼짐(짧음)·켬(긺) 어느 상태든 본문 덩어리가 카드 정중앙에 온다 — 위 붙고 아래 비는 상태 방지 */
+    display: flex; flex-direction: column; justify-content: center;
   }
   .chem-name {
     font-size: 13px; font-weight: 700; line-height: 19px;
@@ -1523,20 +1526,26 @@
   .chem-name-sep { color: var(--muted); font-weight: 400; }
   /* 설명 보기 토글 ON: 좌열 케미명·우열 설명 세로 나열(2026-08-08 확정, 명전 2·3위 토글 방식 이식).
      이름 우측정렬·설명 좌측정렬로 짝을 붙인다. 설명은 한 줄 말줄임(두 줄이 되면 카드 높이가 행마다 출렁임).
-     카드 높이는 동적 — 다중 이름 카드만 행 수만큼 늘어난다(대부분 1이름이라 미세). */
-  .chem-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 10px; }
+     카드 높이는 아래 renderChemistry 끝의 실측(꺼짐·켬 최대)으로 종류별 고정 — 토글해도 크기 불변, 내용은 flex 중앙. */
+  /* 토글 묶음(라벨+스위치): 단독 줄이 아니라 첫 섹션 라벨('모두 포함' 또는 '2인 케미') 줄 우측에 인라인 배치 */
+  .chem-bar { display: flex; align-items: center; gap: 8px; }
+  /* 토글이 든 첫 섹션 헤더: 라벨 좌·토글 우 한 줄(명전 .hall-bar와 동일 구도).
+     제목의 margin-bottom(12px)은 flex 행 안에서 세로 중앙을 틀어지게 하므로 컨테이너 margin으로 옮긴다(간격 총량 동일) */
+  .chem-sec-flex { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .chem-sec-flex .chem-group-title { margin-bottom: 0; }
   /* 이름 영역(명전 메커니즘 그대로, 2026-08-08 재수정): 꺼짐(가로)·켬(2열) 두 변형을 함께 렌더해두고
      클래스(.chem-show-desc)로 전환 — 재렌더 없이 즉시 토글. 카드 높이는 렌더 뒤 두 상태를 '실측'해
      종류별 최댓값을 공통 min-height로 고정(renderChemistry 끝) — 본문 덩어리는 토글 따라 자연 이동, 카드 크기만 불변. */
   .chem-head { display: flex; justify-content: center; margin-bottom: 10px; }
-  .chem-nlist { display: none; }
+  /* 켬 2열은 .chem-name 밖(형제)이라 폰트를 따로 명시해야 한다 — 빠뜨리면 body 기본(16px·400)으로 커지고 얇아짐 */
+  .chem-nlist { display: none; font-size: 13px; font-weight: 700; color: var(--text); }
   .chem-grid.chem-show-desc .chem-head .chem-name:not(.chem-name-fallback) { display: none; }
   /* ON 2열: 카드 중앙 블록(inline-grid) — 좌열 이름 우측정렬·우열 설명 좌측정렬로 짝을 붙인다.
      행높이·줄높이 19px 통일: 아이콘 유무로 줄간격이 흔들리지 않게. */
   .chem-grid.chem-show-desc .chem-nlist { display: inline-grid; grid-template-columns: auto auto; grid-auto-rows: 19px; gap: 3px 8px; align-items: center; }
   .chem-nlist .chem-name-part { justify-self: end; text-align: right; white-space: nowrap; line-height: 19px; }
   .chem-ndesc {
-    font-size: 11px; line-height: 19px; color: var(--text); opacity: 0.85;
+    font-size: 11px; font-weight: 400; line-height: 19px; color: var(--text); opacity: 0.85;   /* 400 명시: 부모 .chem-nlist의 700 상속 차단 */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
   }
   /* 링크 아이콘(2026-08-08 확정): 이름 뒤 인라인 상시 표시 — 클릭 동작의 존재를 토글과 무관하게 알린다.
@@ -6866,8 +6875,12 @@ function renderChemistry() {
   };
 
   // 섹션 제목. firstNoBorder=true면 위 구분선·여백 제거 (그리드 첫 줄, 또는 우산 라벨 바로 아래용)
-  const sec = (label, firstNoBorder, isTrack) =>
-    `<div class="chem-group-section"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div></div>`;
+  // extra: 우측에 끼울 HTML(설명 보기 토글) — 있으면 라벨 좌·토글 우 한 줄(.chem-sec-flex, 명전 .hall-bar 구도)
+  const sec = (label, firstNoBorder, isTrack, extra) =>
+    `<div class="chem-group-section${extra ? ' chem-sec-flex' : ''}"${firstNoBorder ? ' style="margin-top:0;padding-top:0;border-top:none"' : ''}><div class="chem-group-title${isTrack ? ' chem-track-title' : ''}">${label}</div>${extra || ''}</div>`;
+  // 설명 보기 토글(명전 2·3위 토글과 동일 부품): 단독 줄이 아니라 화면 첫 섹션 라벨과 같은 줄 우측에 배치.
+  // 첫 섹션 = 상단 트랙이 뜨면 '모두 포함', 아니면 '2인 케미' — 아래 topHtml/botHtml에서 그 한 곳에만 넣는다.
+  const descBar = `<div class="chem-bar"><span class="hall-bar-label">설명 보기</span><button class="notify-switch ${chemShowDesc ? 'on' : ''}" id="chemDescToggle" type="button" aria-label="설명 보기"></button></div>`;
 
   // 상단 트랙(모두 포함)은 2~12명 선택일 때만 작동. 1명·전원·0명은 제외 → 그 경우 화면은 기존(일부 포함 OR)과 동일.
   const selArr = [...chemFilterMembers];
@@ -6886,7 +6899,7 @@ function renderChemistry() {
     const matchedBody = matched.length > 0
       ? matched.map(x => x.html).join('')
       : '<div class="chem-empty">조건에 맞는 케미가 없어요</div>';
-    topHtml = sec('모두 포함', true, true) + matchedBody;
+    topHtml = sec('모두 포함', true, true, descBar) + matchedBody;
   }
 
   // ── 하단: 일부 포함 — 기존 OR 결과(상단에 올라간 카드는 제외). 우산 라벨은 상단이 떴을 때만. ──
@@ -6903,7 +6916,7 @@ function renderChemistry() {
 
   let botHtml = '';
   if (topActive) botHtml += sec('일부 포함', false, true);   // 우산 라벨(상단과 구분하는 트랙 구분선)
-  botHtml += sec('2인 케미', true);                     // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거
+  botHtml += sec('2인 케미', true, false, topActive ? '' : descBar);   // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거. 토글은 화면 첫 헤더에만
   botHtml += (botPairCards.length > 0 ? botPairCards : '<div class="chem-empty">필터 조건에 맞는 케미가 없어요</div>');
   botHtml += botGroupSections;
 
@@ -6927,10 +6940,6 @@ function renderChemistry() {
 
   body.innerHTML = `
     <div class="chem-content">
-      <div class="chem-bar">
-        <span class="hall-bar-label">설명 보기</span>
-        <button class="notify-switch ${chemShowDesc ? 'on' : ''}" id="chemDescToggle" type="button" aria-label="설명 보기"></button>
-      </div>
       <div class="chem-grid${chemShowDesc ? ' chem-show-desc' : ''}">
         ${topHtml}
         ${botHtml}

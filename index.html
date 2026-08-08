@@ -1519,7 +1519,12 @@
   .chem-name-part.inert { cursor: default; }
   .chem-name-part.inert:hover { color: var(--text); }   /* 보여줄 게 없는 이름은 민트 강조도 없음 */
   .chem-name-part.dim { opacity: 0.35; }
-  .chem-name-sep { color: var(--muted); font-weight: 400; }
+  .chem-name-sep { color: var(--muted); font-weight: 400; padding: 0 2px; transition: opacity 0.12s; }
+  /* 링크 이름 오버·고정 시 뒤따르는 구분자(·)를 숨기고 아이콘이 그 자리를 차지 — 다음 이름과의 겹침 해소(2026-08-08).
+     이름이 몇 개든 각자 자기 뒤 구분자를 쓰므로 3개 이상에서도 성립. 마지막 이름은 오른쪽이 빈 공간이라 겹칠 대상 없음. */
+  .chem-name-part.has-link:hover + .chem-name-sep,
+  .chem-name-part.has-link.hl + .chem-name-sep,
+  .chem-name-part.has-link.pin + .chem-name-sep { opacity: 0; }
   /* 설명 줄: 케미명 위 어깨글(2026-08-08 확정 — 이름 밑은 오버 중 커서에 가리고, 카드 하단은 이름과 멀어짐).
      자리는 항상 확보해 높이 고정. 간격은 스샷 피드백으로 축소 — 빈 설명 줄이 여백으로 읽혀 위가 넓어 '보이는' 착시가 있어
      하단 여백은 상단(16+4)보다 살짝 좁게 잡는다. */
@@ -2989,8 +2994,20 @@ try {
 } catch (e) {}
 
 let chemCounts = {};
-let chemFilterMembers = new Set(MEMBERS.map(m => m.id));
-let chemFilterTypes = new Set(['컨텐츠', '프로필', '기타', '미분류']);   // 종류 필터(2026-08-08) — 기본 전체 켜짐
+const CHEM_TYPES = ['컨텐츠', '프로필', '기타', '미분류'];   // 필터 표시 순서(미분류는 시트가 아니라 판정으로만 존재)   // ※ 아래 필터 초기화가 참조하므로 반드시 이 위에 선언(2026-08-08 부팅 TDZ 사고 재발 방지)
+// 케미탭 필터 저장(2026-08-08): 이벤트 탭과 달리 '꺼둔 것(제외)'을 저장한다 — 켠 목록을 저장하면
+// 저장 이후 합류한 새 멤버가 목록에 없어 조용히 숨는 잠복 이슈가 생긴다(이벤트 탭에 실존, 빙밍 합류 전 저장분).
+// 제외 목록은 새 멤버·새 종류가 자동으로 켜진 채 시작한다. 탈퇴 멤버의 잔재 id는 무시되므로 무해.
+const LS_CHEM_FILTER_MEMBERS_OFF = 'chuntaverse_chem_filter_members_off';
+const LS_CHEM_FILTER_TYPES_OFF = 'chuntaverse_chem_filter_types_off';
+const _chemMemOff = lsGetSet(LS_CHEM_FILTER_MEMBERS_OFF, []);
+const _chemTypeOff = lsGetSet(LS_CHEM_FILTER_TYPES_OFF, []);
+let chemFilterMembers = new Set(MEMBERS.map(m => m.id).filter(id => !_chemMemOff.has(id)));
+let chemFilterTypes = new Set(CHEM_TYPES.filter(t => !_chemTypeOff.has(t)));
+const saveChemFilters = () => {
+  lsSetSet(LS_CHEM_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => !chemFilterMembers.has(id))));
+  lsSetSet(LS_CHEM_FILTER_TYPES_OFF, new Set(CHEM_TYPES.filter(t => !chemFilterTypes.has(t))));
+};
 const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
 let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — 동일하면 재구축 스킵(lastTimelineSig와 동일 취지)
 
@@ -3000,7 +3017,7 @@ let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — �
 //   반대로 신코드는 E열부터만 멤버로 읽으므로 구 시트에서는 케미명이 전부 사라진다.
 const CHEM_NAME_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=574378390';
 const LS_CHEMNAME_CACHE = 'chuntaverse_chem_names_v2';   // v1은 구 형식 행 캐시 — 신 파서가 읽으면 오독하므로 키를 올려 자연 폐기
-const CHEM_TYPES = ['컨텐츠', '프로필', '기타', '미분류'];   // 필터 표시 순서(미분류는 시트가 아니라 판정으로만 존재)
+try { localStorage.removeItem('chuntaverse_chem_names_v1'); } catch (e) {}   // 방치된 구 키 청소(2026-08-08 리뷰)
 let CHEM_NAMES = {};    // '아이디1:아이디2' → [{name, types[], desc, clip}] — 같은 쌍의 여러 행이 배열로 쌓임(행 순서 유지)
 let CHEM_GROUPS = [];   // [{members:[아이디...], entries:[{name, types[], desc, clip}]}]
 function applyChemNameRows(rows) {
@@ -3277,7 +3294,7 @@ function topbarLinksHtml() {
   return topbarLinks.map(b => {
     const pc = escapeHtml(b.l1) + (b.l2 ? '<br>' + escapeHtml(b.l2) : '');
     const tx = lightenForText(b.hex);   // 아이콘은 지정색 원본, 글자만 보정 — 순위 버튼과 동일 규칙(2026-08-04 일괄 적용)
-    return `<a class="page-title-link tb-sheet-btn" href="${escapeHtml(b.url)}" target="_blank" rel="noopener" style="--tb-rgb:${hexToRgb(b.hex)};color:${b.hex}">${SVG_ICONS[b.icon]}<span class="tb-t-pc" style="color:${tx}">${pc}</span><span class="tb-t-mb" style="color:${tx}">${escapeHtml(b.mb)}</span></a>`;
+    return `<a class="page-title-link tb-sheet-btn" href="${escapeHtml(b.url)}" target="_blank" rel="noopener" style="--tb-rgb:${hexToRgb(b.hex)};color:${b.hex}">${SVG_ICONS[b.icon] || SVG_ICONS.link}<span class="tb-t-pc" style="color:${tx}">${pc}</span><span class="tb-t-mb" style="color:${tx}">${escapeHtml(b.mb)}</span></a>`;
   }).join('');
 }
 
@@ -6768,7 +6785,7 @@ function renderChemistry() {
       const link = (isUrl || isRef) ? e.clip : '';
       const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
       const inert = !e.desc && !link;   // 설명도 링크도 없는 이름 — 오버·클릭에 반응할 이유가 없다(거짓 클릭 신호 방지)
-      return `<span class="chem-name-part${active ? '' : ' dim'}${inert ? ' inert' : ''}" data-cname="${escapeHtml(e.name)}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>`;
+      return `<span class="chem-name-part${active ? '' : ' dim'}${inert ? ' inert' : ''}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>`;
     });
     return `<div class="chem-name">${parts.join('<span class="chem-name-sep"> · </span>')}</div>`;
   };
@@ -6899,24 +6916,28 @@ function renderChemistry() {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       if (chemFilterMembers.has(id)) chemFilterMembers.delete(id); else chemFilterMembers.add(id);
+      saveChemFilters();
       renderChemistry();
     });
   });
   const toggleBtn = document.getElementById('chemFilterToggle');
   if (toggleBtn) toggleBtn.addEventListener('click', () => {
     if (chemFilterMembers.size === MEMBERS.length) chemFilterMembers.clear(); else MEMBERS.forEach(m => chemFilterMembers.add(m.id));
+    saveChemFilters();
     renderChemistry();
   });
   body.querySelectorAll('#chemFilterTypes .filter-type[data-ctype]').forEach(btn => {
     btn.addEventListener('click', () => {
       const t = btn.dataset.ctype;
       if (chemFilterTypes.has(t)) chemFilterTypes.delete(t); else chemFilterTypes.add(t);
+      saveChemFilters();
       renderChemistry();
     });
   });
   const typeToggleBtn = document.getElementById('chemTypeToggle');
   if (typeToggleBtn) typeToggleBtn.addEventListener('click', () => {
     if (chemFilterTypes.size === CHEM_TYPES.length) chemFilterTypes.clear(); else CHEM_TYPES.forEach(t => chemFilterTypes.add(t));
+    saveChemFilters();
     renderChemistry();
   });
 
@@ -6964,7 +6985,7 @@ function renderChemistry() {
         const target = [...grid.querySelectorAll('.chem-name-part')].find(x => x.dataset.cname === clip && x !== part);
         if (target) {
           const tcard = target.closest('.chem-card');
-          if (tcard.scrollIntoView) tcard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일(스크롤 애니메이션 없음, 2026-08-08)
           tcard.classList.remove('chem-flash'); void tcard.offsetWidth;   // 연타 시 강조 재시작
           tcard.classList.add('chem-flash');
           setTimeout(() => tcard.classList.remove('chem-flash'), 1400);

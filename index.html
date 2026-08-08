@@ -1516,20 +1516,25 @@
   /* 케미명 조각(2026-08-08): 이름마다 오버/클릭 대상. 강조는 사이트 규약대로 민트, 종류 필터 밖 이름은 흐림 */
   .chem-name-part { cursor: pointer; transition: color 0.12s; }
   .chem-name-part:hover, .chem-name-part.hl { color: var(--accent); }
+  .chem-name-part.inert { cursor: default; }
+  .chem-name-part.inert:hover { color: var(--text); }   /* 보여줄 게 없는 이름은 민트 강조도 없음 */
   .chem-name-part.dim { opacity: 0.35; }
   .chem-name-sep { color: var(--muted); font-weight: 400; }
   /* 설명 줄: 케미명 위 어깨글(2026-08-08 확정 — 이름 밑은 오버 중 커서에 가리고, 카드 하단은 이름과 멀어짐).
-     자리는 항상 확보해 높이 고정. 위에 생기는 25px(높이17+간격8)만큼 본문 아래(.chem-pad)에 대칭 여백. */
+     자리는 항상 확보해 높이 고정. 간격은 스샷 피드백으로 축소 — 빈 설명 줄이 여백으로 읽혀 위가 넓어 '보이는' 착시가 있어
+     하단 여백은 상단(16+4)보다 살짝 좁게 잡는다. */
   .chem-desc {
-    min-height: 17px; margin-bottom: 8px;
+    min-height: 16px; margin-bottom: 4px;
     font-size: 11px; color: var(--muted);
     text-align: center; line-height: 1.5;
     overflow: hidden;
   }
-  .chem-pad { height: 25px; }   /* 상단 설명 줄(17+8)과 대칭 — 이름·아바타 뭉치를 카드 세로 가운데로 */
-  /* 링크 아이콘: 자리 상시 확보(투명) → 이름 오버·고정 시 표시. 자리를 미리 잡아 이름 밀림 방지 */
-  .chem-name-link { display: inline-block; width: 15px; margin-left: 3px; opacity: 0; vertical-align: -1px; transition: opacity 0.12s; }
-  .chem-name-link svg { width: 12px; height: 12px; }
+  .chem-pad { height: 16px; }
+  /* 링크 아이콘(2026-08-08 재수정): 배치 흐름 밖(absolute) — 정렬은 아이콘 없는 텍스트 기준으로 잡히고,
+     오버·고정 시에만 이름 오른쪽에 겹쳐 나타난다. 자리 차지가 없으니 등장해도 아무것도 안 밀린다. */
+  .chem-name-part { position: relative; }
+  .chem-name-link { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 2px; opacity: 0; transition: opacity 0.12s; pointer-events: none; }
+  .chem-name-link svg { width: 12px; height: 12px; display: block; }
   .chem-name-part:hover .chem-name-link, .chem-name-part.hl .chem-name-link, .chem-name-part.pin .chem-name-link { opacity: 1; }
   /* 연관 케미 도착 강조: 민트 테두리 잠깐 — transition으로 자연 소멸(제거 시 원색 복귀) */
   .chem-card { transition: border-color 0.35s, box-shadow 0.35s; }
@@ -6753,7 +6758,7 @@ function renderChemistry() {
 
   // 이름 줄(2026-08-08 피드백 반영): 이름마다 오버/클릭 대상. 순서는 시트 그대로, 필터는 색만 바꾼다(안 걸린 이름 흐림).
   // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink 아이콘·새 탭), 실존 케미명이면 연관 케미(link 아이콘·그 카드로 이동).
-  // 실존하지 않는 이름(오타)은 링크로 만들지 않아 죽은 링크가 생길 수 없다. 아이콘 자리는 상시 확보(투명→오버 시 표시)로 이름 밀림 방지.
+  // 실존하지 않는 이름(오타)은 링크로 만들지 않아 죽은 링크가 생길 수 없다. 아이콘은 상시 표시(회색→오버 시 민트).
   const nameRowHtml = (entries) => {
     if (!entries) return null;
     const parts = entries.map((e) => {
@@ -6762,7 +6767,8 @@ function renderChemistry() {
       const isRef = !isUrl && !!e.clip && allEntryNames.has(e.clip);
       const link = (isUrl || isRef) ? e.clip : '';
       const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
-      return `<span class="chem-name-part${active ? '' : ' dim'}" data-cname="${escapeHtml(e.name)}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>`;
+      const inert = !e.desc && !link;   // 설명도 링크도 없는 이름 — 오버·클릭에 반응할 이유가 없다(거짓 클릭 신호 방지)
+      return `<span class="chem-name-part${active ? '' : ' dim'}${inert ? ' inert' : ''}" data-cname="${escapeHtml(e.name)}" data-desc="${escapeHtml(e.desc)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>`;
     });
     return `<div class="chem-name">${parts.join('<span class="chem-name-sep"> · </span>')}</div>`;
   };
@@ -6933,12 +6939,12 @@ function renderChemistry() {
   if (grid) {
     grid.addEventListener('mouseover', e => {
       const part = e.target.closest('.chem-name-part');
-      if (!part) return;
+      if (!part || part.classList.contains('inert')) return;
       setDesc(part.closest('.chem-card'), descFor(part), part);
     });
     grid.addEventListener('mouseout', e => {
       const part = e.target.closest('.chem-name-part');
-      if (!part) return;
+      if (!part || part.classList.contains('inert')) return;
       const card = part.closest('.chem-card');
       const pinned = card.querySelector('.chem-name-part.pin');
       if (pinned) setDesc(card, descFor(pinned), pinned);
@@ -6946,7 +6952,7 @@ function renderChemistry() {
     });
     grid.addEventListener('click', e => {
       const part = e.target.closest('.chem-name-part');
-      if (!part) return;
+      if (!part || part.classList.contains('inert')) return;
       const card = part.closest('.chem-card');
       const clip = part.dataset.clip || '';
       // 링크 있는 이름: 호버 기기는 즉시 이동, 터치 기기는 고정된 상태에서의 탭만 이동

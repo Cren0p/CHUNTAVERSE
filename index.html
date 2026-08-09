@@ -920,7 +920,7 @@
     color: var(--text);
     border-color: var(--accent);
   }
-  .timeline-scroll-btn svg { width: 12px; height: 12px; display: block; flex-shrink: 0; margin-top: -1px; }   /* -1px 광학 보정: 한글 글리프는 라인박스에서 살짝 위에 앉아 기하 중앙 배치 시 아이콘이 ~1px 처져 보인다(모바일 확대 실측) */
+  .timeline-scroll-btn svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }   /* 세로는 flex 중앙 = 테두리 기준 정중앙(실측 ±0.5px 이내). 텍스트 쪽이 폰트 특성으로 반픽셀 위에 앉지만, 아이콘을 그에 맞추면 테두리 기준이 틀어진다(2026-08-09 실측 확정 — 정렬 기준은 테두리) */
   .sort-toggle {
     display: inline-flex;
     align-items: center;
@@ -939,11 +939,7 @@
     color: var(--text);
     border-color: var(--accent);
   }
-  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; margin-top: -1px; }   /* -1px 광학 보정(.timeline-scroll-btn svg와 동일 사유) */
-  /* 라벨 폭을 '오래된순'(가장 긴 라벨) 기준으로 고정: 보이지 않는 예비 텍스트가 폭만 차지해
-     최신순↔오래된순 토글 시 버튼 크기가 안 변한다. 폰트 실측 기반이라 px 하드코딩 불필요. */
-  .sort-toggle span { display: inline-flex; flex-direction: column; align-items: center; }
-  .sort-toggle span::after { content: '오래된순'; height: 0; visibility: hidden; overflow: hidden; }
+  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }   /* 세로는 flex 중앙 = 테두리 기준 정중앙(실측 ±0.5px 이내). 텍스트 대비 보정은 하지 않는다 — 한글 글리프가 반픽셀 위에 앉는 폰트 특성이라 아이콘을 옮기면 테두리 기준이 틀어짐(2026-08-09 실측 확정) */
 
   .stats-wrap {
     padding: 20px 24px;
@@ -1546,7 +1542,7 @@
   /* 이름 영역(명전 메커니즘 그대로, 2026-08-08 재수정): 꺼짐(가로)·켬(2열) 두 변형을 함께 렌더해두고
      클래스(.chem-show-desc)로 전환 — 재렌더 없이 즉시 토글. 카드 높이는 렌더 뒤 두 상태를 '실측'해
      종류별 최댓값을 공통 min-height로 고정(renderChemistry 끝) — 본문 덩어리는 토글 따라 자연 이동, 카드 크기만 불변. */
-  .chem-head { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }   /* align-items: center — 실측 후 공통 높이로 고정되는 상자 안에서 1행이든 3행이든 제목 블록이 세로 중앙(토글 시 중심 유지) */
+  .chem-head { display: flex; justify-content: center; margin-bottom: 10px; }
   /* 켬 2열은 .chem-name 밖(형제)이라 폰트를 따로 명시해야 한다 — 빠뜨리면 body 기본(16px·400)으로 커지고 얇아짐 */
   .chem-nlist { display: none; font-size: 13px; font-weight: 700; color: var(--text); }
   .chem-grid.chem-show-desc .chem-head .chem-name:not(.chem-name-fallback):not(.chem-name-keep) { display: none; }   /* keep = 설명이 하나도 없는 카드의 이름줄 — 켬에서도 그대로(격자 전환 무의미) */
@@ -5026,7 +5022,7 @@ function applyFilter() {
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
   });
-  const sortLabel = eventSortAsc ? '오래된순' : '최신순';
+  const sortLabel = eventSortAsc ? '과거순' : '최신순';   // 두 라벨 3자 등장(2026-08-09) — 토글해도 버튼 폭·아이콘-글자 간격이 그대로, 옆 버튼들과 위화감 없음
   const arrowSvg = eventSortAsc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp;   // SVG_ICONS로 통합(2026-08-08)
   const scrollDownSvg = SVG_ICONS.chevronsDown;
   const scrollUpSvg = SVG_ICONS.chevronsUp;
@@ -7098,10 +7094,6 @@ function renderChemistry() {
       cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
       Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
       cards.forEach(c => { c.style.minHeight = maxByKind[kindOf(c)] + 'px'; });
-      // 이름 영역 상자를 공통 높이로 '실제 고정'(2026-08-09): 토글로 행 수가 변해도(1행↔2·3행) 상자 크기가
-      // 불변이라 아래 멤버 사진이 절대 안 움직인다 — 카드 중앙 정렬만으로는 다항목 카드에서 행 수 차의 절반만큼
-      // 사진이 밀렸다. 제목은 상자 중앙(.chem-head align-items)에서 대칭으로 늘어나 중심 유지.
-      cards.forEach(c => { const h = c.querySelector('.chem-head'); if (h) h.style.minHeight = headMax + 'px'; });
     }
   }
 }

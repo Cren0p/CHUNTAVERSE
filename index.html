@@ -888,8 +888,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
-    padding: 8px 14px;
+    gap: 8px;
+    padding: 8px;
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;   /* 좁은 폰: 맨 위로 추가로 4버튼이 한 줄 ~410px 필요 — 안 들어가면 우측 묶음이 다음 줄로 */
     /* sticky(2026-08-09): 이벤트가 최대 1000건이라 중간에서도 조작 가능해야 함 — 모두 읽음·맨 위/아래·정렬이
@@ -901,7 +901,7 @@
     border-top: 1px solid var(--border);
   }
   .timeline-header::before { content: ''; position: absolute; left: -1px; right: -1px; top: -21px; height: 20px; background: var(--bg); }   /* 좌표는 패딩 박스 기준: top -21 = 테두리(1px) 위 20px 지점부터, height 20 = 테두리 직전까지. 21로 두면 border-top을 덮어 윗변이 사라진다 */
-  .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 6px; }
+  .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 8px; }   /* 간격 통일(2026-08-09): 버튼 사이·가장자리·행간 전부 상하 패딩과 같은 8px */
   .timeline-scroll-btn {
     display: inline-flex;
     align-items: center;
@@ -920,7 +920,7 @@
     color: var(--text);
     border-color: var(--accent);
   }
-  .timeline-scroll-btn svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .timeline-scroll-btn svg { width: 12px; height: 12px; display: block; flex-shrink: 0; margin-top: -1px; }   /* -1px 광학 보정: 한글 글리프는 라인박스에서 살짝 위에 앉아 기하 중앙 배치 시 아이콘이 ~1px 처져 보인다(모바일 확대 실측) */
   .sort-toggle {
     display: inline-flex;
     align-items: center;
@@ -939,7 +939,11 @@
     color: var(--text);
     border-color: var(--accent);
   }
-  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; margin-top: -1px; }   /* -1px 광학 보정(.timeline-scroll-btn svg와 동일 사유) */
+  /* 라벨 폭을 '오래된순'(가장 긴 라벨) 기준으로 고정: 보이지 않는 예비 텍스트가 폭만 차지해
+     최신순↔오래된순 토글 시 버튼 크기가 안 변한다. 폰트 실측 기반이라 px 하드코딩 불필요. */
+  .sort-toggle span { display: inline-flex; flex-direction: column; align-items: center; }
+  .sort-toggle span::after { content: '오래된순'; height: 0; visibility: hidden; overflow: hidden; }
 
   .stats-wrap {
     padding: 20px 24px;
@@ -1501,7 +1505,6 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
-    padding-top: 20px;   /* 백드롭 스트립의 위 여백 20px과 짝 — 첫 라벨이 스트립 하단 바(34px) 구간에서 시작해 토글과 한 줄 */
   }
   .chem-card {
     background: var(--surface);
@@ -1527,24 +1530,26 @@
   /* 설명 보기 토글 ON: 좌열 케미명·우열 설명 세로 나열(2026-08-08 확정, 명전 2·3위 토글 방식 이식).
      이름 우측정렬·설명 좌측정렬로 짝을 붙인다. 설명은 한 줄 말줄임(두 줄이 되면 카드 높이가 행마다 출렁임).
      카드 높이는 아래 renderChemistry 끝의 실측(꺼짐·켬 최대)으로 종류별 고정 — 토글해도 크기 불변, 내용은 flex 중앙. */
-  /* 설명 보기 토글 + 상단 백드롭(2026-08-09 재구축): height 54 = 위 여백 20px(필터 패널 top:20과 동일 이격)
-     + 바 34px. margin-bottom:-54로 흐름을 밀지 않고, 불투명 배경이 여백 구간까지 덮어 스크롤 중 카드가
-     비치지 않는다(그냥 top:20px만 주면 그 틈으로 카드가 지나가 보임). 토글은 하단 34px 구간 중앙.
-     라벨(z3)이 이 스트립(z2) 위로 슬라이드 인/아웃 — 라벨엔 배경이 없어 토글을 가리지 않는다. */
+  /* 설명 보기 토글 + 상단 바(2026-08-09 재조정): 바는 34px, sticky top:20(필터 패널과 동일 이격).
+     스크롤 전에는 자연 위치(칸 최상단)라 우측 필터 패널과 같은 높이에서 시작하고, 붙었을 때만 20px 떠 있다.
+     떠 있을 때 위 20px 틈으로 카드가 비치는 건 ::before 백드롭(페이지 배경색)이 차단 — 스크롤 전엔 그 자리가
+     chem-wrap의 padding(20px, 원래 페이지 배경)이라 무해. margin-bottom:-34로 흐름을 밀지 않는다.
+     라벨(z3)이 이 바(z2) 위로 슬라이드 인/아웃 — 라벨엔 배경이 없어 토글을 가리지 않는다. */
   .chem-toggle-sticky {
-    position: sticky; top: 0; z-index: 2;
-    height: 54px; margin-bottom: -54px; box-sizing: border-box; padding-top: 20px;
+    position: sticky; top: 20px; z-index: 2;
+    height: 34px; margin-bottom: -34px;
     background: var(--bg);
     display: flex; align-items: center; justify-content: flex-end;
   }
+  .chem-toggle-sticky::before { content: ''; position: absolute; left: 0; right: 0; top: -20px; height: 20px; background: var(--bg); }
   .chem-bar { display: flex; align-items: center; gap: 8px; }
   /* 이름 영역(명전 메커니즘 그대로, 2026-08-08 재수정): 꺼짐(가로)·켬(2열) 두 변형을 함께 렌더해두고
      클래스(.chem-show-desc)로 전환 — 재렌더 없이 즉시 토글. 카드 높이는 렌더 뒤 두 상태를 '실측'해
      종류별 최댓값을 공통 min-height로 고정(renderChemistry 끝) — 본문 덩어리는 토글 따라 자연 이동, 카드 크기만 불변. */
-  .chem-head { display: flex; justify-content: center; margin-bottom: 10px; }
+  .chem-head { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }   /* align-items: center — 실측 후 공통 높이로 고정되는 상자 안에서 1행이든 3행이든 제목 블록이 세로 중앙(토글 시 중심 유지) */
   /* 켬 2열은 .chem-name 밖(형제)이라 폰트를 따로 명시해야 한다 — 빠뜨리면 body 기본(16px·400)으로 커지고 얇아짐 */
   .chem-nlist { display: none; font-size: 13px; font-weight: 700; color: var(--text); }
-  .chem-grid.chem-show-desc .chem-head .chem-name:not(.chem-name-fallback) { display: none; }
+  .chem-grid.chem-show-desc .chem-head .chem-name:not(.chem-name-fallback):not(.chem-name-keep) { display: none; }   /* keep = 설명이 하나도 없는 카드의 이름줄 — 켬에서도 그대로(격자 전환 무의미) */
   /* ON 3열: 카드 중앙 블록(inline-grid) — [이름(우측정렬)] [아이콘 전용 칸] [설명(좌측정렬)].
      아이콘을 별도 칸으로 빼서 이름 텍스트 오른끝이 전부 같은 선에 맞는다(이름 뒤 인라인이던 2026-08-08 방식은
      아이콘 있는 이름만 왼쪽으로 밀려 정렬이 어긋났음). 아이콘 없는 행은 빈 칸이 폭만 유지.
@@ -1670,6 +1675,10 @@
   @container (max-width: 1000px) { .chem-group-grid { grid-template-columns: repeat(3, 1fr); } }
   @container (max-width: 700px) { .chem-group-grid { grid-template-columns: repeat(2, 1fr); } }
   @container (max-width: 480px) { .chem-group-grid { grid-template-columns: 1fr; } }
+  /* 높이 실측 중에만 행 늘림(stretch) 차단(2026-08-09): 그리드 기본값은 같은 행의 카드를 행 최대 높이로 늘리는데,
+     그 상태로 offsetHeight를 재면 "옆 카드의 이름 행 수"가 내 몸통 높이로 오염되어(폭·열수에 따라 행 구성원이
+     달라지니 기기마다 다르게) min-height가 이중 가산으로 부푼다. 측정 두 패스 동안만 이 클래스를 켠다. */
+  .chem-grid.chem-measure .chem-group-grid { align-items: start; }
   .chem-group-members {
     display: flex;
     align-items: center;
@@ -6875,7 +6884,9 @@ function renderChemistry() {
   };
   const nameRowHtml = (entries) => {
     if (!entries) return null;
-    const nameLine = `<div class="chem-name">${entries.map(e => partSpan(e).html).join('<span class="chem-name-sep"> · </span>')}</div>`;
+    const anyDesc = entries.some(e => e.desc);
+    const nameLine = `<div class="chem-name${anyDesc ? '' : ' chem-name-keep'}">${entries.map(e => partSpan(e).html).join('<span class="chem-name-sep"> · </span>')}</div>`;
+    if (!anyDesc) return nameLine;   // 설명이 하나도 없는 카드: 켬 상태에서도 이 줄 그대로(chem-name-keep) — 격자로 바꿀 게 없어 토글이 진짜 무동작(글씨·아이콘 픽셀 고정)
     const rows = entries.map(rowHtml).join('');
     return nameLine + `<div class="chem-nlist">${rows}</div>`;   // 두 변형 공존 — 표시는 클래스가 결정
   };
@@ -7077,14 +7088,20 @@ function renderChemistry() {
       const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
       const headOf = c => { const h = c.querySelector('.chem-head'); return h ? h.offsetHeight : 0; };
       const wasOn = grid.classList.contains('chem-show-desc');
+      grid.classList.add('chem-measure');   // 실측 동안 행 늘림 차단 — 옆 카드 높이가 내 실측에 오염되는 것 방지
       grid.classList.remove('chem-show-desc'); const hOff = cards.map(c => c.offsetHeight); const headOff = cards.map(headOf);
       grid.classList.add('chem-show-desc');    const hOn = cards.map(c => c.offsetHeight);  const headOn = cards.map(headOf);
       grid.classList.toggle('chem-show-desc', wasOn);
+      grid.classList.remove('chem-measure');
       const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
       const maxByKind = {};   // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
       cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
       Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
       cards.forEach(c => { c.style.minHeight = maxByKind[kindOf(c)] + 'px'; });
+      // 이름 영역 상자를 공통 높이로 '실제 고정'(2026-08-09): 토글로 행 수가 변해도(1행↔2·3행) 상자 크기가
+      // 불변이라 아래 멤버 사진이 절대 안 움직인다 — 카드 중앙 정렬만으로는 다항목 카드에서 행 수 차의 절반만큼
+      // 사진이 밀렸다. 제목은 상자 중앙(.chem-head align-items)에서 대칭으로 늘어나 중심 유지.
+      cards.forEach(c => { const h = c.querySelector('.chem-head'); if (h) h.style.minHeight = headMax + 'px'; });
     }
   }
 }

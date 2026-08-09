@@ -108,7 +108,7 @@
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
     text-align: center;
-    min-height: 66px;
+    min-height: 68px;   /* main-header와 동일 값으로 결속(2026-08-10 유격 수정) — 버튼 여백 개편(08-09)으로 상단바 자연 높이가 67.8px(버튼 42.8+패딩 24+테두리 1)이 되며 66 고정이던 이 칸과 어긋났다. 양쪽 68 클램프로 경계선 재정렬. 버튼 높이 규칙 변경 시 두 값을 같이 재계산할 것 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -250,13 +250,13 @@
   }
   .main-header {
     /* 간격 일원화(2026-08-09): 상하·좌우 경계-버튼, 요소 사이 전부 12px.
-       세로 12는 padding으로 선언 — 버튼(≈43px)+상하 24로 자연 높이 ≈67이 min-height(66)를 넘어 padding이 실제 간격을 지배.
-       min-height는 갱신줄 유무로 탭별 높이가 출렁이는 것을 막는 기존 안전망이라 존치. 모바일(≤700px)은 별도 체계. */
+       세로 12는 padding으로 선언 — 버튼(≈43px)+상하 24로 자연 높이 ≈67이 구 min-height(66)를 넘어 padding이 간격을 지배했다.
+       min-height 68(2026-08-10): 자연 높이 67.8을 다시 덮는 값 — 탭별 높이 통일 안전망 복원 + sidebar-logo(동일 68)와 경계선 정렬. 모바일(≤700px)은 별도 체계. */
     padding: 12px;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(97,255,236,0.05) 0%, transparent 100%);
     display: flex; align-items: center; gap: 12px;
-    min-height: 66px;
+    min-height: 68px;
   }
   .page-title {
     flex-shrink: 1;
@@ -429,23 +429,53 @@
   .rk-note { font-size: 11px; color: var(--muted); padding: 4px 0 0; }
   /* 순위 버튼: 색은 시트 G열 hex(tb-sheet-btn과 동일 방식). button은 기본 가운데정렬이라 text-align 명시 필요 */
   button.page-title-link.rank-btn { cursor: pointer; font-family: inherit; text-align: left; }
-  /* 좋아요 요청 개별 숨김 ✕ (카드 우상단 오버레이) */
-  .lr-item { position: relative; }
-  .lr-item .event { padding-right: 38px; }   /* ✕(우상단) 자리 확보 — 상대시간과 겹침 방지 */
-  .lr-item .event-icon { display: none; }   /* 모달엔 좋아요 요청만 모이므로 타입 구분용 따봉 아이콘 불필요(이벤트 탭은 유지). flex 항목 제거라 좌측 빈칸·gap 안 남음 */
-  /* 카드 높이 통일(2026-08-07): 대상 글 제목이 붙은 항목만 헤더가 2줄로 접혀 60px, 나머지는 40px이라
-     목록이 들쭉날쭉했다. 긴 쪽에 맞춰 바닥을 깔아 전부 같은 높이로 만든다(일정 모달 .sch-item과 같은 방식).
-     .event-body가 세로 가운데 정렬이라 짧은 카드는 여백이 위아래로 균등하게 나뉜다.
-     제목이 아주 길어 헤더가 3줄이 되면 그 카드만 다시 커지는데, 막으려면 제목을 잘라야 해서 두었다. */
-  .lr-item .event-body { min-height: 60px; }
-  .lr-dismiss {
-    position: absolute; top: 8px; right: 8px; z-index: 2;
-    width: 22px; height: 22px;
+  /* 좋아요 요청 모달 v2(2026-08-10 전면 개편): 같은 글끼리 묶어 [컨텐츠 헤더]+[요청 행]으로 표시.
+     이벤트 탭 카드(renderEvent)를 안 쓰는 이유: 탭은 이벤트가 섞여 있어 요청 하나에 전체 정보가 필요하지만,
+     모달은 요청만 모이므로 컨텐츠 정보를 헤더로 병합 — 행마다 반복되던 대상 태그와 과확보 높이(구 min-height 60)를 없앤다. */
+  .lrg-head {
+    display: flex; align-items: center;
+    padding: 10px 16px 10px 14px;          /* 1줄 고정: 줄높이 17 + 상하 10 + 테두리 2 = 39px 균일 */
+    border-left: 4px solid transparent;    /* 행의 신규 표시 자리(4px)와 좌변 통일 — 헤더·행 글 시작점 = 18px 일치 */
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; font-weight: 700; color: #cbd5e1;
+  }
+  .lrg-head:first-child { border-top: none; }   /* 첫 묶음은 모달 헤더 밑선과 겹선 방지 */
+  .lrg-head-txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 17px; color: inherit; text-decoration: none; }   /* 1줄 말줄임(구 2줄 클램프 폐지 — 2026-08-10 확정) */
+  a.lrg-head-txt:hover { color: var(--accent); }
+  .lrq-row {
+    position: relative;
+    border-left: 4px solid transparent;    /* 신규(안읽음) 표시 자리 — 이벤트 탭 .event.unread와 동일 방식 */
+  }
+  .lrq-row + .lrq-row { border-top: 1px solid rgba(30,39,64,0.5); }
+  .lrq-row:hover { background: var(--surface2); }
+  .lrq-row.unread { border-left-color: var(--ev-unread); background: rgba(97, 255, 236, 0.10); box-shadow: inset 4px 0 12px -4px rgba(97, 255, 236, 0.35); }
+  .lrq-row.unread:hover { background: rgba(97, 255, 236, 0.16); }
+  .lrq-link {
+    display: flex; align-items: center; gap: 10px;
+    min-height: 58px;                      /* 요청 행 2줄 고정: 19+2+17 + 상하 10 = 58 — 둘째 줄이 없어도 같은 높이 */
+    padding: 10px 48px 10px 14px;          /* 상하 10(2026-08-10 여백 확대, 구 6) · 우측 48 = 체크박스(우측 가운데) 자리 */
+    text-decoration: none; color: var(--text);
+  }
+  .lrq-avatar { width: 26px; height: 26px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .lrq-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .lrq-l1 { font-size: 13px; font-weight: 700; line-height: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lrq-l1 .lrq-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-left: 6px; }   /* 멤버명-라벨 간격 6px — 이벤트 탭 .event-member 규칙과 동일 */
+  .lrq-l2 { color: #94a3b8; font-size: 12px; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 이벤트 탭 .event-detail과 동일 톤·1줄 말줄임 */
+  .lrq-link:hover .lrq-l2 { color: var(--accent2); }
+  /* 체크박스(구 ✕ 대체): '확인함/좋아요 눌러줌' 토글 저장 — 행은 목록에 남고 재클릭으로 해제 가능(✕는 캐시 삭제 없이는 복구 불가였음) */
+  .lrq-check {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 20px; height: 20px; padding: 0;
     display: flex; align-items: center; justify-content: center;
     background: rgba(7,10,20,0.72); border: 1px solid var(--border);
-    color: var(--muted); font-size: 12px; line-height: 1; cursor: pointer;
+    color: transparent; cursor: pointer;    /* 체크 글리프는 상시 렌더·미체크 땐 투명 — 토글이 행 클래스 하나로 끝난다 */
   }
-  .lr-dismiss:hover { color: var(--text); background: var(--surface2); border-color: var(--muted); }
+  .lrq-check svg { width: 14px; height: 14px; display: block; }
+  .lrq-check:hover { background: var(--surface2); border-color: var(--muted); }
+  .lrq-row.checked .lrq-check { border-color: rgba(52, 211, 153, 0.7); background: rgba(52, 211, 153, 0.10); color: #6ee7b7; }
+  .lrq-row.checked .lrq-link { opacity: 0.5; }   /* 처리한 요청은 살짝 가라앉힘(목록엔 남음) */
   /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
   .sch-btn-dday { color: var(--accent); font-variant-numeric: tabular-nums; }
   /* 같은 날 2건+ 일정 묶음: 제목 행 위 / 각 제목 아래 같은 열에 그 일정의 dtime(열 정렬). 폭은 내용으로 관리(컷·말줄임 없음). */
@@ -3480,7 +3510,8 @@ const normLikeUrl = (u) => (u || '').split('#')[0].trim().replace(/\/$/, '');
 // dedup·✕·빨간점 키용: 댓글 앵커(#comment_noti…) 보존 — 같은 글이라도 서로 다른 댓글/링크는 별개 요청으로 취급(이벤트 탭과 동일). CSV 숨김은 앵커 있으면 그 댓글만(fullLikeUrl 매칭), 앵커 없으면 글 전체(normLikeUrl 매칭) 숨김.
 const fullLikeUrl = (u) => (u || '').trim().replace(/\/$/, '');
 // ── 유저 단위 좋아요 요청 상태(localStorage) — CSV 숨김(글 단위·Crenop 관리)과 별개 ──
-const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // 유저가 ✕로 숨긴 댓글(멤버+URL 단위, 영구)
+const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // (구) ✕ 숨김 키 — 2026-08-10 체크박스 전환으로 신규 기록 중단, 모달 열 때 CHECKED로 이관(멱등)하는 원본으로만 유지
+const LS_LIKE_CHECKED = 'chuntaverse_like_checked_v1';    // 유저가 '확인함/좋아요 눌러줌' 체크한 요청(멤버+URL 단위) — ✕와 달리 목록에 남고 재클릭으로 해제 가능
 const LS_LIKE_SEEN = 'chuntaverse_like_seen_v1';          // 유저가 모달에서 본 댓글(멤버+URL 단위, 빨간 점 끔용)
 const LS_LIKEREQ_CACHE = 'chuntaverse_like_req_cache_v1'; // 점 계산용 마지막 목록 캐시
 let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계산용)
@@ -3542,6 +3573,63 @@ function preloadLikeHide() {
   return likeHidePreload;
 }
 
+// 좋아요 요청 모달 v2(2026-08-10 전면 개편, 정렬 토글 폐지): 항상 같은 글끼리 묶어 [컨텐츠 헤더]+[요청 행]으로 표시.
+// 행은 '누구 요청 · 누구 댓글'만 — 컨텐츠 정보는 헤더로 병합(이벤트 탭은 이벤트가 섞여 있어 요청마다 전체 정보가 필요하지만, 모달은 요청만 모여 행마다 중복이라 제거).
+let likeReqShown = null;         // 모달이 현재 그리는 목록(시트 숨김 적용분). null=아직 못 받음/실패
+let likeReqNewSet = new Set();   // 이번 열림에서 '신규'였던 요청 키 스냅샷 — 직후 seen 처리로 버튼 점은 꺼지되, 행 표시는 모달 세션 동안 유지
+
+// 같은 글(normLikeUrl — 댓글 앵커 무시) 묶음. 입력이 최신순이라 묶음 순서 = 각 묶음의 최신 요청 순, 묶음 안도 최신순 유지.
+function buildLikeReqGroups(list) {
+  const buckets = new Map();
+  for (const e of (list || [])) {
+    const k = normLikeUrl(e.url);
+    if (!buckets.has(k)) buckets.set(k, { url: k, entries: [] });
+    buckets.get(k).entries.push(e);
+  }
+  return [...buckets.values()];
+}
+
+// 묶음 헤더 문구: 'OOO 컨텐츠 - "글제목"'. 못 읽어온 조각은 빠짐(익명으로 제목을 못 읽는 게시판 존재 — renderEvent [한계] 참조),
+// 대상·제목은 묶음 내 첫 확보값 사용(요청마다 조회 성공 여부가 다를 수 있음). 둘 다 없으면 일반 문구.
+function likeReqGroupTitle(entries) {
+  const tn = (entries.find(e => e.target_name) || {}).target_name;
+  const pt = (entries.find(e => e.post_title) || {}).post_title;
+  return [tn ? `${tn} 컨텐츠` : '', pt ? `"${pt}"` : ''].filter(Boolean).join(' - ') || '숲 게시글';
+}
+
+const LRQ_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><polyline points="4 12.5 10 18.5 20 6.5"/></svg>';
+
+function renderLikeReqBody() {
+  const body = document.getElementById('lrBody');
+  if (!body || !likeReqShown) return;
+  if (likeReqShown.length === 0) {
+    body.innerHTML = '<div class="lr-msg">기록된 좋아요 요청이 없습니다.</div>';
+    return;
+  }
+  const checked = lsKeySet(LS_LIKE_CHECKED);
+  body.innerHTML = buildLikeReqGroups(likeReqShown).map(g => {
+    const title = escapeHtml(likeReqGroupTitle(g.entries));
+    const head = `<div class="lrg-head">` + (g.url
+      ? `<a class="lrg-head-txt" href="${escapeHtml(g.url)}" target="_blank" rel="noopener">${title}</a>`
+      : `<span class="lrg-head-txt">${title}</span>`) + `</div>`;
+    const rows = g.entries.map(e => {
+      const key = likeReqKey(e);
+      const m = findMember(e.member_id);
+      const cm = e.comment_member_id ? findMember(e.comment_member_id) : null;
+      const l2 = [cm ? `<span style="color:${cm.color}">${escapeHtml(cm.name)}</span> 댓글` : '', e.title ? escapeHtml(e.title) : ''].filter(Boolean).join(' · ');
+      const cls = 'lrq-row' + (likeReqNewSet.has(key) ? ' unread' : '') + (checked.has(key) ? ' checked' : '');
+      return `<div class="${cls}" data-lrkey="${escapeHtml(key)}">`
+        + `<a class="lrq-link" href="${escapeHtml(withTextFragment(e.url, e.title))}" target="_blank" rel="noopener">`
+        + (m ? `<img class="lrq-avatar" src="${m.img}" alt="${escapeHtml(e.member_name)}">` : '')
+        + `<span class="lrq-main"><span class="lrq-l1"><span style="color:${m ? m.color : '#fff'}">${escapeHtml(e.member_name)}</span><span class="lrq-label">좋아요 요청</span></span>`
+        + (l2 ? `<span class="lrq-l2">${l2}</span>` : '')
+        + `</span><span class="event-time"><span class="event-time-rel">${formatRelTime(e.time)}</span><span class="event-time-abs">${formatAbsTime(e.time)}</span></span></a>`
+        + `<button class="lrq-check" type="button" aria-label="확인 표시" aria-pressed="${checked.has(key)}">${LRQ_CHECK_SVG}</button></div>`;
+    }).join('');
+    return head + rows;
+  }).join('');
+}
+
 async function openLikeRequests() {
   const ov = document.getElementById('lrOverlay');
   const head = document.getElementById('lrHead');
@@ -3550,6 +3638,7 @@ async function openLikeRequests() {
   head.innerHTML = `<span>${SVG_ICONS.thumbsup}멤버들의 좋아요 요청 모아보기</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
   ov.hidden = false;
   syncBodyScrollLock();
+  likeReqShown = null;
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   try {
     // hover로 이미 받는 중/받아둔 게 있으면 그걸, 아니면 지금 시작. 숨김목록을 손에 쥔 뒤 렌더하므로 "보였다 사라짐" 없음.
@@ -3557,14 +3646,12 @@ async function openLikeRequests() {
     const data = await res.json();
     likeReqCache = dedupeLikeReqs(data.like_requests || []);          // 점 계산용 갱신(같은 글 최신만)
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
-    const dismiss = lsKeySet(LS_LIKE_DISMISS);
-    const list = likeReqCache.filter(e => !(hideSet.has(fullLikeUrl(e.url)) || hideSet.has(normLikeUrl(e.url))) && !dismiss.has(likeReqKey(e)));
-    if (list.length === 0) {
-      body.innerHTML = '<div class="lr-msg">기록된 좋아요 요청이 없습니다.</div>';
-    } else {
-      body.innerHTML = list.map(e => `<div class="lr-item" data-lrkey="${escapeHtml(likeReqKey(e))}">${renderEvent(e, [])}<button class="lr-dismiss" type="button" aria-label="숨기기">✕</button></div>`).join('');
-    }
-    lsKeyAdd(LS_LIKE_SEEN, list.map(likeReqKey));                     // 본 것으로 표시 → 점 끔
+    lsKeyAdd(LS_LIKE_CHECKED, [...lsKeySet(LS_LIKE_DISMISS)]);        // 구 ✕ 숨김 → 체크로 이관(멱등): '처리함' 의미 승계 + 이제 목록에 보이고 해제 가능
+    likeReqShown = likeReqCache.filter(e => !(hideSet.has(fullLikeUrl(e.url)) || hideSet.has(normLikeUrl(e.url))));
+    const seen = lsKeySet(LS_LIKE_SEEN);
+    likeReqNewSet = new Set(likeReqShown.map(likeReqKey).filter(k => !seen.has(k)));   // 신규 스냅샷 — 이벤트 탭 안읽음과 같은 표시(민트 좌선+배경)를 행에 적용
+    renderLikeReqBody();
+    lsKeyAdd(LS_LIKE_SEEN, likeReqShown.map(likeReqKey));             // 본 것으로 표시 → 버튼 점 끔(기존 동작 유지)
     refreshLikeDot();
   } catch (err) {
     body.innerHTML = '<div class="lr-msg">불러오기에 실패했습니다. 잠시 후 다시 시도해주세요.</div>';
@@ -3702,10 +3789,11 @@ function closeLikeRequests() {
 }
 // 빨간 점: 안 숨김(dismiss)·안 가려짐(CSV 캐시)·안 본(seen) 요청이 1개+면 표시
 function computeLikeDot() {
-  const dismiss = lsKeySet(LS_LIKE_DISMISS), seen = lsKeySet(LS_LIKE_SEEN), hide = lsHideSet();
+  // 점 = 아직 안 본 요청 존재(시트 숨김 제외). 체크(확인함)는 무관 — 신규는 정의상 미체크. 구 ✕(dismiss) 조건은 체크 전환(2026-08-10)으로 폐지(이관분은 모달에서 이미 seen 처리된 키들).
+  const seen = lsKeySet(LS_LIKE_SEEN), hide = lsHideSet();
   return likeReqCache.some(e => {
     const k = likeReqKey(e);
-    return !dismiss.has(k) && !seen.has(k) && !(hide.has(fullLikeUrl(e.url)) || hide.has(normLikeUrl(e.url)));
+    return !seen.has(k) && !(hide.has(fullLikeUrl(e.url)) || hide.has(normLikeUrl(e.url)));
   });
 }
 function refreshLikeDot() {
@@ -3724,17 +3812,15 @@ async function loadLikeReqForDot() {
     refreshLikeDot();
   } catch (e) {}
 }
-// ✕ 개별 숨김 — localStorage에 요청 키 저장(영구), 열린 모달에서 해당 카드 제거
-function dismissLikeRequest(key) {
-  lsKeyAdd(LS_LIKE_DISMISS, [key]);
-  const body = document.getElementById('lrBody');
-  if (body) {
-    body.querySelectorAll('.lr-item').forEach(it => { if (it.dataset.lrkey === key) it.remove(); });
-    if (!body.querySelector('.lr-item') && !body.querySelector('.lr-msg')) {
-      body.innerHTML = '<div class="lr-msg">기록된 좋아요 요청이 없습니다.</div>';
-    }
-  }
-  refreshLikeDot();
+// 체크 토글(구 ✕ 대체) — '확인함/좋아요 눌러줌'을 요청 키 단위로 localStorage 저장. 행은 목록에 남고 재클릭으로 해제(✕의 캐시 삭제 없인 복구 불가 문제 해소).
+// 해당 행만 제자리 갱신(전체 재렌더 없음 — 스크롤 위치 보존).
+function toggleLikeReqChecked(key, row, btn) {
+  const s = lsKeySet(LS_LIKE_CHECKED);
+  if (s.has(key)) s.delete(key); else s.add(key);
+  lsSet(LS_LIKE_CHECKED, JSON.stringify([...s]));
+  row.classList.toggle('checked', s.has(key));
+  if (s.has(key)) { row.classList.remove('unread'); likeReqNewSet.delete(key); }   // 체크 = 그 자리에서 읽음 처리(2026-08-10) — 모달을 나가지 않아도 신규 표시가 꺼진다. 체크 해제로 되살리진 않음(읽음은 단방향)
+  if (btn) btn.setAttribute('aria-pressed', String(s.has(key)));
 }
 document.addEventListener('click', (e) => {
   const ov = document.getElementById('lrOverlay');
@@ -3743,12 +3829,12 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { closeLikeRequests(); closeStatGraph(); }   // 좋아요/일정 모달 + 그래프 모달 모두 ESC로 닫기
 });
-// 좋아요 요청 카드의 ✕(개별 숨김) — 위임. ✕는 .event 링크의 형제라 클릭이 링크로 새지 않음.
+// 요청 행 체크박스(확인/좋아요 완료 표시) — 위임. 링크(.lrq-link)의 형제라 클릭이 링크로 새지 않음.
 document.addEventListener('click', (e) => {
-  const x = e.target.closest && e.target.closest('.lr-dismiss');
-  if (!x) return;
-  const item = x.closest('.lr-item');
-  if (item && item.dataset.lrkey) dismissLikeRequest(item.dataset.lrkey);
+  const c = e.target.closest && e.target.closest('.lrq-check');
+  if (!c) return;
+  const row = c.closest('.lrq-row');
+  if (row && row.dataset.lrkey) toggleLikeReqChecked(row.dataset.lrkey, row, c);
 });
 
 // ── 다가오는 일정 (구글 시트 gid=2043421724 — 컨텐츠와 통합 시트) ──
@@ -4695,7 +4781,7 @@ function renderEvent(e, allEvents) {
   } else if (e.type === 'comment_recommend' && e.title) {
     // '누구 댓글 · 원본 숲 게시글 제목'. e.title은 링크를 담고 있던 멤버 글의 제목이다.
     //   [이벤트 탭] 그 게시글 이벤트가 타임라인에 따로 있으므로 둘의 연결이 보인다.
-    //   [좋아요 요청 모달] 게시글 이벤트 없이 단독으로 놓이므로, 이 줄이 유일한 출처 표시다.
+    //   (좋아요 요청 모달은 2026-08-10부터 renderEvent를 쓰지 않는다 — 전용 렌더 renderLikeReqBody가 같은 정보를 행 2줄째로 표시)
     // comment_member_id가 없으면(외부인 댓글·이 기능 이전 항목) 앞 조각만 빠지고 제목은 그대로 나온다 — 무회귀.
     const cm = e.comment_member_id ? findMember(e.comment_member_id) : null;
     const who = cm ? `<span style="color: ${cm.color}">${escapeHtml(cm.name)}</span> 댓글 · ` : '';
@@ -7647,6 +7733,10 @@ function buildMiCollect(kind, entries) {
     return ka - kb || a.base - b.base;
   });
 }
+// 숲에서 데뷔한 멤버(천양·임하밍·체비): 시트 I열(숲 기준)은 비워두지만 데뷔가 곧 숲 첫 방송이라 H열이 숲 기준일 그 자체 —
+// (숲 기준) 모아보기에 H열 값으로 포함한다. 그 외 I열 빈 멤버(타 플랫폼 데뷔, 숲 시작일 미추적)는 종전대로 미표시.
+const SOOP_NATIVE_DEBUT = new Set(['243000', 'imha22', 'chebi2']);
+const soopEffDate = (id, i) => i.soopDate || (SOOP_NATIVE_DEBUT.has(id) ? i.firstStream : '');
 const MI_COLLECT_FIELDS = {
   age:          { label: '나이', kind: 'age', raw: (id, i) => i.age, display: (id, i) => calcAge(id, i.age) },
   birthday:     { label: '생일', kind: 'birthday', raw: id => (MEMBER_BIRTHDAYS[id] || {}).display || '', display: id => (MEMBER_BIRTHDAYS[id] || {}).display || '' },
@@ -7655,7 +7745,7 @@ const MI_COLLECT_FIELDS = {
   fanName:      { label: '팬네임', kind: null, raw: (id, i) => i.fanName, display: (id, i) => i.fanName },
   group:        { label: '다른 소속', kind: null, raw: (id, i) => i.group, display: (id, i) => i.group },
   firstStream:  { label: '첫 방송일', kind: 'date', raw: (id, i) => i.firstStream, display: (id, i) => calcDaysSince(i.firstStream) },   // 완전한 날짜만 (D+N일) 자동 병기(calcDaysSince 재사용)
-  soopDate:     { label: '숲 기준 첫 방송일', kind: 'date', raw: (id, i) => i.soopDate, display: (id, i) => calcDaysSince(i.soopDate), onlyFilled: true },   // I열 있는 멤버만 모아 표시 — 대다수가 빈 항목이라 '—' 행은 소음(2026-08-10)
+  soopDate:     { label: '숲 기준 첫 방송일', kind: 'date', raw: (id, i) => soopEffDate(id, i), display: (id, i) => calcDaysSince(soopEffDate(id, i)), onlyFilled: true },   // I열 있는 멤버 + 숲 데뷔 3인(H열)만 모아 표시 — 그 외 빈 멤버는 '—' 대신 행 제외(2026-08-10)
   vote:         { label: '면접 득표수/득표율', kind: 'rank', raw: (id, i) => i.vote, display: (id, i) => i.vote },
   election2026: { label: '2026 반장선거 득표수/득표율', kind: 'rank', raw: (id, i) => i.election2026, display: (id, i) => i.election2026 },
 };

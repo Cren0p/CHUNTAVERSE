@@ -593,12 +593,15 @@
   .blackout-overlay { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
   .blackout-msg {
     position: sticky; top: 42vh;
-    text-align: center; padding: 0 16px;
+    width: fit-content; margin: 0 auto;         /* 내용 크기만큼 감싸고 가로 중앙 — sticky는 세로만 담당 */
+    text-align: center; padding: 20px 32px;     /* 여백 확대(2026-08-10 2차: 구 14/26이 좁다는 피드백) */
+    background: rgba(7, 10, 20, 0.45);          /* 테두리 없는 순수 스크림(3차 확정): 뒤가 어두우면 어둡게, 밝은 썸네일이면 비쳐 보임. 조절은 이 알파값 하나 */
     font-size: 22px; font-weight: 800; color: var(--text);
-    line-height: 1.45; text-shadow: 0 2px 14px rgba(0,0,0,0.85);
+    line-height: 1.25;                          /* 1.45→1.25: 반행간이 위(22px줄 +5px)·아래(30px줄 +7px)에 다르게 붙어 여백이 불균일해 보이던 원인 — 조여서 패딩이 여백을 지배하게 */
+    text-shadow: 0 2px 14px rgba(0,0,0,0.85);
   }
   .blackout-time {
-    display: block; margin-top: 10px;
+    display: block; margin-top: 12px;
     font-size: 30px; color: var(--accent);
     font-variant-numeric: tabular-nums;   /* 초가 흘러도 글자 폭이 안 흔들리게 */
   }

@@ -349,6 +349,7 @@
   .lr-head svg { width: 15px; height: 15px; display: block; }
   .lr-close {
     background: none; border: none; color: var(--muted);
+    font-family: inherit;   /* ✕ 글리프도 사이트 폰트로 — 버튼은 UA 기본 폰트라 상속이 끊긴다(좋아요·일정·통계 그래프·모아보기 등 5개 모달 공용, 2026-08-10) */
     font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 6px;
   }
   .lr-close:hover { color: var(--text); }
@@ -1907,7 +1908,7 @@
   .hall-bar-right { display: flex; align-items: center; gap: 8px; }
   .hall-bar-label { font-size: 13px; font-weight: 600; color: var(--muted); user-select: none; }
   .hall-period { display: flex; gap: 4px; flex-wrap: wrap; }
-  .hall-period-btn { font-size: 12px; font-weight: 600; padding: 5px 10px; background: var(--surface2); border: 1.5px solid var(--border); color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .hall-period-btn { font-family: inherit; font-size: 12px; font-weight: 600; padding: 5px 10px; background: var(--surface2); border: 1.5px solid var(--border); color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }   /* inherit 없으면 버튼은 UA 기본 폰트라 Pretendard를 못 받는다 — 통계 탭 .stats-period-btn과 동일 처리(2026-08-10) */
   .hall-period-btn:hover { border-color: var(--accent); }
   .hall-period-btn.active { border-color: var(--accent); color: #fff; background: var(--surface); }
   .hall-grid {
@@ -2079,9 +2080,12 @@
     padding: 22px 24px;
     display: flex; flex-direction: column;
   }
+  /* 소제목(크루 연혁 구획 + 영상 목록 제목 공용). 2026-08-10 개편: 구 12px/700/자간1.5는 제목이 자기 본문(연혁 14px·설명 15px)보다
+     작아 위계가 뒤집혀 있었고, 그 존재감을 굵기·넓은 자간으로 메우다 보니 작은 한글이 뭉쳐 보였다.
+     크기를 본문에 맞추고 굵기·자간을 낮춰 구분은 색(accent)과 600이 담당. 자간 1.5는 영문 대문자 라벨용 값이라 한글엔 과했다. */
   .crew-act-sub {
-    font-size: 12px; font-weight: 700; color: var(--accent);
-    letter-spacing: 1.5px; margin: 16px 0 7px;
+    font-size: 14px; font-weight: 600; color: var(--accent);
+    letter-spacing: 0; margin: 16px 0 10px;   /* 아래 여백 7→10: 글자가 커진 만큼 제목-목록 간격 재조정 */
   }
   .crew-act-sub:first-child { margin-top: 0; }
   /* 프로필 하단 영상 스트립. 폭(max-width)은 인라인으로 호출부가 준다 — 크루 1300 / 멤버 1000으로 위 블록과 좌우를 맞춘다. */

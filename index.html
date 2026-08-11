@@ -518,7 +518,7 @@
      통계 탭 .calendar-* 부품을 그대로 쓰고, 월 단위가 아니라 '오늘 주 ~ 마지막 일정 주'를 세로로 잇는다(월 경계 없음).
      한 칸이 74px(모바일 50px)뿐이라 칸에는 점만 두고, 날짜를 누르면 그 주 아래로 상세가 펼쳐진다.
      스크롤바 자리(both-edges): 스크롤 유무로 달력 폭이 바뀌지 않게 좌우에 같은 폭을 비워둔다 — 일정 모달에서만(다른 모달 레이아웃 불변). */
-  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; }
+  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; padding-bottom: 12px; }   /* 하단 여백은 좌우(.sch-week 패딩)와 같은 12px — 마지막 주가 모달 바닥에 붙지 않게 */
   .sch-weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
     padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
@@ -3843,6 +3843,8 @@ function closeLikeRequests() {
   const rkPanel = ov && ov.querySelector('.lr-panel');
   rankOpenPost = null;
   if (rkPanel) { rkPanel.classList.remove('rk-modal', 'sch-cal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을, 다른 모달이 달력 뷰의 스크롤바 여백을 물려받지 않게 원복
+  const lrBody = document.getElementById('lrBody');
+  if (lrBody) lrBody.style.removeProperty('min-height');   // 일정 모달이 박아둔 고정 높이 해제(lr-body는 모달 공용)
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기
@@ -4123,6 +4125,27 @@ function renderScheduleCalendar(vis) {
   return html;
 }
 
+// 달력↔목록 전환 시 모달 높이가 흔들리면 헤더의 토글 버튼 위치까지 움직여 조작감이 나빠진다.
+// 두 뷰를 실제로 한 번씩 그려 높이를 재고, 큰 쪽을 본문 최소 높이로 박아 둔다(케미 카드 높이 통일과 같은 방식).
+// 측정은 모달을 연 직후 1회. 중간 상태는 같은 실행 흐름 안에서 덮어써지므로 화면에 보이지 않는다.
+// 패널 max-height(80vh)가 상한이라, 잰 높이가 그보다 크면 어차피 두 뷰 모두 상한에 걸려 높이가 같아진다.
+function fitScheduleHeight(vis) {
+  const body = document.getElementById('lrBody');
+  const panel = document.querySelector('#lrOverlay .lr-panel');
+  if (!body) return;
+  body.style.minHeight = '';   // 재측정 전 초기화 — 모달을 닫지 않고 다시 열어도 값이 누적되지 않게
+  if (!vis.length) return;
+  const keep = body.innerHTML;
+  if (panel) panel.classList.add('sch-cal');      // 달력 전용 여백(하단 12px)까지 포함해 재야 정확
+  body.innerHTML = renderScheduleCalendar(vis);
+  const hCal = body.scrollHeight;
+  if (panel) panel.classList.remove('sch-cal');
+  body.innerHTML = vis.map(renderScheduleItem).join('');
+  const hList = body.scrollHeight;
+  body.innerHTML = keep;
+  body.style.minHeight = Math.max(hCal, hList) + 'px';
+}
+
 // 본문만 다시 그린다(헤더·모달 상태 유지) — 뷰 전환·날짜 펼침 공용
 function paintSchedule() {
   const body = document.getElementById('lrBody');
@@ -4152,6 +4175,7 @@ async function openSchedule() {
   if (rows) { lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows)); scheduleData = parseScheduleRows(rows); updatePageTitle(); }
   const vis = visibleSchedule();
   schOpenDate = vis.length ? vis[0].date : '';   // 열 때마다 가장 임박한 일정을 펼친 상태로(펼침 상태는 저장하지 않음)
+  fitScheduleHeight(vis);
   paintSchedule();
 }
 

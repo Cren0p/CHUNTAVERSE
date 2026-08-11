@@ -525,10 +525,11 @@
      본문은 flex로 남는 공간을 채우고, 내용이 넘치면 자기 스크롤로 처리(min-height:0 = flex 자식이 콘텐츠보다 작아질 수 있게). */
   .lr-panel.sch-fixed { height: var(--sch-h); }
   .lr-panel.sch-fixed .lr-body { flex: 1 1 0; min-height: 0; }
-  /* 목록 끝 표시: 짧은 뷰 아래 빈 공간이 남을 때 '내용은 여기까지'를 긋는다.
-     목록은 행마다 구분선이 이어지는 구조라 자연스럽지만, 달력은 선이 없는 구조라 붙이지 않는다(2026-08-11 확정). */
-  .sch-end { border-top: 1px solid var(--border); padding: 12px 0; display: flex; align-items: center; justify-content: center; }
-  .sch-end-dot { width: 4px; height: 4px; background: var(--muted); }
+  /* 목록 끝 표시: 짧은 뷰 아래 빈 공간이 남을 때 '내용은 여기까지'를 알린다.
+     목록은 행마다 구분선이 이어지는 구조라 자연스럽지만, 달력은 선이 없는 구조라 붙이지 않는다(2026-08-11 확정).
+     자체 border-top은 두지 않는다 — 끝 표시가 붙으면 마지막 .sch-item이 :last-child가 아니게 되어 그 행의 밑선이 살아나므로,
+     여기서 윗선을 또 그으면 1px 두 개가 맞닿아 그 선만 굵어 보인다(2026-08-11 수정). */
+  .sch-end { padding: 12px 0; text-align: center; color: var(--muted); font-size: 11px; font-weight: 600; }   /* 달력 접힘 안내(.sch-gap)와 같은 톤 — 두 뷰가 같은 말투로 '없음'을 알린다 */
   .sch-weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
     padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
@@ -4108,7 +4109,7 @@ function renderScheduleCalendar(vis) {
       const gap = j - i;
       if (gap >= 2) {   // 1주 공백은 그대로 그린다 — 접으면 달력의 연속성이 끊겨 오히려 읽기 나쁨
         const from = weeks[i].days[0], to = weeks[j - 1].days[6];
-        html += `<div class="sch-gap">일정 없는 ${gap}주 · ${from.getUTCMonth() + 1}/${from.getUTCDate()} – ${to.getUTCMonth() + 1}/${to.getUTCDate()}</div>`;
+        html += `<div class="sch-gap">${from.getUTCMonth() + 1}/${from.getUTCDate()} – ${to.getUTCMonth() + 1}/${to.getUTCDate()} · 예정된 일정 없음</div>`;
         i = j;
         continue;
       }
@@ -4139,7 +4140,7 @@ function renderScheduleCalendar(vis) {
 
 // 두 뷰의 최종 HTML은 반드시 이 헬퍼로만 만든다 — 렌더와 높이 측정이 다른 결과물을 쓰면 고정 높이가 어긋난다.
 // 끝 표시(구분선+점)는 목록에만: 목록은 행마다 구분선이 이어져 자연스럽지만 달력엔 그 어휘가 없다.
-const SCH_END_HTML = '<div class="sch-end"><span class="sch-end-dot"></span></div>';
+const SCH_END_HTML = '<div class="sch-end">이후 예정된 일정 없음</div>';
 const schCalHtml = vis => renderScheduleCalendar(vis);
 const schListHtml = vis => vis.map(renderScheduleItem).join('') + SCH_END_HTML;
 

@@ -1554,6 +1554,10 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
+    /* 스크롤 고정(scroll anchoring) 해제(2026-08-10): '설명 보기' 토글은 카드 높이를 바꾸지 않지만(아래 실측으로 고정),
+       카드 안에서 이름·설명 줄이 재배치되면 브라우저가 그 요소를 기준점으로 잡아 스크롤을 보정한다 →
+       화면 위 경계에 카드가 걸쳐 있을 때만 목록이 위아래로 튀어 보였다. 문서 높이가 불변이므로 보정 자체가 불필요. */
+    overflow-anchor: none;
   }
   .chem-card {
     background: var(--surface);

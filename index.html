@@ -518,12 +518,17 @@
      통계 탭 .calendar-* 부품을 그대로 쓰고, 월 단위가 아니라 '오늘 주 ~ 마지막 일정 주'를 세로로 잇는다(월 경계 없음).
      한 칸이 74px(모바일 50px)뿐이라 칸에는 점만 두고, 날짜를 누르면 그 주 아래로 상세가 펼쳐진다.
      스크롤바 자리(both-edges): 스크롤 유무로 달력 폭이 바뀌지 않게 좌우에 같은 폭을 비워둔다 — 일정 모달에서만(다른 모달 레이아웃 불변). */
-  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; }
-  /* 목록 끝 표시(2026-08-11): 두 뷰 높이를 큰 쪽에 맞추다 보니 짧은 뷰 아래에 빈 공간이 남는다.
-     구분선으로 '내용은 여기까지'를 긋고 점 하나로 끝을 알린다 — 아래 여백도 이 요소가 겸한다(좌우와 같은 12px). */
+  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; padding-bottom: 12px; }   /* 달력 하단 여백은 좌우(.sch-week 패딩)와 같은 12px */
+  /* 두 뷰 높이 통일(2026-08-11 재작업) — 반드시 '패널의 height'로 준다.
+     [폐기된 방식] 본문(.lr-body)에 min-height를 박으면, flex 자식의 min-height가 부모의 max-height(80vh)를 이겨
+       본문이 패널을 뚫고 나온다(실제 발생). height는 max-height가 이기므로 상한이 저절로 지켜진다.
+     본문은 flex로 남는 공간을 채우고, 내용이 넘치면 자기 스크롤로 처리(min-height:0 = flex 자식이 콘텐츠보다 작아질 수 있게). */
+  .lr-panel.sch-fixed { height: var(--sch-h); }
+  .lr-panel.sch-fixed .lr-body { flex: 1 1 0; min-height: 0; }
+  /* 목록 끝 표시: 짧은 뷰 아래 빈 공간이 남을 때 '내용은 여기까지'를 긋는다.
+     목록은 행마다 구분선이 이어지는 구조라 자연스럽지만, 달력은 선이 없는 구조라 붙이지 않는다(2026-08-11 확정). */
   .sch-end { border-top: 1px solid var(--border); padding: 12px 0; display: flex; align-items: center; justify-content: center; }
   .sch-end-dot { width: 4px; height: 4px; background: var(--muted); }
-  .lr-panel.sch-cal .sch-end { margin-top: 8px; }   /* 달력은 주 그리드가 선에 바로 붙어 답답하므로 한 칸 띄운다 */
   .sch-weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
     padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
@@ -539,7 +544,7 @@
   .calendar-daynum.sch-mo { font-size: 12px; }                                        /* 그 달이 처음 등장하는 칸: 9/1 형태(두 토막이라 살짝 작게) */
   .sch-dots { display: flex; gap: 3px; align-items: center; justify-content: center; margin-top: 1px; }
   .sch-dot { width: 5px; height: 5px; background: var(--accent); }
-  .sch-detail { border: 1px solid var(--border); border-top: none; background: var(--bg); }
+  .sch-detail { border: 1px solid var(--border); background: var(--bg); margin-top: 4px; }   /* 윗변 포함 사방 테두리(2026-08-11) — 주 그리드와 상세를 확실히 가른다 */
   .sch-detail:empty { display: none; }
   .sch-gap {
     margin: 8px 12px; padding: 8px 0; text-align: center;
@@ -3847,9 +3852,10 @@ function closeLikeRequests() {
   stopRankPoll();          // 순위 모달과 오버레이를 공유 — 닫히면 폴링도 반드시 멈춘다
   const rkPanel = ov && ov.querySelector('.lr-panel');
   rankOpenPost = null;
-  if (rkPanel) { rkPanel.classList.remove('rk-modal', 'sch-cal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을, 다른 모달이 달력 뷰의 스크롤바 여백을 물려받지 않게 원복
-  const lrBody = document.getElementById('lrBody');
-  if (lrBody) lrBody.style.removeProperty('min-height');   // 일정 모달이 박아둔 고정 높이 해제(lr-body는 모달 공용)
+  if (rkPanel) {
+    rkPanel.classList.remove('rk-modal', 'sch-cal', 'sch-fixed');   // 순위 색·일정 모달의 달력 여백/고정 높이를 다음 모달이 물려받지 않게 원복
+    rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); rkPanel.style.removeProperty('--sch-h');
+  }
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기
@@ -4119,7 +4125,8 @@ function renderScheduleCalendar(vis) {
       if (items.length) cls.push('sch-has');
       if (k === schOpenDate) cls.push('sch-open');
       const num = firstOfMonth ? `${mo}/${d.getUTCDate()}` : `${d.getUTCDate()}`;
-      const dots = items.length ? `<span class="sch-dots">${items.map(() => '<span class="sch-dot"></span>').join('')}</span>` : '';
+      // 점은 최대 4개까지만(칸 폭 74px·모바일 50px — 5개부터 좁은 화면에서 칸을 넘는다). 실제 건수는 눌러서 확인.
+      const dots = items.length ? `<span class="sch-dots">${items.slice(0, 4).map(() => '<span class="sch-dot"></span>').join('')}</span>` : '';
       html += `<div class="${cls.join(' ')}" data-schday="${items.length ? k : ''}"><span class="calendar-daynum${firstOfMonth ? ' sch-mo' : ''}">${num}</span>${dots}</div>`;
     }
     html += '</div>';
@@ -4131,8 +4138,9 @@ function renderScheduleCalendar(vis) {
 }
 
 // 두 뷰의 최종 HTML은 반드시 이 헬퍼로만 만든다 — 렌더와 높이 측정이 다른 결과물을 쓰면 고정 높이가 어긋난다.
+// 끝 표시(구분선+점)는 목록에만: 목록은 행마다 구분선이 이어져 자연스럽지만 달력엔 그 어휘가 없다.
 const SCH_END_HTML = '<div class="sch-end"><span class="sch-end-dot"></span></div>';
-const schCalHtml = vis => renderScheduleCalendar(vis) + SCH_END_HTML;
+const schCalHtml = vis => renderScheduleCalendar(vis);
 const schListHtml = vis => vis.map(renderScheduleItem).join('') + SCH_END_HTML;
 
 // 달력↔목록 전환 시 모달 높이가 흔들리면 헤더의 토글 버튼 위치까지 움직여 조작감이 나빠진다.
@@ -4142,18 +4150,22 @@ const schListHtml = vis => vis.map(renderScheduleItem).join('') + SCH_END_HTML;
 function fitScheduleHeight(vis) {
   const body = document.getElementById('lrBody');
   const panel = document.querySelector('#lrOverlay .lr-panel');
-  if (!body) return;
-  body.style.minHeight = '';   // 재측정 전 초기화 — 모달을 닫지 않고 다시 열어도 값이 누적되지 않게
+  if (!body || !panel) return;
+  panel.classList.remove('sch-fixed');            // 재측정 전 해제 — 이전 고정값이 측정을 오염시키지 않게
+  panel.style.removeProperty('--sch-h');
   if (!vis.length) return;
   const keep = body.innerHTML;
-  if (panel) panel.classList.add('sch-cal');      // 달력 전용 여백(끝 표시 위 8px)까지 포함해 재야 정확
+  const wasCal = panel.classList.contains('sch-cal');
+  panel.classList.add('sch-cal');                 // 달력 전용 여백까지 포함해 재야 정확
   body.innerHTML = schCalHtml(vis);
-  const hCal = body.scrollHeight;
-  if (panel) panel.classList.remove('sch-cal');
+  const hCal = panel.scrollHeight;                // 헤더 포함 패널 전체 높이. 80vh를 넘는 내용은 이미 상한값으로 측정된다
+  panel.classList.remove('sch-cal');
   body.innerHTML = schListHtml(vis);
-  const hList = body.scrollHeight;
+  const hList = panel.scrollHeight;
+  panel.classList.toggle('sch-cal', wasCal);
   body.innerHTML = keep;
-  body.style.minHeight = Math.max(hCal, hList) + 'px';
+  panel.style.setProperty('--sch-h', Math.max(hCal, hList) + 'px');
+  panel.classList.add('sch-fixed');               // height로 고정 — max-height(80vh)가 상한이라 넘칠 수 없다
 }
 
 // 본문만 다시 그린다(헤더·모달 상태 유지) — 뷰 전환·날짜 펼침 공용

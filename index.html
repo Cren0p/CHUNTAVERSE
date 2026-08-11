@@ -514,6 +514,33 @@
     object-fit: cover;
     border: 1px solid var(--border);
   }
+  /* ── 일정 모달 달력 뷰(2026-08-10) ──
+     통계 탭 .calendar-* 부품을 그대로 쓰고, 월 단위가 아니라 '오늘 주 ~ 마지막 일정 주'를 세로로 잇는다(월 경계 없음).
+     한 칸이 74px(모바일 50px)뿐이라 칸에는 점만 두고, 날짜를 누르면 그 주 아래로 상세가 펼쳐진다.
+     스크롤바 자리(both-edges): 스크롤 유무로 달력 폭이 바뀌지 않게 좌우에 같은 폭을 비워둔다 — 일정 모달에서만(다른 모달 레이아웃 불변). */
+  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; }
+  .sch-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
+  }
+  .sch-week { padding: 0 12px; }
+  .sch-week + .sch-week { margin-top: 4px; }
+  .sch-week .calendar-day { cursor: default; }                                        /* 통계 달력은 모든 칸이 클릭 대상이지만 여기선 일정 있는 날만 */
+  .sch-week .calendar-day:not(.sch-has):hover { border-color: transparent; }
+  .sch-week .calendar-day.past { opacity: 0.25; }                                     /* 이번 주 중 지나간 날 */
+  .sch-week .calendar-day.sch-has { background: rgba(97,255,236,0.18); color: var(--accent); cursor: pointer; }
+  .sch-week .calendar-day.sch-has:hover { background: rgba(97,255,236,0.30); border-color: var(--accent); }
+  .sch-week .calendar-day.sch-open { border-color: var(--accent); }
+  .calendar-daynum.sch-mo { font-size: 12px; }                                        /* 그 달이 처음 등장하는 칸: 9/1 형태(두 토막이라 살짝 작게) */
+  .sch-dots { display: flex; gap: 3px; align-items: center; justify-content: center; margin-top: 1px; }
+  .sch-dot { width: 5px; height: 5px; background: var(--accent); }
+  .sch-detail { border: 1px solid var(--border); border-top: none; background: var(--bg); }
+  .sch-detail:empty { display: none; }
+  .sch-gap {
+    margin: 8px 12px; padding: 8px 0; text-align: center;
+    border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
+    color: var(--muted); font-size: 11px; font-weight: 600;
+  }
   .sch-item-dday {
     font-size: 13px; color: var(--accent); font-weight: 700;
     white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
@@ -3815,7 +3842,7 @@ function closeLikeRequests() {
   stopRankPoll();          // 순위 모달과 오버레이를 공유 — 닫히면 폴링도 반드시 멈춘다
   const rkPanel = ov && ov.querySelector('.lr-panel');
   rankOpenPost = null;
-  if (rkPanel) { rkPanel.classList.remove('rk-modal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을 물려받지 않게 원복
+  if (rkPanel) { rkPanel.classList.remove('rk-modal', 'sch-cal'); rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); }   // 좋아요 요청·일정 모달이 순위 색을, 다른 모달이 달력 뷰의 스크롤바 여백을 물려받지 않게 원복
   syncBodyScrollLock();
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;  // 일정 모달도 lrOverlay를 공유 — 선로딩분 동일하게 폐기
@@ -4028,21 +4055,119 @@ function preloadSchedule() {
   return schedulePreload;
 }
 
+const LS_SCH_VIEW = 'chuntaverse_sch_view_v1';   // 'cal'(달력) | 'list'(목록) — 모달을 닫아도 유지(2026-08-10 요청)
+let schOpenDate = '';   // 달력에서 펼친 날짜 (한 번에 하나 — 통계 탭 달력과 동일하게 '선택한 날짜의 정보만')
+
+// 달력 뷰: 오늘이 속한 주부터 마지막 일정이 속한 주까지 주 단위로 잇는다(월 그리드 아님 → 빈 달을 그리지 않음).
+// 일정 없는 주가 2주 이상 이어지면 한 줄 안내로 접는다(펼치기 없음 — 펼쳐도 빈 칸뿐).
+function renderScheduleCalendar(vis) {
+  const dayMs = 86400000;
+  const kst = kstNow();
+  const today = new Date(Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()));
+  const key = d => `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  const addDays = (d, n) => new Date(d.getTime() + n * dayMs);
+  const parseD = s => { const [y, m, dd] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, dd)); };
+
+  const byDate = {};
+  for (const it of vis) (byDate[it.date] = byDate[it.date] || []).push(it);
+
+  // 주 배열 — 시작은 '오늘이 속한 주'(첫 일정 주부터 그리면 오늘이 화면에서 빠져 남은 기간 감각이 사라짐)
+  const start = addDays(today, -today.getUTCDay());
+  const last = parseD(vis[vis.length - 1].date);
+  const end = addDays(last, 6 - last.getUTCDay());
+  const weeks = [];
+  for (let s = start; s <= end; s = addDays(s, 7)) {
+    const days = [];
+    for (let i = 0; i < 7; i++) days.push(addDays(s, i));
+    weeks.push({ days, has: days.some(d => byDate[key(d)]) });
+  }
+
+  const dowNames = ['일', '월', '화', '수', '목', '금', '토'];
+  let html = '<div class="sch-weekdays">' + dowNames.map((d, i) =>
+    `<div class="calendar-weekday${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${d}</div>`).join('') + '</div>';
+
+  const shownMonths = new Set();
+  let i = 0;
+  while (i < weeks.length) {
+    if (!weeks[i].has) {
+      let j = i;
+      while (j < weeks.length && !weeks[j].has) j++;
+      const gap = j - i;
+      if (gap >= 2) {   // 1주 공백은 그대로 그린다 — 접으면 달력의 연속성이 끊겨 오히려 읽기 나쁨
+        const from = weeks[i].days[0], to = weeks[j - 1].days[6];
+        html += `<div class="sch-gap">일정 없는 ${gap}주 · ${from.getUTCMonth() + 1}/${from.getUTCDate()} – ${to.getUTCMonth() + 1}/${to.getUTCDate()}</div>`;
+        i = j;
+        continue;
+      }
+    }
+    html += '<div class="sch-week"><div class="calendar-grid">';
+    for (const d of weeks[i].days) {
+      const k = key(d), items = byDate[k] || [];
+      const mo = d.getUTCMonth() + 1;
+      const firstOfMonth = !shownMonths.has(mo);   // 그 달이 화면에 처음 나오는 칸에만 9/1 형태로 — 월 라벨 행을 따로 두지 않는다
+      if (firstOfMonth) shownMonths.add(mo);
+      const cls = ['calendar-day'];
+      if (d < today) cls.push('past');
+      if (k === key(today)) cls.push('today');
+      if (items.length) cls.push('sch-has');
+      if (k === schOpenDate) cls.push('sch-open');
+      const num = firstOfMonth ? `${mo}/${d.getUTCDate()}` : `${d.getUTCDate()}`;
+      const dots = items.length ? `<span class="sch-dots">${items.map(() => '<span class="sch-dot"></span>').join('')}</span>` : '';
+      html += `<div class="${cls.join(' ')}" data-schday="${items.length ? k : ''}"><span class="calendar-daynum${firstOfMonth ? ' sch-mo' : ''}">${num}</span>${dots}</div>`;
+    }
+    html += '</div>';
+    const open = weeks[i].days.map(key).find(k => k === schOpenDate && byDate[k]);
+    html += `<div class="sch-detail">${open ? byDate[open].map(renderScheduleItem).join('') : ''}</div></div>`;
+    i++;
+  }
+  return html;
+}
+
+// 본문만 다시 그린다(헤더·모달 상태 유지) — 뷰 전환·날짜 펼침 공용
+function paintSchedule() {
+  const body = document.getElementById('lrBody');
+  const panel = document.querySelector('#lrOverlay .lr-panel');
+  if (!body) return;
+  const vis = visibleSchedule();
+  const isCal = lsGet(LS_SCH_VIEW, 'cal') === 'cal' && vis.length > 0;
+  if (panel) panel.classList.toggle('sch-cal', isCal);   // 스크롤바 자리 확보는 달력일 때만
+  const btn = document.getElementById('schViewToggle');
+  if (btn) btn.innerHTML = isCal ? `${SVG_ICONS.calendar}<span>달력</span>` : `${SVG_ICONS.eventList}<span>목록</span>`;
+  if (vis.length === 0) { body.innerHTML = '<div class="lr-msg">예정된 일정이 없습니다.</div>'; return; }
+  body.innerHTML = isCal ? renderScheduleCalendar(vis) : vis.map(renderScheduleItem).join('');
+}
+
 async function openSchedule() {
   const ov = document.getElementById('lrOverlay');
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !body) return;
-  head.innerHTML = `<span style="color:var(--accent)">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  head.innerHTML = `<span style="color:var(--accent)">${SVG_ICONS.calendar}다가오는 천타버스 일정</span>`
+    + `<span class="rk-head-right"><button class="sort-toggle" id="schViewToggle" type="button"></button>`
+    + `<button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button></span>`;
   ov.hidden = false;
   syncBodyScrollLock();
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   const rows = await preloadSchedule();  // hover로 미리 받아둔 게 있으면 그것, 없으면 지금 받음
   if (rows) { lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows)); scheduleData = parseScheduleRows(rows); updatePageTitle(); }
   const vis = visibleSchedule();
-  if (vis.length === 0) { body.innerHTML = '<div class="lr-msg">예정된 일정이 없습니다.</div>'; return; }
-  body.innerHTML = vis.map(renderScheduleItem).join('');
+  schOpenDate = vis.length ? vis[0].date : '';   // 열 때마다 가장 임박한 일정을 펼친 상태로(펼침 상태는 저장하지 않음)
+  paintSchedule();
 }
+
+// 달력 뷰 조작 — 날짜 펼침(한 번에 하나) · 목록/달력 전환(선택은 localStorage 유지)
+document.addEventListener('click', (e) => {
+  const cell = e.target.closest && e.target.closest('[data-schday]');
+  if (cell && cell.dataset.schday) {
+    schOpenDate = (schOpenDate === cell.dataset.schday) ? '' : cell.dataset.schday;
+    paintSchedule();
+    return;
+  }
+  if (e.target.closest && e.target.closest('#schViewToggle')) {
+    lsSet(LS_SCH_VIEW, lsGet(LS_SCH_VIEW, 'cal') === 'cal' ? 'list' : 'cal');
+    paintSchedule();
+  }
+});
 
 // 모달 리스트 항목: 절대 날짜·시간 + 제목(+링크) + D-day 배지(목록은 날짜 단위 D-day로 고정 — 똑딱이는 D-time은 상단바 버튼 전용).
 function renderScheduleItem(item) {

@@ -518,7 +518,12 @@
      통계 탭 .calendar-* 부품을 그대로 쓰고, 월 단위가 아니라 '오늘 주 ~ 마지막 일정 주'를 세로로 잇는다(월 경계 없음).
      한 칸이 74px(모바일 50px)뿐이라 칸에는 점만 두고, 날짜를 누르면 그 주 아래로 상세가 펼쳐진다.
      스크롤바 자리(both-edges): 스크롤 유무로 달력 폭이 바뀌지 않게 좌우에 같은 폭을 비워둔다 — 일정 모달에서만(다른 모달 레이아웃 불변). */
-  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; padding-bottom: 12px; }   /* 하단 여백은 좌우(.sch-week 패딩)와 같은 12px — 마지막 주가 모달 바닥에 붙지 않게 */
+  .lr-panel.sch-cal .lr-body { scrollbar-gutter: stable both-edges; }
+  /* 목록 끝 표시(2026-08-11): 두 뷰 높이를 큰 쪽에 맞추다 보니 짧은 뷰 아래에 빈 공간이 남는다.
+     구분선으로 '내용은 여기까지'를 긋고 점 하나로 끝을 알린다 — 아래 여백도 이 요소가 겸한다(좌우와 같은 12px). */
+  .sch-end { border-top: 1px solid var(--border); padding: 12px 0; display: flex; align-items: center; justify-content: center; }
+  .sch-end-dot { width: 4px; height: 4px; background: var(--muted); }
+  .lr-panel.sch-cal .sch-end { margin-top: 8px; }   /* 달력은 주 그리드가 선에 바로 붙어 답답하므로 한 칸 띄운다 */
   .sch-weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
     padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
@@ -4125,6 +4130,11 @@ function renderScheduleCalendar(vis) {
   return html;
 }
 
+// 두 뷰의 최종 HTML은 반드시 이 헬퍼로만 만든다 — 렌더와 높이 측정이 다른 결과물을 쓰면 고정 높이가 어긋난다.
+const SCH_END_HTML = '<div class="sch-end"><span class="sch-end-dot"></span></div>';
+const schCalHtml = vis => renderScheduleCalendar(vis) + SCH_END_HTML;
+const schListHtml = vis => vis.map(renderScheduleItem).join('') + SCH_END_HTML;
+
 // 달력↔목록 전환 시 모달 높이가 흔들리면 헤더의 토글 버튼 위치까지 움직여 조작감이 나빠진다.
 // 두 뷰를 실제로 한 번씩 그려 높이를 재고, 큰 쪽을 본문 최소 높이로 박아 둔다(케미 카드 높이 통일과 같은 방식).
 // 측정은 모달을 연 직후 1회. 중간 상태는 같은 실행 흐름 안에서 덮어써지므로 화면에 보이지 않는다.
@@ -4136,11 +4146,11 @@ function fitScheduleHeight(vis) {
   body.style.minHeight = '';   // 재측정 전 초기화 — 모달을 닫지 않고 다시 열어도 값이 누적되지 않게
   if (!vis.length) return;
   const keep = body.innerHTML;
-  if (panel) panel.classList.add('sch-cal');      // 달력 전용 여백(하단 12px)까지 포함해 재야 정확
-  body.innerHTML = renderScheduleCalendar(vis);
+  if (panel) panel.classList.add('sch-cal');      // 달력 전용 여백(끝 표시 위 8px)까지 포함해 재야 정확
+  body.innerHTML = schCalHtml(vis);
   const hCal = body.scrollHeight;
   if (panel) panel.classList.remove('sch-cal');
-  body.innerHTML = vis.map(renderScheduleItem).join('');
+  body.innerHTML = schListHtml(vis);
   const hList = body.scrollHeight;
   body.innerHTML = keep;
   body.style.minHeight = Math.max(hCal, hList) + 'px';
@@ -4157,7 +4167,7 @@ function paintSchedule() {
   const btn = document.getElementById('schViewToggle');
   if (btn) btn.innerHTML = isCal ? `${SVG_ICONS.calendar}<span>달력</span>` : `${SVG_ICONS.eventList}<span>목록</span>`;
   if (vis.length === 0) { body.innerHTML = '<div class="lr-msg">예정된 일정이 없습니다.</div>'; return; }
-  body.innerHTML = isCal ? renderScheduleCalendar(vis) : vis.map(renderScheduleItem).join('');
+  body.innerHTML = isCal ? schCalHtml(vis) : schListHtml(vis);
 }
 
 async function openSchedule() {

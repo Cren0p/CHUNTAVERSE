@@ -3424,20 +3424,25 @@ function getTodayCelebrations() {
     if (!bd || bd.month !== cm || bd.day !== cd) continue;
     const info = MEMBER_INFO[m.id];
     const birthMatch = info?.age?.match(/^(\d{4})년생$/);
-    const nthText = birthMatch ? `${cy - parseInt(birthMatch[1])}번째 ` : '';
+    // '만 N세'로 못박는다(2026-08-11): 구 'N번째 생일'은 태어난 날을 첫 번째로 세는 감각과 충돌해 해석이 갈렸다.
+    // 값 자체는 동일(cy - 출생연도 = 만 나이). 출생연도를 모르면 나이 조각을 통째로 뺀다.
+    const nthText = birthMatch ? `만 ${cy - parseInt(birthMatch[1])}세 ` : '';
     results.push(celebBox(CELEB_SVG.birthday, `${m.name}님의 ${nthText}생일을<br>축하합니다!`, m.name, '생축!', m.color, `members:${m.id}`));
   }
 
   if (cm === 11 && cd === 30 && cy > 2025) {
     results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을<br>축하합니다!`, '천타버스', `${cy - 2025}주년!`, '#61FFEC', 'members:crew'));
   }
+  // 일수는 '결성 후 N일'(2026-08-11): 시작일을 0으로 두는 경과일이라 '결성 N일'로 쓰면 시작일을 1일차로 세는 관습과 하루 어긋나 보인다.
+  // '후'를 넣어 기준을 문구에 드러낸다 — 프로필의 (D+N일) 표기와 같은 값.
   const ctDays = Math.floor((todayMs - CT_FORMATION.getTime()) / 86400000);
   if (ctDays > 0 && ctDays % 100 === 0 && !(cm === 11 && cd === 30)) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${ctDays}일을<br>축하합니다!`, '천타버스', `${ctDays}일!`, '#61FFEC', 'members:crew'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 후 ${ctDays}일을<br>축하합니다!`, '천타버스', `${ctDays}일!`, '#61FFEC', 'members:crew'));
   }
 
   // 방송 기산 기준이 멤버마다 다름(2026-07-31 확정): 아래 명단은 '숲 기준일'을 기념하는 멤버 — "숲 방송"으로 표기하고 시트 I열(soopDate) 날짜로 기산(비면 H열 폴백).
   // 그 외(마다옴·나나문·임하밍·문모모·체비·플리)는 '플랫폼 무관 첫 방송일(H열)'이라 "숲"을 빼고 "방송"으로 표기.
+  // 천양은 어느 쪽도 아니다(2026-08-11 명시): 첫 방송일이 정확히 알려지지 않아 시트가 비어 있고, 그래서 아래 루프가 조용히 건너뛴다 — 명단 누락이 아니라 데이터 부재.
   // 2026-08-10 개편: 구 H열의 숲 기준일이 I열로 이동, H열은 전원 실제 첫 방송일 — 명단 멤버의 기산 날짜와 문구는 개편 전과 동일하게 유지된다.
   const SOOP_BASED_START = new Set(['kappuchan', 'kyaang123', 'wellro314', 'mocamu2', 'dalta20', 'tleod1818']);   // 빙밍: 숲 데뷔 2022-10-04 기준(2026-08-02)
   for (const m of MEMBERS) {
@@ -3454,7 +3459,7 @@ function getTodayCelebrations() {
     } else {
       const days = Math.floor((todayMs - Date.UTC(fy, fm - 1, fd)) / 86400000);
       if (days > 0 && days % 100 === 0) {
-        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} ${days}일을<br>축하합니다!`, m.name, `${days}일!`, m.color, `members:${m.id}`));
+        results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} 후 ${days}일을<br>축하합니다!`, m.name, `${days}일!`, m.color, `members:${m.id}`));
       }
     }
   }

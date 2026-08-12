@@ -4146,7 +4146,6 @@ const schListHtml = vis => vis.map(renderScheduleItem).join('') + SCH_END_HTML;
 // 패널 max-height(80vh)가 상한이라, 잰 높이가 그보다 크면 어차피 두 뷰 모두 상한에 걸려 높이가 같아진다.
 function fitScheduleHeight(vis) {
   const body = document.getElementById('lrBody');
-  const head = document.getElementById('lrHead');
   const panel = document.querySelector('#lrOverlay .lr-panel');
   if (!body || !panel) return;
   panel.classList.remove('sch-fixed');            // 재측정 전 해제 — 이전 고정값이 측정을 오염시키지 않게
@@ -4154,19 +4153,26 @@ function fitScheduleHeight(vis) {
   if (!vis.length) return;
   const keep = body.innerHTML;
   const wasCal = panel.classList.contains('sch-cal');
-  // 본문의 '콘텐츠 높이'를 재는 이유: 패널 높이를 재면 max-height(80vh)에 걸려 잘린 값이 나와 실제 필요 높이를 알 수 없다.
-  // scrollHeight는 잘려도 전체 높이를 돌려준다. 여기에 머리말 높이를 더해 패널 필요 높이를 구성한다.
+  // 측정법(2026-08-12 재작업): 상한(max-height)을 잠시 풀고 패널의 '자연 높이'를 통째로 잰다.
+  //   · 상한이 걸린 채 재면 잘린 값이 나와 필요 높이를 알 수 없다.
+  //   · 부분(머리말+본문)을 더해 조립하는 방식은 box-sizing:border-box 때문에 패널 자신의 상하 테두리 2px이 빠져
+  //     그만큼 본문이 모자라고, 딱 그 몇 px 때문에 스크롤바가 떴다(구 방식의 실패 원인).
+  //   패널을 통째로 재면 테두리·머리말·여백이 전부 포함되므로 산술 조립 자체가 필요 없다.
+  // 오버레이가 align-items:center라 상한을 풀어도 패널이 늘어나지 않고 내용 높이를 따른다.
+  // 측정 중 상태는 같은 실행 흐름에서 최종 화면으로 덮이므로 눈에 보이지 않는다.
+  const keepMax = panel.style.maxHeight;
+  panel.style.maxHeight = 'none';
   panel.classList.add('sch-cal');                 // 달력 전용 여백(하단 12px·좌우 gutter)까지 포함해 재야 정확
   body.innerHTML = schCalHtml(vis);
-  const hCal = body.scrollHeight;
+  const hCal = panel.getBoundingClientRect().height;
   panel.classList.remove('sch-cal');
   body.innerHTML = schListHtml(vis);
-  const hList = body.scrollHeight;
+  const hList = panel.getBoundingClientRect().height;
   panel.classList.toggle('sch-cal', wasCal);
   body.innerHTML = keep;
-  const headH = head ? head.getBoundingClientRect().height : 0;
-  // +1은 반올림 여유: scrollHeight는 정수라 실제가 600.4px이면 600으로 깎여 1px이 모자라고, 그 1px 때문에 스크롤바가 뜬다.
-  panel.style.setProperty('--sch-h', Math.ceil(headH + Math.max(hCal, hList)) + 1 + 'px');
+  if (keepMax) panel.style.maxHeight = keepMax; else panel.style.removeProperty('max-height');
+  // 올림 + 1px 여유: 자연 높이는 소수(예: 626.4)라 내림하면 그 0.4px 때문에 다시 스크롤바가 뜬다.
+  panel.style.setProperty('--sch-h', Math.ceil(Math.max(hCal, hList)) + 1 + 'px');
   panel.classList.add('sch-fixed');               // height로 고정 — max-height(80vh)가 상한이라 넘칠 수 없다
 }
 

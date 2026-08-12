@@ -4153,6 +4153,12 @@ function fitScheduleHeight(vis) {
   if (!vis.length) return;
   const keep = body.innerHTML;
   const wasCal = panel.classList.contains('sch-cal');
+  const keepOpen = schOpenDate;
+  // 달력은 '가장 큰 상세'가 열린 상태로 잰다(2026-08-12): 같은 날 일정이 여럿인 날을 누르면 상세가 그만큼 길어지는데,
+  // 첫 일정(대개 1건) 기준으로만 재두면 그 날을 누르는 순간 높이가 모자라 스크롤이 생긴다. 최악의 경우로 재두면 어떤 날짜를 눌러도 높이가 그대로.
+  const cnt = {};
+  for (const it of vis) cnt[it.date] = (cnt[it.date] || 0) + 1;
+  schOpenDate = Object.keys(cnt).reduce((a, b) => (cnt[b] > cnt[a] ? b : a));
   // 측정법(2026-08-12 재작업): 상한(max-height)을 잠시 풀고 패널의 '자연 높이'를 통째로 잰다.
   //   · 상한이 걸린 채 재면 잘린 값이 나와 필요 높이를 알 수 없다.
   //   · 부분(머리말+본문)을 더해 조립하는 방식은 box-sizing:border-box 때문에 패널 자신의 상하 테두리 2px이 빠져
@@ -4169,6 +4175,7 @@ function fitScheduleHeight(vis) {
   body.innerHTML = schListHtml(vis);
   const hList = panel.getBoundingClientRect().height;
   panel.classList.toggle('sch-cal', wasCal);
+  schOpenDate = keepOpen;   // 측정용으로 바꿨던 펼침 날짜 원복
   body.innerHTML = keep;
   if (keepMax) panel.style.maxHeight = keepMax; else panel.style.removeProperty('max-height');
   // 올림 + 1px 여유: 자연 높이는 소수(예: 626.4)라 내림하면 그 0.4px 때문에 다시 스크롤바가 뜬다.
@@ -4188,6 +4195,13 @@ function paintSchedule() {
   if (btn) btn.innerHTML = isCal ? `${SVG_ICONS.calendar}<span>달력</span>` : `${SVG_ICONS.eventList}<span>목록</span>`;
   if (vis.length === 0) { body.innerHTML = '<div class="lr-msg">예정된 일정이 없습니다.</div>'; return; }
   body.innerHTML = isCal ? schCalHtml(vis) : schListHtml(vis);
+  // 잔여 오차 자동 보정(2026-08-12): 고정 높이를 씌운 뒤에도 실제로 몇 px 넘치면 그만큼만 키운다.
+  // 소수점 누락·폰트 교체·브라우저별 반올림 등 원인이 무엇이든 '실제 넘침량'으로 메우므로 추정에 기대지 않는다.
+  // 넘치지 않으면 계산이 0이라 아무 일도 없고, 진짜로 상한(80vh)을 넘는 내용은 max-height가 이겨 스크롤이 정상 동작으로 남는다.
+  if (panel && panel.classList.contains('sch-fixed')) {
+    const over = body.scrollHeight - body.clientHeight;
+    if (over > 0) panel.style.setProperty('--sch-h', Math.ceil(panel.getBoundingClientRect().height + over) + 'px');
+  }
 }
 
 async function openSchedule() {

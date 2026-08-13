@@ -7482,17 +7482,22 @@ const HALL_PERIODS = [
   { key: 'h1',    label: '2026 상반기' },
   { key: 'h2',    label: '2026 하반기' },
 ];
-const HALL_H1_CHAT_MONTH  = '2026-06';                 // 상반기 채팅 버킷(채팅 수집 6/5 개시 → 6월=상반기 전체)
-const HALL_H2_START_MONTH = '2026-07';                 // 하반기 채팅 버킷 시작월(from)
+// 상반기는 시작·종료월 둘 다 필요하고 하반기는 시작월만 필요하다 — 워커 /chat-counts의 to는 '거기까지'라
+// 진행 중인 하반기에 상한을 걸면 새 달이 열릴 때마다 상수를 고쳐야 한다(미지정 = 현재 KST월까지가 맞다).
+// [2026-08-13] 상반기가 HALL_H1_CHAT_MONTH='2026-06' 단일 버킷이었다. 채팅 수집 개시가 6/5라 그때는 6월=상반기 전체가 맞았지만,
+//   VOD 소급 수집으로 2026-01~05 버킷이 채워지면서 상반기 채팅 지표가 5개월치를 조용히 빠뜨리고 있었다 → from+to 범위 질의로 교체.
+const HALL_H1_START_MONTH = '2026-01';                 // 상반기 채팅 버킷 시작월(from)
+const HALL_H1_END_MONTH   = '2026-06';                 // 상반기 채팅 버킷 종료월(to — 그 달 포함)
+const HALL_H2_START_MONTH = '2026-07';                 // 하반기 채팅 버킷 시작월(from) — 상한 없음(현재 KST월까지)
 const HALL_H1_LO = kstMonthStartMs(2026, 1);           // 2026-01-01 KST 자정 (세션·시트 상반기 하한) — 로컬 Date 생성자는 뷰어 TZ에 따라 경계가 밀려 금지(KST 정렬 정책)
 const HALL_H2_LO = kstMonthStartMs(2026, 7);           // 2026-07-01 KST 자정 (상/하반기 경계)
 const HALL_H2_HI = kstMonthStartMs(2027, 1);           // 2027-01-01 KST 자정 (하반기 상한)
 const hallChemCache = {};
 
-// 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-06 버킷, h2=2026-07~현재 합산. 기간별 캐시.
+// 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-01~06 합산, h2=2026-07~현재 합산. 기간별 캐시.
 async function loadHallChem(period) {
   let url = WORKER_URL + '/chat-counts';
-  if (period === 'h1') url += '?month=' + HALL_H1_CHAT_MONTH;
+  if (period === 'h1') url += '?from=' + HALL_H1_START_MONTH + '&to=' + HALL_H1_END_MONTH;
   else if (period === 'h2') url += '?from=' + HALL_H2_START_MONTH;
   try {
     const res = await fetch(url);
@@ -7508,7 +7513,7 @@ async function refreshHallChem() {
   const cached = hallChemCache[period];
   if (!cached) return;
   let url = WORKER_URL + '/chat-counts';
-  if (period === 'h1') url += '?month=' + HALL_H1_CHAT_MONTH;
+  if (period === 'h1') url += '?from=' + HALL_H1_START_MONTH + '&to=' + HALL_H1_END_MONTH;
   else if (period === 'h2') url += '?from=' + HALL_H2_START_MONTH;
   try {
     const res = await fetch(url);

@@ -2627,7 +2627,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-17b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-19a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3488,12 +3488,17 @@ function parseTopbarRows(rows) {
   const out = [];
   for (const r of (rows || [])) {
     const a = (r[0] || '').trim();
-    // A열 두 갈래(2026-08-13): 주소면 새 창 링크, 숫자면 그 gid 탭을 내용으로 읽는 모달.
-    //   둘 다 아니면 빈 행·메모성 행으로 보고 제외 — 주소 판정은 프로토콜 화이트리스트 유지(javascript: 등 차단, 채팅 링크와 동일 정책).
-    //   B~F(아이콘·라벨·색)는 두 갈래가 같은 값을 쓴다. 버튼 생김새가 같아야 하므로 여기서 갈라지지 않는다.
+    // A열 세 갈래(2026-08-13, 2026-08-19): 주소면 새 창 링크, 숫자면 그 gid 탭을 내용으로 읽는 모달.
+    //   예약어 'title'은 버튼이 아니라 좌상단 로고 교체 행(parseTitleOverride가 따로 읽음) — 여기서는 아래 판정으로 자연 제외된다.
+    //   셋 다 아니면 빈 행·메모성 행으로 보고 제외 — 주소 판정은 프로토콜 화이트리스트 유지(javascript: 등 차단, 채팅 링크와 동일 정책).
+    //   B~F(아이콘·라벨·색)는 링크·모달이 같은 값을 쓴다. 버튼 생김새가 같아야 하므로 여기서 갈라지지 않는다.
     const isUrl = /^https?:\/\//.test(a);
     const gid = /^\d+$/.test(a) ? a : '';
     if (!isUrl && !gid) continue;
+    // G열(만료일 · 2026-08-19): 값이 해석되면 그 시각까지만 노출(kstExpiryMs — 날짜=그날 자정, +HH:mm=그 분). 지나면 버튼 숨김.
+    //   빈 칸·형식 밖은 무기한 노출 — hex 무효→기본색과 같은 관대 관례(G에 메모를 적어도 버튼이 사라지지 않게).
+    const until = (r[6] || '').trim();
+    if (until) { const ex = kstExpiryMs(until); if (ex !== null && Date.now() > ex) continue; }
     const iconKey = (r[1] || '').trim();
     const hexRaw = (r[5] || '').trim();
     out.push({
@@ -3626,14 +3631,38 @@ async function loadLikeRankBtn() {
   } catch (e) {}   // 실패 시 캐시본 유지 — 상단바 링크 시트와 동일 정책
 }
 
+// ── 좌상단 로고 교체(2026-08-19) — 상단바 시트에 A열 예약어 'title' 행 하나로 제어 ─────────
+// Title.webp 파일은 그대로 두고 표시만 전환한다: B열=이미지 주소, G열=만료일(버튼과 동일 규칙 — 지나면 기본 로고 복귀).
+// 주소는 https:// 또는 레포 상대경로(이미지 확장자)만 허용. '//호스트' 형태(프로토콜 상속 외부행)와 javascript: 류는 형식에서 차단.
+// 행이 없거나 주소가 형식 밖이거나 만료가 지났으면 null → 기본 Title.webp. 여러 title 행이면 첫 행만 쓴다.
+function parseTitleOverride(rows) {
+  for (const r of (rows || [])) {
+    if ((r[0] || '').trim().toLowerCase() !== 'title') continue;
+    const img = (r[1] || '').trim();
+    const ok = /^https:\/\/[^\s"'<>]+$/.test(img) || /^(?!\/\/)[\w\-./]+\.(webp|png|jpe?g|gif|svg)$/i.test(img);
+    if (!ok) return null;
+    const until = (r[6] || '').trim();
+    if (until) { const ex = kstExpiryMs(until); if (ex !== null && Date.now() > ex) return null; }
+    return img;
+  }
+  return null;
+}
+function applyTitleOverride(rows) {
+  const el = document.getElementById('siteLogoImg');
+  if (!el) return;
+  const img = parseTitleOverride(rows);
+  el.src = img || 'Title.webp';   // 해제·만료 시 기본 복귀. 캐시본→본선 순서로 두 번 불려도 멱등
+}
+
 async function loadTopbarLinks() {
-  try { const c = JSON.parse(lsGet(LS_TOPBAR_CACHE, 'null')); if (c) { topbarLinks = parseTopbarRows(c); updatePageTitle(); } } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_TOPBAR_CACHE, 'null')); if (c) { topbarLinks = parseTopbarRows(c); applyTitleOverride(c); updatePageTitle(); } } catch (e) {}
   try {
     const res = await fetch(TOPBAR_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     const rows = parseCSV(await res.text());
     lsSet(LS_TOPBAR_CACHE, JSON.stringify(rows));
     topbarLinks = parseTopbarRows(rows);
+    applyTitleOverride(rows);
     updatePageTitle();
   } catch (e) {}   // 실패 시 캐시본 유지 — 첫 방문+시트 장애 조합에서만 버튼 공백(크루 시트와 동일 수용)
 }
@@ -3683,21 +3712,18 @@ let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계�
 const likeReqKey = (e) => `${e.member_id || ''}|${fullLikeUrl(e.url)}`;   // dedup과 동일 키(멤버+전체 URL, 댓글 앵커 포함). dismiss·seen·빨간점이 '같은 링크'를 시간 무관 동일 취급 → X했거나 본 링크는 재요청돼도 다시 안 켜짐
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
-// 좋아요 숨김 B열(만료일) 판정: B 비었거나 날짜 형식 밖이면 즉시 숨김, 날짜면 그날(KST)까지 노출하고 지나면 숨김.
-// 날짜는 일정 시트와 동일 YYYY-MM-DD 기준(. / 구분·한 자리 월일·뒤따르는 구분자 허용). B엔 날짜만 적을 것(여분 텍스트는 형식 밖→즉시 숨김).
-function likeHideActiveOn(dateRaw, todayKst) {
-  const m = String(dateRaw || '').trim().replace(/\s+/g, '').replace(/[.\/]/g, '-').replace(/-+$/, '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (!m) return true;
-  const due = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  return todayKst > due;
+// 좋아요 숨김 B열(만료일) 판정: B 비었거나 형식 밖이면 즉시 숨김, 날짜면 그날(KST)까지 노출하고 지나면 숨김.
+// 2026-08-19: 해석을 kstExpiryMs 공통 파서로 위임 — 'YYYY-MM-DD HH:mm'도 받는다(그 분까지 노출). 날짜만 적으면 종전과 동일한 자정 경계.
+function likeHideActiveOn(dateRaw, nowMs) {
+  const ex = kstExpiryMs(dateRaw);
+  return ex === null || nowMs > ex;
 }
-// 캐시 엔트리({u: 정규화URL, d: 만료일})에서 "지금 숨겨야 할" URL Set 생성. 날짜는 호출 시점 KST로 매번 재평가(자정 넘기면 자동 반영).
+// 캐시 엔트리({u: 정규화URL, d: 만료일})에서 "지금 숨겨야 할" URL Set 생성. 호출 시점마다 재평가(자정·지정 시각을 넘기면 자동 반영).
 function buildLikeHideSet(entries) {
-  const kst = new Date(Date.now() + 9 * 3600 * 1000);
-  const todayKst = `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+  const nowMs = Date.now();
   const s = new Set();
   for (const e of (entries || [])) {
-    if (e && e.u && likeHideActiveOn(e.d, todayKst)) s.add(e.u);
+    if (e && e.u && likeHideActiveOn(e.d, nowMs)) s.add(e.u);
   }
   return s;
 }
@@ -4871,6 +4897,25 @@ function formatRelTime(iso) {
 // 사이트 날짜 표시 통일(한글 'YYYY년 M월 D일'). 연도 없는 생일(M월 D일)·월 단위 라벨(YYYY년 M월)은 별도 범주라 미적용.
 function koDate(y, m, d) { return `${y}년 ${m}월 ${d}일`; }
 function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }   // 뷰어 TZ 무관 현재 KST — getUTC*로 읽음
+// ── 만료형 날짜 공통 파서(2026-08-19) ────────────────────────────────────────────
+// 시트의 만료·기한 칸을 한 곳에서 해석한다: 'YYYY-MM-DD' = 그날 KST 자정(23:59:59.999)까지, 'YYYY-MM-DD HH:mm' = 그 분까지.
+// 반환은 만료 시각 epoch ms, 형식 밖·빈 값은 null — "빈 칸을 어떻게 볼지"는 시트마다 달라(숨김=즉시 숨김, 상단바=무기한 노출,
+// 휴방=미표시) 여기서 정하지 않고 호출부가 정한다. 날짜부 관대 규칙은 종전 숨김 B열과 동일(. / 구분·한 자리 월일·구분자 주변 공백).
+// 비교는 항상 Date.now() vs 반환값. +09:00 접미 ISO로 만들어 뷰어 TZ 무관(로컬 게터 미사용) — 워커에 이식해도 그대로 동작.
+function kstExpiryMs(raw) {
+  const v = String(raw || '').trim().replace(/\s*([.\/-])\s*/g, '$1');
+  const m = v.replace(/[.\/]/g, '-').replace(/-+(?= |$)/, '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?$/);
+  if (!m) return null;
+  const mo = m[2].padStart(2, '0'), da = m[3].padStart(2, '0');
+  const hh = m[4] === undefined ? '23' : m[4].padStart(2, '0');
+  const mi = m[4] === undefined ? '59' : m[5];
+  if (+mo < 1 || +mo > 12 || +da < 1 || +da > 31 || +hh > 23 || +mi > 59) return null;
+  const t = new Date(`${m[1]}-${mo}-${da}T${hh}:${mi}:59.999+09:00`).getTime();
+  if (Number.isNaN(t)) return null;
+  const k = new Date(t + 9 * 3600 * 1000);   // 달력 검증: V8은 2/31을 NaN이 아니라 3/3으로 굴린다(실측) → KST로 되읽어 일치 확인
+  if (k.getUTCFullYear() !== +m[1] || k.getUTCMonth() + 1 !== +mo || k.getUTCDate() !== +da) return null;
+  return t;
+}
 function kstMonthStartMs(year, month1) { return Date.UTC(year, month1 - 1, 1) - 9 * 3600 * 1000; }   // KST YYYY-MM-01 00:00의 epoch ms (월 경계 필터)
 function formatAbsTime(iso) {
   if (!iso) return '';
@@ -4956,7 +5001,7 @@ function daysInMonth(year, month1) {
 function buildCard(m, info) {
   const tag = 'a';   // 생방송=시청 페이지, 오프라인=방송국 페이지 — 둘 다 SOOP 새 탭 링크
   const card = document.createElement(tag);
-  const vacSrc = !info.live && VACATION[m.id] && (() => { const n = new Date(Date.now() + 9*3600*1000); return `${n.getUTCFullYear()}-${String(n.getUTCMonth()+1).padStart(2,'0')}-${String(n.getUTCDate()).padStart(2,'0')}` <= VACATION[m.id].until; })() ? VACATION[m.id].img : null;
+  const vacSrc = !info.live && VACATION[m.id] && (() => { const ex = kstExpiryMs(VACATION[m.id].until); return ex !== null && Date.now() <= ex; })() ? VACATION[m.id].img : null;   // until 당일(HH:mm 적으면 그 분)까지 표시 — kstExpiryMs 공통 해석(2026-08-19). 형식 밖 until은 미표시(종전 문자열 비교의 우연 통과 차단)
   card.className = 'card ' + (info.live ? 'live' : 'offline') + (vacSrc ? ' vacation' : '');
   card.dataset.member = info.id;
   card.href = info.live

@@ -384,6 +384,8 @@
      color:inherit이 필요한 이유 — .rk-like/.rk-gap은 지정색이 없어 a의 기본 링크색을 물려받는다. */
   a.rk-row { text-decoration: none; color: inherit; border: 1px solid transparent; padding: 2px 5px; margin: 0 -6px; }
   a.rk-row:hover { border-color: var(--accent); }
+  /* 팀 병합(2026-08-20): 이어지는 팀 행은 위 간격을 붙여 한 덩어리로 — 행 사이 구분감 제거. 숫자 칸은 렌더러가 비운다 */
+  .rk-row.rk-teamcont { padding-top: 0; margin-top: -1px; }
   .rk-grp { color: var(--muted); font-size: 11px; }
   .rk-rank, .rk-like, .rk-gap { font-variant-numeric: tabular-nums; text-align: right; }
   /* 순위·컷은 대회 색을 따르지 않는다 — '안정권이냐 탈락권이냐'가 한눈에 보여야 하므로 고정 의미색을 쓴다.
@@ -2627,7 +2629,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-20b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-20c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3934,7 +3936,7 @@ function renderRankEvent(ev) {
     .map(g => ({ _cut: true, group: g.name, cut: g.cut, like: g.cut }));
   const merged = [...sorted, ...cutRows]
     .sort((a, b) => ((b.like ?? -1) - (a.like ?? -1)) || ((a._cut ? 1 : 0) - (b._cut ? 1 : 0)));
-  const rows = merged.map(m => {
+  const rows = merged.map((m, mi, arr) => {
     if (m._cut) {
       // 멤버 행과 같은 클래스를 써서 열이 자동으로 맞는다. '컷'이라는 단어는 넣지 않는다 —
       // 상단에 "33위 컷 기준"이 있고 색·경계선이 이미 그 뜻이라, 넣으면 등수 칸의 좌우 정렬만 깨진다.
@@ -3953,14 +3955,25 @@ function renderRankEvent(ev) {
     const zone = m.gap === null ? '' : (m.gap >= 0 ? ' in' : ' out');
     const gap = m.gap === null ? '' : `컷 ${m.gap >= 0 ? '+' : ''}${m.gap.toLocaleString()}`;
     // 워커가 그 멤버의 댓글 앵커(pCommentNo)를 실어 보내면 행 전체를 링크로. 못 실었으면 div 그대로.
-    const inner = `${av}${nm}`
-      + (grouped ? `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>` : '')
-      + `<span class="rk-rank">${m.rank}위</span>`
-      + `<span class="rk-like">${m.like.toLocaleString()}</span>`
-      + `<span class="rk-gap">${gap}</span>`;
+    // [팀 병합 표시 · 2026-08-20 Crenop] 같은 팀의 연속 행(판정: 직전 행과 같은 대표 댓글 링크)은 한 덩어리로 —
+    //   이어지는 행은 아바타·이름만 남기고 전형·순위·좋아요·컷차이를 비운다(숫자는 팀당 한 번, 첫 행에만).
+    //   좋아요 동률로 묶지 않는 이유: 남남끼리도 동률이 실제로 난다(특히 초반 0·1개 구간) — 링크 동일성이 팀의 확정 신호다.
+    //   빈 span은 grid 열 자리 유지용(빼면 칸이 밀린다). 동점 컷 행은 정렬 규칙상 팀 아래에 서므로 사이에 끼지 않는다.
+    const prevM = arr[mi - 1];
+    const teamCont = !!m.url && !!prevM && !prevM._cut && prevM.url === m.url;
+    const inner = teamCont
+      ? `${av}${nm}`
+        + (grouped ? `<span class="rk-grp"></span>` : '')
+        + `<span class="rk-rank"></span><span class="rk-like"></span><span class="rk-gap"></span>`
+      : `${av}${nm}`
+        + (grouped ? `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>` : '')
+        + `<span class="rk-rank">${m.rank}위</span>`
+        + `<span class="rk-like">${m.like.toLocaleString()}</span>`
+        + `<span class="rk-gap">${gap}</span>`;
+    const rowCls = `rk-row${zone}${teamCont ? ' rk-teamcont' : ''}`;
     return m.url
-      ? `<a class="rk-row${zone}" href="${escapeHtml(m.url)}" target="_blank" rel="noopener">${inner}</a>`
-      : `<div class="rk-row${zone}">${inner}</div>`;
+      ? `<a class="${rowCls}" href="${escapeHtml(m.url)}" target="_blank" rel="noopener">${inner}</a>`
+      : `<div class="${rowCls}">${inner}</div>`;
   }).join('');
   // 상단에는 기준(몇 위까지 뽑는지)만. 전형별 컷 숫자는 각 멤버 행으로 내려갔다.
   const sub = ev.quota ? `${ev.quota}위 컷 기준` : '';

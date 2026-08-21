@@ -1960,7 +1960,15 @@
     display: flex; flex-direction: column;
     gap: 16px;
   }
-  .hall-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .hall-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    /* sticky(2026-08-21 Crenop): PC는 명전이 거의 한 화면이지만 모바일은 카드 수만큼 스크롤이 길어
+       좌측 기간 버튼·우측 2·3위 토글이 떠내려간다 — 이벤트 헤더바·케미 토글과 같은 관례(top 20px)로 상시 조작.
+       배경은 페이지색(--bg): 이 줄은 패널이 아니라 배경 위 맨몸 컨트롤이라 케미 토글(.chem-toggle-sticky) 계보. */
+    position: sticky; top: 20px; z-index: 2; background: var(--bg);
+  }
+  /* 위 20px 틈으로 카드가 비치는 것 차단 — 이벤트 헤더바 ::before 백드롭 기법. 높이 21 = 20 + 1px 겹침:
+     접합면이 '맞닿기만' 하면 고DPI 소수 배율에서 반픽셀 틈이 생긴다는 교훈(.timeline-header::before) 그대로. 같은 색이라 겹침 무해. */
+  .hall-bar::before { content: ''; position: absolute; left: 0; right: 0; top: -20px; height: 21px; background: var(--bg); }
   .hall-bar-right { display: flex; align-items: center; gap: 8px; }
   .hall-bar-label { font-size: 13px; font-weight: 600; color: var(--muted); user-select: none; }
   .hall-period { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -2629,7 +2637,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-20c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-21c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3245,7 +3253,7 @@ function applyChemNameRows(rows) {
     const name = (r[0] || '').trim().replace(/\s*,\s*/g, ' · ');  // 시트엔 쉼표로 적고 표시는 사이트 규약인 가운뎃점
     if (!name || name === '케미명') continue;  // 빈 행·헤더 행 무시
     // B열 종류: | 구분 다중 허용, 유효값만 통과. 빈 칸·오타는 기타로 흘림(이름이 있는데 미분류일 수는 없음 — 미분류는 '행 없음'의 뜻)
-    const types = (r[1] || '').split('|').map(t => t.trim()).filter(t => ['컨텐츠', '프로필', '기타'].includes(t));
+    const types = (r[1] || '').split(/[|,/]/).map(t => t.trim()).filter(t => ['컨텐츠', '프로필', '기타'].includes(t));   // 구분자 |·쉼표·/ 겸용(2026-08-21 Crenop): 가운데줄은 입력이 번거로워 시트엔 쉼표·슬래시를 허용 — 이름 칸의 쉼표→가운뎃점과 같은 취지
     if (types.length === 0) types.push('기타');
     const desc = (r[2] || '').trim();
     const clip = (r[3] || '').trim();

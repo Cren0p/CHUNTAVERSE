@@ -2204,6 +2204,24 @@
   .crew-act-li .dot { color: var(--accent); flex: none; }
   .crew-act-li .d { color: #cbd5e1; font-weight: 700; }
   .crew-act-li .tag { color: var(--muted); font-size: 12px; }
+  /* 컨텐츠 모아보기 링크 행(2026-08-24, E열 검색어 보유 행): 민트 박스 + link SVG — 사이트 내 링크 표지(Crenop 확정).
+     색 문법은 퀵버튼과 동일(테두리 민트 · 배경 0.08 → hover 0.18), 각진 박스. 글자·날짜·태그 색은 일반 행과 동일 상속. */
+  .crew-act-link {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: inherit; line-height: inherit; text-align: left;
+    color: var(--accent); cursor: pointer;
+    background: rgba(97,255,236,0.08);
+    border: 1px solid var(--accent);
+    padding: 2px 9px; margin: -2px 0;   /* 상하 패딩만큼 당겨 행 높이 리듬 유지(4px 행간 그대로) */
+    transition: background 0.15s;
+  }
+  .crew-act-link:hover { background: rgba(97,255,236,0.18); }
+  .crew-act-link .d { color: #cbd5e1; }
+  .crew-act-link svg { width: 12px; height: 12px; flex: none; }
+  /* 모아보기 모달 본문: 컨텐츠 탭 카드 재사용, 560px 패널엔 2열(좁으면 1열) */
+  .cc-collect-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .cc-collect-grid { grid-template-columns: 1fr; } }
+  .cc-collect-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 28px 12px; }
 
   .members-profile {
     display: grid;
@@ -2641,7 +2659,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-24c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-24d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3359,7 +3377,7 @@ const LS_PROFVIDEO_CACHE = 'chuntaverse_profvideo_cache_v1';
 const LS_CREWACT_CACHE = 'chuntaverse_crewact_cache_v1';
 const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v2';   // v2: I열(숲 기준) 삽입으로 열 배치가 바뀜 — 옛 캐시를 새 파서로 읽으면 득표가 한 칸 밀려 보이므로 키를 올려 무효화
 const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
-let crewActs = [];       // [{section, date, text, tag}] — 시트 행 순서 = 표시 순서
+let crewActs = [];       // [{section, date, text, tag, key}] — 시트 행 순서 = 표시 순서. key(E열)는 컨텐츠 모아보기 검색어
 // 프로필 하단 영상 스트립. 시트 행 순서 = 표시 순서(정렬 안 함), 연속된 같은 목록제목이 한 덩어리.
 // 목록 개수를 2개로 고정하지 않는 이유: 제목이 시트에 있으므로 3개든 1개든 시트가 정한다.
 let profileVideos = [];   // [{target, section, title, url, img}]
@@ -3382,7 +3400,8 @@ function youtubeVideoId(url) {
 }
 
 function parseCrewActRows(rows) {
-  return rows.filter(r => r[0] && r[2] && r[0] !== '섹션').map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '' }));
+  // E열(2026-08-24 신설) = 컨텐츠 모아보기 검색어(|·쉼표 다중). 값 있는 행은 클릭 가능 — 컨텐츠 제목 부분일치 수집 모달(openContentCollect).
+  return rows.filter(r => r[0] && r[2] && r[0] !== '섹션').map(r => ({ section: r[0], date: r[1] || '', text: r[2], tag: r[3] || '', key: (r[4] || '').trim() }));
 }
 function parseMemberInfoRows(rows) {
   const o = {};
@@ -7294,6 +7313,54 @@ async function loadContent() {
   }
 }
 
+// 컨텐츠 카드 1장 마크업 — 컨텐츠 탭 그리드·정기 활동 모아보기 모달 공용(2026-08-24 추출, 마크업 무변경).
+function contentCardHtml(c) {
+  const memberImgs = c.members.map(name => {
+    const m = MEMBERS.find(x => x.name === name);
+    return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
+  }).join('');
+  const imgTag = `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">`;
+  const cardTag = c.link ? 'a' : 'div';
+  const cardAttrs = c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '';
+  return `
+    <${cardTag} class="content-card"${cardAttrs}>
+      <div class="content-card-img">${imgTag}</div>
+      <div class="content-card-info">
+        <div class="content-card-text">
+          <span class="content-card-title">${escapeHtml(c.title || '')}</span>
+          <span class="content-card-date">${c.date?.display || ''}</span>
+        </div>
+        <div class="content-card-members"${membersRowStyle(c.members.length)}>${memberImgs}</div>
+      </div>
+    </${cardTag}>
+  `;
+}
+
+// ── 정기 활동 → 컨텐츠 모아보기(2026-08-24) — 크루활동 E열 검색어로 컨텐츠 제목 부분일치 수집 ──
+// 검색어는 |·쉼표 다중(표기 흔들림 흡수 — "티타임|Tea Time"). 첫 검색어가 모달 표시명을 겸한다.
+// 실데이터 검증(2026-08-24): '티타임' 8건 전부 일치, '정기 모캡' 5건 일치·시리즈 밖 '비키니 모캡' 자연 배제.
+function contentCollectMatches(key) {
+  const keys = String(key || '').split(/[|,]/).map(t => t.trim()).filter(Boolean);
+  if (!keys.length) return [];
+  return contentData.filter(c => keys.some(k => (c.title || '').includes(k)));
+}
+// lrOverlay(좋아요·항목 모아보기 공용)에 컨텐츠 카드 그리드로 표시. contentData 정렬(최신 우선)을 그대로 따른다.
+// 헤더 '총 N회'는 항목 1건 = 1회 전제(티타임·정기 모캡 실데이터 기준) — 어긋나는 시리즈가 생기면 문구만 조정.
+function openContentCollect(key) {
+  const ov = document.getElementById('lrOverlay');
+  const head = document.getElementById('lrHead');
+  const body = document.getElementById('lrBody');
+  if (!ov || !head || !body) return;
+  const items = contentCollectMatches(key);
+  const label = String(key).split(/[|,]/)[0].trim();
+  head.innerHTML = `<span style="color:var(--accent)">${escapeHtml(label)} 모아보기${items.length ? ` · 총 ${items.length}회` : ''}</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
+  body.innerHTML = items.length
+    ? `<div class="cc-collect-grid">${items.map(contentCardHtml).join('')}</div>`
+    : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없어요${contentData.length === 0 ? ' — 컨텐츠 데이터를 불러오는 중이거나 불러오지 못했어요' : ''}</div>`;
+  ov.hidden = false;
+  syncBodyScrollLock();
+}
+
 function renderContent() {
   const body = document.getElementById('contentBody');
   if (!body) return;
@@ -7308,27 +7375,7 @@ function renderContent() {
   if (sig === _contentRenderSig && body.querySelector('.content-grid')) return;
   _contentRenderSig = sig;
 
-  const cardsHtml = contentData.map(c => {
-    const memberImgs = c.members.map(name => {
-      const m = MEMBERS.find(x => x.name === name);
-      return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
-    }).join('');
-    const imgTag = `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">`;
-    const cardTag = c.link ? 'a' : 'div';
-    const cardAttrs = c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '';
-    return `
-      <${cardTag} class="content-card"${cardAttrs}>
-        <div class="content-card-img">${imgTag}</div>
-        <div class="content-card-info">
-          <div class="content-card-text">
-            <span class="content-card-title">${escapeHtml(c.title || '')}</span>
-            <span class="content-card-date">${c.date?.display || ''}</span>
-          </div>
-          <div class="content-card-members"${membersRowStyle(c.members.length)}>${memberImgs}</div>
-        </div>
-      </${cardTag}>
-    `;
-  }).join('');
+  const cardsHtml = contentData.map(contentCardHtml).join('');
 
   body.innerHTML = `<div class="content-grid">${cardsHtml}</div>`;
 }
@@ -8124,7 +8171,11 @@ function renderMembersCrew(body) {
     let lastSec = '';
     crewActs.forEach(a => {
       if (a.section !== lastSec) { actsHtml += `<div class="crew-act-sub">${escapeHtml(a.section)}</div>`; lastSec = a.section; }
-      actsHtml += `<div class="crew-act-li"><span class="dot">•</span><span>${a.date ? `<span class="d">${escapeHtml(a.date)}</span> — ` : ''}${escapeHtml(a.text)}${crewTagHtml(a.tag)}</span></div>`;
+      const inner = `${a.date ? `<span class="d">${escapeHtml(a.date)}</span> — ` : ''}${escapeHtml(a.text)}${crewTagHtml(a.tag)}`;
+      // key(E열) 있는 행 = 컨텐츠 모아보기 링크(2026-08-24 Crenop 확정: 민트 박스 + link SVG — 사이트 내 링크 표지)
+      actsHtml += a.key
+        ? `<div class="crew-act-li"><span class="dot">•</span><button class="crew-act-link" type="button" data-key="${escapeHtml(a.key)}">${inner}${SVG_ICONS.link}</button></div>`
+        : `<div class="crew-act-li"><span class="dot">•</span><span>${inner}</span></div>`;
     });
   }
   body.innerHTML = `
@@ -8140,6 +8191,7 @@ function renderMembersCrew(body) {
     ${renderVideoStrips('천타버스', 'CHUNTAVERSE.webp', 1300)}
   `;
   bindVideoStrips(body);
+  body.querySelectorAll('.crew-act-link').forEach(btn => btn.addEventListener('click', () => openContentCollect(btn.dataset.key)));
 }
 
 // ── 프로필 항목 모아보기: 행(data-mi) 클릭 → 전 멤버의 해당 항목을 lrOverlay(좋아요·일정 공용)에 정렬 표시 ──

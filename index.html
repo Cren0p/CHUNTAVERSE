@@ -502,7 +502,7 @@
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
-    min-height: 66px;   /* 아바타 최대 2행(42) + 상하 패딩 24 — 멤버 0·1·2행 무관 행 높이 고정(content/banner-card-info와 동일 사유) */
+    min-height: 66px;   /* 아바타 최대 2행(42) + 상하 패딩 24 — 멤버 0·1·2행 무관 행 높이 고정(content-card-info와 동일 사유) */
     border-bottom: 1px solid var(--border);
   }
   .sch-item:last-child { border-bottom: none; }
@@ -1845,7 +1845,7 @@
   }
   .content-card-info {
     padding: 10px 12px;
-    min-height: 62px;   /* 아바타 최대 2행(20+2+20=42) + 상하 패딩 20 — 멤버 0·1·2행 무관 하단바 높이 고정(banner-card-info와 동일) */
+    min-height: 62px;   /* 아바타 최대 2행(20+2+20=42) + 상하 패딩 20 — 멤버 0·1·2행 무관 하단바 높이 고정(현수막 탭도 이 카드 공용) */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1892,66 +1892,6 @@
     display: flex; flex-direction: column;
     gap: 16px;
   }
-  .banner-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  @media (max-width: 1100px) { .banner-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .banner-grid { grid-template-columns: 1fr; } }
-  .banner-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    overflow: hidden;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    color: inherit;
-  }
-  a.banner-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(97,255,236,0.12); }   /* 링크 있는 카드만 — hover 테두리=클릭 가능 문법 */
-  .banner-card-img {
-    flex: 1;
-    height: 240px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: var(--surface2);
-  }
-  .banner-card-img img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-  }
-  .banner-card-info {
-    padding: 10px 12px;
-    min-height: 62px;   /* 아바타 최대 2행 기준 고정 — content-card-info와 동일 사유 */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .banner-card-date {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    flex: 1;
-  }
-  .banner-card-members {
-    display: flex;
-    gap: 2px;
-    flex-wrap: wrap;
-    flex-shrink: 0;
-    justify-content: flex-end;
-    max-width: 132px;
-  }
-  .banner-card-members img {
-    width: 20px; height: 20px;
-    object-fit: cover;
-    border: 1px solid var(--border);
-  }
-
   /* === 명예의 전당 탭 === */
   .hall-wrap {
     padding: 20px 24px;
@@ -2205,7 +2145,7 @@
   .crew-act-li .d { color: #cbd5e1; font-weight: 700; }
   .crew-act-li .tag { color: var(--muted); font-size: 12px; }
   /* 컨텐츠 모아보기 링크 행(E열 검색어 보유 행): [data-mi] 행 처방 그대로 — 평상시 무장식, hover에서 surface2 + 민트 인셋 링.
-     상시 표지는 민트 link SVG 하나. */
+     상시 표지는 무채색 link SVG 하나. */
   .crew-act-link {
     display: inline-flex; align-items: center; gap: 7px;
     font: inherit; line-height: inherit; text-align: left;
@@ -2215,7 +2155,7 @@
     transition: background 0.15s, box-shadow 0.15s;
   }
   .crew-act-link:hover { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent); }
-  .crew-act-link svg { width: 12px; height: 12px; flex: none; color: var(--accent); }
+  .crew-act-link svg { width: 12px; height: 12px; flex: none; color: var(--muted); }   /* 행 내 인라인 아이콘은 무채색 — 시계 아이콘 규약(2026-07-17)과 통일 */
   /* 모아보기 모달: 폭은 그래프 모달과 동급(740px — 2열이 컨텐츠 탭 카드 크기에 근접), 카드는 컨텐츠 탭 재사용 */
   .lr-panel.cc-modal { max-width: 740px; }
   .cc-collect-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -2658,7 +2598,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-24f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-24i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3165,6 +3105,18 @@ function titleBadgeHtml(title) {
   if (!t || ![...t].every(ch => BADGE_GLYPHS.g[ch])) return '';
   return `<span class="members-profile-title" role="img" aria-label="${escapeHtml(t)}">${ornateTitleBadgeSvg(t, TITLE_BADGE_COLORS[t] || TITLE_BADGE_FALLBACK)}</span>`;
 }
+
+// ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
+// (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
+// 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title';
+document.addEventListener('mouseover', (e) => {
+  const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
+  if (!el) return;
+  const t = el.textContent.trim();
+  if (t && (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight + 1)) { if (el.title !== t) el.title = t; }
+  else if (el.title) el.removeAttribute('title');
+});
 
 const PAGE_TITLES = { members: '프로필', live: '생방송', events: '최근 이벤트', stats: '통계', chemistry: '케미', content: '컨텐츠', links: '관련 링크', banner: '현수막', hall: '명예의 전당' };
 const VALID_PAGES = Object.keys(PAGE_TITLES);
@@ -7192,6 +7144,15 @@ function parseBannerDate(url) {
   return { sort: fullMatch ? fullMatch[1] : s, display: koDate(2000 + yy, parseInt(mm), parseInt(dd)) };
 }
 
+// 현수막 행 파서(2026-08-24 C열 제목 신설): A=이미지 B=링크 C=제목 D~=멤버(구 C~). 시트에 C열을 먼저 삽입한 뒤 이 코드를 배포할 것 — 역순이면 첫 멤버가 제목 자리에 뜬다.
+// 멤버는 크루 순 정렬 — 렌더 코드는 컨텐츠 탭과 문자 단위 동일하므로 두 탭의 순서 차이는 시트 입력 순서에서 왔다(컨텐츠 시트는 멤버 고정 열, 현수막은 자유 나열). 정렬로 배치 통일.
+function parseBannerRows(rows) {
+  const ord = new Map(MEMBERS.map((m, i) => [m.name, i]));
+  return rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
+    const members = r.slice(3).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
+    return { url: r[0], link: (r[1] || '').trim(), title: (r[2] || '').trim(), members, date: parseBannerDate(r[0]) };
+  });
+}
 async function loadBanners() {
   try {
     if (bannerData.length === 0) {
@@ -7204,12 +7165,7 @@ async function loadBanners() {
     if (!res.ok) throw new Error('no data');
     const csv = await res.text();
     const rows = parseCSV(csv);
-    bannerData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-      const url = r[0];
-      const link = (r[1] || '').trim();
-      const members = r.slice(2).filter(c => c.length > 0);
-      return { url, link, members, date: parseBannerDate(url) };
-    });
+    bannerData = parseBannerRows(rows);
     bannerData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_BANNER_CACHE, JSON.stringify(bannerData));
     lastBannerUpdate = new Date();
@@ -7234,30 +7190,12 @@ function renderBanners() {
 
   // 데이터가 직전 렌더와 동일하고 이미 그려져 있으면 재구축 생략(탭 전환은 CSS show/hide라 DOM이 유지됨 → 매 진입 재구축은 낭비).
   // 항목은 추가만 되고 삭제는 거의 없으므로 length + 최신 항목 정렬키로 변경을 충분히 감지.
-  const sig = bannerData.length + '|' + (bannerData[0]?.date?.sort || '');
-  if (sig === _bannerRenderSig && body.querySelector('.banner-grid')) return;
+  const sig = 'v2|' + bannerData.length + '|' + (bannerData[0]?.date?.sort || '');   // v2 = 제목 필드 도입 표식(캐시 재렌더 1회 강제)
+  if (sig === _bannerRenderSig && body.querySelector('.content-grid')) return;
   _bannerRenderSig = sig;
 
-  const cardsHtml = bannerData.map(b => {
-    const memberImgs = b.members.map(name => {
-      const m = MEMBERS.find(x => x.name === name);
-      return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
-    }).join('');
-    const imgTag = `<img src="${escapeHtml(b.url)}" alt="${b.date?.display || ''}" loading="lazy">`;
-    const cardTag = b.link ? 'a' : 'div';
-    const cardAttrs = b.link ? ` href="${escapeHtml(b.link)}" target="_blank" rel="noopener"` : '';
-    return `
-      <${cardTag} class="banner-card"${cardAttrs}>
-        <div class="banner-card-img">${imgTag}</div>
-        <div class="banner-card-info">
-          <span class="banner-card-date">${b.date?.display || ''}</span>
-          <div class="banner-card-members"${membersRowStyle(b.members.length)}>${memberImgs}</div>
-        </div>
-      </${cardTag}>
-    `;
-  }).join('');
-
-  body.innerHTML = `<div class="banner-grid">${cardsHtml}</div>`;
+  // 카드·그리드는 컨텐츠 탭과 공용(2026-08-24 통일 — 디자인 준용 지시). 전용 CSS(.banner-*)는 제거.
+  body.innerHTML = `<div class="content-grid">${bannerData.map(contentCardHtml).join('')}</div>`;
 }
 
 function membersRowStyle(count) {
@@ -7312,12 +7250,12 @@ async function loadContent() {
   }
 }
 
-// 컨텐츠 카드 1장 마크업 — 컨텐츠 탭 그리드·정기 활동 모아보기 모달 공용(2026-08-24 추출, 마크업 무변경).
+// 컨텐츠 카드 1장 마크업 — 컨텐츠 탭·현수막 탭·모아보기 모달 공용. 제목 말줄임 hover는 전수 위임(ELLIPSIS_TIP_SEL) 소관.
 function contentCardHtml(c) {
-  const memberImgs = c.members.map(name => {
-    const m = MEMBERS.find(x => x.name === name);
-    return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
-  }).join('');
+  // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
+  // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
+  const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
+  const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
   const imgTag = `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">`;
   const cardTag = c.link ? 'a' : 'div';
   const cardAttrs = c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '';
@@ -7329,7 +7267,7 @@ function contentCardHtml(c) {
           <span class="content-card-title">${escapeHtml(c.title || '')}</span>
           <span class="content-card-date">${c.date?.display || ''}</span>
         </div>
-        <div class="content-card-members"${membersRowStyle(c.members.length)}>${memberImgs}</div>
+        <div class="content-card-members"${membersRowStyle(known.length)}>${memberImgs}</div>
       </div>
     </${cardTag}>
   `;

@@ -2204,21 +2204,20 @@
   .crew-act-li .dot { color: var(--accent); flex: none; }
   .crew-act-li .d { color: #cbd5e1; font-weight: 700; }
   .crew-act-li .tag { color: var(--muted); font-size: 12px; }
-  /* 컨텐츠 모아보기 링크 행(2026-08-24, E열 검색어 보유 행): 민트 박스 + link SVG — 사이트 내 링크 표지(Crenop 확정).
-     색 문법은 퀵버튼과 동일(테두리 민트 · 배경 0.08 → hover 0.18), 각진 박스. 글자·날짜·태그 색은 일반 행과 동일 상속. */
+  /* 컨텐츠 모아보기 링크 행(E열 검색어 보유 행): [data-mi] 행 처방 그대로 — 평상시 무장식, hover에서 surface2 + 민트 인셋 링.
+     상시 표지는 민트 link SVG 하나. */
   .crew-act-link {
     display: inline-flex; align-items: center; gap: 7px;
     font: inherit; line-height: inherit; text-align: left;
-    color: var(--accent); cursor: pointer;
-    background: rgba(97,255,236,0.08);
-    border: 1px solid var(--accent);
-    padding: 2px 9px; margin: -2px 0;   /* 상하 패딩만큼 당겨 행 높이 리듬 유지(4px 행간 그대로) */
-    transition: background 0.15s;
+    color: inherit; cursor: pointer;
+    background: none; border: none;
+    padding: 2px 6px; margin: -2px -6px;   /* hover 링이 글자를 살짝 감싸도록 — 음수 마진으로 행 리듬은 그대로([data-mi] 기법) */
+    transition: background 0.15s, box-shadow 0.15s;
   }
-  .crew-act-link:hover { background: rgba(97,255,236,0.18); }
-  .crew-act-link .d { color: #cbd5e1; }
-  .crew-act-link svg { width: 12px; height: 12px; flex: none; }
-  /* 모아보기 모달 본문: 컨텐츠 탭 카드 재사용, 560px 패널엔 2열(좁으면 1열) */
+  .crew-act-link:hover { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent); }
+  .crew-act-link svg { width: 12px; height: 12px; flex: none; color: var(--accent); }
+  /* 모아보기 모달: 폭은 그래프 모달과 동급(740px — 2열이 컨텐츠 탭 카드 크기에 근접), 카드는 컨텐츠 탭 재사용 */
+  .lr-panel.cc-modal { max-width: 740px; }
   .cc-collect-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   @media (max-width: 480px) { .cc-collect-grid { grid-template-columns: 1fr; } }
   .cc-collect-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 28px 12px; }
@@ -2659,7 +2658,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-24d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-24f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4065,7 +4064,7 @@ function closeLikeRequests() {
   const rkPanel = ov && ov.querySelector('.lr-panel');
   rankOpenPost = null;
   if (rkPanel) {
-    rkPanel.classList.remove('rk-modal', 'sch-cal', 'sch-fixed', 'tbm-modal');   // 순위 색·일정 모달의 달력 여백/고정 높이·시트 모달 색을 다음 모달이 물려받지 않게 원복
+    rkPanel.classList.remove('rk-modal', 'sch-cal', 'sch-fixed', 'tbm-modal', 'cc-modal');   // 순위 색·일정 달력 여백/고정 높이·시트 모달 색·모아보기 폭을 다음 모달이 물려받지 않게 원복
     rkPanel.style.removeProperty('--rk-c'); rkPanel.style.removeProperty('--rk-rgb'); rkPanel.style.removeProperty('--sch-h');
   }
   syncBodyScrollLock();
@@ -7336,22 +7335,22 @@ function contentCardHtml(c) {
   `;
 }
 
-// ── 정기 활동 → 컨텐츠 모아보기(2026-08-24) — 크루활동 E열 검색어로 컨텐츠 제목 부분일치 수집 ──
-// 검색어는 |·쉼표 다중(표기 흔들림 흡수 — "티타임|Tea Time"). 첫 검색어가 모달 표시명을 겸한다.
-// 실데이터 검증(2026-08-24): '티타임' 8건 전부 일치, '정기 모캡' 5건 일치·시리즈 밖 '비키니 모캡' 자연 배제.
+// ── 정기 활동 → 컨텐츠 모아보기(2026-08-24) — 크루활동 E열 검색어(|·쉼표 다중)로 제목 부분일치 수집. 첫 검색어 = 모달 표시명.
+// 실데이터 검증: '티타임' 8건·'정기 모캡' 5건 일치, '비키니 모캡' 배제.
 function contentCollectMatches(key) {
   const keys = String(key || '').split(/[|,]/).map(t => t.trim()).filter(Boolean);
   if (!keys.length) return [];
   return contentData.filter(c => keys.some(k => (c.title || '').includes(k)));
 }
-// lrOverlay(좋아요·항목 모아보기 공용)에 컨텐츠 카드 그리드로 표시. contentData 정렬(최신 우선)을 그대로 따른다.
-// 헤더 '총 N회'는 항목 1건 = 1회 전제(티타임·정기 모캡 실데이터 기준) — 어긋나는 시리즈가 생기면 문구만 조정.
+// lrOverlay 공용 모달에 컨텐츠 카드 그리드로 표시. 과거순(1회→최신 — 컨텐츠 탭 최신순과 반대). '총 N회'는 항목 1건=1회 전제.
 function openContentCollect(key) {
   const ov = document.getElementById('lrOverlay');
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !head || !body) return;
-  const items = contentCollectMatches(key);
+  const panel = ov.querySelector('.lr-panel');
+  if (panel) panel.classList.add('cc-modal');   // 폭 740 — 원복은 closeLikeRequests
+  const items = contentCollectMatches(key).slice().reverse();
   const label = String(key).split(/[|,]/)[0].trim();
   head.innerHTML = `<span style="color:var(--accent)">${escapeHtml(label)} 모아보기${items.length ? ` · 총 ${items.length}회` : ''}</span><button class="lr-close" type="button" onclick="closeLikeRequests()">✕</button>`;
   body.innerHTML = items.length

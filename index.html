@@ -1067,7 +1067,12 @@
   .stats-period-bar { display: flex; align-items: stretch; gap: 8px; margin-bottom: 16px; }
   .stats-period-wrap { display: grid; grid-template-columns: repeat(13, 1fr); gap: 6px; flex: 1; min-width: 0; }
   /* 멤버 개별탭: 스테퍼 줄(전폭) + 6열 2행 월 버튼 — 블록 외곽만 달력·요약과 정렬(내부 7열 정렬은 폐기) */
-  .stats-member-period { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .stats-member-period { display: flex; gap: 8px; min-width: 0; align-items: stretch; }   /* v2(2026-08-29): PC는 ‹연도›+12개월 한 줄 */
+  .stats-member-period .stats-period-wrap.no-all { grid-template-columns: repeat(12, 1fr); }
+  @container (max-width: 1360px) {   /* 달력 컴팩트 폼과 같은 임계 — 그 밑에선 종전 세로(연도 줄 + 6열 2행) 복원 */
+    .stats-member-period { flex-direction: column; }
+    .stats-member-period .stats-period-wrap.no-all { grid-template-columns: repeat(6, 1fr); }
+  }
   .stats-period-wrap.no-all { grid-template-columns: repeat(6, 1fr); }
   .stats-period-btn {
     background: var(--surface2);
@@ -1196,6 +1201,7 @@
   .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
   .stats-detail-summary {
     display: flex; flex: 1; flex-wrap: wrap; gap: 16px;
+    justify-content: center;   /* v2(2026-08-29): 항목 무리는 가운데, 각 항목 내부 텍스트는 좌측정렬 유지 — Crenop 지정 */
     padding: 8px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1214,28 +1220,23 @@
   .day-session-viewer .stats-row-icon { margin-right: 3px; }
 
   .stats-member-header {
-    display: grid;
-    grid-template-columns: minmax(0, 480px) 1fr;
-    gap: 16px;
+    display: flex; flex-direction: column;   /* v2(2026-08-29): 선택기 줄 → 요약 줄 세로 적층 — 단일 컬럼 개편 */
+    gap: 12px;
     margin-bottom: 16px;
-    align-items: stretch;
   }
-  @container (max-width: 800px) { .stats-member-header { grid-template-columns: 1fr; } }   /* 우측 열이 ~300px 밑으로 가기 전에 1단(달력 480 + gap 16 기준) */
 
   .stats-detail-body {
-    display: grid;
-    /* 썸네일 달력(2026-08-29): 좌열 1240px = 170px 셀 ×7 + gap 4×6 + 달력 패딩 24 — 유튜브 스트립(200px 타일)의
-       85% 규격(170 확정, 작으면 "일별 요약 하단 이동 + 200 승격"이 후속 카드). 폭이 모자라면 좌열이 먼저
-       줄고(minmax 0) 우열은 300px 최저선을 지킨다. */
-    grid-template-columns: minmax(0, 1240px) minmax(300px, 1fr);
-    gap: 16px; align-items: start;
+    display: flex; flex-direction: column; gap: 16px;
+    /* v2(2026-08-29): 우측 상세 열 폐지 — 일별 요약은 달력의 해당 주 아래 확장(일정 모달 문법)으로 이동.
+       단일 컬럼이라 PC·모바일 구조가 동일하고, 차이는 셀 썸네일 유무(달력 블록의 1360 분기)뿐. */
   }
-  /* 셀 하한(~140px) 밑으로 내려가는 폭이면 중간 상태 없이 통째로 모바일 폼 — 탭별 독립 분기(2026-08-29 확정 스펙).
-     구 800px 분기를 이 값으로 승계: 800~1360 구간은 종전 2단 대신 모바일 폼이 뜬다(1366 노트북·반쪽 창 포함). */
-  @container (max-width: 1360px) { .stats-detail-body { grid-template-columns: 1fr; } }
 
-  .calendar { background: var(--surface); border: 1px solid var(--border); padding: 12px; }
+  .calendar { background: var(--surface); border: 1px solid var(--border); padding: 12px; max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* v2: 200px 셀 ×7 + 셀간 gap 24 + 패딩 24 (+테두리 2) — 유튜브 스트립 검증 규격 승격, 전폭 단일 컬럼에서 중앙 */
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-weekdays { margin-bottom: 4px; }
+  .cal-weekrow + .cal-weekrow { margin-top: 4px; }   /* 주 행 간격 = 셀 gap(4px)과 동일 — 연속된 그리드처럼 보이게 */
+  .cal-week-detail { border: 1px solid var(--border); background: var(--bg); padding: 16px; margin-top: 4px; }   /* 주간 확장 슬롯 — 일정 모달 .sch-detail과 동일 문법 */
+  .cal-week-detail:empty { display: none; }
   .calendar-weekday {
     text-align: center; font-size: 11px;
     color: var(--muted); font-weight: 700; padding: 6px 0;
@@ -1292,9 +1293,9 @@
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .cd-thumb-n { position: absolute; right: 3px; bottom: 3px; display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.65); color: #fff; }
   .cd-thumb-n svg { width: 10px; height: 10px; display: block; }
-  /* 일별 요약 VOD 슬롯 — 파트 전부 나열(랩), 규격은 달력 셀과 동일 170px(VOD 썸네일 문법 단일화) */
+  /* 일별 요약 VOD 슬롯 — 파트 전부 나열(랩), 규격은 달력 셀과 동일 200px(VOD 썸네일 문법 단일화 — v2 승격) */
   .ds-vods { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-  .ds-vod { width: 170px; text-decoration: none; color: inherit; display: block; }
+  .ds-vod { width: 200px; text-decoration: none; color: inherit; display: block; }   /* v2: 달력 셀과 동일 200px — VOD 썸네일 규격 단일화 */
   .ds-vod-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface2); }
   .ds-vod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ds-vod:hover .ds-vod-thumb { outline: 1.5px solid var(--accent); }
@@ -1323,14 +1324,9 @@
     background: rgba(46, 245, 225, 0.12);
   }
 
-  /* 시간대별 방송 분포 히트맵 (멤버 개별 화면) */
-  .stats-detail-left { min-width: 0; }
-  .toh-wrap { margin-top: 16px; }
-  .toh-mb { display: none; }
-  @media (max-width: 900px) {
-    .toh-pc { display: none; }
-    .toh-mb { display: block; }
-  }
+  /* 시간대별 방송 분포 히트맵 (멤버 개별 화면) — v2(2026-08-29): 단일 컬럼 개편으로 pc/mb 쌍둥이 블록 폐지(위치가 하나로 통일).
+     전폭에 억지로 맞추지 않는다 — 760px 캡으로 셀 비율(정사각 지향) 복원, 중앙 배치. */
+  .toh-wrap { margin: 16px auto 0; max-width: 760px; width: 100%; }
   .toh-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
   .toh-title { font-size: 12px; font-weight: 600; color: #cbd5e1; }
   .toh-sub { font-size: 11px; color: var(--muted); }
@@ -1401,13 +1397,7 @@
     -webkit-box-orient: vertical;
   }
 
-  .day-detail {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-  }
+  /* (.day-detail 컨테이너 CSS는 v2에서 제거 — 패널이 사라지고 내용물은 .cal-week-detail 확장 슬롯 안에서 렌더) */
   .day-detail-title {
     font-size: 14px; font-weight: 700;
     color: var(--accent);
@@ -6349,12 +6339,8 @@ function renderStatsMember(body, memberId) {
       </div>
     </div>
     <div class="stats-detail-body">
-      <div class="stats-detail-left">
-        ${renderCalendar(year, month, sum, memberId)}
-        ${heatHtml ? `<div class="toh-wrap toh-pc">${heatHtml}</div>` : ''}
-      </div>
-      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
-      ${heatHtml ? `<div class="toh-wrap toh-mb">${heatHtml}</div>` : ''}
+      ${renderCalendar(year, month, sum, memberId)}
+      ${heatHtml ? `<div class="toh-wrap">${heatHtml}</div>` : ''}
     </div>
   `;
   bindPeriodSelector(body, false);
@@ -6370,8 +6356,13 @@ function renderStatsMember(body, memberId) {
       body.querySelectorAll('.calendar-day').forEach(d => {
         d.classList.toggle('selected', d.dataset.date === statsState.selectedDate);
       });
-      const dd = document.getElementById('dayDetail');
-      if (dd) dd.innerHTML = renderDayDetail(year, month, sum, memberId);
+      // v2: 해당 주 아래 확장(일정 모달 문법) — 모든 슬롯 비우고 선택된 날의 주 슬롯만 채운다
+      body.querySelectorAll('.cal-week-detail').forEach(el => { el.innerHTML = ''; });
+      if (statsState.selectedDate) {
+        const row = btn.closest('.cal-weekrow');
+        const slot = row && row.querySelector('.cal-week-detail');
+        if (slot) slot.innerHTML = renderDayDetail(year, month, sum, memberId);
+      }
     });
   });
 }
@@ -6564,12 +6555,14 @@ function renderCalendar(year, month1, sum, memberId) {
   const todayKey = isoToKstDateKey(new Date().toISOString());
   const ym = `${year}-${String(month1).padStart(2, '0')}`;
   const weekdays = ['일','월','화','수','목','금','토'];
-  let html = `<div class="calendar"><div class="calendar-grid">`;
+  let html = `<div class="calendar"><div class="calendar-grid cal-weekdays">`;
   weekdays.forEach((w, i) => {
     html += `<div class="calendar-weekday ${i===0?'sun':i===6?'sat':''}">${w}</div>`;
   });
-  for (let i = 0; i < firstDow; i++) html += `<div class="calendar-day outside"></div>`;
-  for (let day = 1; day <= totalDays; day++) {
+  html += `</div>`;
+  // v2(2026-08-29): 주 단위 행 + 각 주 아래 확장 슬롯 — 일정 모달(.sch-week/.sch-detail) 문법 이식.
+  // 선택된 날이 속한 주의 슬롯만 렌더 시점에 채운다(빈 슬롯은 CSS로 숨김). 클릭 갱신은 바인딩이 같은 규칙 수행.
+  const cellHtml = (day) => {
     const dateKey = ymdKey(year, month1, day);
     const sessions = sessionsByDate[dateKey] || [];
     const posts = postsByDate[dateKey] || [];
@@ -6596,7 +6589,7 @@ function renderCalendar(year, month1, sum, memberId) {
       if (hasCafe) dots.push('<span class="calendar-day-dot cafe"></span>');
       bottomLine = `<span class="calendar-day-dots">${dots.join('')}</span>`;
     }
-    // PC 폼(2026-08-29): 그날 '시작'한 세션들의 VOD를 broad_no로 대조 — 대표 썸네일 + 우상단 칩(0인 항목 생략)
+    // PC 폼: 그날 '시작'한 세션들의 VOD를 broad_no로 대조 — 대표 썸네일 + 우상단 칩(0인 항목 생략)
     let dayVods = null;                            // null=목록 미도착 → VOD 칩·썸네일 보류(도착 시 재렌더로 채움)
     if (memberId && sessions.length > 0) {
       const seen = new Set(); const acc = [];
@@ -6613,25 +6606,40 @@ function renderCalendar(year, month1, sum, memberId) {
     if (hasPost) chips.push(`<span class="cd-chip post">${SVG_ICONS.board}${posts.length}</span>`);
     if (hasCafe) chips.push(`<span class="cd-chip cafe">${SVG_ICONS.coffee}${cafes.length}</span>`);
     if (hasYoutube) chips.push(`<span class="cd-chip youtube">${SVG_ICONS.youtube}${youtubes.length}</span>`);
-    if (dayVods && dayVods.length > 0) chips.push(`<span class="cd-chip vod">${SVG_ICONS.play}${dayVods.length}</span>`);
+    if (dayVods && dayVods.length > 0) chips.push(`<span class="cd-chip vod">${SVG_ICONS.film}${dayVods.length}</span>`);   // film — 컨텐츠 탭 VOD 아이콘(play 키는 존재하지 않음, 2026-08-29 교정)
     let thumbHtml = '';
     if (dayVods && dayVods.length > 0) {
       const rep = dayVods[0];                      // 대표 = 그날 첫 세션의 첫 파트(파트순 정렬 결과)
-      const n = dayVods.length > 1 ? `<span class="cd-thumb-n">${SVG_ICONS.play}${dayVods.length}</span>` : '';
+      const n = dayVods.length > 1 ? `<span class="cd-thumb-n">${SVG_ICONS.film}${dayVods.length}</span>` : '';
       if (rep.thumb) thumbHtml = `<span class="cd-thumb"><img src="${escapeHtml(rep.thumb)}" alt="" loading="lazy">${n}</span>`;
     }
-    html += `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}${bottomLine}</button>`;
+    return { selected: statsState.selectedDate === dateKey,
+      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}${bottomLine}</button>` };
+  };
+  const cells = [];
+  for (let i = 0; i < firstDow; i++) cells.push(null);
+  for (let day = 1; day <= totalDays; day++) cells.push(day);
+  while (cells.length % 7 !== 0) cells.push(null);
+  for (let w = 0; w < cells.length / 7; w++) {
+    let weekHtml = '';
+    let weekHasSelected = false;
+    for (let c = 0; c < 7; c++) {
+      const day = cells[w * 7 + c];
+      if (day === null) { weekHtml += `<div class="calendar-day outside"></div>`; continue; }
+      const cell = cellHtml(day);
+      if (cell.selected) weekHasSelected = true;
+      weekHtml += cell.html;
+    }
+    html += `<div class="cal-weekrow"><div class="calendar-grid">${weekHtml}</div><div class="cal-week-detail">${weekHasSelected ? renderDayDetail(year, month1, sum, memberId) : ''}</div></div>`;
   }
-  const trailing = (7 - ((firstDow + totalDays) % 7)) % 7;
-  for (let i = 0; i < trailing; i++) html += `<div class="calendar-day outside"></div>`;
-  html += `</div></div>`;
+  html += `</div>`;
   return html;
 }
 
 function renderDayDetail(year, month1, sum, memberId) {
   const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
   const date = statsState.selectedDate;
-  if (!date) return `<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>`;
+  if (!date) return '';   // v2: 선택 없음 = 확장 슬롯 자체가 안 열림(구 우측 패널의 자리표시 문구 폐지)
   const sessions = sessionsByDate[date] || [];
   const posts = postsByDate[date] || [];
   const youtubes = youtubeByDate[date] || [];

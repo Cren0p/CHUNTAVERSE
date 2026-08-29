@@ -1224,10 +1224,15 @@
 
   .stats-detail-body {
     display: grid;
-    grid-template-columns: minmax(0, 480px) 1fr;
+    /* 썸네일 달력(2026-08-29): 좌열 1240px = 170px 셀 ×7 + gap 4×6 + 달력 패딩 24 — 유튜브 스트립(200px 타일)의
+       85% 규격(170 확정, 작으면 "일별 요약 하단 이동 + 200 승격"이 후속 카드). 폭이 모자라면 좌열이 먼저
+       줄고(minmax 0) 우열은 300px 최저선을 지킨다. */
+    grid-template-columns: minmax(0, 1240px) minmax(300px, 1fr);
     gap: 16px; align-items: start;
   }
-  @container (max-width: 800px) { .stats-detail-body { grid-template-columns: 1fr; } }
+  /* 셀 하한(~140px) 밑으로 내려가는 폭이면 중간 상태 없이 통째로 모바일 폼 — 탭별 독립 분기(2026-08-29 확정 스펙).
+     구 800px 분기를 이 값으로 승계: 800~1360 구간은 종전 2단 대신 모바일 폼이 뜬다(1366 노트북·반쪽 창 포함). */
+  @container (max-width: 1360px) { .stats-detail-body { grid-template-columns: 1fr; } }
 
   .calendar { background: var(--surface); border: 1px solid var(--border); padding: 12px; }
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -1238,14 +1243,14 @@
   .calendar-weekday.sun { color: #f87171; }
   .calendar-weekday.sat { color: #60a5fa; }
   .calendar-day {
-    aspect-ratio: 1;
     background: var(--surface2);
     border: 1.5px solid transparent;
     display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+    align-items: stretch; justify-content: flex-start;   /* 썸네일 폼(기본=PC) — 컴팩트 복원은 1360 분기(아래) */
     font-size: 13px; color: var(--text);
     cursor: pointer; transition: all 0.15s;
-    padding: 4px; gap: 2px;
+    padding: 5px; gap: 4px;
+    min-height: 118px;   /* 썸네일 없는 날(칩만·빈 날)도 행 높이 유지 — 주 단위 줄높이 요동 방지 */
     font-family: inherit;
   }
   .calendar-day:hover { border-color: var(--accent); }
@@ -1271,6 +1276,46 @@
   .calendar-day-dot.post { background: var(--filter-post); }
   .calendar-day-dot.youtube { background: var(--ev-youtube); }
   .calendar-day-dot.cafe { background: #03C75A; }
+  /* ── 썸네일 달력(2026-08-29): 기본=PC 폼, 컴팩트(구형) 복원은 아래 1360 분기 ── */
+  .calendar-daycount, .calendar-day-dots { display: none; }   /* PC 폼에선 우상단 칩이 대체 */
+  .cd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; width: 100%; }
+  .cd-top .calendar-daynum { line-height: 16px; }
+  .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 6px; justify-content: flex-end; min-width: 0; }
+  .cd-chip { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 700; line-height: 14px; color: var(--muted); }
+  .cd-chip svg { width: 11px; height: 11px; display: block; }
+  .cd-chip.broadcast { color: var(--accent); }
+  .cd-chip.post { color: var(--filter-post); }
+  .cd-chip.youtube { color: var(--ev-youtube); }
+  .cd-chip.cafe { color: #03C75A; }
+  .cd-chip.vod { color: var(--text); }
+  .cd-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
+  .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cd-thumb-n { position: absolute; right: 3px; bottom: 3px; display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.65); color: #fff; }
+  .cd-thumb-n svg { width: 10px; height: 10px; display: block; }
+  /* 일별 요약 VOD 슬롯 — 파트 전부 나열(랩), 규격은 달력 셀과 동일 170px(VOD 썸네일 문법 단일화) */
+  .ds-vods { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .ds-vod { width: 170px; text-decoration: none; color: inherit; display: block; }
+  .ds-vod-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface2); }
+  .ds-vod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ds-vod:hover .ds-vod-thumb { outline: 1.5px solid var(--accent); }
+  .ds-vod-title { display: block; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ds-vod-badge { display: inline-block; margin-right: 4px; padding: 0 4px; font-size: 10px; font-weight: 700; line-height: 15px; vertical-align: 1px; }
+  .ds-vod-badge.sub { background: rgba(96,165,250,0.18); color: #60a5fa; }     /* auth_no 107 — 구독+ 전용(상관 기반 추정) */
+  .ds-vod-badge.adult { background: rgba(248,113,113,0.18); color: #f87171; }  /* grade 19 */
+  .ds-vod-none { font-size: 11px; color: var(--muted); }
+  .ds-vod-none.link { color: var(--accent); text-decoration: none; }
+  .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
+  .vod-pick-panel { max-width: 600px; }
+  .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
+  .vod-pick-empty a { color: var(--accent); }
+  @container (max-width: 1360px) {   /* 컴팩트(모바일) 폼 — 구형 달력 복원, 썸네일은 일별 요약이 담당 */
+    .cd-chips, .cd-thumb { display: none; }
+    .calendar-daycount { display: inline; }
+    .calendar-day-dots { display: flex; }
+    .calendar-day { aspect-ratio: 1; align-items: center; justify-content: center; padding: 4px; gap: 2px; min-height: 0; }
+    .cd-top { display: contents; }   /* 날짜 숫자를 종전 중앙 흐름으로 되돌림 */
+    .calendar { max-width: 520px; margin: 0 auto; }   /* 넓은 컨테이너에서 컴팩트 폼이 옆으로 퍼지는 것 방지 */
+  }
   .calendar-day.has-activity:not(.has-broadcast) {
     background: rgba(46, 245, 225, 0.06);
   }
@@ -3115,7 +3160,7 @@ function titleBadgeHtml(title) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-title';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -3888,7 +3933,7 @@ async function openLikeRequests() {
 // 모달 열림 중 배경 스크롤 잠금 — 열린 오버레이(lrOverlay=좋아요·일정 공용, statGraphOverlay=그래프)가
 // 하나라도 있으면 body 스크롤 차단, 모두 닫히면 복원. open/close 5지점에서 호출.
 function syncBodyScrollLock() {
-  const anyOpen = ['lrOverlay', 'statGraphOverlay'].some(id => { const el = document.getElementById(id); return el && !el.hidden; });
+  const anyOpen = ['lrOverlay', 'statGraphOverlay', 'vodPickOverlay'].some(id => { const el = document.getElementById(id); return el && !el.hidden; });
   document.body.style.overflow = anyOpen ? 'hidden' : '';
 }
 
@@ -5238,6 +5283,11 @@ function renderEvent(e, allEvents) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
+  // 종료 이벤트 → VOD 직결(2026-08-29): broad_no가 있으면 클릭을 handleEndVodClick이 가로채 매칭한다
+  // (캐시 적중 단일=직행, 복수·미적중=모달, 없음=안내). 목록 href는 폴백 — JS 미동작 시 종전 동작 그대로.
+  if (e.type === 'end' && e.member_id && e.broad_no && e.url) {
+    return `<div class="event" data-time="${eventTime}"><a class="event-link ev-endvod" data-member="${escapeHtml(e.member_id)}" data-broad="${escapeHtml(String(e.broad_no))}" data-etime="${eventTime}" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
+  }
   const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
   if (LIVE_NAV_TYPES.has(e.type)) {
     const liveUrl = `https://play.sooplive.co.kr/${e.member_id}`;
@@ -5567,6 +5617,9 @@ function applyFilter() {
   tl.querySelectorAll('.mark-read-btn').forEach(btn => {
     btn.addEventListener('click', () => { setLastSeenToNow(); refreshUnreadIndicator(); });
   });
+  tl.querySelectorAll('.ev-endvod').forEach(a => {   // 종료 이벤트 → VOD 직결(2026-08-29)
+    a.addEventListener('click', (ev) => handleEndVodClick(ev, a));
+  });
   const scrollBottomBtn = document.getElementById('scrollToBottom');
   if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'end' }); });
   const scrollTopBtn = document.getElementById('scrollToTop');
@@ -5875,6 +5928,103 @@ function bindPeriodSelector(body, includeAll) {
   });
 }
 
+// ── VOD 상태(2026-08-29): 워커 /vods 프록시 응답을 멤버|월 키로 보관 ──
+// 달력 썸네일·일별 요약이 공유. 지난달은 사실상 불변이라 localStorage 캐시(통계 월 캐시와 같은 태도),
+// 현재월은 메모리만(신선도는 워커 엣지캐시 5분이 담당). 도착하면 renderStatsBody 재호출로 썸네일이 채워진다.
+const vodState = { data: {}, loading: new Set() };
+const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
+function vodKey(memberId, ym) { return memberId + '|' + ym; }
+function ensureVodMonth(memberId, ym) {
+  if (!memberId || !ym) return;
+  const key = vodKey(memberId, ym);
+  if (vodState.data[key] || vodState.loading.has(key)) return;
+  const cur = isCurrentMonth(ym);
+  if (!cur) {
+    const cachedRaw = lsGet(LS_VOD_PREFIX + key, null);
+    if (cachedRaw) { try { const arr = JSON.parse(cachedRaw); if (Array.isArray(arr)) { vodState.data[key] = arr; return; } } catch (e) {} }
+  }
+  vodState.loading.add(key);
+  fetch(`${WORKER_URL}/vods?member=${encodeURIComponent(memberId)}&month=${ym}`)
+    .then(r => r.json())
+    .then(j => {
+      vodState.loading.delete(key);
+      if (j && j.ok && Array.isArray(j.vods)) {
+        vodState.data[key] = j.vods;
+        if (!cur) lsSet(LS_VOD_PREFIX + key, JSON.stringify(j.vods));
+        if (currentPage === 'stats') renderStatsBody();
+      }
+    })
+    .catch(() => { vodState.loading.delete(key); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도)
+}
+function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad_no 결측(판단 불가 — 슬롯 생략) / []=이 방송의 VOD 없음
+  if (!broadNo) return null;
+  const list = vodState.data[vodKey(memberId, ym)];
+  if (!list) return null;
+  return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
+}
+function vodPlayerUrl(v) { return `https://vod.sooplive.com/player/${v.title_no}`; }
+function vodBadges(v) {
+  let b = '';
+  if (v.auth_no === 107) b += `<span class="ds-vod-badge sub">구독+</span>`;   // 실측 상관 기반(2026-08-29) — 미지의 값은 배지 생략
+  if (v.grade === 19) b += `<span class="ds-vod-badge adult">19</span>`;
+  return b;
+}
+function vodTileHtml(v) {
+  const dur = v.duration_ms ? `<span class="cd-thumb-n">${formatDuration(v.duration_ms)}</span>` : '';
+  return `<a class="ds-vod" href="${vodPlayerUrl(v)}" target="_blank" rel="noopener">` +
+    `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}${dur}</span>` +
+    `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span></a>`;
+}
+
+// ── 종료 이벤트 → VOD 직결(최근 이벤트 탭, 2026-08-29) ──
+// 캐시 적중이면 클릭 제스처 안에서 동기 해석(단일이면 href만 바꿔 기본 새탭 이동 활용). 미적중 첫 클릭은
+// 기본 이동을 막고 받아온 뒤 결과를 모달로 — 비동기 window.open은 팝업 차단 대상이라 모달 안 클릭을 새 제스처로 쓴다.
+const vodRecent = { data: {}, at: {} };   // memberId → 최신 1페이지(5분 신선)
+function endVodResolve(memberId, broadNo) {
+  const list = vodRecent.data[memberId];
+  if (!list) return null;
+  return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
+}
+function handleEndVodClick(ev, a) {
+  const memberId = a.dataset.member, broadNo = a.dataset.broad, endMs = Number(a.dataset.etime) || 0;
+  const listUrl = a.getAttribute('href');
+  const fresh = vodRecent.at[memberId] && (Date.now() - vodRecent.at[memberId] < 5 * 60 * 1000);
+  if (fresh) {
+    const parts = endVodResolve(memberId, broadNo) || [];
+    if (parts.length === 1) { a.href = vodPlayerUrl(parts[0]); setTimeout(() => { a.href = listUrl; }, 0); return; }   // 직행 — 기본 이동의 목적지만 교체 후 원복
+    if (parts.length > 1) { ev.preventDefault(); openVodPickModal(parts, null, false); return; }
+    if (Date.now() - endMs < 3600e3) return;                                  // 유예(1h): 종전대로 목록으로 기본 이동
+    ev.preventDefault(); openVodPickModal([], listUrl, false); return;        // 없음 안내(목록 링크는 모달 안 보조)
+  }
+  ev.preventDefault();
+  fetch(`${WORKER_URL}/vods?member=${encodeURIComponent(memberId)}`)
+    .then(r => r.json())
+    .then(j => {
+      if (j && j.ok && Array.isArray(j.vods)) { vodRecent.data[memberId] = j.vods; vodRecent.at[memberId] = Date.now(); }
+      const parts = endVodResolve(memberId, broadNo) || [];
+      if (parts.length > 0) { openVodPickModal(parts, null, false); return; }   // 첫 클릭은 모달 경유 — 모달 안 클릭이 곧 재생(1개여도)
+      openVodPickModal([], listUrl, Date.now() - endMs < 3600e3);
+    })
+    .catch(() => openVodPickModal([], listUrl, false));   // 조회 실패 → 목록 링크를 모달로 제공(팝업 차단 회피)
+}
+function openVodPickModal(parts, listUrl, preparing) {
+  const ov = document.getElementById('vodPickOverlay');
+  const head = document.getElementById('vodPickHead');
+  const body = document.getElementById('vodPickBody');
+  if (!ov || !head || !body) return;
+  head.textContent = parts.length > 0 ? '다시보기 선택' : '다시보기';
+  body.innerHTML = parts.length > 0
+    ? `<div class="ds-vods">${parts.map(vodTileHtml).join('')}</div>`
+    : `<div class="vod-pick-empty">${preparing ? '다시보기 준비 중입니다.' : '다시보기가 없습니다. (숨김·삭제·미생성)'}${listUrl ? ` <a href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">다시보기 목록 열기</a>` : ''}</div>`;
+  ov.hidden = false;
+  syncBodyScrollLock();
+}
+function closeVodPick() {
+  const ov = document.getElementById('vodPickOverlay');
+  if (ov) ov.hidden = true;
+  syncBodyScrollLock();
+}
+
 function renderStatsBody() {
   const body = document.getElementById('statsBody');
   if (!body) return;
@@ -6138,6 +6288,7 @@ function renderStatsMember(body, memberId) {
   const { year, month } = statsState.viewMonth;
   const ms = getMemberStatsForView(memberId);
   const sum = computeMonthSummary(ms, year, month);
+  ensureVodMonth(memberId, `${year}-${String(month).padStart(2, '0')}`);   // 달력·일별 요약 썸네일용 — 도착하면 재렌더
   const now = kstNow();
   const isCurrentMonth = (year === now.getUTCFullYear() && month === now.getUTCMonth() + 1);
   const heatHtml = renderTimeOfDayHeatmap(year, month, sum, isCurrentMonth);
@@ -6199,7 +6350,7 @@ function renderStatsMember(body, memberId) {
     </div>
     <div class="stats-detail-body">
       <div class="stats-detail-left">
-        ${renderCalendar(year, month, sum)}
+        ${renderCalendar(year, month, sum, memberId)}
         ${heatHtml ? `<div class="toh-wrap toh-pc">${heatHtml}</div>` : ''}
       </div>
       <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId)}</div>
@@ -6406,11 +6557,12 @@ function niceNum(v) {
   const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
   return nice * base;
 }
-function renderCalendar(year, month1, sum) {
+function renderCalendar(year, month1, sum, memberId) {
   const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={}, broadcastDateSet } = sum;
   const totalDays = daysInMonth(year, month1);
   const firstDow = new Date(year, month1 - 1, 1).getDay();
   const todayKey = isoToKstDateKey(new Date().toISOString());
+  const ym = `${year}-${String(month1).padStart(2, '0')}`;
   const weekdays = ['일','월','화','수','목','금','토'];
   let html = `<div class="calendar"><div class="calendar-grid">`;
   weekdays.forEach((w, i) => {
@@ -6433,6 +6585,7 @@ function renderCalendar(year, month1, sum) {
     if (hasActivity) classes.push('has-activity');
     if (dateKey === todayKey) classes.push('today');
     if (statsState.selectedDate === dateKey) classes.push('selected');
+    // 컴팩트 폼(1360 이하)용 종전 하단 표기 — PC 폼에선 CSS가 숨기고 우상단 칩이 대체
     let bottomLine = '';
     if (sessions.length > 0) {                     // 회수 라벨은 그날 '시작'한 방송 수 — 이어진 날은 채움만
       bottomLine = `<span class="calendar-daycount">${sessions.length}회</span>`;
@@ -6441,9 +6594,33 @@ function renderCalendar(year, month1, sum) {
       if (hasPost) dots.push('<span class="calendar-day-dot post"></span>');
       if (hasYoutube) dots.push('<span class="calendar-day-dot youtube"></span>');
       if (hasCafe) dots.push('<span class="calendar-day-dot cafe"></span>');
-      bottomLine = `<div class="calendar-day-dots">${dots.join('')}</div>`;
+      bottomLine = `<span class="calendar-day-dots">${dots.join('')}</span>`;
     }
-    html += `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="calendar-daynum">${day}</span>${bottomLine}</button>`;
+    // PC 폼(2026-08-29): 그날 '시작'한 세션들의 VOD를 broad_no로 대조 — 대표 썸네일 + 우상단 칩(0인 항목 생략)
+    let dayVods = null;                            // null=목록 미도착 → VOD 칩·썸네일 보류(도착 시 재렌더로 채움)
+    if (memberId && sessions.length > 0) {
+      const seen = new Set(); const acc = [];
+      let pending = false;
+      for (const s of sessions) {
+        const parts = vodsForBroad(memberId, ym, s.broad_no);
+        if (parts === null) { pending = true; continue; }
+        for (const v of parts) { if (!seen.has(v.title_no)) { seen.add(v.title_no); acc.push(v); } }
+      }
+      if (!pending || acc.length > 0) dayVods = acc;
+    }
+    const chips = [];
+    if (sessions.length > 0) chips.push(`<span class="cd-chip broadcast">${SVG_ICONS.soop}${sessions.length}</span>`);
+    if (hasPost) chips.push(`<span class="cd-chip post">${SVG_ICONS.board}${posts.length}</span>`);
+    if (hasCafe) chips.push(`<span class="cd-chip cafe">${SVG_ICONS.coffee}${cafes.length}</span>`);
+    if (hasYoutube) chips.push(`<span class="cd-chip youtube">${SVG_ICONS.youtube}${youtubes.length}</span>`);
+    if (dayVods && dayVods.length > 0) chips.push(`<span class="cd-chip vod">${SVG_ICONS.play}${dayVods.length}</span>`);
+    let thumbHtml = '';
+    if (dayVods && dayVods.length > 0) {
+      const rep = dayVods[0];                      // 대표 = 그날 첫 세션의 첫 파트(파트순 정렬 결과)
+      const n = dayVods.length > 1 ? `<span class="cd-thumb-n">${SVG_ICONS.play}${dayVods.length}</span>` : '';
+      if (rep.thumb) thumbHtml = `<span class="cd-thumb"><img src="${escapeHtml(rep.thumb)}" alt="" loading="lazy">${n}</span>`;
+    }
+    html += `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}${bottomLine}</button>`;
   }
   const trailing = (7 - ((firstDow + totalDays) % 7)) % 7;
   for (let i = 0; i < trailing; i++) html += `<div class="calendar-day outside"></div>`;
@@ -6503,19 +6680,32 @@ function renderDayDetail(year, month1, sum, memberId) {
       if (s.changes && s.changes.length > 0) {
         changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
           let icon, label, valHtml;
-          if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
-          else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
-          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → ${modeLabel(c.after)}`; }
-          else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → ${escapeHtml(c.after||'')}`; }
+          if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
+          else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
+          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → <span class="chg-after">${modeLabel(c.after)}</span>`; }
+          else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
           return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
         }).join('')}</div>`;
       }
-      const sessionUrl = s.end
-        ? `https://www.sooplive.com/station/${memberId}/vod`
-        : `https://play.sooplive.co.kr/${memberId}`;
-      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${startStr} ~ ${endStr}${durStr}</span>${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${changesHtml}`;
-      html += memberId
-        ? `<a class="day-session" href="${escapeHtml(sessionUrl)}" target="_blank" rel="noopener">${sessionInner}</a>`
+      // VOD 슬롯(2026-08-29): 종료 방송 행은 통행 링크를 풀고(재생 진입은 썸네일이 담당) 제목 아래에 파트를 전부
+      // 나열한다 — 일별 요약에선 모달 불필요(확정 스펙). 목록 미도착·broad_no 결측(구형 세션)은 슬롯 자체를 생략해
+      // "없음" 오표기를 막는다. 진행 중 방송은 종전대로 행 전체가 생방 링크.
+      let vodSlot = '';
+      if (memberId && s.end) {
+        const ymKey = `${year}-${String(month1).padStart(2, '0')}`;
+        const parts = vodsForBroad(memberId, ymKey, s.broad_no);
+        if (parts && parts.length > 0) {
+          vodSlot = `<div class="ds-vods">${parts.map(vodTileHtml).join('')}</div>`;
+        } else if (parts) {   // 목록은 도착했는데 이 방송의 VOD가 없음
+          const endMs = new Date(s.end).getTime();
+          vodSlot = (!isNaN(endMs) && Date.now() - endMs < 3600e3)
+            ? `<div class="ds-vods"><a class="ds-vod-none link" href="https://www.sooplive.com/station/${memberId}/vod" target="_blank" rel="noopener">다시보기 준비 중 · 목록 보기</a></div>`
+            : `<div class="ds-vods"><span class="ds-vod-none">다시보기 없음</span></div>`;   // 숨김·삭제·미생성 — 목록 링크 대신 명시(확정 스펙)
+        }
+      }
+      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${startStr} ~ ${endStr}${durStr}</span>${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;
+      html += (memberId && !s.end)
+        ? `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`
         : `<div class="day-session">${sessionInner}</div>`;
     } else if (item.kind === 'post') {
       const p = item.data;
@@ -8299,6 +8489,12 @@ function renderMembersProfile(body, memberId) {
     <div class="lr-panel graph-modal-panel">
       <div class="lr-head" id="statGraphHead"></div>
       <div class="lr-body" id="statGraphBody"></div>
+    </div>
+  </div>
+  <div class="lr-overlay" id="vodPickOverlay" hidden onclick="if(event.target===this)closeVodPick()">
+    <div class="lr-panel vod-pick-panel">
+      <div class="lr-head" id="vodPickHead"></div>
+      <div class="lr-body" id="vodPickBody"></div>
     </div>
   </div>
 </body>

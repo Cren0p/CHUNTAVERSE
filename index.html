@@ -1237,6 +1237,15 @@
     margin-bottom: 16px;
   }
 
+  /* ── [요약 | 달력 종류 필터] 한 행 (2026-08-29 확정) ──
+     넓으면 좌 요약(기존 flex:1)·우 필터가 같은 행, 좁으면 flex-wrap이 실측으로 행을 나눈다(수동 분기점 없음 —
+     wrap 자체가 '안 들어가면 내려간다'라 눈대중 분기가 필요 없다). 같은 행일 땐 stretch로 두 박스 높이 통일,
+     행 분리 시 각자 자연 높이(확정 스펙). 셀·알약·켜짐/꺼짐 시각은 이벤트 탭 종류 필터 원본 클래스 그대로. */
+  .ss-filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; justify-content: center; }
+  .ss-filter-row .stats-detail-summary { min-width: 0; }
+  .cal-type-filter { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); box-sizing: border-box; }
+  .cal-type-filter .filter-type { width: 34px; }
+
   .stats-detail-body {
     display: flex; flex-direction: column; gap: 16px;
     /* v2(2026-08-29): 우측 상세 열 폐지 — 일별 요약은 달력의 해당 주 아래 확장(일정 모달 문법)으로 이동.
@@ -1357,7 +1366,7 @@
     flex-direction: column;
   }
   @container (min-width: 1361px) {   /* PC 썸네일 폼 — 통계 전용 스코프 */
-    .stats-detail-body .calendar { max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* 200px 셀 ×7 + gap 24 + 패딩 24 (+테두리) */
+    .stats-member-header, .stats-detail-body .calendar { max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* 200px 셀 ×7 + gap 24 + 패딩 24 (+테두리). 연/월·요약(+필터) 행도 같은 상한 — 한 선언 공유라 달력 폭을 바꾸면 함께 움직인다(2026-08-29 폭 정렬 확정: 종전엔 두 행만 전폭이라 넓은 화면에서 달력보다 삐져나왔다) */
     .stats-detail-body .calendar-day { aspect-ratio: auto; align-items: stretch; justify-content: flex-start; padding: 5px; gap: 4px; min-height: 118px; }   /* 썸네일 없는 날도 행 높이 유지 */
     .stats-detail-body .cd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; width: 100%; }
     .stats-detail-body .cd-top .calendar-daynum { line-height: 14px; }
@@ -2687,7 +2696,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-26a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3310,6 +3319,21 @@ const saveEventFilters = () => {
   lsSetSet(LS_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => !filterState.members.has(id))));
   lsSetSet(LS_FILTER_TYPES_OFF, new Set(ALL_TYPE_KEYS.filter(t => !filterState.types.has(t))));
 };
+// ── 달력 종류 필터 (2026-08-29 확정): 이벤트 탭 '종류' 셀 원본 이식(채팅 제외 4종 + 모두 알약), PC·모바일 공통 한 줄.
+// 저장은 이벤트 탭과 '별도 키'(같은 키면 이벤트 탭에서 끈 종류가 달력에도 꺼져 두 화면이 엮인다) — 제외 집합
+// 방식은 이벤트 필터와 동일 독트린(새 타입 합류 시 기본 켜짐).
+const CAL_TYPE_KEYS = ['soop', 'post', 'youtube', 'cafe'];
+const CAL_TYPE_TITLES = { soop: '숲 방송', post: '숲 게시글', youtube: '유튜브 업로드', cafe: '카페 게시글' };
+const LS_CAL_TYPES_OFF = 'chuntaverse_stats_cal_types_off';
+let calTypeState = new Set(CAL_TYPE_KEYS.filter(t => !lsGetSet(LS_CAL_TYPES_OFF, []).has(t)));
+const calTypeOn = (t) => calTypeState.has(t);
+const saveCalTypes = () => lsSetSet(LS_CAL_TYPES_OFF, new Set(CAL_TYPE_KEYS.filter(t => !calTypeState.has(t))));
+function calTypeFilterHtml() {
+  const iconOf = { soop: 'soop', post: 'board', youtube: 'youtube', cafe: 'coffee' };   // 달력 칩과 동일 아이콘
+  return `<button class="filter-toggle-all" id="calTypeToggleAll">${calTypeState.size === CAL_TYPE_KEYS.length ? '모두 해제' : '모두 선택'}</button>` +
+    CAL_TYPE_KEYS.map(t => `<button class="filter-type ${calTypeOn(t) ? 'on' : ''}" data-type="${t}" title="${CAL_TYPE_TITLES[t]}"><span class="filter-icon">${SVG_ICONS[iconOf[t]]}</span></button>`).join('');
+}
+
 let allEvents = [];
 let liveInfoMap = {};   // 최신 폴링의 멤버별 생방송 상태(live·btime) — VOD 연결의 '생방송 중' 판정 진실원(v14)
 let eventSortAsc = false;
@@ -3325,6 +3349,12 @@ function dedupBattleNotices(list) {
     seen.add(e.mkey);
     return true;
   });
+}
+
+function ytVideoId(url) {   // 유튜브 영상 ID 추출(watch?v= · youtu.be/ · shorts/) — 실패 시 '' → 썸네일 생략
+  if (!url) return '';
+  const m = String(url).match(/(?:youtube\.com\/(?:watch\?[^#]*v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/);
+  return m ? m[1] : '';
 }
 
 function typeToCat(et) {
@@ -6457,6 +6487,7 @@ function renderStatsMember(body, memberId) {
   body.innerHTML = `
     <div class="stats-member-header">
       ${periodSelectorHtml(false)}
+      <div class="ss-filter-row">
       <div class="stats-detail-summary">
         ${(() => {
           const md = (statsState.medals && statsState.medals[memberId]) || {};
@@ -6499,6 +6530,8 @@ function renderStatsMember(body, memberId) {
         </div>`;
         })()}
       </div>
+      <div class="cal-type-filter" id="calTypeFilter">${calTypeFilterHtml()}</div>
+      </div>
     </div>
     <div class="stats-detail-body">
       ${renderCalendar(year, month, sum, memberId)}
@@ -6511,6 +6544,22 @@ function renderStatsMember(body, memberId) {
   body.querySelectorAll('.stats-summary-item[data-metric]').forEach(item => {
     item.addEventListener('click', () => openStatGraphModal(memberId, item.dataset.metric));
   });
+  // 달력 종류 필터 — 토글 시 저장 후 재렌더(칩·썸네일 즉시 반영). 요약 클릭(그래프)은 불변 — 필터는 별도 표면.
+  const ctf = body.querySelector('#calTypeFilter');
+  if (ctf) {
+    ctf.querySelectorAll('.filter-type[data-type]').forEach(btn => btn.addEventListener('click', () => {
+      const t = btn.dataset.type;
+      if (calTypeState.has(t)) calTypeState.delete(t); else calTypeState.add(t);
+      saveCalTypes();
+      renderStatsMember(body, memberId);
+    }));
+    const allBtn = ctf.querySelector('#calTypeToggleAll');
+    if (allBtn) allBtn.addEventListener('click', () => {
+      calTypeState = calTypeState.size === CAL_TYPE_KEYS.length ? new Set() : new Set(CAL_TYPE_KEYS);
+      saveCalTypes();
+      renderStatsMember(body, memberId);
+    });
+  }
   body.querySelectorAll('.calendar-day').forEach(btn => {
     if (btn.classList.contains('outside')) return;
     btn.addEventListener('click', () => {
@@ -6736,10 +6785,11 @@ function renderCalendar(year, month1, sum, memberId) {
     const posts = postsByDate[dateKey] || [];
     const youtubes = youtubeByDate[dateKey] || [];
     const cafes = cafeByDate[dateKey] || [];
-    const hasBroadcast = broadcastDateSet ? broadcastDateSet.has(dateKey) : sessions.length > 0;   // 걸친 날도 채움
-    const hasPost = posts.length > 0;
-    const hasYoutube = youtubes.length > 0;
-    const hasCafe = cafes.length > 0;
+    // 종류 필터(2026-08-29): 꺼진 종류는 칩·썸네일·활동 표시에서 제외. 셀 클릭·일별 요약은 불변(요약은 상세라 전량 표시).
+    const hasBroadcast = calTypeOn('soop') && (broadcastDateSet ? broadcastDateSet.has(dateKey) : sessions.length > 0);   // 걸친 날도 채움
+    const hasPost = calTypeOn('post') && posts.length > 0;
+    const hasYoutube = calTypeOn('youtube') && youtubes.length > 0;
+    const hasCafe = calTypeOn('cafe') && cafes.length > 0;
     const hasActivity = hasBroadcast || hasPost || hasYoutube || hasCafe;
     const classes = ['calendar-day'];
     if (hasBroadcast) classes.push('has-broadcast');
@@ -6750,7 +6800,7 @@ function renderCalendar(year, month1, sum, memberId) {
     // 슬롯 클래스(cd-s-*)로 컴팩트 2열 그리드의 자리를 고정: 1행 [숲|VOD] · 2행 [숲글|카페] · 3행 [유튜브].
     // 항목이 0이라 빠져도 남은 칩의 자리가 안 흔들린다. PC는 flex 한 줄(우측 정렬)이라 슬롯 무시.
     let dayVods = null;                            // null=목록 미도착 → VOD 칩·썸네일 보류(도착 시 재렌더로 채움)
-    if (memberId && sessions.length > 0) {
+    if (memberId && calTypeOn('soop') && sessions.length > 0) {
       const seen = new Set(); const acc = [];
       let pending = false;
       for (const s of sessions) {
@@ -6761,7 +6811,7 @@ function renderCalendar(year, month1, sum, memberId) {
       if (!pending || acc.length > 0) dayVods = acc;
     }
     const chips = [];
-    if (sessions.length > 0) chips.push(chipHtml('broadcast cd-s-soop', 'soop', sessions.length));
+    if (calTypeOn('soop') && sessions.length > 0) chips.push(chipHtml('broadcast cd-s-soop', 'soop', sessions.length));
     if (hasPost) chips.push(chipHtml('post cd-s-post', 'board', posts.length));
     if (hasCafe) chips.push(chipHtml('cafe cd-s-cafe', 'coffee', cafes.length));
     if (hasYoutube) chips.push(chipHtml('youtube cd-s-yt', 'youtube', youtubes.length));
@@ -6769,9 +6819,14 @@ function renderCalendar(year, month1, sum, memberId) {
     // v4: 썸네일 박스는 방송날이면 상시 예약 — VOD 목록 도착 전후·다시보기 없는 날에도 셀 높이가 안 변한다
     // (로딩 시점 셀 크기 널뛰기 해소). 빈 박스 = "로딩 중/다시보기 없음" 시각 신호 겸용. 개수 배지는 칩(film N)이 담당하므로 제거.
     let thumbHtml = '';
-    if (memberId && sessions.length > 0) {
+    if (memberId && calTypeOn('soop') && sessions.length > 0) {
       const rep = (dayVods && dayVods.length > 0) ? dayVods[0] : null;   // 대표 = 그날 첫 세션의 첫 파트(파트순 정렬 결과)
       thumbHtml = `<span class="cd-thumb">${rep && rep.thumb ? `<img src="${escapeHtml(rep.thumb)}" alt="" loading="lazy">` : ''}</span>`;
+    } else if (memberId && !calTypeOn('soop') && calTypeOn('youtube') && youtubes.length > 0) {
+      // 필터 연동(2026-08-29 확정): 방송을 끄면 유튜브 업로드가 있는 날의 셀이 유튜브 썸네일을 대신 표시.
+      // 유튜브 제공 고정 주소(i.ytimg.com/vi/{ID}/mqdefault = 320×180, 16:9)라 추가 조회 없음.
+      const yid = ytVideoId(youtubes[0].url);
+      thumbHtml = `<span class="cd-thumb">${yid ? `<img src="https://i.ytimg.com/vi/${yid}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>`;
     }
     return { selected: statsState.selectedDate === dateKey,
       html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}</button>` };
@@ -6897,7 +6952,10 @@ function renderDayDetail(year, month1, sum, memberId) {
     } else if (item.kind === 'youtube') {
       const y = item.data;
       const inner = `<span class="day-kind-icon youtube">${SVG_ICONS.youtube}</span><span class="day-item-time">${formatHHMM(y.time)}</span><span class="day-item-title">${escapeHtml(y.title||'(제목 없음)')}</span>`;
-      html += y.url ? `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
+      // 유튜브 썸네일 타일(2026-08-29 확정): VOD 타일 문법(.ds-vod 200px 16:9 + 제목 줄) 재사용 — 새 CSS 없음.
+      const yid = ytVideoId(y.url);
+      const ytile = (y.url && yid) ? `<div class="ds-vods"><a class="ds-vod" href="${escapeHtml(y.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${yid}/mqdefault.jpg" alt="" loading="lazy"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(y.title||'')}</span></span></a></div>` : '';
+      html += y.url ? `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>${ytile}` : `<div class="day-item">${inner}</div>`;
     } else if (item.kind === 'cafe') {
       const c = item.data;
       const cafeNameEsc = escapeHtml(c.cafe_name || '');

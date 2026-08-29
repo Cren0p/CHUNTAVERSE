@@ -1209,8 +1209,11 @@
     box-sizing: border-box;
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
-  .stats-summary-break { display: none; }   /* v4: 넓을 땐 한 줄 */
-  @container (max-width: 1080px) { .stats-summary-break { display: block; flex-basis: 100%; height: 0; margin-top: -10px; } }   /* v7: 개행 스팬이 자체 flex 줄(높이 0)을 차지해 행간이 gap 10×2=20px가 되던 것을 음수 마진으로 상쇄 — 경계·행간 모두 10px */
+  .ss-row { display: contents; }   /* v8: 넓을 땐 두 행 묶음이 한 줄로 흐른다 */
+  @container (max-width: 1080px) {   /* 8항목이 한 줄에 못 드는 폭 — 시청자 5 | 게시 3 고정 2행, 행간=경계=10px 구조 보장 */
+    .stats-detail-summary { flex-direction: column; align-items: center; }
+    .ss-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 16px; }
+  }
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
   .stats-summary-value { font-size: 14px; font-weight: 700; }
   /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
@@ -1279,24 +1282,36 @@
   .cd-chip.youtube { color: var(--ev-youtube); }
   .cd-chip.cafe { color: #03C75A; }
   .cd-chip.vod { color: var(--accent); }           /* VOD = 민트(Crenop 지정) */
+  /* v8: 아이콘 글리프 여백 실측 보정(path 좌표 정식 해석, 11px 렌더 기준 좌/우 여백:
+     soop 0.5/0.4 · board 1.4/1.4 · coffee 0.4/0.4 · youtube 0/0 · film 2.3/1.4).
+     0.5px 호흡만 남기고 음수마진으로 상쇄 → 아이콘→숫자·칩→칩 시각 간격 균일.
+     세로중심은 5종 모두 정중앙(5.5/11) 실측 — 세로 어긋남은 라인박스 문제였음(14px 통일로 해소). */
+  .cd-chip.post svg { margin-left: -1px; margin-right: -1px; }
+  .cd-chip.youtube svg { margin-left: 0.5px; margin-right: 0.5px; }
+  .cd-chip.vod svg { margin-left: -2px; margin-right: -1px; }
   /* v6: 요일 날짜색을 전역 규칙으로 — 통계·일정 달력 공용(색만 얹는 무해 규칙, 리셋을 앞에 둬 주말색이 이긴다) */
   .stats-detail-body .calendar-daynum { color: var(--text); }
   .calendar-daynum.sun { color: #f87171; }
   .calendar-daynum.sat { color: #60a5fa; }
-  /* v7: 컴팩트 셀 = 날짜 좌상단 고정 + 2열 고정표(Crenop 지정 2026-08-29) — 내용량과 무관하게 날짜 위치 불변.
-     배치: [날짜|유튜브] [숲방송|숲게시글] [VOD|카페]. 0개 항목은 비표시하되 자리는 고정(좌측 정렬, 가운데 몰림 없음).
-     높이 산수: 14 + 9 + 9 + 행간 4 + 패딩 8 = 44px ≤ 최소 셀(≈48px 정사각) — 최악 조합도 정사각 안에 들어간다. */
+  /* v8: 컴팩트 셀 — 날짜는 좌상단 '절대 고정', 칩 묶음은 자기들끼리 뭉쳐 남은 공간의 정중앙(Crenop 지정).
+     묶음 내부는 고정 슬롯 2열: 1행 [숲|VOD] · 2행 [숲글|카페] · 3행 [유튜브] — 최초 확정안 복귀
+     (빈칸 두는 배치는 날짜가 흐름에 있던 시절의 충돌 회피책이었고, 날짜가 absolute로 빠지며 근거 소멸).
+     0개 항목은 비표시하되 슬롯은 고정(열폭=내용, 좌측 정렬 — 자리 흔들림 없음). */
   @container (max-width: 1360px) {
-    .stats-detail-body .calendar-day { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto); align-content: start; justify-items: start; align-items: center; padding: 4px 5px; gap: 2px; }
-    .stats-detail-body .cd-chips { display: contents; }   /* 칩들을 셀 그리드의 직접 항목으로 */
-    .stats-detail-body .calendar-day .calendar-daynum { grid-area: 1 / 1; line-height: 14px; }
-    .stats-detail-body .cd-s-yt   { grid-area: 1 / 2; }
-    .stats-detail-body .cd-s-soop { grid-area: 2 / 1; }
-    .stats-detail-body .cd-s-post { grid-area: 2 / 2; }
-    .stats-detail-body .cd-s-vod  { grid-area: 3 / 1; }
-    .stats-detail-body .cd-s-cafe { grid-area: 3 / 2; }
+    .stats-detail-body .calendar-day { position: relative; padding: 3px; padding-top: 16px; justify-content: center; align-items: center; gap: 0; }
+    .stats-detail-body .calendar-day .calendar-daynum { position: absolute; top: 3px; left: 5px; line-height: 13px; }
+    .stats-detail-body .cd-chips { display: grid; grid-template-columns: auto auto; gap: 2px 6px; justify-items: start; }
+    .stats-detail-body .cd-s-soop { grid-area: 1 / 1; }
+    .stats-detail-body .cd-s-vod  { grid-area: 1 / 2; }
+    .stats-detail-body .cd-s-post { grid-area: 2 / 1; }
+    .stats-detail-body .cd-s-cafe { grid-area: 2 / 2; }
+    .stats-detail-body .cd-s-yt   { grid-area: 3 / 1; }
     .stats-detail-body .cd-chip { font-size: 9px; line-height: 9px; gap: 1px; }
     .stats-detail-body .cd-chip svg { width: 9px; height: 9px; }
+    /* 9px 스케일 보정(11px 실측 × 9/11, 0.5px 스냅) */
+    .stats-detail-body .cd-chip.post svg { margin-left: -0.5px; margin-right: -0.5px; }
+    .stats-detail-body .cd-chip.youtube svg { margin-left: 0.5px; margin-right: 0.5px; }
+    .stats-detail-body .cd-chip.vod svg { margin-left: -1.5px; margin-right: -0.5px; }
   }
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -1328,6 +1343,10 @@
   .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
   .day-detail-title .cd-chip { font-size: 12px; line-height: 13px; }
   .day-detail-title .cd-chip svg { width: 13px; height: 13px; }
+  /* 13px 스케일 보정(11px 실측 × 13/11, 0.5px 스냅) */
+  .day-detail-title .cd-chip.post svg { margin-left: -1px; margin-right: -1px; }
+  .day-detail-title .cd-chip.youtube svg { margin-left: 0.5px; margin-right: 0.5px; }
+  .day-detail-title .cd-chip.vod svg { margin-left: -2px; margin-right: -1.5px; }
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
   .vod-pick-panel { max-width: 600px; }
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
@@ -6341,6 +6360,7 @@ function renderStatsMember(body, memberId) {
           const md = (statsState.medals && statsState.medals[memberId]) || {};
           const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
           return `
+        <div class="ss-row">
         <div class="stats-summary-item" data-metric="broadcastDays">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
           <span class="stats-summary-value">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
@@ -6361,7 +6381,7 @@ function renderStatsMember(body, memberId) {
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
           <span class="stats-summary-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
         </div>
-        <span class="stats-summary-break"></span><!-- v4: 2열이 필요해지는 폭이면 여기서 개행 — 시청자 5개 | 게시 3개 대칭(Crenop 지정) -->
+        </div><div class="ss-row"><!-- v8: 고정 2행 구조 — 시청자 5 | 게시 3. 개행 스팬 방식 폐기(flex 줄 높이에 대한 음수마진은 브라우저 재량이라 행간 보장 불가) -->
         <div class="stats-summary-item" data-metric="post">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
           <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
@@ -6373,6 +6393,7 @@ function renderStatsMember(body, memberId) {
         <div class="stats-summary-item" data-metric="youtube">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
           <span class="stats-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
+        </div>
         </div>`;
         })()}
       </div>
@@ -6725,10 +6746,11 @@ function renderDayDetail(year, month1, sum, memberId) {
       const s = item.data;
       const startStr = formatHHMM(s.start);
       const endStr = s.end ? formatHHMM(s.end) : '진행 중';
-      let durStr = '';
+      let durSpan = '';
       if (s.end) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
-        durStr = ` <span class="stats-row-icon" style="color:var(--ev-start);margin-left:4px">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}`;   // v7: 가운데점 제거 — 시계 아이콘이 구분자 역할(Crenop 지정)
+        // v8: 길이를 시청자 스팬과 같은 문법의 형제 요소로 — 행 gap(8px)이 시간·길이·최고·평균을 등간격으로 배치
+        durSpan = `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}</span>`;
       }
       const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
       // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
@@ -6764,7 +6786,7 @@ function renderDayDetail(year, month1, sum, memberId) {
             : `<div class="ds-vods"><span class="ds-vod-none">다시보기 없음</span></div>`;   // 숨김·삭제·미생성 — 목록 링크 대신 명시(확정 스펙)
         }
       }
-      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span>${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;
+      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time">${startStr} ~ ${endStr}</span>${durSpan}${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;
       html += (memberId && !s.end)
         ? `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`
         : `<div class="day-session">${sessionInner}</div>`;

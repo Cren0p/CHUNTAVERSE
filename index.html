@@ -557,8 +557,8 @@
   .sch-week .calendar-day.sch-has:hover { background: rgba(97,255,236,0.30); border-color: var(--accent); }
   .sch-week .calendar-day.sch-open { border-color: var(--accent); }
   .calendar-daynum.sch-mo { font-size: 12px; }                                        /* 그 달이 처음 등장하는 칸: 9/1 형태(두 토막이라 살짝 작게) */
-  .sch-dots { display: flex; gap: 3px; align-items: center; justify-content: center; margin-top: 1px; }
-  .sch-dot { width: 5px; height: 5px; background: var(--accent); }
+  .sch-week .calendar-daynum { color: var(--text); }   /* v6: 평일 날짜는 기본색 — sch-has 민트 상속 차단(요일색 문법, 셀 배경 민트는 유지) */
+  .sch-cnt { margin-top: 1px; }   /* v6: 점 → film+실개수 칩(통계 문법) — .cd-chip.vod 공용 스타일 사용 */
   .sch-detail { border: 1px solid var(--border); background: var(--bg); margin-top: 4px; }   /* 윗변 포함 사방 테두리(2026-08-11) — 주 그리드와 상세를 확실히 가른다 */
   .sch-detail:empty { display: none; }
   .sch-gap {
@@ -1200,9 +1200,9 @@
   .stats-month-btn:disabled { color: var(--border); cursor: not-allowed; }
   .stats-month-text { font-size: 14px; font-weight: 700; min-width: 110px; text-align: center; }
   .stats-detail-summary {
-    display: flex; flex: 1; flex-wrap: wrap; gap: 16px;
+    display: flex; flex: 1; flex-wrap: wrap; gap: 10px 16px;   /* v5: 행간 10px = 상하 패딩과 동일 — 2행일 때 경계~1행~2행~경계 간격 통일(Crenop 지정) */
     justify-content: center;   /* v2(2026-08-29): 항목 무리는 가운데, 각 항목 내부 텍스트는 좌측정렬 유지 — Crenop 지정 */
-    padding: 8px 16px;
+    padding: 10px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     align-items: center;
@@ -1259,8 +1259,8 @@
   .calendar-day:hover { border-color: var(--accent); }
   .calendar-day.outside { opacity: 0.25; cursor: default; }
   .calendar-day.outside:hover { border-color: transparent; }
-  .calendar-day.has-broadcast { background: rgba(97,255,236,0.18); color: var(--accent); }
-  .calendar-day.has-broadcast:hover { background: rgba(97,255,236,0.30); }
+  /* (방송날 민트 배경·글자색은 v5에서 제거 — 정보는 칩·썸네일이 담당, 날짜색은 요일 규칙(Crenop 지정 2026-08-29).
+     선택 테두리(.selected)와 오늘 표시(.today)는 유지) */
   .calendar-day.selected { border-color: var(--accent); }
   .calendar-day.today { box-shadow: inset 0 0 0 1.5px var(--time); }
   .calendar-daynum { font-weight: 700; font-size: 13px; }
@@ -1278,10 +1278,23 @@
   .cd-chip { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 700; line-height: 11px; color: var(--muted); }   /* line-height=아이콘 11px 동일 — 세로 중심 일치 */
   .cd-chip svg { width: 11px; height: 11px; display: block; flex: none; }
   .cd-chip.broadcast { color: var(--ev-start); }   /* 숲 파랑 — 사이트 공통(--ev-start) */
-  .cd-chip.post { color: var(--filter-post); }
+  .cd-chip.post { color: var(--ev-post); }         /* v5: 숲 게시글 고유 초록(--ev-post) — filter-post(민트)는 필터 버튼용이라 오용이었음 */
   .cd-chip.youtube { color: var(--ev-youtube); }
   .cd-chip.cafe { color: #03C75A; }
   .cd-chip.vod { color: var(--accent); }           /* VOD = 민트(Crenop 지정) */
+  /* v6: 요일 날짜색을 전역 규칙으로 — 통계·일정 달력 공용(색만 얹는 무해 규칙, 리셋을 앞에 둬 주말색이 이긴다) */
+  .stats-detail-body .calendar-daynum { color: var(--text); }
+  .calendar-daynum.sun { color: #f87171; }
+  .calendar-daynum.sat { color: #60a5fa; }
+  /* v6: 컴팩트 정사각 복원(Crenop 지정) — v5의 66px 고정높이 철회. 대신 아래 1360 분기에서 내부 요소를
+     축소해 칩 3행까지 정사각에 수용. 최악 조합(5종 전부)은 ~380px 폰에서만 2px 남짓 초과 가능. */
+  @container (max-width: 1360px) {
+    .stats-detail-body .calendar-day { padding: 3px; gap: 1px; }
+    .stats-detail-body .calendar-day .calendar-daynum { line-height: 14px; }
+    .stats-detail-body .cd-chips { gap: 1px 5px; margin-top: 0; }
+    .stats-detail-body .cd-chip { font-size: 9px; line-height: 9px; gap: 1px; }
+    .stats-detail-body .cd-chip svg { width: 9px; height: 9px; }
+  }
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* (.cd-thumb-n 개수 배지는 v4에서 제거 — 칩의 film 숫자가 담당, 썸네일을 가리지 않는다) */
@@ -1298,11 +1311,20 @@
   .ds-vod-none { font-size: 11px; color: var(--muted); }
   .ds-vod-none.link { color: var(--accent); text-decoration: none; }
   /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
+  /* v5 색 분류: 인라인 시간 배지는 무채색 — 생방송 카드 .card-btime의 2026-07-17 확정("무채색, 경과 표시와 통일")과 동일 부류.
+     파랑(--ev-start)은 '방송 시간' 지표 라벨 아이콘과 세션 행 시간 아이콘에만. */
   .ds-vod-dur { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; font-size: 11px; color: var(--muted); font-weight: 600; }
-  .ds-vod-dur .stats-row-icon { margin: 0; }
+  .ds-vod-dur svg { width: 12px; height: 12px; display: block; flex: none; }
   /* 일별 요약 변경 로그의 경과 배지 — 이벤트 탭 .event-elapsed 재사용, 10px 라인에 맞게 축소 */
   .day-session-change .event-elapsed { font-size: 10px; margin-left: 2px; }
   .day-session-change .event-elapsed svg { width: 10px; height: 10px; vertical-align: -1px; }
+  /* v5: 일별 요약 헤더 — 날짜는 요일색, 개수는 달력과 동일한 칩 문법(약간 키움) */
+  .ddt-date { color: var(--text); }
+  .ddt-date.sun { color: #f87171; }
+  .ddt-date.sat { color: #60a5fa; }
+  .ddt-chips { display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; vertical-align: 1px; }
+  .day-detail-title .cd-chip { font-size: 12px; line-height: 13px; }
+  .day-detail-title .cd-chip svg { width: 13px; height: 13px; }
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
   .vod-pick-panel { max-width: 600px; }
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
@@ -1319,13 +1341,10 @@
     .stats-detail-body .calendar { max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* 200px 셀 ×7 + gap 24 + 패딩 24 (+테두리) */
     .stats-detail-body .calendar-day { aspect-ratio: auto; align-items: stretch; justify-content: flex-start; padding: 5px; gap: 4px; min-height: 118px; }   /* 썸네일 없는 날도 행 높이 유지 */
     .stats-detail-body .cd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; width: 100%; }
-    .stats-detail-body .cd-top .calendar-daynum { line-height: 16px; }
-    .stats-detail-body .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 7px; justify-content: flex-end; margin-top: 0; }   /* PC: 한 줄 우측 정렬 — 컴팩트 슬롯 그리드 무시(flex는 grid-area 미적용) */
+    .stats-detail-body .cd-top .calendar-daynum { line-height: 14px; }   /* v5: 13px 글자에 여유 1px — 칩(11px)과 첫 줄 눈높이 근접 */
+    .stats-detail-body .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 7px; justify-content: flex-end; margin-top: 0; padding-top: 1px; }   /* PC: 한 줄 우측 정렬(컴팩트 슬롯 무시) + 날짜와 세로 눈높이 보정 1px */
     .stats-detail-body .cd-thumb { display: block; }
-    /* 날짜 색 = 요일색(일 적·토 청·평일 기본) — 방송날 민트 상속을 끊는다(Crenop 지정). 셀 배경 민트는 유지 */
-    .stats-detail-body .calendar-daynum { color: var(--text); }
-    .stats-detail-body .calendar-daynum.sun { color: #f87171; }
-    .stats-detail-body .calendar-daynum.sat { color: #60a5fa; }
+    /* (요일 날짜색 규칙은 v5에서 베이스로 이동 — 컴팩트 포함 통계 전 폼 공통 적용) */
   }
   @container (min-width: 801px) and (max-width: 1360px) {   /* 중간 폭 — 컴팩트 달력 + 우측 일별 요약(구형 2열 복원, Crenop 지정) */
     .stats-detail-body { display: grid; grid-template-columns: minmax(0, 500px) minmax(300px, 1fr); grid-template-areas: "cal detail" "heat detail"; gap: 16px; align-items: start; }
@@ -1334,12 +1353,7 @@
     .stats-detail-body .day-detail { grid-area: detail; display: flex; }
     .stats-detail-body .cal-week-detail { display: none; }   /* 이 밴드에선 주간 확장 대신 우측 패널 */
   }
-  .calendar-day.has-activity:not(.has-broadcast) {
-    background: rgba(46, 245, 225, 0.06);
-  }
-  .calendar-day.has-activity:not(.has-broadcast):hover {
-    background: rgba(46, 245, 225, 0.12);
-  }
+  /* (활동일 옅은 민트 음영도 v5에서 제거 — 음영 폐지, 칩이 활동 정보를 담당) */
 
   /* 시간대별 방송 분포 히트맵 (멤버 개별 화면) — v3(2026-08-29): 셀을 15×15 정사각으로 고정(열 폭=행 높이).
      래퍼는 내용 폭(31일≈490px)에 맞추고 중앙 배치 — 전폭에 늘리지 않는다(Crenop 지정). 좁은 화면은 내부 가로 스크롤. */
@@ -4346,9 +4360,10 @@ function renderScheduleCalendar(vis) {
       if (items.length) cls.push('sch-has');
       if (k === schOpenDate) cls.push('sch-open');
       const num = firstOfMonth ? `${mo}/${d.getUTCDate()}` : `${d.getUTCDate()}`;
-      // 점은 최대 4개까지만(칸 폭 74px·모바일 50px — 5개부터 좁은 화면에서 칸을 넘는다). 실제 건수는 눌러서 확인.
-      const dots = items.length ? `<span class="sch-dots">${items.slice(0, 4).map(() => '<span class="sch-dot"></span>').join('')}</span>` : '';
-      html += `<div class="${cls.join(' ')}" data-schday="${items.length ? k : ''}"><span class="calendar-daynum${firstOfMonth ? ' sch-mo' : ''}">${num}</span>${dots}</div>`;
+      const dowCls = d.getUTCDay() === 0 ? ' sun' : d.getUTCDay() === 6 ? ' sat' : '';   // v6: 요일 날짜색 — 통계 달력 문법 이식(Crenop 지정)
+      // v6: 점(상한 4) → film 아이콘+실개수 칩 — 통계 달력의 개수 문법 이식. 한 요소라 폭 걱정 없이 실제 건수 그대로.
+      const cnt = items.length ? `<span class="cd-chip vod sch-cnt">${SVG_ICONS.film}${items.length}</span>` : '';
+      html += `<div class="${cls.join(' ')}" data-schday="${items.length ? k : ''}"><span class="calendar-daynum${firstOfMonth ? ' sch-mo' : ''}${dowCls}">${num}</span>${cnt}</div>`;
     }
     html += '</div>';
     const open = weeks[i].days.map(key).find(k => k === schOpenDate && byDate[k]);
@@ -5978,7 +5993,7 @@ function vodBadges(v) {
 }
 function vodTileHtml(v) {
   // v4: 길이는 썸네일 오버레이가 아니라 제목 아래 줄 — 생방송·이벤트 탭의 clockTime 문법 준용(썸네일 가림 방지, Crenop 지정)
-  const dur = v.duration_ms ? `<span class="ds-vod-dur"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(v.duration_ms)}</span>` : '';
+  const dur = v.duration_ms ? `<span class="ds-vod-dur">${SVG_ICONS.clockTime}${formatDuration(v.duration_ms)}</span>` : '';   // v5: 무채색 — card-btime 부류(인라인 시간 배지)
   return `<a class="ds-vod" href="${vodPlayerUrl(v)}" target="_blank" rel="noopener">` +
     `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}</span>` +
     `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span>${dur}</a>`;
@@ -6662,13 +6677,26 @@ function renderDayDetail(year, month1, sum, memberId) {
   const youtubes = youtubeByDate[date] || [];
   const cafes = cafeByDate[date] || [];
   const totalActivities = sessions.length + posts.length + youtubes.length + cafes.length;
-  if (totalActivities === 0) return `<div class="day-detail-title">${date}</div><div class="day-detail-empty">이 날은 활동 기록이 없어요</div>`;
-  const summaryParts = [];
-  if (sessions.length > 0) summaryParts.push(`방송 ${sessions.length}회`);
-  if (posts.length > 0) summaryParts.push(`게시글 ${posts.length}개`);
-  if (youtubes.length > 0) summaryParts.push(`유튜브 ${youtubes.length}개`);
-  if (cafes.length > 0) summaryParts.push(`카페 ${cafes.length}개`);
-  let html = `<div class="day-detail-title">${date} · ${summaryParts.join(' · ')}</div>`;
+  // v5: 헤더를 달력 칩 문법으로 통일 — 날짜는 요일색, 개수는 아이콘+숫자(Crenop 지정 2026-08-29)
+  const ddDow = new Date(date + 'T00:00:00Z').getUTCDay();   // 'YYYY-MM-DD'는 UTC 자정 파싱 — 그 달력 날짜의 요일이 그대로 나온다
+  const ddDateHtml = `<span class="ddt-date${ddDow === 0 ? ' sun' : ddDow === 6 ? ' sat' : ''}">${date}</span>`;
+  if (totalActivities === 0) return `<div class="day-detail-title">${ddDateHtml}</div><div class="day-detail-empty">이 날은 활동 기록이 없어요</div>`;
+  let ddVodN = 0;   // 그날 세션들의 VOD 개수(달력 film 칩과 동일 산정 — title_no 중복 제거)
+  if (memberId && sessions.length > 0) {
+    const seen = new Set();
+    for (const s of sessions) {
+      const parts = vodsForBroad(memberId, `${year}-${String(month1).padStart(2, '0')}`, s.broad_no) || [];
+      for (const v of parts) seen.add(v.title_no);
+    }
+    ddVodN = seen.size;
+  }
+  const headChips = [];
+  if (sessions.length > 0) headChips.push(`<span class="cd-chip broadcast">${SVG_ICONS.soop}${sessions.length}</span>`);
+  if (posts.length > 0) headChips.push(`<span class="cd-chip post">${SVG_ICONS.board}${posts.length}</span>`);
+  if (cafes.length > 0) headChips.push(`<span class="cd-chip cafe">${SVG_ICONS.coffee}${cafes.length}</span>`);
+  if (youtubes.length > 0) headChips.push(`<span class="cd-chip youtube">${SVG_ICONS.youtube}${youtubes.length}</span>`);
+  if (ddVodN > 0) headChips.push(`<span class="cd-chip vod">${SVG_ICONS.film}${ddVodN}</span>`);
+  let html = `<div class="day-detail-title">${ddDateHtml}<span class="ddt-chips">${headChips.join('')}</span></div>`;
   const items = [];
   for (const s of sessions) {
     const t = new Date(s.start).getTime();
@@ -6695,7 +6723,7 @@ function renderDayDetail(year, month1, sum, memberId) {
       let durStr = '';
       if (s.end) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
-        durStr = ` · ${formatDuration(ms)}`;
+        durStr = ` · <span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}`;   // v6: 시계는 길이 앞(Crenop 지정) — 아이콘=길이 표식, 진행 중(길이 없음)엔 아이콘도 없음
       }
       const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
       // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
@@ -6731,7 +6759,7 @@ function renderDayDetail(year, month1, sum, memberId) {
             : `<div class="ds-vods"><span class="ds-vod-none">다시보기 없음</span></div>`;   // 숨김·삭제·미생성 — 목록 링크 대신 명시(확정 스펙)
         }
       }
-      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${startStr} ~ ${endStr}${durStr}</span>${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;
+      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time">${startStr} ~ ${endStr}${durStr}</span>${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;
       html += (memberId && !s.end)
         ? `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`
         : `<div class="day-session">${sessionInner}</div>`;

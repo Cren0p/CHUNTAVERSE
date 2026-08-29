@@ -1376,7 +1376,7 @@
     /* (요일 날짜색 규칙은 v5에서 베이스로 이동 — 컴팩트 포함 통계 전 폼 공통 적용) */
   }
   @container (min-width: 801px) and (max-width: 1360px) {   /* 중간 폭 — 컴팩트 달력 + 우측 일별 요약(구형 2열 복원, Crenop 지정) */
-    .stats-detail-body { display: grid; grid-template-columns: minmax(0, 500px) minmax(300px, 1fr); grid-template-areas: "cal detail" "heat detail"; gap: 16px; align-items: start; }
+    .stats-detail-body { display: grid; grid-template-columns: minmax(0, 500px) minmax(300px, 1fr); grid-template-areas: "cal detail" "heat detail"; grid-template-rows: auto 1fr; gap: 16px; align-items: start; }   /* rows auto·1fr(2026-08-29): 우측 요약이 두 행에 걸치는데 행 규칙이 없으면 요약의 남는 높이가 1행에도 배분돼 히트맵이 달력에서 밀려 내려갔다 — 1행은 달력 높이만, 나머지는 전부 2행이 흡수해 히트맵이 달력 바로 아래 고정 */
     .stats-detail-body .calendar { grid-area: cal; }
     .stats-detail-body .toh-wrap { grid-area: heat; margin: 0; }
     .stats-detail-body .day-detail { grid-area: detail; display: flex; }
@@ -2699,7 +2699,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-29c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

@@ -553,8 +553,8 @@
   .sch-week .calendar-day { cursor: default; }                                        /* 통계 달력은 모든 칸이 클릭 대상이지만 여기선 일정 있는 날만 */
   .sch-week .calendar-day:not(.sch-has):hover { border-color: transparent; }
   .sch-week .calendar-day.past { opacity: 0.25; }                                     /* 이번 주 중 지나간 날 */
-  .sch-week .calendar-day.sch-has { background: rgba(97,255,236,0.18); color: var(--accent); cursor: pointer; }
-  .sch-week .calendar-day.sch-has:hover { background: rgba(97,255,236,0.30); border-color: var(--accent); }
+  .sch-week .calendar-day.sch-has { cursor: pointer; }   /* v7: 민트 음영 제거(Crenop 지정) — film+N 칩이 컨텐츠 유무를 담당 */
+  .sch-week .calendar-day.sch-has:hover { border-color: var(--accent); }
   .sch-week .calendar-day.sch-open { border-color: var(--accent); }
   .calendar-daynum.sch-mo { font-size: 12px; }                                        /* 그 달이 처음 등장하는 칸: 9/1 형태(두 토막이라 살짝 작게) */
   .sch-week .calendar-daynum { color: var(--text); }   /* v6: 평일 날짜는 기본색 — sch-has 민트 상속 차단(요일색 문법, 셀 배경 민트는 유지) */
@@ -1210,7 +1210,7 @@
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
   .stats-summary-break { display: none; }   /* v4: 넓을 땐 한 줄 */
-  @container (max-width: 1080px) { .stats-summary-break { display: block; flex-basis: 100%; height: 0; } }   /* 8항목이 못 드는 폭 — 자연 랩이 엉뚱한 데서 꺾이기 전에 평균/숲 사이 고정 개행 */
+  @container (max-width: 1080px) { .stats-summary-break { display: block; flex-basis: 100%; height: 0; margin-top: -10px; } }   /* v7: 개행 스팬이 자체 flex 줄(높이 0)을 차지해 행간이 gap 10×2=20px가 되던 것을 음수 마진으로 상쇄 — 경계·행간 모두 10px */
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
   .stats-summary-value { font-size: 14px; font-weight: 700; }
   /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
@@ -1271,10 +1271,7 @@
   .cd-thumb { display: none; }                   /* 썸네일은 PC 폼에서만 — 칩은 v4부터 컴팩트에도 상시 표시 */
   /* v4 컴팩트 칩: 2열 고정 슬롯 그리드(1행 숲|VOD · 2행 숲글|카페 · 3행 유튜브 — Crenop 지정).
      슬롯(grid-area) 고정이라 0으로 빠진 항목이 있어도 남은 칩의 자리가 안 흔들린다. */
-  .cd-chips { display: grid; grid-template-columns: auto auto; gap: 2px 8px; justify-content: center; margin-top: 1px; min-width: 0; }
-  .cd-s-soop { grid-area: 1 / 1; } .cd-s-vod { grid-area: 1 / 2; }
-  .cd-s-post { grid-area: 2 / 1; } .cd-s-cafe { grid-area: 2 / 2; }
-  .cd-s-yt   { grid-area: 3 / 1; }
+  .cd-chips { min-width: 0; }   /* 폼별 배치는 분기에서: PC=flex 한 줄 / 컴팩트=display:contents(셀 그리드에 직접 배치, 아래 v7) */
   .cd-chip { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 700; line-height: 11px; color: var(--muted); }   /* line-height=아이콘 11px 동일 — 세로 중심 일치 */
   .cd-chip svg { width: 11px; height: 11px; display: block; flex: none; }
   .cd-chip.broadcast { color: var(--ev-start); }   /* 숲 파랑 — 사이트 공통(--ev-start) */
@@ -1286,12 +1283,18 @@
   .stats-detail-body .calendar-daynum { color: var(--text); }
   .calendar-daynum.sun { color: #f87171; }
   .calendar-daynum.sat { color: #60a5fa; }
-  /* v6: 컴팩트 정사각 복원(Crenop 지정) — v5의 66px 고정높이 철회. 대신 아래 1360 분기에서 내부 요소를
-     축소해 칩 3행까지 정사각에 수용. 최악 조합(5종 전부)은 ~380px 폰에서만 2px 남짓 초과 가능. */
+  /* v7: 컴팩트 셀 = 날짜 좌상단 고정 + 2열 고정표(Crenop 지정 2026-08-29) — 내용량과 무관하게 날짜 위치 불변.
+     배치: [날짜|유튜브] [숲방송|숲게시글] [VOD|카페]. 0개 항목은 비표시하되 자리는 고정(좌측 정렬, 가운데 몰림 없음).
+     높이 산수: 14 + 9 + 9 + 행간 4 + 패딩 8 = 44px ≤ 최소 셀(≈48px 정사각) — 최악 조합도 정사각 안에 들어간다. */
   @container (max-width: 1360px) {
-    .stats-detail-body .calendar-day { padding: 3px; gap: 1px; }
-    .stats-detail-body .calendar-day .calendar-daynum { line-height: 14px; }
-    .stats-detail-body .cd-chips { gap: 1px 5px; margin-top: 0; }
+    .stats-detail-body .calendar-day { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto); align-content: start; justify-items: start; align-items: center; padding: 4px 5px; gap: 2px; }
+    .stats-detail-body .cd-chips { display: contents; }   /* 칩들을 셀 그리드의 직접 항목으로 */
+    .stats-detail-body .calendar-day .calendar-daynum { grid-area: 1 / 1; line-height: 14px; }
+    .stats-detail-body .cd-s-yt   { grid-area: 1 / 2; }
+    .stats-detail-body .cd-s-soop { grid-area: 2 / 1; }
+    .stats-detail-body .cd-s-post { grid-area: 2 / 2; }
+    .stats-detail-body .cd-s-vod  { grid-area: 3 / 1; }
+    .stats-detail-body .cd-s-cafe { grid-area: 3 / 2; }
     .stats-detail-body .cd-chip { font-size: 9px; line-height: 9px; gap: 1px; }
     .stats-detail-body .cd-chip svg { width: 9px; height: 9px; }
   }
@@ -1322,7 +1325,7 @@
   .ddt-date { color: var(--text); }
   .ddt-date.sun { color: #f87171; }
   .ddt-date.sat { color: #60a5fa; }
-  .ddt-chips { display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; vertical-align: 1px; }
+  .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
   .day-detail-title .cd-chip { font-size: 12px; line-height: 13px; }
   .day-detail-title .cd-chip svg { width: 13px; height: 13px; }
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
@@ -1341,8 +1344,9 @@
     .stats-detail-body .calendar { max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* 200px 셀 ×7 + gap 24 + 패딩 24 (+테두리) */
     .stats-detail-body .calendar-day { aspect-ratio: auto; align-items: stretch; justify-content: flex-start; padding: 5px; gap: 4px; min-height: 118px; }   /* 썸네일 없는 날도 행 높이 유지 */
     .stats-detail-body .cd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; width: 100%; }
-    .stats-detail-body .cd-top .calendar-daynum { line-height: 14px; }   /* v5: 13px 글자에 여유 1px — 칩(11px)과 첫 줄 눈높이 근접 */
-    .stats-detail-body .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 7px; justify-content: flex-end; margin-top: 0; padding-top: 1px; }   /* PC: 한 줄 우측 정렬(컴팩트 슬롯 무시) + 날짜와 세로 눈높이 보정 1px */
+    .stats-detail-body .cd-top .calendar-daynum { line-height: 14px; }
+    .stats-detail-body .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 7px; justify-content: flex-end; margin-top: 0; }
+    .stats-detail-body .cd-chip { line-height: 14px; }   /* v7: 칩 라인박스=날짜(14px) 통일 — 구 11px 박스는 첫 줄이 3px 높게 앉았다(픽셀 산정), 1px 임시 보정 폐기 */
     .stats-detail-body .cd-thumb { display: block; }
     /* (요일 날짜색 규칙은 v5에서 베이스로 이동 — 컴팩트 포함 통계 전 폼 공통 적용) */
   }
@@ -1432,6 +1436,7 @@
   .day-detail-title {
     font-size: 14px; font-weight: 700;
     color: var(--accent);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;   /* v7: 날짜·칩을 flex 세로 중앙으로 — vertical-align 보정 폐기 */
     margin-bottom: 12px; padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
@@ -6723,7 +6728,7 @@ function renderDayDetail(year, month1, sum, memberId) {
       let durStr = '';
       if (s.end) {
         const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
-        durStr = ` · <span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}`;   // v6: 시계는 길이 앞(Crenop 지정) — 아이콘=길이 표식, 진행 중(길이 없음)엔 아이콘도 없음
+        durStr = ` <span class="stats-row-icon" style="color:var(--ev-start);margin-left:4px">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}`;   // v7: 가운데점 제거 — 시계 아이콘이 구분자 역할(Crenop 지정)
       }
       const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
       // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략

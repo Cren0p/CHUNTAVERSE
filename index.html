@@ -1282,10 +1282,12 @@
   /* v4 컴팩트 칩: 2열 고정 슬롯 그리드(1행 숲|VOD · 2행 숲글|카페 · 3행 유튜브 — Crenop 지정).
      슬롯(grid-area) 고정이라 0으로 빠진 항목이 있어도 남은 칩의 자리가 안 흔들린다. */
   .cd-chips { min-width: 0; }   /* 폼별 배치는 분기에서: PC=flex 한 줄 / 컴팩트=display:contents(셀 그리드에 직접 배치, 아래 v7) */
-  /* v11: 칩 = 아이콘+숫자 단일 SVG 합성(chipHtml) — 한 번에 래스터되므로 요소 간 반픽셀 편차 소멸.
-     CSS는 높이(스케일)와 색만 담당, 내부 배치는 전부 24단위 좌표. */
+  /* v12: 칩 = [컴팩트용 아이콘 단독 .cd-ic | PC·헤더용 합성 .cd-full] 이중 표현 — 폼별로 하나만 보인다.
+     합성본은 아이콘+숫자가 한 SVG 좌표계(한 번에 래스터 → 반픽셀 편차 소멸), 숫자는 BADGE_GLYPHS 자산. */
   .cd-chip { display: inline-flex; color: var(--muted); }
-  .cd-chip > svg { height: 11px; width: auto; display: block; }
+  .cd-chip .cd-full { height: 11px; width: auto; display: block; }
+  .cd-chip .cd-ic { display: none; }
+  .cd-chip .cd-ic svg { width: 10px; height: 10px; display: block; }
   .cd-chip.broadcast { color: var(--ev-start); }   /* 숲 파랑 — 사이트 공통(--ev-start) */
   .cd-chip.post { color: var(--ev-post); }         /* 숲 게시글 고유 초록(--ev-post) */
   .cd-chip.youtube { color: var(--ev-youtube); }
@@ -1307,8 +1309,8 @@
     .stats-detail-body .cd-s-post { grid-area: 2 / 2; }
     .stats-detail-body .cd-s-vod  { grid-area: 3 / 1; }
     .stats-detail-body .cd-s-cafe { grid-area: 3 / 2; }
-    .stats-detail-body .cd-chip > svg { width: 10px; height: 10px; }   /* v11: 정사각 강제 + slice 크롭 = 아이콘만 노출
-       — 숫자 제거(Crenop 안: 10px 숫자는 판독 불가·색×숫자 밀도가 난잡의 주범, 개수는 클릭 상세가 담당) */
+    .stats-detail-body .cd-chip .cd-full { display: none; }   /* v12: 크롭 방식 폐기(Crenop 지정) — 컴팩트는 아이콘 단독본으로 */
+    .stats-detail-body .cd-chip .cd-ic { display: inline-flex; }   /* 숫자 제거: 10px 숫자는 판독 불가·밀도 난잡, 개수는 클릭 상세가 담당 */
   }
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -1320,11 +1322,8 @@
   .ds-vod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ds-vod:hover .ds-vod-thumb { outline: 1.5px solid var(--accent); }
   .ds-vod-title { display: block; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ds-vod-badge { display: inline-block; margin-right: 4px; padding: 0 4px; font-size: 10px; font-weight: 700; line-height: 15px; vertical-align: 1px; }
-  .ds-vod-badge.sub { background: rgba(96,165,250,0.18); color: #60a5fa; }     /* auth_no 107 — 구독+ 전용(상관 기반 추정) */
-  .ds-vod-badge.adult { background: rgba(248,113,113,0.18); color: #f87171; }  /* grade 19 */
+  /* (.ds-vod-badge는 v12에서 폐기 — 기존 모드 배지 문법(day-session-mode + labelBadgeSvg) 재사용) */
   .ds-vod-none { font-size: 11px; color: var(--muted); }
-  .ds-vod-none.link { color: var(--accent); text-decoration: none; }
   /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
   /* v5 색 분류: 인라인 시간 배지는 무채색 — 생방송 카드 .card-btime의 2026-07-17 확정("무채색, 경과 표시와 통일")과 동일 부류.
      파랑(--ev-start)은 '방송 시간' 지표 라벨 아이콘과 세션 행 시간 아이콘에만. */
@@ -1338,11 +1337,14 @@
   .ddt-date.sun { color: #f87171; }
   .ddt-date.sat { color: #60a5fa; }
   .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
-  .day-detail-title .cd-chip > svg { height: 13px; width: auto; }   /* v11: 헤더 스케일 — 배치는 칩 내부 좌표가 담당 */
+  .day-detail-title .cd-chip .cd-full { height: 13px; }   /* v12: 헤더 스케일 — 배치는 칩 내부 좌표가 담당 */
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
-  .vod-pick-panel { max-width: 600px; }
+  .vod-pick-panel { width: 436px; max-width: calc(100vw - 32px); }   /* v12: 2타일 정합 폭 = 12 + 200 + 12 + 200 + 12 (3개↑는 아래 줄로) */
+  .vod-pick-panel .lr-body { padding: 12px; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다 */
+  .vod-pick-panel .ds-vods { gap: 12px; margin-top: 0; }
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
-  .vod-pick-empty a { color: var(--accent); }
+  .vod-pick-empty a, .ds-vod-none.link { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .vod-pick-empty a svg, .ds-vod-none.link svg { width: 12px; height: 12px; display: block; }
   /* 우측 일별 요약 패널 — 기본 숨김(≤800 모바일·PC는 주간 확장이 담당), 중간 폭 밴드에서만 표시 */
   .day-detail {
     display: none;
@@ -3082,43 +3084,29 @@ const SVG_ICONS = {
   chuntaverse: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>`,
 };
 
-// ── 숫자 글리프 자산(v11, 2026-08-29): Pretendard Bold 외곽선 0~9 — SVG_ICONS 곁에서 함께 관리(Crenop 지정) ──
-// 아이콘과 같은 24단위 박스: '0' 높이 15/24, 세로중심 12(폰트 파일에서 직접 추출·정규화). 데이터(w=진행폭, d=path)로
-// 보관해 단독 SVG(numSvgs)로도, 칩 합성(chipHtml)으로도 재사용한다.
-const SVG_DIGITS = {
-  '0': { w: 13.73, d: 'M6.87 19.50C10.52 19.50 12.73 16.80 12.73 12.00C12.73 7.24 10.52 4.50 6.87 4.50C3.22 4.50 1.00 7.22 1.00 12.00C1.00 16.78 3.22 19.50 6.87 19.50ZM6.87 17.00C5.17 17.00 4.08 15.37 4.10 12.00C4.10 8.67 5.17 6.98 6.87 6.98C8.56 6.98 9.63 8.67 9.63 12.00C9.65 15.37 8.56 17.00 6.87 17.00Z' },
-  '1': { w: 8.47, d: 'M7.47 4.70L4.61 4.70L1.00 7.00L1.00 9.68L4.35 7.58L4.43 7.58L4.43 19.30L7.47 19.30Z' },
-  '2': { w: 12.58, d: 'M1.14 19.30L11.58 19.30L11.58 16.80L5.35 16.80L5.35 16.72L7.57 14.56C10.58 11.84 11.38 10.47 11.38 8.81C11.38 6.27 9.31 4.50 6.18 4.50C3.10 4.50 0.98 6.31 1.00 9.18L3.88 9.18C3.88 7.79 4.77 6.92 6.14 6.92C7.47 6.92 8.46 7.73 8.46 9.02C8.46 10.17 7.73 10.97 6.36 12.28L1.12 17.10Z' },
-  '3': { w: 13.21, d: 'M6.56 19.50C9.85 19.50 12.23 17.71 12.21 15.21C12.23 13.39 11.04 12.08 8.90 11.82L8.90 11.70C10.54 11.42 11.69 10.25 11.67 8.61C11.69 6.29 9.65 4.50 6.60 4.50C3.62 4.50 1.34 6.23 1.30 8.75L4.21 8.75C4.25 7.65 5.31 6.92 6.60 6.92C7.90 6.92 8.74 7.69 8.74 8.79C8.74 9.94 7.73 10.73 6.30 10.73L4.95 10.73L4.95 12.97L6.30 12.97C8.02 12.97 9.08 13.81 9.06 15.00C9.08 16.17 8.04 17.00 6.58 17.00C5.17 17.00 4.12 16.27 4.06 15.19L1.00 15.19C1.06 17.73 3.36 19.50 6.56 19.50Z' },
-  '4': { w: 13.83, d: 'M1.00 16.72L8.10 16.72L8.10 19.30L10.98 19.30L10.98 16.72L12.83 16.72L12.83 14.28L10.98 14.28L10.98 4.70L7.17 4.70L1.00 14.32ZM4.06 14.28L4.06 14.16L8.00 8.03L8.14 8.03L8.14 14.28Z' },
-  '5': { w: 12.85, d: 'M6.32 19.50C9.61 19.50 11.85 17.38 11.85 14.44C11.85 11.64 9.85 9.64 7.17 9.64C5.88 9.64 4.79 10.15 4.25 10.87L4.13 10.87L4.53 7.18L11.02 7.18L11.02 4.70L2.03 4.70L1.24 13.11L3.98 13.11C4.43 12.28 5.19 11.88 6.28 11.88C7.81 11.90 8.90 12.97 8.90 14.52C8.90 16.03 7.83 17.10 6.32 17.10C5.05 17.10 4.00 16.33 3.94 15.19L1.00 15.19C1.06 17.71 3.28 19.50 6.32 19.50Z' },
-  '6': { w: 13.41, d: 'M6.89 19.50C10.17 19.52 12.41 17.38 12.41 14.42C12.41 11.68 10.46 9.70 7.83 9.70C6.22 9.70 4.77 10.47 4.10 11.76L3.96 11.76C3.98 8.90 5.03 7.10 7.01 7.10C8.18 7.10 9.02 7.73 9.27 8.75L12.25 8.75C11.95 6.35 9.95 4.50 7.01 4.50C3.36 4.50 1.00 7.42 1.00 12.34C1.00 17.69 3.86 19.48 6.89 19.50ZM6.87 17.10C5.38 17.10 4.29 15.93 4.27 14.50C4.29 13.07 5.42 11.90 6.91 11.90C8.40 11.90 9.47 13.05 9.47 14.50C9.47 15.97 8.36 17.10 6.87 17.10Z' },
-  '7': { w: 12.3, d: 'M2.01 19.30L5.15 19.30L11.30 7.22L11.30 4.70L1.00 4.70L1.00 7.18L8.16 7.18L8.16 7.28Z' },
-  '8': { w: 13.45, d: 'M6.73 19.50C10.05 19.50 12.45 17.75 12.45 15.37C12.45 13.53 11.02 12.04 9.25 11.76L9.25 11.66C10.78 11.35 11.89 10.04 11.91 8.43C11.89 6.15 9.71 4.50 6.73 4.50C3.74 4.50 1.56 6.15 1.56 8.43C1.56 10.02 2.65 11.35 4.23 11.66L4.23 11.76C2.41 12.04 1.00 13.53 1.00 15.37C1.00 17.75 3.40 19.50 6.73 19.50ZM6.73 17.18C5.17 17.18 4.15 16.31 4.17 15.06C4.15 13.79 5.23 12.87 6.73 12.87C8.22 12.87 9.29 13.79 9.29 15.06C9.29 16.31 8.26 17.18 6.73 17.18ZM6.73 10.73C5.44 10.73 4.53 9.90 4.53 8.73C4.53 7.58 5.42 6.80 6.73 6.80C8.04 6.80 8.94 7.60 8.94 8.73C8.94 9.90 8.02 10.73 6.73 10.73Z' },
-  '9': { w: 13.41, d: 'M6.52 4.50C3.22 4.48 1.00 6.62 1.00 9.56C1.02 12.28 2.96 14.26 5.58 14.26C7.21 14.26 8.64 13.49 9.33 12.20L9.45 12.20C9.45 15.13 8.40 16.90 6.40 16.90C5.23 16.90 4.39 16.25 4.15 15.19L1.16 15.19C1.46 17.67 3.46 19.50 6.40 19.50C10.07 19.50 12.43 16.58 12.41 11.62C12.41 6.31 9.55 4.52 6.52 4.50ZM6.54 6.88C8.04 6.88 9.13 8.07 9.15 9.46C9.15 10.87 8.00 12.04 6.52 12.04C5.03 12.04 3.96 10.91 3.96 9.48C3.94 8.03 5.05 6.88 6.54 6.88Z' },
-};
-function numSvgs(n) {   // 숫자만 필요한 곳용 — 낱자 SVG 나열
-  return String(n).split('').map(ch => { const g = SVG_DIGITS[ch]; return g ? `<svg class="cd-d" viewBox="0 0 ${g.w} 24"><path fill="currentColor" d="${g.d}"/></svg>` : ''; }).join('');
-}
-// 칩 = 아이콘+숫자를 '한 SVG 좌표계'에 합성(v11) — 두 요소가 한 번에 래스터되므로 요소 간 반픽셀 반올림 편차가
-// 원리적으로 소멸(v10 두-박스 병렬에서 잔존하던 세로 어긋남의 마지막 후보). 아이콘 글리프 여백(실측)은 유닛으로
-// 선반영: 글리프 좌단 1u 정렬, 글리프 우단→숫자 4.5u(≈2px@11px). preserveAspectRatio slice + 정사각 강제 시
-// 숫자부가 잘려 '아이콘만' 표시가 된다(컴팩트 셀이 이 크롭을 사용 — 숫자 제거, 개수는 클릭 상세가 담당).
-const CHIP_ICON_PAD = { soop: [1.1, 0.9], board: [3.1, 3.1], coffee: [0.9, 0.9], youtube: [0, 0], film: [5.0, 3.1] };   // [좌, 우] 글리프 여백(24단위)
+// ── 칩 합성 v12(2026-08-29): 숫자는 기존 자산 BADGE_GLYPHS(2026-07-13, 잉크 경계 동봉)로 그린다 ──
+// v11에서 fontkit으로 새로 추출했던 SVG_DIGITS는 '이미 있던 자산의 중복'이라 삭제 — 코드 정독 실패의 산물.
+// BADGE_GLYPHS는 세로 스냅 문제(폰트 힌팅의 ±1px 착지)를 도형 렌더로 푼 검증된 체계고, nav 배지·라이브
+// 카운트·모드 배지가 전부 이걸 쓴다. 칩도 같은 등록부·같은 함수(navDigitsGroup)를 쓴다.
+// 구조: 한 SVG(뷰박스 높이 24) 안에 [아이콘 24박스(글리프 좌단 1u 정렬)] + [숫자(잉크 높이 15u, 세로중심 12)].
+// 마크업엔 컴팩트용 아이콘 단독본(.cd-ic)을 병기 — 크롭 방식 폐기(Crenop 지정), CSS가 폼별로 하나만 보인다.
+const CHIP_ICON_PAD = { soop: [1.1, 0.9], board: [3.1, 3.1], coffee: [0.9, 0.9], youtube: [0, 0], film: [5.0, 3.1] };   // [좌, 우] 글리프 여백(24단위, path 실측)
 function chipHtml(cls, iconKey, n) {
   const pad = CHIP_ICON_PAD[iconKey] || [0, 0];
   const ix = 1 - pad[0];
-  let x = ix + 24 - pad[1] + 4.5;
+  const startX = ix + 24 - pad[1] + 4.5;                    // 아이콘 글리프 우단 + 4.5u(≈2px@11px)
+  const s = 15 / (DIGIT_INK.y1 - DIGIT_INK.y0);             // 숫자 잉크 높이 15u — '0' 기준 6.9px@11px
+  const str = String(n);
+  let aw = 0, first = null, last = null;
+  for (const ch of str) { const g = BADGE_GLYPHS.g[ch]; if (!g) continue; aw += g.a; if (!first) first = g; last = g; }
+  const inkW = first ? (aw - first.x0 - (last.a - last.x1)) * s : 0;
+  const yBase = 12 + (DIGIT_INK.y0 + DIGIT_INK.y1) / 2 * s;
+  const digits = first ? `<g class="cd-digits" fill="currentColor">${navDigitsGroup(str, s, startX - first.x0 * s, yBase)}</g>` : '';
+  const W = Math.ceil(startX + inkW + 1);
   const inner = (SVG_ICONS[iconKey] || '').replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
-  let dg = '';
-  for (const ch of String(n)) {
-    const g = SVG_DIGITS[ch];
-    if (!g) continue;
-    dg += `<g transform="translate(${x.toFixed(2)} 0)"><path fill="currentColor" d="${g.d}"/></g>`;
-    x += g.w;
-  }
-  const W = Math.ceil(x + 1);
-  return `<span class="cd-chip ${cls}" data-n="${n}"><svg viewBox="0 0 ${W} 24" preserveAspectRatio="xMinYMid slice"><svg x="${ix.toFixed(2)}" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="visible">${inner}</svg><g class="chip-nm">${dg}</g></svg></span>`;
+  return `<span class="cd-chip ${cls}" data-n="${n}">` +
+    `<span class="cd-ic" aria-hidden="true">${SVG_ICONS[iconKey] || ''}</span>` +
+    `<svg class="cd-full" viewBox="0 0 ${W} 24" aria-label="${n}"><svg x="${ix.toFixed(2)}" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="visible">${inner}</svg>${digits}</svg></span>`;
 }
 
 
@@ -5360,10 +5348,17 @@ function renderEvent(e, allEvents) {
       <span class="event-time-abs">${formatAbsTime(e.time)}</span>
     </div>
   `;
-  // 종료 이벤트 → VOD 직결(2026-08-29): broad_no가 있으면 클릭을 handleEndVodClick이 가로채 매칭한다
-  // (캐시 적중 단일=직행, 복수·미적중=모달, 없음=안내). 목록 href는 폴백 — JS 미동작 시 종전 동작 그대로.
-  if (e.type === 'end' && e.member_id && e.broad_no && e.url) {
-    return `<div class="event" data-time="${eventTime}"><a class="event-link ev-endvod" data-member="${escapeHtml(e.member_id)}" data-broad="${escapeHtml(String(e.broad_no))}" data-etime="${eventTime}" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${inner}</a></div>`;
+  // v12(2026-08-29, Crenop 지정): 종료된 방송의 "모든" 이벤트(시작·제목/카테고리/모드 변경·채팅류·종료)를
+  // 그 방송의 VOD로 연결한다. 방송 중 세션은 종전대로 생방송 링크. 해석은 렌더 시점(resolveEventSession) —
+  // href 폴백은 VOD 목록이고, 목록 도착 시 applyVodLinks가 1개=플레이어 직링크 / 2개↑=선택 모달 표식으로 확정.
+  const vodTypes = new Set(['start', 'title', 'category', 'mode_change', 'end', 'chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift']);
+  const chatUrlMatch = (e.type === 'chat' && e.message) ? e.message.match(/^(https?:\/\/\S+)/) : null;   // 링크 채팅은 그 링크 우선(종전 규칙 유지)
+  if (vodTypes.has(e.type) && !chatUrlMatch) {
+    const sess = resolveEventSession(e, allEvents || []);
+    if (sess && sess.ended) {
+      const listUrl = `https://www.sooplive.com/station/${sess.memberId}/vod`;
+      return `<div class="event" data-time="${eventTime}"><a class="event-link ev-vod" data-member="${escapeHtml(sess.memberId)}" data-broad="${escapeHtml(sess.broadNo || '')}" href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
+    }
   }
   const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
   if (LIVE_NAV_TYPES.has(e.type)) {
@@ -5372,11 +5367,8 @@ function renderEvent(e, allEvents) {
   }
   if (['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type) && e.channel_id) {
     // 채팅 본문이 http(s) 링크로 시작하면 방송이 아니라 그 링크로 연결 (뒤에 글자가 붙어 있으면 앞 URL 토큰만)
-    if (e.type === 'chat' && e.message) {
-      const urlMatch = e.message.match(/^(https?:\/\/\S+)/);
-      if (urlMatch) {
-        return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(urlMatch[1])}" target="_blank" rel="noopener">${inner}</a></div>`;
-      }
+    if (chatUrlMatch) {
+      return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(chatUrlMatch[1])}" target="_blank" rel="noopener">${inner}</a></div>`;
     }
     const liveUrl = `https://play.sooplive.co.kr/${e.channel_id}`;
     return `<div class="event" data-time="${eventTime}"><a class="event-link" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
@@ -5694,8 +5686,14 @@ function applyFilter() {
   tl.querySelectorAll('.mark-read-btn').forEach(btn => {
     btn.addEventListener('click', () => { setLastSeenToNow(); refreshUnreadIndicator(); });
   });
-  tl.querySelectorAll('.ev-endvod').forEach(a => {   // 종료 이벤트 → VOD 직결(2026-08-29)
-    a.addEventListener('click', (ev) => handleEndVodClick(ev, a));
+  // v12: VOD 링크 확정 패스 + 복수 파트 모달(위임 1개 — 도착 후 표식이 붙어도 동작)
+  applyVodLinks(tl);
+  tl.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a.ev-vodmulti');
+    if (!a || !tl.contains(a)) return;
+    ev.preventDefault();
+    const parts = endVodResolve(a.dataset.member, a.dataset.broad) || [];
+    openVodPickModal(parts, a.getAttribute('href'));
   });
   const scrollBottomBtn = document.getElementById('scrollToBottom');
   if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'end' }); });
@@ -6040,10 +6038,10 @@ function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad
   return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
 }
 function vodPlayerUrl(v) { return `https://vod.sooplive.com/player/${v.title_no}`; }
-function vodBadges(v) {
+function vodBadges(v) {   // v12: 기존 모드 배지 문법 그대로(labelBadgeSvg 계열) — 새 배지 스타일 폐기(Crenop 지정)
   let b = '';
-  if (v.auth_no === 107) b += `<span class="ds-vod-badge sub">구독+</span>`;   // 실측 상관 기반(2026-08-29) — 미지의 값은 배지 생략
-  if (v.grade === 19) b += `<span class="ds-vod-badge adult">19</span>`;
+  if (v.grade === 19) b += `<span class="day-session-mode adult" role="img" aria-label="19+">${modeBadgeSvg('adult')}</span>`;
+  if (v.auth_no === 107) b += `<span class="day-session-mode subscription" role="img" aria-label="구독+">${modeBadgeSvg('subscription')}</span>`;   // auth 107 — 실측 상관 기반
   return b;
 }
 function vodTileHtml(v) {
@@ -6054,38 +6052,64 @@ function vodTileHtml(v) {
     `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span>${dur}</a>`;
 }
 
-// ── 종료 이벤트 → VOD 직결(최근 이벤트 탭, 2026-08-29) ──
-// 캐시 적중이면 클릭 제스처 안에서 동기 해석(단일이면 href만 바꿔 기본 새탭 이동 활용). 미적중 첫 클릭은
-// 기본 이동을 막고 받아온 뒤 결과를 모달로 — 비동기 window.open은 팝업 차단 대상이라 모달 안 클릭을 새 제스처로 쓴다.
-const vodRecent = { data: {}, at: {} };   // memberId → 최신 1페이지(5분 신선)
+// ── 이벤트 탭 VOD 직결 v12(2026-08-29): 종료된 방송의 "모든" 이벤트(시작·제목/모드 변경·채팅·종료)를 그 VOD로 ──
+// 클릭 시점이 아니라 렌더 시점에 해석한다 — 그래야 "첫 클릭은 모달, 둘째부터 직행" 같은 상태 의존 비일관이
+// 원리적으로 사라진다(Crenop 지적). 목록 도착 전엔 href가 VOD 목록(폴백)이고, 도착하면 제자리 갱신:
+// 1개=플레이어 직링크(모달 없음, 항상 동일), 2개↑=클릭 시 선택 모달, 0개=목록 유지. 생방송 중 세션은 종전대로 생방 링크.
+const vodRecent = { data: {}, at: {}, loading: new Set() };   // memberId → 최신 1페이지(5분 신선)
 function endVodResolve(memberId, broadNo) {
   const list = vodRecent.data[memberId];
-  if (!list) return null;
+  if (!list || !broadNo) return null;
   return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
 }
-function handleEndVodClick(ev, a) {
-  const memberId = a.dataset.member, broadNo = a.dataset.broad, endMs = Number(a.dataset.etime) || 0;
-  const listUrl = a.getAttribute('href');
+function ensureVodRecent(memberId) {
   const fresh = vodRecent.at[memberId] && (Date.now() - vodRecent.at[memberId] < 5 * 60 * 1000);
-  if (fresh) {
-    const parts = endVodResolve(memberId, broadNo) || [];
-    if (parts.length === 1) { a.href = vodPlayerUrl(parts[0]); setTimeout(() => { a.href = listUrl; }, 0); return; }   // 직행 — 기본 이동의 목적지만 교체 후 원복
-    if (parts.length > 1) { ev.preventDefault(); openVodPickModal(parts, null, false); return; }
-    if (Date.now() - endMs < 3600e3) return;                                  // 유예(1h): 종전대로 목록으로 기본 이동
-    ev.preventDefault(); openVodPickModal([], listUrl, false); return;        // 없음 안내(목록 링크는 모달 안 보조)
-  }
-  ev.preventDefault();
+  if (fresh || vodRecent.loading.has(memberId)) return;
+  vodRecent.loading.add(memberId);
   fetch(`${WORKER_URL}/vods?member=${encodeURIComponent(memberId)}`)
     .then(r => r.json())
     .then(j => {
-      if (j && j.ok && Array.isArray(j.vods)) { vodRecent.data[memberId] = j.vods; vodRecent.at[memberId] = Date.now(); }
-      const parts = endVodResolve(memberId, broadNo) || [];
-      if (parts.length > 0) { openVodPickModal(parts, null, false); return; }   // 첫 클릭은 모달 경유 — 모달 안 클릭이 곧 재생(1개여도)
-      openVodPickModal([], listUrl, Date.now() - endMs < 3600e3);
+      vodRecent.loading.delete(memberId);
+      if (j && j.ok && Array.isArray(j.vods)) {
+        vodRecent.data[memberId] = j.vods; vodRecent.at[memberId] = Date.now();
+        const tl = document.getElementById('timeline');   // 이벤트 탭 타임라인(실 id) — v12 초판의 'eventsTimeline'은 죽은 참조였음(스위트 적발)
+        if (tl) applyVodLinks(tl);   // 도착 → 보이는 링크 제자리 갱신(재렌더 없이)
+      }
     })
-    .catch(() => openVodPickModal([], listUrl, false));   // 조회 실패 → 목록 링크를 모달로 제공(팝업 차단 회피)
+    .catch(() => vodRecent.loading.delete(memberId));
 }
-function openVodPickModal(parts, listUrl, preparing) {
+// 이벤트 → 소속 방송 세션 상태. end는 자기 broad_no. 그 외는 "이 시각에 돌던 방송이 이후 종료됐는가"로 판정:
+// 같은 멤버의 다음 end가 다음 start보다 먼저면 종료 세션(그 end의 broad_no가 곧 이 세션의 VOD 키), 아니면 생방송 중.
+function resolveEventSession(e, allEvents) {
+  const isChat = ['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type);
+  const memberId = isChat ? e.channel_id : e.member_id;
+  if (!memberId) return null;
+  if (e.type === 'end') return { ended: true, memberId, broadNo: e.broad_no ? String(e.broad_no) : null };
+  const t = new Date(e.time).getTime();
+  let nextEnd = null, nextStart = null;
+  for (const ev of allEvents) {
+    if (ev.member_id !== memberId) continue;
+    const et = new Date(ev.time).getTime();
+    if (ev.type === 'end' && et >= t && (!nextEnd || et < nextEnd.t)) nextEnd = { t: et, broad_no: ev.broad_no };
+    if (ev.type === 'start' && et > t && (!nextStart || et < nextStart.t)) nextStart = { t: et };
+  }
+  if (nextEnd && (!nextStart || nextEnd.t <= nextStart.t)) return { ended: true, memberId, broadNo: nextEnd.broad_no ? String(nextEnd.broad_no) : null };
+  return { ended: false, memberId };
+}
+// 렌더 직후·목록 도착 시 호출 — ev-vod 앵커의 목적지를 현재 캐시로 확정한다(1개 직행 / 2개↑ 모달 표식 / 그 외 목록 유지)
+function applyVodLinks(tl) {
+  tl.querySelectorAll('a.ev-vod').forEach(a => {
+    const m = a.dataset.member, b = a.dataset.broad;
+    ensureVodRecent(m);
+    const parts = endVodResolve(m, b);
+    if (parts === null) return;                       // 목록 미도착·broad_no 미상 — 폴백(목록) 유지
+    a.classList.remove('ev-vodmulti');
+    if (parts.length === 1) { a.href = vodPlayerUrl(parts[0]); return; }
+    if (parts.length >= 2) { a.classList.add('ev-vodmulti'); return; }   // 클릭 시 선택 모달(위임 리스너)
+    // 0개 → 목록 폴백 그대로(숨김·삭제·미생성)
+  });
+}
+function openVodPickModal(parts, listUrl) {
   const ov = document.getElementById('vodPickOverlay');
   const head = document.getElementById('vodPickHead');
   const body = document.getElementById('vodPickBody');
@@ -6093,7 +6117,7 @@ function openVodPickModal(parts, listUrl, preparing) {
   head.textContent = parts.length > 0 ? '다시보기 선택' : '다시보기';
   body.innerHTML = parts.length > 0
     ? `<div class="ds-vods">${parts.map(vodTileHtml).join('')}</div>`
-    : `<div class="vod-pick-empty">${preparing ? '다시보기 준비 중입니다.' : '다시보기가 없습니다. (숨김·삭제·미생성)'}${listUrl ? ` <a href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">다시보기 목록 열기</a>` : ''}</div>`;
+    : `<div class="vod-pick-empty">다시보기가 없습니다.${listUrl ? ` <a href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">VOD 목록 ${SVG_ICONS.externalLink}</a>` : ''}</div>`;   // v12: 문구·링크 통일(Crenop 지정)
   ov.hidden = false;
   syncBodyScrollLock();
 }
@@ -6810,11 +6834,9 @@ function renderDayDetail(year, month1, sum, memberId) {
         const parts = vodsForBroad(memberId, ymKey, s.broad_no);
         if (parts && parts.length > 0) {
           vodSlot = `<div class="ds-vods">${parts.map(vodTileHtml).join('')}</div>`;
-        } else if (parts) {   // 목록은 도착했는데 이 방송의 VOD가 없음
-          const endMs = new Date(s.end).getTime();
-          vodSlot = (!isNaN(endMs) && Date.now() - endMs < 3600e3)
-            ? `<div class="ds-vods"><a class="ds-vod-none link" href="https://www.sooplive.com/station/${memberId}/vod" target="_blank" rel="noopener">다시보기 준비 중 · 목록 보기</a></div>`
-            : `<div class="ds-vods"><span class="ds-vod-none">다시보기 없음</span></div>`;   // 숨김·삭제·미생성 — 목록 링크 대신 명시(확정 스펙)
+        } else if (parts) {   // 목록은 도착했는데 이 방송의 VOD가 없음(숨김·삭제·미생성)
+          // v12: 문구·링크 통일(Crenop 지정) — 유예 분기 폐지, 항상 "없습니다" + VOD 목록(외부 링크 아이콘)
+          vodSlot = `<div class="ds-vods"><span class="ds-vod-none">다시보기가 없습니다.</span><a class="ds-vod-none link" href="https://www.sooplive.com/station/${memberId}/vod" target="_blank" rel="noopener">VOD 목록 ${SVG_ICONS.externalLink}</a></div>`;
         }
       }
       const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time">${startStr} ~ ${endStr}</span>${durSpan}${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${vodSlot}${changesHtml}`;

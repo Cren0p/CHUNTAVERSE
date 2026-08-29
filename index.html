@@ -1309,8 +1309,8 @@
     .stats-detail-body .cd-s-post { grid-area: 2 / 2; }
     .stats-detail-body .cd-s-vod  { grid-area: 3 / 1; }
     .stats-detail-body .cd-s-cafe { grid-area: 3 / 2; }
-    .stats-detail-body .cd-chip .cd-full { display: none; }   /* v12: 크롭 방식 폐기(Crenop 지정) — 컴팩트는 아이콘 단독본으로 */
-    .stats-detail-body .cd-chip .cd-ic { display: inline-flex; }   /* 숫자 제거: 10px 숫자는 판독 불가·밀도 난잡, 개수는 클릭 상세가 담당 */
+    .stats-detail-body .calendar-day .cd-chip .cd-full { display: none; }   /* v13: '달력 셀'만 아이콘 단독(숫자 제거) — 일별 요약 헤더 숫자까지 사라지던 과대 스코프 교정(Crenop 적발) */
+    .stats-detail-body .calendar-day .cd-chip .cd-ic { display: inline-flex; }
   }
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -1321,7 +1321,9 @@
   .ds-vod-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface2); }
   .ds-vod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ds-vod:hover .ds-vod-thumb { outline: 1.5px solid var(--accent); }
-  .ds-vod-title { display: block; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ds-vod-title { display: flex; align-items: center; gap: 4px; min-height: 20px; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--text); }   /* v13: 배지·글자 세로 중앙 + 배지 없는 타일도 같은 높이(20px 상시 확보 — 정렬 어긋남 예방, Crenop 지정) */
+  .ds-vod-title .day-session-mode { flex: none; }
+  .ds-vod-tt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* (.ds-vod-badge는 v12에서 폐기 — 기존 모드 배지 문법(day-session-mode + labelBadgeSvg) 재사용) */
   .ds-vod-none { font-size: 11px; color: var(--muted); }
   /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
@@ -1339,9 +1341,10 @@
   .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
   .day-detail-title .cd-chip .cd-full { height: 13px; }   /* v12: 헤더 스케일 — 배치는 칩 내부 좌표가 담당 */
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
-  .vod-pick-panel { width: 436px; max-width: calc(100vw - 32px); }   /* v12: 2타일 정합 폭 = 12 + 200 + 12 + 200 + 12 (3개↑는 아래 줄로) */
+  .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다 */
   .vod-pick-panel .ds-vods { gap: 12px; margin-top: 0; }
+  .vod-pick-panel .ds-vod { width: calc(50% - 6px); }   /* 12px gap 반분 — 어떤 테두리 오차에도 2열 유지, 홀수 개는 마지막 줄 좌측 */
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
   .vod-pick-empty a, .ds-vod-none.link { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
   .vod-pick-empty a svg, .ds-vod-none.link svg { width: 12px; height: 12px; display: block; }
@@ -3103,10 +3106,14 @@ function chipHtml(cls, iconKey, n) {
   const yBase = 12 + (DIGIT_INK.y0 + DIGIT_INK.y1) / 2 * s;
   const digits = first ? `<g class="cd-digits" fill="currentColor">${navDigitsGroup(str, s, startX - first.x0 * s, yBase)}</g>` : '';
   const W = Math.ceil(startX + inkW + 1);
-  const inner = (SVG_ICONS[iconKey] || '').replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+  const src = SVG_ICONS[iconKey] || '';
+  const inner = src.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+  // v13: 루트 태그의 표시 속성(fill="currentColor"·stroke 계열)을 중첩 svg에 승계 — 벗기기만 하면 fill 없는
+  // path가 기본 '검정'으로 떨어진다(PC 폼 유튜브 검정의 원인. 컴팩트는 원본 그대로 써서 정상이었음 — 관찰 일치).
+  const rootAttrs = ((src.match(/^<svg([^>]*)>/) || ['', ''])[1] || '').replace(/\s(?:width|height|viewBox|xmlns)="[^"]*"/g, '');
   return `<span class="cd-chip ${cls}" data-n="${n}">` +
-    `<span class="cd-ic" aria-hidden="true">${SVG_ICONS[iconKey] || ''}</span>` +
-    `<svg class="cd-full" viewBox="0 0 ${W} 24" aria-label="${n}"><svg x="${ix.toFixed(2)}" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="visible">${inner}</svg>${digits}</svg></span>`;
+    `<span class="cd-ic" aria-hidden="true">${src}</span>` +
+    `<svg class="cd-full" viewBox="0 0 ${W} 24" aria-label="${n}"><svg x="${ix.toFixed(2)}" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="visible"${rootAttrs}>${inner}</svg>${digits}</svg></span>`;
 }
 
 
@@ -3224,7 +3231,7 @@ function titleBadgeHtml(title) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-title';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -5357,7 +5364,7 @@ function renderEvent(e, allEvents) {
     const sess = resolveEventSession(e, allEvents || []);
     if (sess && sess.ended) {
       const listUrl = `https://www.sooplive.com/station/${sess.memberId}/vod`;
-      return `<div class="event" data-time="${eventTime}"><a class="event-link ev-vod" data-member="${escapeHtml(sess.memberId)}" data-broad="${escapeHtml(sess.broadNo || '')}" href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
+      return `<div class="event" data-time="${eventTime}"><a class="event-link ev-vod" data-member="${escapeHtml(sess.memberId)}" data-broad="${escapeHtml(sess.broadNo || '')}" data-off="${sess.offSec != null ? sess.offSec : ''}" href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">${inner}</a></div>`;
     }
   }
   const LIVE_NAV_TYPES = new Set(['start', 'title', 'category', 'mode_change']);
@@ -5456,6 +5463,8 @@ function renderChatBundle(items, allEvents) {
   const el = getBroadcastElapsed(first, allEvents || []);
   const absRange = formatAbsTime(first.time) + (formatHHMM(last.time) !== formatHHMM(first.time) ? ` ~ ${formatHHMM(last.time)}` : '');
   const liveUrl = `https://play.sooplive.co.kr/${first.channel_id}`;
+  const bundleSess = resolveEventSession(first, allEvents || []);   // v13: 묶음도 개별 채팅과 같은 규칙 — 종료 세션이면 행마다 그 시각의 VOD 지점으로
+  const listUrl = bundleSess && bundleSess.ended ? `https://www.sooplive.com/station/${bundleSess.memberId}/vod` : null;
   const rows = items.map(i => {
     const m = findMember(i.member_id);
     let msg, rowUrl = liveUrl;   // 개별 채팅과 동일 동선: 행 전체가 방송으로 이동, 메시지가 http 링크로 시작하면 그 링크로
@@ -5469,6 +5478,12 @@ function renderChatBundle(items, allEvents) {
       msg = escapeHtml(i.message || '');
       const um = (i.message || '').match(/^(https?:\/\/\S+)/);
       if (um) rowUrl = um[1];
+    }
+    if (rowUrl === liveUrl && listUrl) {   // URL 채팅이 아니고 세션 종료 → VOD 앵커(행별 시각 오프셋)
+      const rt = new Date(i.time).getTime();
+      const sMs = i.broad_start ? new Date(i.broad_start).getTime() : NaN;
+      const off = !isNaN(sMs) && rt >= sMs ? Math.floor((rt - sMs) / 1000) : (bundleSess.offSec != null ? bundleSess.offSec : '');
+      return `<a class="chat-bundle-row ev-vod" data-member="${escapeHtml(bundleSess.memberId)}" data-broad="${escapeHtml(bundleSess.broadNo || '')}" data-off="${off}" href="${escapeHtml(listUrl)}" target="_blank" rel="noopener"><span class="cbr-time">${formatHHMM(i.time)}</span><span class="cbr-name" style="color: ${m ? m.color : '#fff'}">${escapeHtml(i.member_name || '')}</span><span class="cbr-msg">${msg}</span></a>`;
     }
     return `<a class="chat-bundle-row" href="${escapeHtml(rowUrl)}" target="_blank" rel="noopener"><span class="cbr-time">${formatHHMM(i.time)}</span><span class="cbr-name" style="color: ${m ? m.color : '#fff'}">${escapeHtml(i.member_name || '')}</span><span class="cbr-msg">${msg}</span></a>`;
   }).join('');
@@ -5689,11 +5704,11 @@ function applyFilter() {
   // v12: VOD 링크 확정 패스 + 복수 파트 모달(위임 1개 — 도착 후 표식이 붙어도 동작)
   applyVodLinks(tl);
   tl.addEventListener('click', (ev) => {
-    const a = ev.target.closest('a.ev-vodmulti');
+    const a = ev.target.closest('a.ev-vodmulti, a.ev-vodnone');
     if (!a || !tl.contains(a)) return;
     ev.preventDefault();
-    const parts = endVodResolve(a.dataset.member, a.dataset.broad) || [];
-    openVodPickModal(parts, a.getAttribute('href'));
+    const parts = a.classList.contains('ev-vodnone') ? [] : (endVodResolve(a.dataset.member, a.dataset.broad) || []);
+    openVodPickModal(parts, a.getAttribute('href'));   // 없음 확정 → "다시보기가 없습니다." 알림(목록 링크는 모달 안 보조)
   });
   const scrollBottomBtn = document.getElementById('scrollToBottom');
   if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', () => { tl.scrollIntoView({ block: 'end' }); });
@@ -6037,7 +6052,7 @@ function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad
   if (!list) return null;
   return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
 }
-function vodPlayerUrl(v) { return `https://vod.sooplive.com/player/${v.title_no}`; }
+function vodPlayerUrl(v, sec) { return `https://vod.sooplive.com/player/${v.title_no}${sec != null ? `/?change_second=${sec}` : ''}`; }   // v13: 시점 이동(Crenop 제공 파라미터)
 function vodBadges(v) {   // v12: 기존 모드 배지 문법 그대로(labelBadgeSvg 계열) — 새 배지 스타일 폐기(Crenop 지정)
   let b = '';
   if (v.grade === 19) b += `<span class="day-session-mode adult" role="img" aria-label="19+">${modeBadgeSvg('adult')}</span>`;
@@ -6049,7 +6064,7 @@ function vodTileHtml(v) {
   const dur = v.duration_ms ? `<span class="ds-vod-dur">${SVG_ICONS.clockTime}${formatDuration(v.duration_ms)}</span>` : '';   // v5: 무채색 — card-btime 부류(인라인 시간 배지)
   return `<a class="ds-vod" href="${vodPlayerUrl(v)}" target="_blank" rel="noopener">` +
     `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}</span>` +
-    `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span>${dur}</a>`;
+    `<span class="ds-vod-title">${vodBadges(v)}<span class="ds-vod-tt">${escapeHtml(v.title || '')}</span></span>${dur}</a>`;   // v13: 제목=flex 행(배지·글자 세로 중앙), 말줄임은 내부 스팬
 }
 
 // ── 이벤트 탭 VOD 직결 v12(2026-08-29): 종료된 방송의 "모든" 이벤트(시작·제목/모드 변경·채팅·종료)를 그 VOD로 ──
@@ -6078,23 +6093,31 @@ function ensureVodRecent(memberId) {
     })
     .catch(() => vodRecent.loading.delete(memberId));
 }
-// 이벤트 → 소속 방송 세션 상태. end는 자기 broad_no. 그 외는 "이 시각에 돌던 방송이 이후 종료됐는가"로 판정:
-// 같은 멤버의 다음 end가 다음 start보다 먼저면 종료 세션(그 end의 broad_no가 곧 이 세션의 VOD 키), 아니면 생방송 중.
+// 이벤트 → 소속 방송 세션 상태(v13). end는 자기 broad_no. 그 외의 "생방송 중" 판정은 양성 조건으로만:
+// 멤버의 '마지막 방송 경계 이벤트'가 start이고 e가 그 이후일 때만 live. 그 밖은 전부 종료 취급 —
+// 1000건 로테이션으로 옛 세션의 시작·종료가 밀려난 경우(3일 전 채팅이 현 생방송으로 오연결되던 결함, Crenop 진단)
+// 에도 목록 폴백으로 안전하게 떨어진다. 종료 세션이면 방송 시작 기준 오프셋(초)도 산출 — VOD 시점 이동용.
 function resolveEventSession(e, allEvents) {
   const isChat = ['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type);
   const memberId = isChat ? e.channel_id : e.member_id;
   if (!memberId) return null;
-  if (e.type === 'end') return { ended: true, memberId, broadNo: e.broad_no ? String(e.broad_no) : null };
   const t = new Date(e.time).getTime();
-  let nextEnd = null, nextStart = null;
+  let nextEnd = null, lastBoundary = null, prevStart = null;
   for (const ev of allEvents) {
     if (ev.member_id !== memberId) continue;
+    if (ev.type !== 'start' && ev.type !== 'end') continue;
     const et = new Date(ev.time).getTime();
     if (ev.type === 'end' && et >= t && (!nextEnd || et < nextEnd.t)) nextEnd = { t: et, broad_no: ev.broad_no };
-    if (ev.type === 'start' && et > t && (!nextStart || et < nextStart.t)) nextStart = { t: et };
+    if (ev.type === 'start' && et <= t && (!prevStart || et > prevStart.t)) prevStart = { t: et };
+    if (!lastBoundary || et > lastBoundary.t) lastBoundary = { t: et, type: ev.type };
   }
-  if (nextEnd && (!nextStart || nextEnd.t <= nextStart.t)) return { ended: true, memberId, broadNo: nextEnd.broad_no ? String(nextEnd.broad_no) : null };
-  return { ended: false, memberId };
+  if (e.type === 'end') {
+    return { ended: true, memberId, broadNo: e.broad_no ? String(e.broad_no) : null, offSec: null };   // 종료 = 방송 전체 — 시점 이동 없음
+  }
+  if (lastBoundary && lastBoundary.type === 'start' && t >= lastBoundary.t) return { ended: false, memberId };   // 지금 돌고 있는 그 세션
+  const startMs = e.broad_start ? new Date(e.broad_start).getTime() : (prevStart ? prevStart.t : NaN);
+  const offSec = !isNaN(startMs) && t >= startMs ? Math.floor((t - startMs) / 1000) : null;
+  return { ended: true, memberId, broadNo: nextEnd && nextEnd.broad_no ? String(nextEnd.broad_no) : null, offSec };
 }
 // 렌더 직후·목록 도착 시 호출 — ev-vod 앵커의 목적지를 현재 캐시로 확정한다(1개 직행 / 2개↑ 모달 표식 / 그 외 목록 유지)
 function applyVodLinks(tl) {
@@ -6103,10 +6126,25 @@ function applyVodLinks(tl) {
     ensureVodRecent(m);
     const parts = endVodResolve(m, b);
     if (parts === null) return;                       // 목록 미도착·broad_no 미상 — 폴백(목록) 유지
-    a.classList.remove('ev-vodmulti');
+    a.classList.remove('ev-vodmulti'); a.classList.remove('ev-vodnone');
+    if (parts.length === 0) { a.classList.add('ev-vodnone'); return; }   // 없음 '확정' — 이동 대신 알림 모달(위임 리스너)
+    const off = a.dataset.off !== '' && a.dataset.off !== undefined ? Number(a.dataset.off) : null;
+    if (off !== null && !isNaN(off)) {
+      // 이벤트 시각 → 파트·파트 내 초로 환산해 직행(파트 누적 길이 걷기). 감지 지연·분 단위 오차가 있어
+      // 근사치지만(Crenop 인지), 끝을 넘치면 마지막 파트 끝-5초로 클램프.
+      let rest = Math.max(0, off);
+      for (let i = 0; i < parts.length; i++) {
+        const durS = Math.floor((parts[i].duration_ms || 0) / 1000);
+        if (rest < durS || i === parts.length - 1) {
+          if (durS > 0 && rest >= durS) rest = Math.max(0, durS - 5);
+          a.href = vodPlayerUrl(parts[i], rest);
+          return;
+        }
+        rest -= durS;
+      }
+    }
     if (parts.length === 1) { a.href = vodPlayerUrl(parts[0]); return; }
-    if (parts.length >= 2) { a.classList.add('ev-vodmulti'); return; }   // 클릭 시 선택 모달(위임 리스너)
-    // 0개 → 목록 폴백 그대로(숨김·삭제·미생성)
+    a.classList.add('ev-vodmulti');                   // 오프셋 미상 + 복수 파트 → 선택 모달
   });
 }
 function openVodPickModal(parts, listUrl) {

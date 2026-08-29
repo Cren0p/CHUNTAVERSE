@@ -1324,6 +1324,7 @@
     .stats-detail-body .calendar-day .cd-chip .cd-ic { display: inline-flex; }
   }
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
+  .cd-thumb:empty { background: transparent; }   /* v5 상시 예약의 빈 박스는 높이만 잡고 음영 없이 투명(Crenop 지정) — 이미지가 든 박스만 로딩 자리 배경 유지 */
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* (.cd-thumb-n 개수 배지는 v4에서 제거 — 칩의 film 숫자가 담당, 썸네일을 가리지 않는다) */
   /* 일별 요약 VOD 슬롯 — 파트 전부 나열(랩), 규격은 달력 셀과 동일 200px(VOD 썸네일 문법 단일화) */
@@ -2698,7 +2699,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-29b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

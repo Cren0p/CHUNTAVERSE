@@ -1209,6 +1209,8 @@
     box-sizing: border-box;
   }
   .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
+  .stats-summary-break { display: none; }   /* v4: 넓을 땐 한 줄 */
+  @container (max-width: 1080px) { .stats-summary-break { display: block; flex-basis: 100%; height: 0; } }   /* 8항목이 못 드는 폭 — 자연 랩이 엉뚱한 데서 꺾이기 전에 평균/숲 사이 고정 개행 */
   .stats-summary-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
   .stats-summary-value { font-size: 14px; font-weight: 700; }
   /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
@@ -1262,26 +1264,17 @@
   .calendar-day.selected { border-color: var(--accent); }
   .calendar-day.today { box-shadow: inset 0 0 0 1.5px var(--time); }
   .calendar-daynum { font-weight: 700; font-size: 13px; }
-  .calendar-daycount { font-size: 9px; opacity: 0.8; }
-  .calendar-day-dots {
-    display: flex;
-    gap: 3px;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-  }
-  .calendar-day-dot {
-    width: 5px;
-    height: 5px;
-  }
-  .calendar-day-dot.post { background: var(--filter-post); }
-  .calendar-day-dot.youtube { background: var(--ev-youtube); }
-  .calendar-day-dot.cafe { background: #03C75A; }
+  /* (구 "N회"·활동 점 표기 CSS는 v4에서 제거 — 컴팩트도 아이콘+숫자 칩으로 통일, 2026-08-29 Crenop 지정) */
   /* ── 썸네일 달력 v3(2026-08-29): 베이스=원형 컴팩트(공용 .calendar-day를 절대 오염시키지 않는다 — 일정 모달 회귀 교훈).
      PC 썸네일 폼은 통계 전용 스코프(.stats-detail-body) + min-width 1361 컨테이너에서만 켠다. ── */
   .cd-top { display: contents; }                 /* 컴팩트: 날짜 숫자를 셀 중앙 흐름에 그대로 */
-  .cd-chips, .cd-thumb { display: none; }        /* 칩·썸네일은 PC 폼에서만 */
-  .cd-chips { flex-wrap: wrap; gap: 2px 8px; justify-content: flex-end; min-width: 0; }   /* 칩 사이 8px > 칩 내부 2px — 아이콘·제 숫자가 한 덩어리로 읽히는 위계(Crenop 지정) */
+  .cd-thumb { display: none; }                   /* 썸네일은 PC 폼에서만 — 칩은 v4부터 컴팩트에도 상시 표시 */
+  /* v4 컴팩트 칩: 2열 고정 슬롯 그리드(1행 숲|VOD · 2행 숲글|카페 · 3행 유튜브 — Crenop 지정).
+     슬롯(grid-area) 고정이라 0으로 빠진 항목이 있어도 남은 칩의 자리가 안 흔들린다. */
+  .cd-chips { display: grid; grid-template-columns: auto auto; gap: 2px 8px; justify-content: center; margin-top: 1px; min-width: 0; }
+  .cd-s-soop { grid-area: 1 / 1; } .cd-s-vod { grid-area: 1 / 2; }
+  .cd-s-post { grid-area: 2 / 1; } .cd-s-cafe { grid-area: 2 / 2; }
+  .cd-s-yt   { grid-area: 3 / 1; }
   .cd-chip { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 700; line-height: 11px; color: var(--muted); }   /* line-height=아이콘 11px 동일 — 세로 중심 일치 */
   .cd-chip svg { width: 11px; height: 11px; display: block; flex: none; }
   .cd-chip.broadcast { color: var(--ev-start); }   /* 숲 파랑 — 사이트 공통(--ev-start) */
@@ -1291,8 +1284,7 @@
   .cd-chip.vod { color: var(--accent); }           /* VOD = 민트(Crenop 지정) */
   .cd-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cd-thumb-n { position: absolute; right: 3px; bottom: 3px; display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.65); color: #fff; }
-  .cd-thumb-n svg { width: 10px; height: 10px; display: block; }
+  /* (.cd-thumb-n 개수 배지는 v4에서 제거 — 칩의 film 숫자가 담당, 썸네일을 가리지 않는다) */
   /* 일별 요약 VOD 슬롯 — 파트 전부 나열(랩), 규격은 달력 셀과 동일 200px(VOD 썸네일 문법 단일화) */
   .ds-vods { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
   .ds-vod { width: 200px; text-decoration: none; color: inherit; display: block; }
@@ -1305,6 +1297,12 @@
   .ds-vod-badge.adult { background: rgba(248,113,113,0.18); color: #f87171; }  /* grade 19 */
   .ds-vod-none { font-size: 11px; color: var(--muted); }
   .ds-vod-none.link { color: var(--accent); text-decoration: none; }
+  /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
+  .ds-vod-dur { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; font-size: 11px; color: var(--muted); font-weight: 600; }
+  .ds-vod-dur .stats-row-icon { margin: 0; }
+  /* 일별 요약 변경 로그의 경과 배지 — 이벤트 탭 .event-elapsed 재사용, 10px 라인에 맞게 축소 */
+  .day-session-change .event-elapsed { font-size: 10px; margin-left: 2px; }
+  .day-session-change .event-elapsed svg { width: 10px; height: 10px; vertical-align: -1px; }
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
   .vod-pick-panel { max-width: 600px; }
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
@@ -1320,10 +1318,9 @@
   @container (min-width: 1361px) {   /* PC 썸네일 폼 — 통계 전용 스코프 */
     .stats-detail-body .calendar { max-width: 1450px; margin: 0 auto; width: 100%; box-sizing: border-box; }   /* 200px 셀 ×7 + gap 24 + 패딩 24 (+테두리) */
     .stats-detail-body .calendar-day { aspect-ratio: auto; align-items: stretch; justify-content: flex-start; padding: 5px; gap: 4px; min-height: 118px; }   /* 썸네일 없는 날도 행 높이 유지 */
-    .stats-detail-body .calendar-daycount, .stats-detail-body .calendar-day-dots { display: none; }   /* 칩이 대체 */
     .stats-detail-body .cd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; width: 100%; }
     .stats-detail-body .cd-top .calendar-daynum { line-height: 16px; }
-    .stats-detail-body .cd-chips { display: flex; }
+    .stats-detail-body .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 7px; justify-content: flex-end; margin-top: 0; }   /* PC: 한 줄 우측 정렬 — 컴팩트 슬롯 그리드 무시(flex는 grid-area 미적용) */
     .stats-detail-body .cd-thumb { display: block; }
     /* 날짜 색 = 요일색(일 적·토 청·평일 기본) — 방송날 민트 상속을 끊는다(Crenop 지정). 셀 배경 민트는 유지 */
     .stats-detail-body .calendar-daynum { color: var(--text); }
@@ -1356,7 +1353,7 @@
   .toh-body { display: flex; align-items: flex-start; padding: 7px 0; }
   .toh-yaxis { position: relative; width: 22px; flex: none; }
   .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--muted); }
-  .toh-right { flex: 1; min-width: 0; overflow-x: auto; }   /* v3: 정사각 셀 고정폭이 좁은 화면을 넘치면 히트맵만 가로 스크롤 */
+  .toh-right { flex: 1; min-width: 0; }   /* v4: 스크롤 제거 — 열을 minmax(0,15px)로 두어 좁으면 셀이 줄어든다(스크롤바 억제) */
   .toh-grid { display: grid; gap: 0; }
   .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
   .toh-xlabel { font-size: 11px; line-height: 12px; text-align: center; }
@@ -5980,10 +5977,11 @@ function vodBadges(v) {
   return b;
 }
 function vodTileHtml(v) {
-  const dur = v.duration_ms ? `<span class="cd-thumb-n">${formatDuration(v.duration_ms)}</span>` : '';
+  // v4: 길이는 썸네일 오버레이가 아니라 제목 아래 줄 — 생방송·이벤트 탭의 clockTime 문법 준용(썸네일 가림 방지, Crenop 지정)
+  const dur = v.duration_ms ? `<span class="ds-vod-dur"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(v.duration_ms)}</span>` : '';
   return `<a class="ds-vod" href="${vodPlayerUrl(v)}" target="_blank" rel="noopener">` +
-    `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}${dur}</span>` +
-    `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span></a>`;
+    `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}</span>` +
+    `<span class="ds-vod-title">${vodBadges(v)}${escapeHtml(v.title || '')}</span>${dur}</a>`;
 }
 
 // ── 종료 이벤트 → VOD 직결(최근 이벤트 탭, 2026-08-29) ──
@@ -6343,6 +6341,7 @@ function renderStatsMember(body, memberId) {
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
           <span class="stats-summary-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
         </div>
+        <span class="stats-summary-break"></span><!-- v4: 2열이 필요해지는 폭이면 여기서 개행 — 시청자 5개 | 게시 3개 대칭(Crenop 지정) -->
         <div class="stats-summary-item" data-metric="post">
           <span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
           <span class="stats-summary-value">${mv('postCount')}${sum.postCount}개</span>
@@ -6604,18 +6603,9 @@ function renderCalendar(year, month1, sum, memberId) {
     if (hasActivity) classes.push('has-activity');
     if (dateKey === todayKey) classes.push('today');
     if (statsState.selectedDate === dateKey) classes.push('selected');
-    // 컴팩트 폼(1360 이하)용 종전 하단 표기 — PC 폼에선 CSS가 숨기고 우상단 칩이 대체
-    let bottomLine = '';
-    if (sessions.length > 0) {                     // 회수 라벨은 그날 '시작'한 방송 수 — 이어진 날은 채움만
-      bottomLine = `<span class="calendar-daycount">${sessions.length}회</span>`;
-    } else if (!hasBroadcast && (hasPost || hasYoutube || hasCafe)) {
-      const dots = [];
-      if (hasPost) dots.push('<span class="calendar-day-dot post"></span>');
-      if (hasYoutube) dots.push('<span class="calendar-day-dot youtube"></span>');
-      if (hasCafe) dots.push('<span class="calendar-day-dot cafe"></span>');
-      bottomLine = `<span class="calendar-day-dots">${dots.join('')}</span>`;
-    }
-    // PC 폼: 그날 '시작'한 세션들의 VOD를 broad_no로 대조 — 대표 썸네일 + 우상단 칩(0인 항목 생략)
+    // v4: 컴팩트도 동일한 아이콘+숫자 칩 문법으로 통일(구 "N회"/점 표기 폐지 — Crenop 지정).
+    // 슬롯 클래스(cd-s-*)로 컴팩트 2열 그리드의 자리를 고정: 1행 [숲|VOD] · 2행 [숲글|카페] · 3행 [유튜브].
+    // 항목이 0이라 빠져도 남은 칩의 자리가 안 흔들린다. PC는 flex 한 줄(우측 정렬)이라 슬롯 무시.
     let dayVods = null;                            // null=목록 미도착 → VOD 칩·썸네일 보류(도착 시 재렌더로 채움)
     if (memberId && sessions.length > 0) {
       const seen = new Set(); const acc = [];
@@ -6628,19 +6618,20 @@ function renderCalendar(year, month1, sum, memberId) {
       if (!pending || acc.length > 0) dayVods = acc;
     }
     const chips = [];
-    if (sessions.length > 0) chips.push(`<span class="cd-chip broadcast">${SVG_ICONS.soop}${sessions.length}</span>`);
-    if (hasPost) chips.push(`<span class="cd-chip post">${SVG_ICONS.board}${posts.length}</span>`);
-    if (hasCafe) chips.push(`<span class="cd-chip cafe">${SVG_ICONS.coffee}${cafes.length}</span>`);
-    if (hasYoutube) chips.push(`<span class="cd-chip youtube">${SVG_ICONS.youtube}${youtubes.length}</span>`);
-    if (dayVods && dayVods.length > 0) chips.push(`<span class="cd-chip vod">${SVG_ICONS.film}${dayVods.length}</span>`);   // film — 컨텐츠 탭 VOD 아이콘(play 키는 존재하지 않음, 2026-08-29 교정)
+    if (sessions.length > 0) chips.push(`<span class="cd-chip broadcast cd-s-soop">${SVG_ICONS.soop}${sessions.length}</span>`);
+    if (hasPost) chips.push(`<span class="cd-chip post cd-s-post">${SVG_ICONS.board}${posts.length}</span>`);
+    if (hasCafe) chips.push(`<span class="cd-chip cafe cd-s-cafe">${SVG_ICONS.coffee}${cafes.length}</span>`);
+    if (hasYoutube) chips.push(`<span class="cd-chip youtube cd-s-yt">${SVG_ICONS.youtube}${youtubes.length}</span>`);
+    if (dayVods && dayVods.length > 0) chips.push(`<span class="cd-chip vod cd-s-vod">${SVG_ICONS.film}${dayVods.length}</span>`);   // film — 컨텐츠 탭 VOD 아이콘(play 키는 존재하지 않음, 2026-08-29 교정)
+    // v4: 썸네일 박스는 방송날이면 상시 예약 — VOD 목록 도착 전후·다시보기 없는 날에도 셀 높이가 안 변한다
+    // (로딩 시점 셀 크기 널뛰기 해소). 빈 박스 = "로딩 중/다시보기 없음" 시각 신호 겸용. 개수 배지는 칩(film N)이 담당하므로 제거.
     let thumbHtml = '';
-    if (dayVods && dayVods.length > 0) {
-      const rep = dayVods[0];                      // 대표 = 그날 첫 세션의 첫 파트(파트순 정렬 결과)
-      const n = dayVods.length > 1 ? `<span class="cd-thumb-n">${SVG_ICONS.film}${dayVods.length}</span>` : '';
-      if (rep.thumb) thumbHtml = `<span class="cd-thumb"><img src="${escapeHtml(rep.thumb)}" alt="" loading="lazy">${n}</span>`;
+    if (memberId && sessions.length > 0) {
+      const rep = (dayVods && dayVods.length > 0) ? dayVods[0] : null;   // 대표 = 그날 첫 세션의 첫 파트(파트순 정렬 결과)
+      thumbHtml = `<span class="cd-thumb">${rep && rep.thumb ? `<img src="${escapeHtml(rep.thumb)}" alt="" loading="lazy">` : ''}</span>`;
     }
     return { selected: statsState.selectedDate === dateKey,
-      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}${bottomLine}</button>` };
+      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${day}</span><span class="cd-chips">${chips.join('')}</span></span>${thumbHtml}</button>` };
   };
   const cells = [];
   for (let i = 0; i < firstDow; i++) cells.push(null);
@@ -6718,7 +6709,10 @@ function renderDayDetail(year, month1, sum, memberId) {
           else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
           else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → <span class="chg-after">${modeLabel(c.after)}</span>`; }
           else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
-          return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span><span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
+          // v4: 절대시각 옆에 방송 시작 기준 경과를 병기 — 최근 이벤트 탭의 event-elapsed 문법 그대로(Crenop 지정)
+          const chElMs = new Date(c.time).getTime() - new Date(s.start).getTime();
+          const chElHtml = (!isNaN(chElMs) && chElMs >= 0) ? `<span class="event-elapsed">${SVG_ICONS.clockTime} ${formatDuration(chElMs)}</span>` : '';
+          return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span>${chElHtml}<span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
         }).join('')}</div>`;
       }
       // VOD 슬롯(2026-08-29): 종료 방송 행은 통행 링크를 풀고(재생 진입은 썸네일이 담당) 제목 아래에 파트를 전부
@@ -6848,7 +6842,7 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
   let yc = `<div class="toh-yaxis" style="height:${H}px;">`;
   for (let i = 0; i < 9; i++) yc += `<span class="toh-ylabel" style="top:${i * R - 6}px;">${ylab[i]}</span>`;
   yc += `</div>`;
-  let cells = `<div class="toh-grid" style="grid-template-columns:repeat(${dim},${R}px);grid-auto-rows:${R}px;">`;
+  let cells = `<div class="toh-grid" style="grid-template-columns:repeat(${dim},minmax(0,${R}px));grid-auto-rows:${R}px;">`;
   for (let b = 0; b < 8; b++) {
     for (let d = 1; d <= dim; d++) {
       const minutes = grid[d - 1][b];
@@ -6859,7 +6853,7 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
     }
   }
   cells += `</div>`;
-  let xa = `<div class="toh-xaxis" style="grid-template-columns:repeat(${dim},${R}px);">`;
+  let xa = `<div class="toh-xaxis" style="grid-template-columns:repeat(${dim},minmax(0,${R}px));">`;
   for (let d = 1; d <= dim; d++) {
     const g = new Date(year, month1 - 1, d).getDay();
     const c = g === 0 ? '#f87171' : (g === 6 ? '#60a5fa' : '');

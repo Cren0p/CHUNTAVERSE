@@ -2699,7 +2699,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-29f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6882,28 +6882,34 @@ function renderDayDetail(year, month1, sum, memberId) {
     }
     ddVodN = seen.size;
   }
+  // 종류 필터 연동 v2(2026-08-30): 달력만 걸러선 필터 의미가 안 산다(Crenop) — 일별 요약의 칩·행·타일도 함께
+  // 거른다. VOD는 방송 소속이라 숲 스위치를 따른다. 전 종류를 끄면 아래 items가 비어 기존 빈 날 문구가 뜬다.
   const headChips = [];
-  if (sessions.length > 0) headChips.push(chipHtml('broadcast', 'soop', sessions.length));
-  if (posts.length > 0) headChips.push(chipHtml('post', 'board', posts.length));
-  if (cafes.length > 0) headChips.push(chipHtml('cafe', 'coffee', cafes.length));
-  if (youtubes.length > 0) headChips.push(chipHtml('youtube', 'youtube', youtubes.length));
-  if (ddVodN > 0) headChips.push(chipHtml('vod', 'film', ddVodN));
+  if (calTypeOn('soop') && sessions.length > 0) headChips.push(chipHtml('broadcast', 'soop', sessions.length));
+  if (calTypeOn('soop') && ddVodN > 0) headChips.push(chipHtml('vod', 'film', ddVodN));
+  if (calTypeOn('post') && posts.length > 0) headChips.push(chipHtml('post', 'board', posts.length));
+  if (calTypeOn('cafe') && cafes.length > 0) headChips.push(chipHtml('cafe', 'coffee', cafes.length));
+  if (calTypeOn('youtube') && youtubes.length > 0) headChips.push(chipHtml('youtube', 'youtube', youtubes.length));
   let html = `<div class="day-detail-title">${ddDateHtml}<span class="ddt-chips">${headChips.join('')}</span></div>`;
   const items = [];
   for (const s of sessions) {
     const t = new Date(s.start).getTime();
+    if (!calTypeOn('soop')) break;   // 종류 필터 v2 — 세션 행(VOD 타일 포함) 통째 제외
     if (!isNaN(t)) items.push({ kind: 'session', time: t, data: s });
   }
   for (const p of posts) {
     const t = new Date(p.time).getTime();
+    if (!calTypeOn('post')) break;
     if (!isNaN(t)) items.push({ kind: 'post', time: t, data: p });
   }
   for (const y of youtubes) {
     const t = new Date(y.time).getTime();
+    if (!calTypeOn('youtube')) break;
     if (!isNaN(t)) items.push({ kind: 'youtube', time: t, data: y });
   }
   for (const c of cafes) {
     const t = new Date(c.time).getTime();
+    if (!calTypeOn('cafe')) break;
     if (!isNaN(t)) items.push({ kind: 'cafe', time: t, data: c });
   }
   items.sort((a, b) => a.time - b.time);

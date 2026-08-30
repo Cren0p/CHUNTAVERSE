@@ -2699,7 +2699,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-29e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6812,10 +6812,10 @@ function renderCalendar(year, month1, sum, memberId) {
     }
     const chips = [];
     if (calTypeOn('soop') && sessions.length > 0) chips.push(chipHtml('broadcast cd-s-soop', 'soop', sessions.length));
+    if (dayVods && dayVods.length > 0) chips.push(chipHtml('vod cd-s-vod', 'film', dayVods.length));   // v9: 합성 배지 — film은 컨텐츠 탭 VOD 아이콘. v13(2026-08-29): 숲 바로 뒤로 이동(Crenop 지정) — PC 폼은 DOM 순서대로 흐르고, 컴팩트는 슬롯(grid-area) 고정이라 무영향
     if (hasPost) chips.push(chipHtml('post cd-s-post', 'board', posts.length));
     if (hasCafe) chips.push(chipHtml('cafe cd-s-cafe', 'coffee', cafes.length));
     if (hasYoutube) chips.push(chipHtml('youtube cd-s-yt', 'youtube', youtubes.length));
-    if (dayVods && dayVods.length > 0) chips.push(chipHtml('vod cd-s-vod', 'film', dayVods.length));   // v9: 합성 배지 — film은 컨텐츠 탭 VOD 아이콘
     // v4: 썸네일 박스는 방송날이면 상시 예약 — VOD 목록 도착 전후·다시보기 없는 날에도 셀 높이가 안 변한다
     // (로딩 시점 셀 크기 널뛰기 해소). 빈 박스 = "로딩 중/다시보기 없음" 시각 신호 겸용. 개수 배지는 칩(film N)이 담당하므로 제거.
     let thumbHtml = '';

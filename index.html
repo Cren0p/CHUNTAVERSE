@@ -2699,7 +2699,7 @@
 </main>
 
 <script>
-const BUILD = '2026-08-29d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-08-29e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3379,7 +3379,7 @@ const statsState = {
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
 let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
-const LS_STATS_PREFIX = 'chuntaverse_stats_v14_';   // v14: 과거 방송내역 KV 직접 수정(2026-08-04) 반영 — 지난 달은 LS 캐시를 무기한 쓰므로 범프하지 않으면 기존 방문자에게 옛 값이 영구 고정된다. v13 무효화
+const LS_STATS_PREFIX = 'chuntaverse_stats_v15_';   // v15: 과거분 일괄 소급 + 시드 은퇴(2026-08-29) — 지난달 낱개·합계가 달라져 범프(지난 달 LS 캐시는 무기한이라 범프 없이는 옛 값 영구 고정). v14 무효화
 // 버전 범프로 사장된 구버전 캐시(v8_/v9_ 등) 잔존 키 정리 — 방문자 LS 용량 회수. 프리픽스 기준이라 이후 범프에도 재작업 불필요.
 try {
   for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -5966,12 +5966,12 @@ function computeMonthSummary(memberStats, year, month1, nowMs = Date.now()) {
     }
   }
   // seed 데이터 합산 (서비스 시작 전 수동 입력 데이터)
+  // (2026-08-29 시드 은퇴) 숲글·카페·유튜브 시드 합산 제거 — 일괄 소급·북마클릿·시트로 낱개가 실측 확보되어,
+  // 남은 시드 숫자는 삭제된 글·집계 오차의 잔재다. 글·영상 합계는 이제 실제 항목 수만 센다.
+  // 방송 일수·시간·시청자 시드는 소급 대상이 아니었으므로 유지. 값 자체는 KV에 사료로 남는다(seed-report 열람).
   if (memberStats.seed) {
     result.totalDurationMs    += memberStats.seed.broadcastMs || 0;
     result.daysWithBroadcast  += memberStats.seed.sessions    || 0;
-    result.postCount          += memberStats.seed.posts       || 0;
-    result.youtubeCount       += memberStats.seed.youtube     || 0;
-    result.cafeCount          += memberStats.seed.cafe        || 0;
     if (memberStats.seed.viewerPeak && memberStats.seed.viewerPeak > result.viewerPeak) result.viewerPeak = memberStats.seed.viewerPeak;
     if (memberStats.seed.viewerSum) result.viewerSum += memberStats.seed.viewerSum;
     if (memberStats.seed.viewerCount) result.viewerCount += memberStats.seed.viewerCount;
@@ -6274,11 +6274,8 @@ function computeAnnualSums(year, nowMs = Date.now()) {
       annualSums[m.id].cafeCount    += (ms.cafe    || []).filter(c => { const t = new Date(c.time).getTime(); return !isNaN(t) && t >= monthStart && t < monthEnd; }).length;
       // seed 데이터 합산
       if (ms.seed) {
-        annualSums[m.id].sessions        += ms.seed.sessions    || 0;
+        annualSums[m.id].sessions        += ms.seed.sessions    || 0;   // 글·영상 시드는 은퇴(computeMonthSummary 곁 주석) — 방송·시청자만
         annualSums[m.id].totalDurationMs += ms.seed.broadcastMs || 0;
-        annualSums[m.id].postCount       += ms.seed.posts       || 0;
-        annualSums[m.id].youtubeCount    += ms.seed.youtube     || 0;
-        annualSums[m.id].cafeCount       += ms.seed.cafe        || 0;
         if (ms.seed.viewerPeak && ms.seed.viewerPeak > annualSums[m.id].viewerPeak) annualSums[m.id].viewerPeak = ms.seed.viewerPeak;
         if (ms.seed.viewerSum) annualSums[m.id].viewerSum += ms.seed.viewerSum;
         if (ms.seed.viewerCount) annualSums[m.id].viewerCount += ms.seed.viewerCount;
@@ -8215,12 +8212,9 @@ function hallSumMonths(monthList, nowMs = Date.now()) {
       t.postCount    += (ms.posts   || []).filter(p => { const x = new Date(p.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
       t.youtubeCount += (ms.youtube || []).filter(yv => { const x = new Date(yv.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
       t.cafeCount    += (ms.cafe    || []).filter(c => { const x = new Date(c.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
-      if (ms.seed) {
+      if (ms.seed) {   // 글·영상 시드는 은퇴(computeMonthSummary 곁 주석) — 방송만
         t.sessions        += ms.seed.sessions    || 0;
         t.totalDurationMs += ms.seed.broadcastMs || 0;
-        t.postCount       += ms.seed.posts       || 0;
-        t.youtubeCount    += ms.seed.youtube     || 0;
-        t.cafeCount       += ms.seed.cafe        || 0;
       }
     });
   }

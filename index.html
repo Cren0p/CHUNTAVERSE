@@ -928,13 +928,11 @@
     display: grid; grid-template-columns: 1fr 280px;
     gap: 20px; align-items: start;
   }
-  /* 1100px: 채팅 묶음 도입 후 타임라인 실폭 기준 상향 — 900px에선 필터를 내리기 직전 타임라인이 ~350px까지 좁아짐(사이드바 200+패딩 48+필터 280+갭 20 차감). 1100px 전환이면 최소 ~550px 확보. 1100은 탭 접힘과 같은 기존 브레이크포인트 어휘 */
-  @media (max-width: 1100px) {
-    .events-wrap { grid-template-columns: 1fr; }
-    /* 구 규칙(필터를 이벤트 위 strip으로, position:static !important)은 2026-08-31 폐지 —
-       이제 이 폭에서 필터는 우측 드로어로 간다. !important가 남아 있으면 드로어의 position:fixed를 덮어
-       서랍이 열리지 않는다(실제로 그렇게 안 열렸음). 필터가 화면의 3할을 상시 점유하던 문제도 서랍이 푼다. */
-  }
+  /* 필터를 서랍으로 보내며 칸을 비우는 규칙은 아래 태블릿 블록(1150px)이 다른 탭들과 함께 가진다(2026-09-02 이동) —
+     여기 1100px으로 따로 두었더니 1101~1150 구간에서만 필터는 서랍인데 격자는 280px 칸을 그대로 비워
+     본문이 300px 좁아진 채 왼쪽으로 쏠렸다(Crenop 실사고 보고: 최근 활동·케미만 그랬던 이유가 이것).
+     구 규칙(필터를 이벤트 위 strip으로, position:static !important)은 2026-08-31 폐지 — !important가 남으면
+     서랍의 position:fixed를 덮어 서랍이 안 열린다(실제로 그랬음). */
   .timeline { background: var(--surface); border: 1px solid var(--border); border-top: none; min-width: 0; }   /* 윗변은 sticky 헤더가 가짐(2026-08-09) — 헤더가 20px 떠 있어도 rest 상태 박스 윗변이 그대로 */
   .timeline-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
 
@@ -1218,7 +1216,7 @@
   .stats-period-wrap { flex: 1; min-width: 0; }
   .stats-period-wrap .stats-period-btn {
     aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-    white-space: normal; line-height: 1.15; padding: 2px;
+    white-space: normal; line-height: 1.15; padding: 3px 2px 1px;   /* 아래 2px 보정 — 명전 기간 버튼과 같은 값(한글 라인박스 아래 여백) */
   }
   .stats-period-btn .pb-y { font-size: 12px; opacity: 0.85; }   /* 월과 같은 크기 — 굵기·농도 차이만으로 위계를 준다 */
   .stats-period-btn .pb-m { font-size: 12px; font-weight: 700; }
@@ -1794,11 +1792,7 @@
     display: grid; grid-template-columns: 1fr 280px;
     gap: 20px; align-items: start;
   }
-  /* 1100px: 이벤트와 같은 값으로 맞춤(2026-08-31) — 900이면 900~1100 구간에서 필터만 서랍으로 빠지고
-     격자는 280px 칸을 그대로 비워 둔다. 구 '위 strip' 규칙은 우측 드로어로 대체됐다. */
-  @media (max-width: 1100px) {
-    .chem-wrap { grid-template-columns: 1fr; }
-  }
+  /* 칸을 비우는 규칙은 태블릿 블록(1150px)이 다른 탭들과 함께 가진다(2026-09-02 이동, 사유는 .events-wrap 쪽 주석) */
   .chem-content { container-type: inline-size; min-width: 0; }   /* 카드 열 수를 뷰포트가 아닌 이 콘텐츠 칸 폭 기준으로 판단(컨테이너 쿼리) */
   /* 케미 필터: 이벤트 .filter-panel과 동일 — 우측 사이드 sticky. 스크롤이 길어(2인+그룹) 필터 상시 노출이 이득 */
   .chem-filter-panel { position: sticky; top: calc(var(--head-h, 0px) + 20px); }
@@ -2354,7 +2348,9 @@
   }
   /* 줄 간격은 지난 활동 기간 버튼(.stats-period-btn)과 같은 값(2026-09-02 Crenop 지적) — 같은 두 줄 표기인데
      여기만 gap 4px·line-height 1.2라 '26년 / 상반기' 사이가 '26년 / 1월'보다 벌어져 보였다. */
-  #hallPeriodSide .hall-period-btn { gap: 1px; line-height: 1.15; }
+  /* 아래 2px 보정: 한글은 라인박스 아래 여백을 안 써서 가운데정렬만으론 글자가 위로 뜬다(.page-title-link의 6/4와 같은 사유·같은 처방).
+     글자만 있는 버튼에만 준다 — 아이콘이 위를 채우는 종류 버튼에 같이 주면 되레 아래로 처진다(2026-09-02 픽셀 실측으로 확인). */
+  #hallPeriodSide .hall-period-btn { gap: 1px; line-height: 1.15; padding: 3px 2px 1px; }
   .hall-kind-btn { gap: 4px; line-height: 1.2; }   /* 아이콘과 글자 사이는 넓은 쪽을 유지 — 글자끼리가 아니다 */
   .hall-kind-btn svg { width: 16px; height: 16px; display: block; }
   .members-tabs-wrap {
@@ -2857,7 +2853,9 @@
       z-index: 40;
     }
     body.drawer-r .side-pick, body.drawer-r .filter-panel, body.drawer-r .chem-filter-panel { transform: none; }
-    .members-wrap, .stats-wrap, .hall-wrap, .cal-wrap { grid-template-columns: 1fr; }
+    /* 필터·기둥이 서랍으로 빠지는 폭이므로 격자의 280px 칸도 여기서 함께 없앤다 — 탭마다 다른 값을 쓰면
+       그 사이 폭에서 그 탭만 본문이 좁아진다(2026-09-02: 최근 활동·케미가 1100px으로 따로 놀던 것을 합침) */
+    .members-wrap, .stats-wrap, .hall-wrap, .cal-wrap, .events-wrap, .chem-wrap { grid-template-columns: 1fr; }
     .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
     .events-wrap > .timeline, .chem-wrap > .chem-content { margin-left: 0; }
     .drawer-btn#drawerBtnR { display: inline-flex; }   /* 고르는 기둥이 서랍이므로 태블릿에서도 필요하다 */
@@ -3219,7 +3217,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02z';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zb';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4658,9 +4656,12 @@ function fitBtnIcons(root) {
     if (!vb || !vb.width || !bb.width) return;
     const box = sv.getBoundingClientRect();
     const sx = (box.width || 16) / vb.width;
+    const sy = (box.height || 16) / vb.height;
     const l = (bb.x - vb.x) * sx, r = (vb.x + vb.width - bb.x - bb.width) * sx;
-    const shift = (r - l) / 2;   // 왼쪽이 더 비었으면 그림을 왼쪽으로 당긴다(상자 폭은 그대로)
+    const t = (bb.y - vb.y) * sy, bo = (vb.y + vb.height - bb.y - bb.height) * sy;
+    const shift = (r - l) / 2, vshift = (bo - t) / 2;   // 비어 있는 쪽으로 당긴다(상자 크기는 그대로)
     if (Math.abs(shift) > 0.05) { sv.style.marginLeft = `${shift.toFixed(2)}px`; sv.style.marginRight = `${(-shift).toFixed(2)}px`; }
+    if (Math.abs(vshift) > 0.05) { sv.style.marginTop = `${vshift.toFixed(2)}px`; sv.style.marginBottom = `${(-vshift).toFixed(2)}px`; }
   });
 }
 
@@ -5742,10 +5743,21 @@ function calPeriodHtml() {
   const curY = now.getUTCFullYear();
   const prevDis = calState.year <= STATS_START_YEAR ? 'disabled' : '';
   const nextDis = calState.year >= curY ? 'disabled' : '';
+  const curM = now.getUTCMonth() + 1;
+  // 미래 월에 시트(일정·컨텐츠) 항목이 하나라도 있는지 — 두 시트는 통째로 받아 두므로 월을 열어보지 않고도 안다.
+  // 지난 월은 방송 기록이 있으니 항상 열어 둔다.
+  const futureHas = (mo) => {
+    const ym = `${calState.year}-${String(mo).padStart(2, '0')}`;
+    if (scheduleData.some(x => x.date && x.date.startsWith(ym) && calRowVisible(x))) return true;
+    const yymm = String(calState.year).slice(2) + String(mo).padStart(2, '0');
+    return contentData.some(c => c.date && c.date.sort && String(c.date.sort).slice(0, 4) === yymm && calRowVisible(c));
+  };
   const btns = [];
   for (let mo = 1; mo <= 12; mo++) {
-    // 일정은 미래도 있으므로 현재 월까지로 막지 않는다 — 통계(지난 것만)와 다른 점
-    btns.push(`<button class="stats-period-btn${mo === calState.month ? ' active' : ''}" data-calmonth="${mo}"><span class="pb-y">${String(calState.year).slice(2)}년</span><span class="pb-m">${mo}월</span></button>`);
+    // 일정은 미래도 있으므로 현재 월까지로 막지 않는다 — 통계(지난 것만)와 다른 점.
+    // 다만 아직 오지 않았고 일정·컨텐츠도 없는 달은 열어도 빈 화면뿐이라 막는다(2026-09-02 Crenop 지정).
+    const dis = (calState.year > curY || (calState.year === curY && mo > curM)) && !futureHas(mo) ? 'disabled' : '';
+    btns.push(`<button class="stats-period-btn${mo === calState.month ? ' active' : ''}" data-calmonth="${mo}" ${dis}><span class="pb-y">${String(calState.year).slice(2)}년</span><span class="pb-m">${mo}월</span></button>`);
   }
   return `
     <div class="stats-period-row"><button class="stats-month-btn" data-calydir="prev" ${prevDis}>${SVG_ICONS.chevronLeft}</button><div class="stats-period-wrap no-all">${btns.join('')}</div><button class="stats-month-btn" data-calydir="next" ${nextDis}>${SVG_ICONS.chevronRight}</button></div>`;

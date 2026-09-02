@@ -2062,7 +2062,7 @@
   .cal-cell.future.has { border-style: dashed; }
   .cal-cell.has:hover { border-color: var(--accent); }
   .cal-cell.selected { border-color: var(--accent); background: var(--surface2); }
-  .cd-chip.content { color: var(--text2); }
+  .cd-chip.content { color: var(--accent); }   /* film = 민트 — 지난 활동의 .cd-chip.vod(film)와 같은 색(2026-09-02 Crenop 지정) */
   .cd-chip.schedule { color: var(--muted); }
   /* 1열 목록 행 — 기록이 있는 날만. 날짜 · 대표 그림 96px · 칩(+미래면 일정 제목) */
   .cal-rows { display: flex; flex-direction: column; gap: 6px; }
@@ -2099,9 +2099,15 @@
   .cal-vod { width: 200px; }
   .cal-vod-who { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
   .cal-vod-who img { width: 18px; height: 18px; display: block; }
-  /* 기둥의 종류 필터 아이콘 색 — 칩 색과 같게 */
-  .filter-type[data-type="vod"] .filter-icon { color: var(--accent); }
-  .filter-type[data-type="content"] .filter-icon { color: var(--text); }
+  /* 기둥의 종류 버튼 아이콘 색 = 그 아이콘의 사이트 배정색(2026-09-02 Crenop 지정): film 민트·숲 ∞ 파랑(--ev-start)·유튜브 빨강.
+     달력 칸의 칩도 같은 그림이라 같은 색 — 지난 활동의 .cd-chip.vod(film=민트)·.cd-chip.broadcast(숲=파랑)와 한 문법이 된다.
+     글자는 통계 탭 종류 버튼과 같이 흐림→켜지면 민트(.hall-kind-btn). */
+  #calKindBox .hall-kind-btn[data-kind="content"] svg { color: var(--accent); }
+  #calKindBox .hall-kind-btn[data-kind="vod"] svg { color: var(--ev-start); }
+  #calKindBox .hall-kind-btn[data-kind="youtube"] svg { color: var(--ev-youtube); }
+  .cal-main .cd-chip.vod { color: var(--ev-start); }   /* 달력 탭의 vod 칩은 숲 ∞ 마크라 파랑 — 지난 활동의 vod 칩(film)은 민트 그대로 */
+  /* '전체'는 글자만이라 아래 2px 보정(한글 라인박스 — #hallPeriodSide .hall-period-btn과 같은 사유·같은 값). 아이콘 있는 세 칸은 그대로. */
+  #calKindBox .hall-kind-btn[data-kind="all"] { padding: 3px 2px 1px; }
   @media (max-width: 1150px) { .cal-wrap { grid-template-columns: 1fr; } }
   /* 좁은 폭(스마트폰)에서만: 요청 목록과 순위를 같이 쌓으면 화면이 길어져 '요청 ↔ 순위' 토글로 쓴다.
      태블릿까지 걸면 폭이 남는데도 목록이 사라진다(실사고 — 순위만 보이던 화면). */
@@ -3145,11 +3151,11 @@
       <div class="cal-main" id="contentBody">
         <div class="loading"><div class="spinner"></div><div>달력 불러오는 중...</div></div>
       </div>
-      <!-- 기둥(2026-09-02): 멤버 스트립(크루+13) · 종류 필터(컨텐츠·다시보기·유튜브, 일정은 항상) · 연/월.
-           스트립은 지난 활동 탭 문법(.stats-tabs-wrap 3열), 필터는 최근 활동 탭 문법(.filter-row + 모두 해제 슬롯). 내용은 renderCalSide()가 채운다. -->
+      <!-- 기둥(2026-09-02): 멤버 스트립(크루+13) · 종류 버튼(전체·컨텐츠·다시보기·유튜브 중 하나, 일정은 항상) · 연/월.
+           스트립은 지난 활동 탭 문법(.stats-tabs-wrap 3열), 종류는 통계 탭 종류 버튼 문법(.hall-kind 3열 정사각). 내용은 renderCalSide()가 채운다. -->
       <aside class="side-pick">
         <div><div class="filter-title">멤버</div><div class="stats-tabs-wrap" id="calMembersSide"></div></div>
-        <div><div class="filter-title">종류</div><div class="filter-row"><button class="filter-toggle-all" id="calTypeToggleAll">모두 해제</button><div class="filter-types" id="calTypesSide"></div></div></div>
+        <div><div class="filter-title">종류</div><div class="hall-kind" id="calKindBox"></div></div>
         <div><div class="filter-title">기간</div><div id="calPeriodSide"></div></div>
       </aside>
     </div>
@@ -3217,13 +3223,19 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zb';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zc';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
-const STATS_START_YEAR = 2026;
-const STATS_START_MONTH = 1;   // 멤버 탭 달력 하한 — 과거 세션 시딩(2026-01~)으로 1월부터 열람 가능 (구 5: 수집 개시월)
-const STATS_ALL_START_MONTH = 1; // 월간 전체탭은 1월부터
+// ── 기록의 첫 달(2026-09-02, 69번 세션) ──
+// 천타버스 결성일 2025-11-30이 기록의 시작이고, 그 하루는 '2025-12'에 속한다(Crenop 지정 — 말일 하루 때문에 11월을
+// 따로 두지 않는다). 첫 달 2025-12는 11/30 00:00(KST)에 시작하는 32일짜리 달이다. 워커도 같은 두 상수로 같은 경계를 쓴다.
+// 이 규칙을 아는 곳: kstMonthStartMs(월 경계) · dayInStatsMonth(날짜 키의 달 소속) · statsDaysInMonth(일수) · monthGridCells(달력 칸).
+const CREW_START_DAY = '2025-11-30';
+const STATS_FIRST_YM = '2025-12';
+const STATS_START_YEAR = 2025;
+const STATS_START_MONTH = 12;    // 지난 활동·달력 탭 하한 = 첫 달(2025-12). 2025년은 12월 버튼만 열린다. (구 2026-01: 시딩 개시월 / 그 전 5: 수집 개시월)
+const STATS_ALL_START_MONTH = 12; // 월간 전체탭도 첫 달부터 — 25년 전체 = 12월(11/30 포함) 한 달
 
 // 멤버 생일 단일 소스 — 생일 로고 교체(file)·프로필 표시(display)·기념일 박스·프리로드가 모두 이 표를 사용.
 // 날짜·파일명 수정은 여기 한 곳. 단 file의 영문 표기는 MEMBERS.en(주소 표기)과 값이 같으므로, 멤버 영문명을
@@ -5620,8 +5632,16 @@ function renderDisco() {
 // 재료는 지난 활동 탭 것을 그대로 쓴다: 월 통계(/stats?month=, 13명 한 번에) · 다시보기 목록(/vods, 멤버·월별 —
 // 지난달은 브라우저 저장, 크루 화면은 달마다 13번) · 타일(vodTileHtml) · 유튜브 썸네일 주소(ytVideoId).
 // 두 폼(7열 썸네일 / 1열 목록)을 다 그려 두고 CSS가 폭에 따라 하나만 보인다 — 상세 세 자리(주 아래·행 아래·오른쪽 열)도 같은 태도.
-const CAL_TYPES = ['content', 'vod', 'youtube'];   // 종류 필터. 일정은 필터 대상이 아니다(항상 표시 — 2026-09-02 Crenop 지정)
-const CAL_TYPE_LABEL = { content: '컨텐츠', vod: '다시보기', youtube: '유튜브' };
+// 종류 = 단일 선택 버튼(2026-09-02 69번, Crenop 지정 — 구 켜고 끄는 필터 폐지). 통계 탭 종류 버튼(HALL_KINDS·.hall-kind-btn)과
+// 같은 모양·같은 자리 문법: 정사각 3열, 하나만 켜짐. '전체'가 옛 '모두 선택'을 대신하므로 '모두 해제' 버튼은 없다.
+// '전체'는 글자만(기간의 '전체'와 같은 처리 — 새 아이콘은 승인 없이 넣지 않는다). 일정은 종류에 속하지 않고 항상 보인다.
+// 멤버 스트립과 같은 '고르기'라 서랍 체크 버튼의 채움에는 세지 않는다(통계 탭과 동일 — filterCounts.content 폐지).
+const CAL_KINDS = [
+  { key: 'all', label: '전체', icon: null },
+  { key: 'content', label: '컨텐츠', icon: 'film' },
+  { key: 'vod', label: '다시보기', icon: 'soop' },
+  { key: 'youtube', label: '유튜브', icon: 'youtube' },
+];
 // 종류 태그(F열) 표기 → 아이콘 키 별칭표(2026-09-02). 시트에 자유롭게 적고, 여기 있는 표기만 그림이 된다. 대소문자 무시.
 // 모르는 태그는 기본 이름표(tagFilled — 케미 '기타'와 같은 그림). 행성(planet)은 배정 보류 — 모캡 스튜디오 마크라 모캡 대체 후보였다(Crenop).
 const CAL_TAG_ICON = {
@@ -5636,8 +5656,9 @@ const CAL_TAG_LOOKUP = (() => { const o = {}; for (const [k, names] of Object.en
 function tagIconsHtml(tags) {
   return (tags || []).map(t => `<span class="cal-tag" title="${escapeHtml(t)}">${SVG_ICONS[CAL_TAG_LOOKUP[t.toLowerCase()] || 'tagFilled']}</span>`).join('');
 }
-const CAL_TYPE_ICON = { content: 'film', vod: 'soop', youtube: 'youtube' };   // 칩·필터 버튼 공용(2026-09-02 Crenop 지정): 컨텐츠=film · 다시보기=숲 ∞ 마크 · 일정은 film을 흐리게
-const calState = { year: 0, month: 0, selected: null, member: 'all', types: new Set(CAL_TYPES) };
+const CAL_TYPE_ICON = { content: 'film', vod: 'soop', youtube: 'youtube' };   // 칩·종류 버튼 공용(2026-09-02 Crenop 지정): 컨텐츠=film · 다시보기=숲 ∞ 마크 · 일정은 film을 흐리게
+const calState = { year: 0, month: 0, selected: null, member: 'all', type: 'all' };
+function calShows(t) { return calState.type === 'all' || calState.type === t; }   // 고른 종류가 이 종류를 보여주나
 (function () { const n = kstNow(); calState.year = n.getUTCFullYear(); calState.month = n.getUTCMonth() + 1; })();
 function calYm() { return `${calState.year}-${String(calState.month).padStart(2, '0')}`; }
 function calMembers() { return calState.member === 'all' ? MEMBERS : MEMBERS.filter(m => m.id === calState.member); }
@@ -5655,61 +5676,43 @@ function ensureCalMonth() {
   if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
     loadStatsMonth(ym).then(() => { if (currentPage === 'content') renderCalendarTab(); });
   }
-  if (calState.types.has('vod')) calMembers().forEach(m => ensureVodMonth(m.id, ym));
+  if (calShows('vod')) calMembers().forEach(m => ensureVodMonth(m.id, ym));
 }
 
-// 날짜 → { content, schedule, vods:[{m,v,at}], youtube:[{m,y}], vodPending, count }. 꺼진 종류는 아예 담지 않는다(칩·대표 그림·상세 모두 제외).
+// 날짜 → { content, schedule, vods:[{m,v,at}], youtube:[{m,y}], vodPending, count }. 고르지 않은 종류는 아예 담지 않는다(칩·대표 그림·상세 모두 제외).
+// 컨텐츠 시트는 달 구분 없이 통째로 들어오고 화면은 이 달 칸만 쓴다 — 담긴 다른 달 날짜는 그냥 안 쓰인다.
 function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
   const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], youtube: [], vodPending: false, count: 0 });
-  // 서랍 버튼 채움용 개수(2026-09-02): 꺼진 종류도 '있었을 것'으로 세되 담지는 않는다 — 그래야 '이 달에 원래 몇 개'와
-  // '지금 몇 개 남았나'를 같은 한 번의 순회로 얻는다. 일정은 종류 필터 대상이 아니라 양쪽에서 뺀다.
-  // 이 달 밖 날짜는 세지 않는다 — 컨텐츠 시트는 달 구분 없이 통째로 들어오고 화면은 이 달 칸만 쓴다.
-  let shown = 0, total = 0;
-  const inMonth = k => k.startsWith(ym);
-  const onType = t => calState.types.has(t);
-  for (const c of contentData) {
+  if (calShows('content')) for (const c of contentData) {
     const key = c.date && c.date.sort ? String(c.date.sort).slice(0, 6) : '';
     if (key.length !== 6 || !calRowVisible(c)) continue;
-    const dk = `20${key.slice(0, 2)}-${key.slice(2, 4)}-${key.slice(4, 6)}`;
-    if (inMonth(dk)) total++;
-    if (!onType('content')) continue;
-    if (inMonth(dk)) shown++;
-    day(dk).content.push(c);
+    day(`20${key.slice(0, 2)}-${key.slice(2, 4)}-${key.slice(4, 6)}`).content.push(c);
   }
   for (const s of scheduleData) if (calRowVisible(s)) day(s.date).schedule.push(s);
   const monthData = statsState.data[ym];
-  const seenVod = {};   // 날짜별 이미 센 다시보기 — 꺼져 있어도 중복은 한 번만 센다(종전엔 담긴 목록에서 뽑아 썼다)
+  const seenVod = {};   // 날짜별 이미 센 다시보기 — 두 방송이 같은 다시보기를 가리켜도 한 번만
   if (monthData) for (const m of calMembers()) {
     const mi = MEMBERS.indexOf(m);
-    const sum = computeMonthSummary(monthData[m.id], year, month);
-    for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
+    const sum = computeMonthSummary(monthData[m.id], year, month);   // 첫 달(2025-12)은 결성일 11/30 세션·유튜브도 포함(kstMonthStartMs)
+    if (calShows('vod')) for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
       const seen = seenVod[dk] || (seenVod[dk] = new Set());
       for (const s of sessions) {
         const parts = vodsForBroad(m.id, ym, s.broad_no);   // null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
-        if (parts === null) { if (onType('vod')) day(dk).vodPending = true; continue; }
+        if (parts === null) { day(dk).vodPending = true; continue; }
         const at = new Date(s.start).getTime();
         for (const v of parts) {
           if (seen.has(v.title_no)) continue;
           seen.add(v.title_no);
-          if (inMonth(dk)) total++;
-          if (!onType('vod')) continue;
-          if (inMonth(dk)) shown++;
           day(dk).vods.push({ m, mi, v, at });
         }
       }
     }
-    for (const [dk, ys] of Object.entries(sum.youtubeByDate)) {
-      for (const y of ys) {
-        if (inMonth(dk)) total++;
-        if (!onType('youtube')) continue;
-        if (inMonth(dk)) shown++;
-        day(dk).youtube.push({ m, mi, y, at: new Date(y.time).getTime() });
-      }
+    if (calShows('youtube')) for (const [dk, ys] of Object.entries(sum.youtubeByDate)) {
+      for (const y of ys) day(dk).youtube.push({ m, mi, y, at: new Date(y.time).getTime() });
     }
   }
-  filterCounts.content = { shown, total };
   for (const d of Object.values(map)) {
     // 순서 = 사이트 멤버 순서(MEMBERS) → 시각 → 파트(2026-09-02 Crenop 지정). 대표 그림도 상세 타일도 같은 순서라
     // 크루 화면에서 13명이 섞여도 늘 같은 자리에서 같은 사람을 찾는다(생방송 카드·스트립과 같은 문법).
@@ -5720,7 +5723,7 @@ function calItemsByDate() {
   return map;
 }
 
-// 대표 그림 — 컨텐츠 이미지 → 다시보기 → 유튜브(2026-09-02 Crenop 지정). 꺼진 종류는 map에 없으므로 '앞 것을 끄면 다음 것'이 저절로 된다.
+// 대표 그림 — 컨텐츠 이미지 → 다시보기 → 유튜브(2026-09-02 Crenop 지정). 고르지 않은 종류는 map에 없으므로 '다시보기만'을 고르면 다시보기 그림이 저절로 대표가 된다.
 function calRepImg(d) {
   if (d.content.length && d.content[0].url) return escapeHtml(d.content[0].url);
   if (d.vods.length && d.vods[0].v.thumb) return escapeHtml(d.vods[0].v.thumb);
@@ -5756,7 +5759,9 @@ function calPeriodHtml() {
   for (let mo = 1; mo <= 12; mo++) {
     // 일정은 미래도 있으므로 현재 월까지로 막지 않는다 — 통계(지난 것만)와 다른 점.
     // 다만 아직 오지 않았고 일정·컨텐츠도 없는 달은 열어도 빈 화면뿐이라 막는다(2026-09-02 Crenop 지정).
-    const dis = (calState.year > curY || (calState.year === curY && mo > curM)) && !futureHas(mo) ? 'disabled' : '';
+    // 첫 해는 첫 달(12월) 아래를 막는다 — 2025년 버튼은 12월(결성일 11/30 포함) 하나만 열린다(지난 활동 기간 선택기의 minM과 같은 규칙).
+    const belowStart = calState.year === STATS_START_YEAR && mo < STATS_START_MONTH;
+    const dis = belowStart || ((calState.year > curY || (calState.year === curY && mo > curM)) && !futureHas(mo)) ? 'disabled' : '';
     btns.push(`<button class="stats-period-btn${mo === calState.month ? ' active' : ''}" data-calmonth="${mo}" ${dis}><span class="pb-y">${String(calState.year).slice(2)}년</span><span class="pb-m">${mo}월</span></button>`);
   }
   return `
@@ -5806,29 +5811,26 @@ function renderCalendarTab() {
   const ym = calYm();
   const t = kstNow();
   const todayKey = `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}-${String(t.getUTCDate()).padStart(2, '0')}`;
-  const first = new Date(Date.UTC(year, month - 1, 1));
-  const lead = first.getUTCDay();
-  const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const gridCells = monthGridCells(year, month);   // 앞 빈칸·날짜·첫 달의 결성일(11/30) — 지난 활동 멤버 달력과 같은 배열
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   // 고른 날이 없어도 상세 자리는 늘 잡아 둔다 — 누를 때마다 폭이 변하면 칸이 움직인다(오른쪽 열일 때).
   const detail = calState.selected ? calDetailHtml(items) : '<div class="cal-di-none">날짜를 누르면 그날의 활동이 나옵니다.</div>';
   const stateCls = (key, d) => [d && d.count ? 'has' : '', key > todayKey ? 'future' : '', calState.selected === key ? 'selected' : '', key === todayKey ? 'today' : ''].filter(Boolean).join(' ');
 
   // ① 7열 썸네일 칸 — 상단 [날짜 | 칩], 아래 16:9 대표 그림(없고 일정만 있으면 그 자리에 일정 제목)
-  const cells = [];
   // 앞쪽 빈칸도 .cal-cell — .calendar-day의 정사각 비율(aspect-ratio 1)이 남으면 첫 주 행이 그 높이로 늘어난다(2026-09-02 실측)
-  for (let i = 0; i < lead; i++) cells.push('<div class="calendar-day cal-cell outside"></div>');
-  for (let dn = 1; dn <= days; dn++) {
-    const key = `${ym}-${String(dn).padStart(2, '0')}`;
-    const dow = (lead + dn - 1) % 7;
+  const cells = gridCells.map(c => {
+    if (!c) return '<div class="calendar-day cal-cell outside"></div>';
+    const { key, dow } = c;
     const d = items[key];
     const img = d ? calRepImg(d) : '';
     const box = img ? `<img src="${img}" alt="" loading="lazy">` : (d && d.schedule.length ? `<span class="cal-t">${calSchedTitles(d)}</span>` : '');
-    cells.push(`<button class="calendar-day cal-cell ${stateCls(key, d)}" data-caldate="${key}"><span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${dn}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${box}</span></button>`);
-  }
+    return `<button class="calendar-day cal-cell ${stateCls(key, d)}" data-caldate="${key}"><span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${c.label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${box}</span></button>`;
+  });
   const weeks = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
-  const selIdx = calState.selected && calState.selected.startsWith(ym) ? Math.floor((lead + Number(calState.selected.slice(8)) - 1) / 7) : -1;
+  const selPos = calState.selected ? gridCells.findIndex(c => c && c.key === calState.selected) : -1;   // 고른 날의 칸 위치(없으면 -1)
+  const selIdx = selPos < 0 ? -1 : Math.floor(selPos / 7);
   const weekRows = weeks.map((w, i) => {
     const grid = `<div class="calendar-grid">${w.join('')}</div>`;
     return i === selIdx ? grid + `<div class="cal-detail cal-detail-week">${detail}</div>` : grid;   // 고른 날이 속한 주 바로 아래
@@ -5838,12 +5840,12 @@ function renderCalendarTab() {
     + weekRows + `</div></div>`;
 
   // ② 1열 목록 — 기록이 있는 날만 한 행씩. 눌러야 그날 전부(좁으면 그 행 아래, 폭이 남으면 오른쪽 열)
-  const dayKeys = Object.keys(items).filter(k => k.startsWith(ym) && items[k].count).sort();
+  const dayKeys = Object.keys(items).filter(k => dayInStatsMonth(k, ym) && items[k].count).sort();
   const listRows = dayKeys.map(key => {
-    const d = items[key]; const dn = Number(key.slice(8)); const dow = (lead + dn - 1) % 7;
+    const d = items[key]; const dow = new Date(key + 'T00:00:00Z').getUTCDay();
     const img = calRepImg(d);
     const row = `<button class="cal-row ${stateCls(key, d)}" data-caldate="${key}">`
-      + `<span class="cal-row-date${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${month}월 ${dn}일 (${WD[dow]})</span>`
+      + `<span class="cal-row-date${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일 (${WD[dow]})</span>`
       + `<span class="cal-row-thumb">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</span>`
       + `<span class="cal-row-body"><span class="cd-chips">${calChips(d)}</span>${d.schedule.length ? `<span class="cal-row-title">${calSchedTitles(d)}</span>` : ''}</span></button>`;
     return row + (key === calState.selected ? `<div class="cal-detail cal-detail-row">${detail}</div>` : '');   // 좁은 폭에서만 보이는 자리
@@ -5859,7 +5861,7 @@ function renderCalendarTab() {
   renderCalSide();
 }
 
-// 기둥 — 멤버 스트립(크루+13, 한 번만 만들고 활성만 갱신) · 종류 필터(이벤트 탭 필터 문법) · 연/월(달마다 다시 그림)
+// 기둥 — 멤버 스트립(크루+13, 한 번만 만들고 활성만 갱신) · 종류 버튼(통계 탭 종류 버튼 문법, 한 번만 만들고 활성만 갱신) · 연/월(달마다 다시 그림)
 function renderCalSide() {
   const mBox = document.getElementById('calMembersSide');
   if (mBox && !mBox.dataset.inited) {
@@ -5873,26 +5875,17 @@ function renderCalSide() {
     }));
   }
   if (mBox) mBox.querySelectorAll('.cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === calState.member));
-  const tBox = document.getElementById('calTypesSide');
-  const tAll = document.getElementById('calTypeToggleAll');
-  if (tBox && !tBox.dataset.inited) {
-    tBox.dataset.inited = '1';
-    tBox.innerHTML = CAL_TYPES.map(t => `<button class="filter-type" data-type="${t}" title="${CAL_TYPE_LABEL[t]}"><span class="filter-icon">${SVG_ICONS[CAL_TYPE_ICON[t]]}</span><span class="filter-lbl">${CAL_TYPE_LABEL[t]}</span></button>`).join('');
-    tBox.querySelectorAll('.filter-type').forEach(b => b.addEventListener('click', () => {
-      const t = b.dataset.type;
-      if (calState.types.has(t)) calState.types.delete(t); else calState.types.add(t);
+  const kBox = document.getElementById('calKindBox');
+  if (kBox && !kBox.dataset.inited) {
+    kBox.dataset.inited = '1';
+    kBox.innerHTML = CAL_KINDS.map(k => `<button class="hall-kind-btn" data-kind="${k.key}" type="button">${k.icon ? SVG_ICONS[k.icon] : ''}<span>${k.label}</span></button>`).join('');
+    kBox.querySelectorAll('.hall-kind-btn').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.kind === calState.type) return;
+      calState.type = b.dataset.kind;
       renderCalendarTab();
-      if (window.syncDrawerFilterBtn) syncDrawerFilterBtn();
     }));
-    if (tAll) tAll.addEventListener('click', () => {
-      calState.types = calState.types.size === CAL_TYPES.length ? new Set() : new Set(CAL_TYPES);
-      renderCalendarTab();
-      if (window.syncDrawerFilterBtn) syncDrawerFilterBtn();
-    });
   }
-  if (tBox) tBox.querySelectorAll('.filter-type').forEach(b => b.classList.toggle('on', calState.types.has(b.dataset.type)));
-  if (tAll) tAll.textContent = calState.types.size === CAL_TYPES.length ? '모두 해제' : '모두 선택';
-  if (window.syncDrawerFilterBtn) syncDrawerFilterBtn();   // 켜짐 표시를 막 붙였으니 버튼 채움도 같은 틱에(관찰자 60ms 지연을 기다리지 않는다)
+  if (kBox) kBox.querySelectorAll('.hall-kind-btn').forEach(b => b.classList.toggle('active', b.dataset.kind === calState.type));
   const side = document.getElementById('calPeriodSide');
   if (side) {
     side.innerHTML = calPeriodHtml();
@@ -5903,7 +5896,9 @@ function renderCalSide() {
       const now = kstNow();
       const y = calState.year + (b.dataset.calydir === 'prev' ? -1 : 1);
       if (y < STATS_START_YEAR || y > now.getUTCFullYear()) return;
-      calState.year = y; calState.selected = null; renderCalendarTab();
+      calState.year = y; calState.selected = null;
+      if (y === STATS_START_YEAR && calState.month < STATS_START_MONTH) calState.month = STATS_START_MONTH;   // 2025년으로 내려가면 12월로
+      renderCalendarTab();
     }));
   }
 }
@@ -6229,7 +6224,31 @@ function kstExpiryMs(raw) {
   if (k.getUTCFullYear() !== +m[1] || k.getUTCMonth() + 1 !== +mo || k.getUTCDate() !== +da) return null;
   return t;
 }
-function kstMonthStartMs(year, month1) { return Date.UTC(year, month1 - 1, 1) - 9 * 3600 * 1000; }   // KST YYYY-MM-01 00:00의 epoch ms (월 경계 필터)
+// KST YYYY-MM-01 00:00의 epoch ms (월 경계 필터). 첫 달(STATS_FIRST_YM)만 결성일로 하루 앞당긴다 — [11/30 00:00, 1/1 00:00).
+// month1은 13도 받는다(다음 해 1월 = 그 달의 끝). 워커 kstMonthStartMs와 같은 규칙.
+function kstMonthStartMs(year, month1) {
+  const ms = Date.UTC(year, month1 - 1, 1) - 9 * 3600 * 1000;
+  return (`${year}-${String(month1).padStart(2, '0')}` === STATS_FIRST_YM) ? ms - 86400000 : ms;
+}
+// 날짜 키('YYYY-MM-DD')가 'YYYY-MM' 달에 속하나 — 결성일만 첫 달에 얹힌다. 문자열 접두 비교를 이 함수로 통일(월 소속 판정 4곳).
+function dayInStatsMonth(dk, ym) { return dk === CREW_START_DAY ? ym === STATS_FIRST_YM : dk.startsWith(ym); }
+// 그 달의 일수 — 첫 달은 결성일 하루가 더해져 32일('방송 일수 N일 / 32일').
+function statsDaysInMonth(year, month1) { return daysInMonth(year, month1) + (`${year}-${String(month1).padStart(2, '0')}` === STATS_FIRST_YM ? 1 : 0); }
+// 달력 칸 배열 — 앞 빈칸(null) + 그 달의 날짜 {key, label, dow}. 첫 달은 결성일 11/30을 앞 빈칸 자리에 넣는다:
+// 2025-12-01이 월요일이라 앞 빈칸이 일요일 하나뿐이고 결성일이 바로 그 일요일이다(줄이 늘지 않는다). 칸 글자는 '11/30' —
+// 1 왼쪽에 '30'만 있으면 오타로 읽힌다(2026-09-02 Crenop 동의). 지난 활동 멤버 달력과 달력 탭이 같은 배열을 쓴다.
+function monthGridCells(year, month1) {
+  const ym = `${year}-${String(month1).padStart(2, '0')}`;
+  const lead = new Date(Date.UTC(year, month1 - 1, 1)).getUTCDay();
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push(null);
+  if (ym === STATS_FIRST_YM) {
+    const d = new Date(CREW_START_DAY + 'T00:00:00Z');
+    if (d.getUTCDay() < lead) cells[d.getUTCDay()] = { key: CREW_START_DAY, label: `${d.getUTCMonth() + 1}/${d.getUTCDate()}`, dow: d.getUTCDay() };
+  }
+  for (let dn = 1; dn <= daysInMonth(year, month1); dn++) cells.push({ key: ymdKey(year, month1, dn), label: String(dn), dow: (lead + dn - 1) % 7 });
+  return cells;
+}
 function formatAbsTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -6299,7 +6318,7 @@ function sessionDateKeys(s, monthPrefix, nowMs) {
   for (let i = 0; i <= extraDays; i++) {
     const dk = isoToKstDateKey(new Date(t + i * 86400000).toISOString());
     if (!dk) continue;
-    if (monthPrefix && !dk.startsWith(monthPrefix)) break;
+    if (monthPrefix && !dayInStatsMonth(dk, monthPrefix)) break;   // 결성일은 첫 달에 속한다(dayInStatsMonth)
     keys.push(dk);
   }
   return keys;
@@ -7031,7 +7050,7 @@ function computeMedals(sums, medalKeys) {
 
 function computeMonthSummary(memberStats, year, month1, nowMs = Date.now()) {
   const result = {
-    daysWithBroadcast: 0, totalDaysInMonth: daysInMonth(year, month1),
+    daysWithBroadcast: 0, totalDaysInMonth: statsDaysInMonth(year, month1),   // 첫 달은 32일(결성일 포함)
     totalDurationMs: 0, postCount: 0, youtubeCount: 0, cafeCount: 0,
     viewerPeak: 0, viewerSum: 0, viewerCount: 0,
     sessionsByDate: {}, postsByDate: {}, youtubeByDate: {}, cafeByDate: {},
@@ -7859,8 +7878,6 @@ function niceNum(v) {
 }
 function renderCalendar(year, month1, sum, memberId) {
   const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={}, broadcastDateSet } = sum;
-  const totalDays = daysInMonth(year, month1);
-  const firstDow = new Date(year, month1 - 1, 1).getDay();
   const todayKey = isoToKstDateKey(new Date().toISOString());
   const ym = `${year}-${String(month1).padStart(2, '0')}`;
   const weekdays = ['일','월','화','수','목','금','토'];
@@ -7871,9 +7888,10 @@ function renderCalendar(year, month1, sum, memberId) {
   html += `</div>`;
   // v2(2026-08-29): 주 단위 행 + 각 주 아래 확장 슬롯 — 일정 모달(.sch-week/.sch-detail) 문법 이식.
   // 선택된 날이 속한 주의 슬롯만 렌더 시점에 채운다(빈 슬롯은 CSS로 숨김). 클릭 갱신은 바인딩이 같은 규칙 수행.
-  const cellHtml = (day) => {
-    const dateKey = ymdKey(year, month1, day);
-    const dow = (firstDow + day - 1) % 7;   // v3: 날짜 숫자 요일색(일 적·토 청)용 — 달력 헤더와 동일 규칙
+  // 칸 배열(앞 빈칸·날짜·첫 달의 결성일)은 monthGridCells가 준다(2026-09-02) — 달력 탭과 같은 배열.
+  const cellHtml = (cell) => {
+    const dateKey = cell.key;
+    const dow = cell.dow;   // v3: 날짜 숫자 요일색(일 적·토 청)용 — 달력 헤더와 동일 규칙
     const sessions = sessionsByDate[dateKey] || [];
     const posts = postsByDate[dateKey] || [];
     const youtubes = youtubeByDate[dateKey] || [];
@@ -7913,11 +7931,9 @@ function renderCalendar(year, month1, sum, memberId) {
     // (로딩 시점 셀 크기 널뛰기 해소). 빈 박스 = "로딩 중/다시보기 없음" 시각 신호 겸용. 개수 배지는 칩(film N)이 담당하므로 제거.
     // 셀 썸네일 폐지(2026-08-31) — 썸네일 모아보기는 달력 탭 몫, 여기는 통계 본분으로 돌아간다
     return { selected: statsState.selectedDate === dateKey,
-      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${day}</span><span class="cd-chips">${chips.join('')}</span></span></button>` };
+      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${cell.label}</span><span class="cd-chips">${chips.join('')}</span></span></button>` };
   };
-  const cells = [];
-  for (let i = 0; i < firstDow; i++) cells.push(null);
-  for (let day = 1; day <= totalDays; day++) cells.push(day);
+  const cells = monthGridCells(year, month1);
   while (cells.length % 7 !== 0) cells.push(null);
   for (let w = 0; w < cells.length / 7; w++) {
     let weekHtml = '';
@@ -8304,7 +8320,10 @@ async function loadStatsMonth(yyyymm) {
     // '진행 중' 상태로 영구 동결됨(그 사용자 화면에서 방송 시간 누락 + 명전 정전위원회 최대 48h 오염).
     // 서버가 세션을 닫은 뒤의 응답부터 캐시(보류 동안의 재요청 비용은 60s 엣지캐시가 흡수).
     const hasOpenSession = Object.values(monthData).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
-    if (!isCurrentMonth(yyyymm) && !hasOpenSession) lsSetMonthCache(yyyymm, monthData);
+    // 전원 빈 달(세션·글·유튜브·카페 전부 0)도 보류(2026-09-02) — 자료를 아직 안 넣은 과거 달(2025-12 소급 전)을 열어 보면
+    // 빈 달이 방문자 브라우저에 무기한 굳는다. 자료가 들어온 뒤의 응답부터 저장한다.
+    const allEmpty = !Object.values(monthData).some(ms => (ms.sessions || []).length || (ms.posts || []).length || (ms.youtube || []).length || (ms.cafe || []).length);
+    if (!isCurrentMonth(yyyymm) && !hasOpenSession && !allEmpty) lsSetMonthCache(yyyymm, monthData);
   } catch (e) {
   } finally {
     statsState.loadingMonths.delete(yyyymm);
@@ -9428,12 +9447,13 @@ function renderHall() {
   if (!body) return;
   const now = kstNow();
   const year = now.getUTCFullYear();
-  // 역대 집계(개근·마라톤)를 위해 통계 개시(2026-01)부터 현재까지 전 월을 적재 (과거 월은 localStorage 캐시)
+  // 역대 집계(개근·마라톤)를 위해 첫 달(2025-12, 결성일 포함)부터 현재까지 전 월을 적재 (과거 월은 localStorage 캐시)
   const monthsToLoad = [];
   const allMonths = [];
   for (let y = STATS_START_YEAR; y <= year; y++) {
     const maxMo = (y === year) ? now.getUTCMonth() + 1 : 12;
-    for (let mo = 1; mo <= maxMo; mo++) {
+    const minMo = (y === STATS_START_YEAR) ? STATS_START_MONTH : 1;   // 첫 해는 첫 달부터(2025년 = 12월만)
+    for (let mo = minMo; mo <= maxMo; mo++) {
       const ym = `${y}-${String(mo).padStart(2,'0')}`;
       allMonths.push(ym);
       if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) monthsToLoad.push(ym);

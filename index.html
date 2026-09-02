@@ -352,6 +352,7 @@
   .drawer-close:hover { border-color: var(--accent); }   /* 테두리가 있는 요소 → 테두리색만 (신호 규칙 ①) */
   .main-header {
     position: sticky; top: var(--topbar-h, 0px); z-index: 5;   /* 띠 아래에 붙는다 — 기둥·버튼바가 이 아래에서 멈춘다 */
+    background: var(--surface);   /* 상단바와 같은 면(2026-09-02): 없으면 붙어 있는 동안 스크롤한 본문이 이 줄을 뚫고 비친다 */
     padding: 3px 12px;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 12px;
@@ -2343,11 +2344,13 @@
   .side-pick .filter-title { margin-left: 44px; }
   .members-tabs-wrap, .stats-tabs-wrap, .hall-kind, #hallPeriodSide .hall-period { margin: 0 44px; }
   .hall-kind, #hallPeriodSide .hall-period { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .hall-period-btn .pb-y { font-size: 11px; opacity: 0.85; }   /* 상동 — 이 격자는 월 글자가 11px */
-  .hall-period-btn .pb-m { font-size: 11px; font-weight: 700; }
+  /* 지난 활동 기둥의 기간 버튼과 같은 값(2026-09-02 Crenop 지적) — 칸이 60×60으로 똑같은데 여기만 10~11px이라
+     한 사이트에서 같은 역할의 버튼이 작아 보였다. 둘 다 12px로 맞춘다. */
+  .hall-period-btn .pb-y { font-size: 12px; opacity: 0.85; }
+  .hall-period-btn .pb-m { font-size: 12px; font-weight: 700; }
   .hall-kind-btn, #hallPeriodSide .hall-period-btn {
     aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    padding: 2px; white-space: normal; line-height: 1.2; text-align: center; font-size: 10px;
+    padding: 2px; white-space: normal; line-height: 1.2; text-align: center; font-size: 12px;
   }
   .hall-kind-btn svg { width: 16px; height: 16px; display: block; }
   .members-tabs-wrap {
@@ -2486,6 +2489,9 @@
 
   /* 디스코그래피 — 멤버별 묶음. 스트립 자체는 프로필에서 쓰던 것을 그대로 쓴다(문법 통일) */
   .disco-wrap { padding: 20px 24px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; }
+  /* 플레이리스트 버튼(2026-09-02): 종전 상단바 시트 버튼으로 제공하던 것을 음악 탭 우상단 붙박이로 옮겼다.
+     생김새는 시트 버튼(.tb-sheet-btn) 그대로 — 자리만 바뀌었지 같은 것이라 옷을 갈아입힐 이유가 없다. */
+  .disco-head { display: flex; justify-content: flex-end; margin-bottom: 16px; }
   .disco-member + .disco-member { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
   .disco-member-name {
     display: flex; align-items: center; gap: 10px;
@@ -3205,7 +3211,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02w';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02x';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5526,6 +5532,9 @@ function updateHeaderCenter() {
 // 프로필 하단에 붙어 있던 곡 목록을 자기 탭으로 뺐다. 시트(gid 1122643231)와 렌더 문법은 그대로 쓴다 —
 // 멤버를 고르는 스트립을 새로 두지 않고 크루 → 멤버 순으로 이어 붙인다. 크루 단위 곡이 빈약해도
 // 멤버 것을 모으면 한 화면이 차고, 선택기가 사이트에 세 번째로 늘어나지 않는다.
+// 음악 탭 우상단 플레이리스트(2026-09-02 Crenop 지정) — 상단바 시트에서 이리로 옮겨온 링크라 시트 행은 지우면 된다.
+const DISCO_PLAYLIST_URL = 'https://www.youtube.com/playlist?list=PLJ1RaYyFlDhQ';
+const DISCO_PLAYLIST_HEX = '#FF3D3D';
 function renderDisco() {
   const el = document.getElementById('discoBody');
   if (!el) return;
@@ -5537,7 +5546,10 @@ function renderDisco() {
     const color = t.color ? ` style="color:${t.color}"` : '';
     return `<section class="disco-member"><h2 class="disco-member-name"><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span></h2>${strips}</section>`;
   }).join('');
-  el.innerHTML = html || '<div class="lr-msg">등록된 곡이 없습니다.</div>';
+  // 우상단 붙박이 버튼 — 곡이 없어도 남는다(자료가 아니라 이 탭이 늘 가진 링크다)
+  const head = `<div class="disco-head"><a class="page-title-link tb-sheet-btn" href="${DISCO_PLAYLIST_URL}" target="_blank" rel="noopener"`
+    + ` style="--tb-rgb:${hexToRgb(DISCO_PLAYLIST_HEX)};color:${DISCO_PLAYLIST_HEX}">${SVG_ICONS.youtube}<span>천타버스 플레이리스트</span></a></div>`;
+  el.innerHTML = head + (html || '<div class="lr-msg">등록된 곡이 없습니다.</div>');
   bindVideoStrips(el);   // 좌우 화살표는 이 배선이 넘침을 재서 켠다 — 프로필에서 옮겨올 때 빠졌다(2026-09-01)
 }
 

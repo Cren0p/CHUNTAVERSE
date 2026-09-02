@@ -28,7 +28,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <style>
   :root {
-    --tb-vnudge: 1px;        /* 보조바 버튼(.page-title-link·.celebration-box) 글자 하향량 — 글자 잉크 중심을 테두리 중심에. calibrateSubbarText() 실측 주입, 폴백 1px = 종전 고정값(위 6/아래 4) */
     --tag-valign: -6px;      /* 타임라인 모드 배지(19px SVG) 줄 정렬 — 배지 박스 중심을 제목(400·12px) 잉크 중심에. calibrateBadgeValign() 실측 주입, 폴백은 정적 근사 */
     --daytag-valign: -5.5px; /* 통계 일별 모드 배지 줄 정렬 — 제목(600·13px) 문맥. 상동 */
     --bg: #070a14;
@@ -435,7 +434,8 @@
     display: flex;
     align-items: center;
     gap: 10px;   /* 내부 간격 일원화(2026-08-09 비교 확정): 좌경계~아이콘~텍스트~우경계 전부 10px. 바 레벨(경계·버튼 사이)은 12px 별도. 모바일은 세로 미니 별도 규칙 */
-    padding: calc(5px + var(--tb-vnudge)) 10px calc(5px - var(--tb-vnudge));   /* 위/아래 = 5 ± 실측 하향량(2026-09-02, 구 고정 6/4) — 총높이 불변 */
+    padding: 5px 10px;   /* 위/아래 대칭(2026-09-02 실측 확정). 구 6/4(한글 1px 하향 보정, 2026-08-09)는 Crenop Windows 100% 스크린샷 실측에서
+                            글자가 1px 아래로 치우쳐 철회 — 잉크 9행이 안쪽 25px에 위8/아래8이 되려면 밀지 않는 것이 맞다. 같은 스크린샷으로 아이콘도 잼(아래 svg) */
     background: rgba(96,165,250,0.12);
     border: 1px solid rgba(96,165,250,0.4);
     color: #93c5fd;
@@ -449,7 +449,7 @@
   .page-title-link:hover { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.7); }
   /* margin-top -2px: 위 6/아래 4 비대칭 패딩(한글 텍스트 광학 보정)이 콘텐츠 중심을 테두리 중심보다 1px 내리는데,
      아이콘까지 딸려 내려가 위 여백이 2px 더 넓어진다 — 아이콘만 상쇄해 테두리 기준 정중앙(텍스트 보정은 유지). 모바일은 패딩 대칭이라 리셋 */
-  .page-title-link svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: calc(-2 * var(--tb-vnudge)); }   /* 글자 하향량의 2배를 되감아 아이콘만 테두리 정중앙(2026-09-02, 구 -2px) */
+  .page-title-link svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: -1px; }   /* 아이콘 그림이 16px 상자 아래쪽에 치우쳐 있어(실측: 잉크 14행이 위 1.3/아래 0.7) 1px 되감음 — 구 -2px는 6/4 패딩 시절 값(2026-09-02 재실측) */
   /* 가이드 버튼 아이콘 래퍼(JS 주입 대상): 투명화해 svg가 다른 버튼처럼 직접 flex 아이템이 되게 —
      span 인라인 배치는 svg 아래에 폰트 descent(~4px)를 붙여 물음표가 ~2px 위로 뜬다(아래 여백만 커지던 원인) */
   #guideIcon { display: contents; }
@@ -736,7 +736,7 @@
     display: flex;
     align-items: center;
     gap: 10px;   /* .page-title-link과 동일 — 내부 간격 10px(2026-08-09 비교 확정) */
-    padding: calc(5px + var(--tb-vnudge)) 10px calc(5px - var(--tb-vnudge));   /* .page-title-link과 같은 보정 — 같은 줄에 서므로 높이가 어긋나면 안 된다 */
+    padding: 5px 10px;   /* .page-title-link과 같은 값 — 같은 줄에 서므로 높이가 어긋나면 안 된다 */
     font-size: 11px;
     font-weight: 600;
     line-height: 1.4;
@@ -748,7 +748,7 @@
     transition: background 0.15s, border-color 0.15s;
   }
   .celebration-box:hover { background: rgba(var(--cb-rgb), 0.22); border-color: rgba(var(--cb-rgb), 0.7); }
-  .celebration-box svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: calc(-2 * var(--tb-vnudge)); }   /* .page-title-link svg와 동일 사유(비대칭 패딩 상쇄 → 테두리 정중앙) */
+  .celebration-box svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: -1px; }   /* .page-title-link svg와 동일 사유 */
   /* 보조바 버튼의 PC↔모바일 변형 토글 (기본=PC 긴 라벨, 짧은 라벨은 1100px 미디어쿼리에서 표시).
      함께 있던 .nav-label-mb·.nav-live-dot-m은 탐색 UI 맞바꾸기로 쓰임이 사라져 폐지(2026-08-31). */
   .tb-t-mb { display: none; }
@@ -2059,7 +2059,23 @@
   .cal-t { position: absolute; inset: 0; padding: 2px 3px; font-size: 12px; line-height: 1.3; color: var(--text); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }   /* 12px(구 11): 가독성(2026-09-02 Crenop) */
   .cal-tl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 일정 한 건 = 한 줄(2026-09-02 Crenop). 상자 높이를 넘는 줄은 잘린다 */
   .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
-  .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop). 부족하면 묶음별 고유색 검토 */
+  .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop) */
+  /* 태그별 고유색(2026-09-02 Crenop 지정) — 달력 칸·목록·상세·일정 모달 어디서나 같은 색. 브랜드 색 출처는 응답 기록(69번).
+     모르는 태그(이름표)와 롤은 위 .cal-tag 기본색(무채색) 그대로. */
+  .cal-tag[data-tag="soccer"] { color: #ffffff; }
+  .cal-tag[data-tag="minecraft"] .mc-handle { fill: #8B5A2B; }   /* 손잡이 = 나무 */
+  .cal-tag[data-tag="minecraft"] .mc-head { fill: #4AEDD9; }     /* 날 = 다이아 */
+  .cal-tag[data-tag="steam"] { color: #66C0F4; }                 /* Steam 밝은 파랑(스토어 강조색) */
+  .cal-tag[data-tag="pubg"] { color: #F1AA03; }                  /* PUBG 브랜드 노랑주황 */
+  .cal-tag[data-tag="overwatch"] .ow-top { fill: #F99E1A; }      /* 위 고리 = 오버워치 주황(Crenop 정정 2026-09-02) */
+  .cal-tag[data-tag="overwatch"] .ow-body { fill: #ffffff; }     /* 몸통 = 하양 */
+  .cal-tag[data-tag="wow"] { color: #EDE944; }                   /* WoW 노랑 */
+  .cal-tag[data-tag="lol"] { color: #C89B3C; }                   /* 리그 오브 레전드 금색 */
+  .cal-tag[data-tag="switch"] { color: #E60012; }                /* 닌텐도 빨강 */
+  .cal-tag[data-tag="vrchat"], .cal-tag[data-tag="mocap"], .cal-tag[data-tag="fulltrack"] { color: #ffffff; }
+  .cal-tag[data-tag="wak"] { color: #00C6A7; }
+  .cal-tag[data-tag="chuntaverse"] { color: var(--accent); }
+  .cal-tag[data-tag="music"] { color: var(--ev-yellow); }
   /* 미래 = 칸 테두리 점선. 색은 그대로 — 민트는 '누를 수 있음/선택됨'의 색이라 '아직 안 왔음'에 쓰면 뜻이 겹친다(2026-09-01) */
   .cal-cell.future.has { border-style: dashed; }
   .cal-cell.has:hover { border-color: var(--accent); }
@@ -2339,8 +2355,9 @@
   /* 본문 왼쪽에 기둥의 빈 슬롯과 같은 44px을 둔다(2026-09-01, Crenop 지정).
      기둥 오른쪽 44px이 사실상 여백이므로, 왼쪽에 같은 값을 넣어야 덩어리 전체가 좌우 대칭으로 선다. */
   .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
-  .side-pick > * + *, .side-pick .side-stack > * + * { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
-  /* .side-stack: 한 자리에서 내용을 갈아끼우는 묶음(#hallPeriodSide)도 안쪽 칸을 같은 간격·구분선으로 나눈다.
+  /* 묶음 사이 = 여백 하나(20px)(2026-09-02 Crenop 지정). 구 '여백 20 + 구분선 1 + 여백 20'은 높이가 모자란 화면에서 기둥이 넘쳤다. */
+  .side-pick > * + *, .side-pick .side-stack > * + * { margin-top: 20px; }
+  /* .side-stack: 한 자리에서 내용을 갈아끼우는 묶음(#hallPeriodSide)도 안쪽 칸을 같은 간격으로 나눈다.
      종전엔 직계 자식만 걸려 2·3위 토글과 기간 버튼이 간격 0으로 붙어 있었다(반복 지적된 자리). */
   .side-pick .hall-bar { justify-content: flex-start; gap: 10px; margin-left: 44px; }   /* 위아래 버튼 묶음과 같은 왼쪽 기준 */
   .side-pick .filter-title { margin-left: 44px; }
@@ -2499,7 +2516,8 @@
   .disco-wrap { padding: 20px 24px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; }
   /* 플레이리스트 버튼(2026-09-02): 종전 상단바 시트 버튼으로 제공하던 것을 음악 탭 우상단 붙박이로 옮겼다.
      생김새는 시트 버튼(.tb-sheet-btn) 그대로 — 자리만 바뀌었지 같은 것이라 옷을 갈아입힐 이유가 없다. */
-  .disco-head { display: flex; justify-content: flex-end; max-width: 1200px; margin: 0 auto 16px; }   /* 폭·가운데정렬은 아래 멤버 이름과 같은 값 — 버튼 오른쪽 끝이 본문 오른쪽 끝과 맞는다(2026-09-02 실측: 종전엔 76px 밖) */
+  .disco-head { display: flex; justify-content: flex-end; max-width: 1200px; margin: 0 auto 16px; }   /* 곡이 하나도 없을 때만 쓰는 홀로 선 버튼 자리(폭·가운데정렬은 멤버 이름과 같은 값) */
+  .disco-member-name .disco-playlist { margin-left: auto; }   /* 첫 이름 행의 오른쪽 끝 — 이름 줄과 같은 행(2026-09-02 Crenop 지정) */
   .disco-member + .disco-member { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
   .disco-member-name {
     display: flex; align-items: center; gap: 10px;
@@ -3225,7 +3243,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zd';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zg';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3789,7 +3807,7 @@ const SVG_ICONS = {
   // 달력 항목 종류(2026-09-01). 같은 규격: viewBox 24 · 16×16 · stroke 2 · round.
   soccer: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2.6999999999999993a9.3 9.3 0 1 1 -0.01 0z M9.62 11.23 10.53 14.02 13.47 14.02 14.38 11.23 12.00 9.50z M10.41 2.92 9.43 5.93 12.00 7.80 14.57 5.93 13.59 2.92z M2.87 10.70 5.44 12.57 8.01 10.70 7.02 7.68 3.85 7.68z M7.94 20.28 10.51 18.42 9.53 15.40 6.36 15.40 5.38 18.42z M18.62 18.42 17.64 15.40 14.47 15.40 13.49 18.42 16.06 20.28z M20.15 7.68 16.98 7.68 15.99 10.70 18.56 12.57 21.13 10.70z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 잔디(축구) — 채운 공에 오각형을 파냄(2026-09-02, 66번 승인. 64판 폐기)
   steam: `<svg viewBox="0 0 24 24" width="16" height="16"><g transform="translate(-0.73 -2.63) scale(1.2103)"><path d="M9.12 19.29 7.98 19.29 7.02 18.94 6.02 18.02 5.54 16.85 1.79 15.36 1.57 15.06 1.22 13.40 1.22 11.39 6.67 13.62 7.90 13.18 8.68 13.18 11.43 9.21 11.43 8.51 11.69 7.55 12.31 6.50 12.96 5.85 13.92 5.23 15.23 4.88 16.54 4.97 17.85 5.50 19.03 6.59 19.73 7.98 19.81 9.90 19.38 11.13 19.03 11.65 17.85 12.74 16.63 13.27 15.49 13.35 11.83 15.97 11.61 16.19 11.52 17.15 11.08 18.02 10.08 18.94 9.12 19.29z M16.15 11.91 17.06 11.61 17.98 10.78 18.42 9.82 18.50 8.94 18.07 7.63 17.33 6.81 16.45 6.37 15.23 6.28 14.10 6.72 13.27 7.55 12.83 8.60 12.83 9.64 13.09 10.43 13.83 11.35 14.79 11.87 16.15 11.91z M15.84 11.26 15.06 11.17 14.27 10.73 13.79 10.17 13.53 9.47 13.62 8.51 13.96 7.81 14.53 7.33 15.58 6.98 16.28 7.07 16.89 7.42 17.46 7.98 17.72 8.60 17.72 9.64 17.46 10.25 16.80 10.91 15.84 11.26z M9.16 18.55 9.90 18.24 10.56 17.59 10.91 16.80 10.91 15.67 10.30 14.53 9.64 14.05 8.60 13.79 7.90 13.88 7.81 14.05 9.47 14.75 9.86 15.14 10.21 15.84 10.12 16.80 9.38 17.72 8.77 17.98 7.90 17.89 6.50 17.28 6.46 17.41 7.20 18.24 7.72 18.50 9.16 18.55z" fill="currentColor" fill-rule="evenodd"/></g></svg>`,   // 스팀 로고 추적본 22.5(66번 승인. 64판 폐기)
-  minecraft: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M21.10 17.75 19.72 17.71 19.69 16.05 18.03 16.02 18.03 7.63 16.37 7.59 16.30 5.90 7.91 5.90 7.84 4.21 6.18 4.17 6.22 2.80 7.88 2.76 7.91 1.11 16.02 1.11 16.05 2.76 17.75 2.83 17.75 6.15 21.10 6.18 21.13 7.84 22.82 7.91 22.82 16.02 21.17 16.05 21.10 17.75z M21.10 5.90 18.03 5.87 18.06 2.80 21.13 2.83 21.10 5.90z M4.17 22.82 1.14 22.82 1.11 19.76 2.76 19.72 2.80 18.06 4.46 18.03 4.49 16.37 6.15 16.34 6.18 14.68 7.84 14.64 7.88 12.99 9.53 12.95 9.57 11.29 11.22 11.26 11.26 9.60 12.92 9.57 12.95 7.91 14.61 7.88 14.64 6.22 16.02 6.18 16.05 7.84 17.71 7.88 17.75 9.25 16.09 9.29 16.05 10.94 14.40 10.98 14.33 12.67 12.71 12.67 12.67 14.33 11.01 14.36 10.98 16.02 9.32 16.05 9.25 17.75 7.63 17.75 7.59 19.40 5.90 19.47 5.87 21.13 4.21 21.17 4.17 22.82z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 마인크래프트 곡괭이 — 픽셀 추적, 같은 색끼리 이어 붙이고 머리·자루 사이 0.25(66번 승인. 64판 폐기)
+  minecraft: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="mc-head" d="M21.10 17.75 19.72 17.71 19.69 16.05 18.03 16.02 18.03 7.63 16.37 7.59 16.30 5.90 7.91 5.90 7.84 4.21 6.18 4.17 6.22 2.80 7.88 2.76 7.91 1.11 16.02 1.11 16.05 2.76 17.75 2.83 17.75 6.15 21.10 6.18 21.13 7.84 22.82 7.91 22.82 16.02 21.17 16.05 21.10 17.75z M21.10 5.90 18.03 5.87 18.06 2.80 21.13 2.83 21.10 5.90z" fill="currentColor" fill-rule="evenodd"/><path class="mc-handle" d="M4.17 22.82 1.14 22.82 1.11 19.76 2.76 19.72 2.80 18.06 4.46 18.03 4.49 16.37 6.15 16.34 6.18 14.68 7.84 14.64 7.88 12.99 9.53 12.95 9.57 11.29 11.22 11.26 11.26 9.60 12.92 9.57 12.95 7.91 14.61 7.88 14.64 6.22 16.02 6.18 16.05 7.84 17.71 7.88 17.75 9.25 16.09 9.29 16.05 10.94 14.40 10.98 14.33 12.67 12.71 12.67 12.67 14.33 11.01 14.36 10.98 16.02 9.32 16.05 9.25 17.75 7.63 17.75 7.59 19.40 5.90 19.47 5.87 21.13 4.21 21.17 4.17 22.82z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 마인크래프트 곡괭이 — 픽셀 추적, 같은 색끼리 이어 붙이고 머리·자루 사이 0.25(66번 승인. 64판 폐기)
   vrchat: `<svg viewBox="0 0 24 24" width="16" height="16"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14a2.5 2.5 0 0 1 2.5 2.5v6a2.5 2.5 0 0 1-2.5 2.5h-1.2l1.9 4.7-6.1-4.7H5A2.5 2.5 0 0 1 2.5 13V7A2.5 2.5 0 0 1 5 4.5z"/><rect x="10.8" y="7" width="8.4" height="6" rx="1.6" fill="currentColor" stroke="none"/></g></svg>`,   // VRChat 말풍선 마크 v2(59번 생존분, 66번 승인. 64판 폐기)
   // 행성: 1시→7시 방향 보석이 가운데 박히고, 11시→5시 방향으로 고리가 두르는 모양
   planet: `<svg viewBox="0 0 24 24" width="16" height="16"><defs><clipPath id="plp"><path d="M0 0h24v24H0z M12 5.0a7.0 7.0 0 1 0 0.01 0z"/></clipPath></defs><path d="M12 5.0a7.0 7.0 0 1 0 0.01 0z M16.02 7.69 12.20 15.42 7.98 16.31 8.58 12.04z" fill="currentColor" fill-rule="evenodd"/><g clip-path="url(#plp)"><ellipse cx="12" cy="12" rx="10.6" ry="3.2" transform="rotate(30 12 12)" fill="none" stroke="currentColor" stroke-width="1.5"/></g></svg>`,   // 행성 — 채운 구체 + 결정 구멍, 고리는 구체 밖에서만(66번 승인. 64판 폐기)
@@ -3851,7 +3869,7 @@ const SVG_ICONS = {
   mocap: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M16.19 5.28 15.28 5.19 14.57 4.80 14.06 4.20 13.78 3.35 13.85 2.58 14.26 1.78 14.87 1.26 15.71 0.99 16.56 1.06 17.27 1.42 17.85 2.10 18.10 2.85 18.05 3.67 17.69 4.43 17.11 4.96 16.19 5.28z M15.42 23.01 15.10 23.01 13.27 22.51 12.85 22.20 12.71 21.86 12.80 21.26 14.47 16.31 10.30 13.71 9.85 13.18 9.69 12.70 9.69 12.17 9.83 11.71 11.95 7.31 9.86 7.29 8.02 9.96 7.60 10.26 7.08 10.31 6.85 10.24 6.49 9.96 6.36 9.70 6.31 9.25 6.45 8.86 8.62 5.73 9.04 5.40 9.29 5.33 14.02 5.33 14.71 5.49 15.28 5.81 15.75 6.25 17.65 9.37 20.12 7.73 20.56 7.68 20.81 7.75 21.16 8.01 21.34 8.33 21.37 8.84 21.04 9.37 17.91 11.50 17.56 11.63 17.01 11.59 16.55 11.23 15.26 9.14 13.48 12.63 16.69 14.83 16.98 15.16 17.14 15.58 17.07 16.26 14.95 21.29 14.96 21.37 15.71 21.71 15.98 22.11 15.93 22.61 15.74 22.85 15.42 23.01z M3.42 20.22 2.90 20.06 2.61 19.62 2.63 19.25 3.30 17.33 3.72 17.03 7.90 16.09 9.38 13.05 9.62 13.56 10.00 13.99 11.36 14.87 9.74 17.59 9.43 17.92 9.06 18.10 4.52 19.06 4.00 19.92 3.79 20.11 3.42 20.22z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 모션캡처 — 달리는 사람(66번 승인, 신규)
   fulltrack: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13.42 9.01 10.55 9.01 10.40 8.86 10.36 3.72 10.55 3.44 10.78 3.34 13.19 3.34 13.57 3.62 13.60 8.76 13.42 9.01z M21.46 11.18 21.11 10.66 20.05 9.76 19.61 9.06 18.99 8.44 18.29 7.94 16.42 7.11 15.22 6.81 13.95 6.64 13.94 4.62 15.42 4.81 17.19 5.34 18.53 6.01 19.56 6.78 20.45 7.76 21.01 8.73 21.38 9.93 21.46 11.18z M2.50 11.08 2.55 10.06 2.89 8.96 3.49 7.89 4.54 6.74 5.84 5.84 7.18 5.24 8.75 4.81 10.03 4.66 9.98 6.68 7.58 7.14 5.81 7.91 4.91 8.54 4.36 9.10 3.92 9.76 3.27 10.18 2.50 11.08z M21.60 12.75 20.83 11.92 19.73 11.38 18.13 11.12 15.62 11.02 8.21 11.02 5.07 11.18 4.10 11.38 3.30 11.72 2.22 12.67 2.55 11.67 3.05 10.86 3.80 10.21 4.81 9.78 6.04 9.55 7.81 9.41 15.19 9.38 18.09 9.58 19.06 9.78 20.03 10.18 20.50 10.51 21.05 11.17 21.41 11.93 21.60 12.75z M16.96 20.66 14.82 20.66 14.49 20.56 13.84 20.05 13.29 19.29 12.68 19.06 10.85 19.13 10.30 19.54 9.71 20.33 9.01 20.66 5.51 20.56 4.54 20.40 3.70 20.10 3.14 19.73 2.69 19.24 2.35 18.64 2.12 17.81 1.98 16.64 1.98 14.84 2.15 13.74 2.49 12.93 2.97 12.35 3.80 11.85 4.74 11.58 6.24 11.42 17.53 11.42 19.26 11.62 20.36 12.02 20.76 12.28 21.35 12.97 21.75 14.10 21.81 16.81 21.68 17.88 21.45 18.68 20.86 19.53 19.96 20.16 18.79 20.50 16.96 20.66z M1.63 16.69 1.23 16.66 0.98 16.51 0.98 12.27 1.33 12.05 2.03 12.05 1.68 13.77 1.63 16.69z M22.43 16.69 22.15 16.67 22.15 13.97 21.80 12.05 22.50 12.05 23.02 12.47 23.02 16.27 22.77 16.56 22.43 16.69z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 풀트래킹 — 헤드기어 + 손 트래커 둘(66번 승인, 신규)
   pubg: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M21.01 18.40 20.11 18.40 19.96 18.33 15.64 18.36 15.55 18.31 15.60 18.21 15.49 18.21 15.45 18.36 14.59 18.33 14.52 18.40 12.60 18.40 12.15 18.33 9.94 18.36 9.82 18.29 9.71 18.36 9.18 18.36 9.15 18.29 8.81 18.40 5.02 18.40 4.00 18.33 2.99 18.36 2.28 18.25 2.03 18.01 1.92 17.59 1.99 16.58 1.96 16.09 1.26 16.11 1.06 16.02 0.98 15.75 1.02 14.93 1.26 14.76 1.96 14.74 1.96 9.26 1.09 9.22 1.13 9.11 0.98 9.00 0.98 8.17 1.11 8.19 1.02 8.06 1.30 7.93 1.41 8.00 1.60 7.93 1.86 8.04 1.96 7.98 1.92 6.29 1.99 5.92 2.20 5.71 2.61 5.60 4.23 5.60 4.38 5.67 8.70 5.64 8.79 5.69 8.73 5.79 8.88 5.79 8.83 5.73 8.88 5.64 10.72 5.64 10.76 5.79 10.87 5.79 10.82 5.69 10.91 5.64 14.03 5.64 14.22 5.75 14.48 5.64 15.15 5.64 15.19 5.79 15.27 5.64 16.02 5.60 18.61 5.60 18.83 5.67 19.17 5.60 19.85 5.60 20.22 5.67 20.56 5.64 20.90 5.75 21.50 5.71 21.65 5.79 21.85 5.99 21.97 6.41 22.01 7.98 22.17 8.04 22.36 7.93 22.55 8.00 22.74 7.93 22.85 8.00 22.92 7.96 23.02 8.10 22.91 8.13 23.02 8.17 23.02 9.03 22.91 9.11 22.94 9.18 22.02 9.24 21.97 9.63 22.04 9.78 21.97 10.01 22.08 9.97 22.01 10.35 22.01 13.43 22.08 13.99 22.01 14.22 22.08 14.40 22.01 14.52 22.01 14.74 22.06 14.80 22.94 14.82 22.91 14.89 23.02 14.97 23.02 15.87 22.92 15.81 22.91 15.90 23.02 15.94 22.92 16.07 22.77 16.04 22.74 16.11 22.66 16.04 22.08 16.02 22.12 17.03 22.04 17.93 21.97 18.08 21.65 18.33 21.01 18.40z M11.23 17.22 11.19 17.11 11.36 17.05 20.22 17.05 20.41 17.12 20.77 17.07 20.69 11.59 20.77 11.36 20.77 9.97 20.69 9.90 20.77 9.86 20.69 9.71 20.73 7.76 20.65 7.38 20.69 7.01 20.63 6.95 4.12 6.95 3.23 6.89 3.23 7.95 3.16 8.17 3.27 8.40 3.27 8.58 3.23 9.03 3.12 9.07 3.23 9.11 3.27 9.37 3.31 10.95 3.23 11.81 3.27 16.09 3.20 16.24 3.27 17.07 4.45 17.05 4.49 17.16 4.57 17.16 4.60 17.05 4.79 17.05 4.83 17.12 6.41 17.05 10.69 17.05 11.14 17.09 11.12 17.18 11.23 17.22z M18.95 15.92 16.99 15.92 16.73 15.81 16.45 15.45 16.41 12.60 16.49 11.25 16.41 10.95 16.45 10.12 16.37 9.71 16.41 8.70 16.52 8.36 16.84 8.08 18.95 8.04 19.25 8.11 19.49 8.36 19.49 9.90 19.43 9.99 18.49 9.99 18.44 9.94 18.48 9.22 18.38 9.13 17.67 9.13 17.61 9.18 17.73 11.44 17.65 13.24 17.69 14.59 17.63 14.76 18.31 14.83 18.40 14.74 18.33 13.73 18.36 12.45 18.31 12.32 18.06 12.19 18.06 11.55 18.14 11.21 19.43 11.16 19.56 11.40 19.56 15.27 19.49 15.57 19.25 15.81 18.95 15.92z M5.62 15.96 4.79 15.96 4.62 15.72 4.66 13.58 4.59 13.24 4.70 12.79 4.57 12.66 4.47 12.68 4.44 12.45 4.47 11.66 4.62 11.51 4.62 8.13 4.68 8.08 7.42 8.11 7.70 8.32 7.78 8.70 7.74 12.34 7.66 12.53 7.31 12.77 5.86 12.79 5.86 12.90 5.79 12.94 5.90 13.05 5.90 15.72 5.77 15.92 5.62 15.96z M11.02 15.92 10.95 15.85 9.15 15.92 8.81 15.85 8.60 15.64 8.53 15.34 8.53 10.05 8.56 9.33 8.70 9.35 8.72 9.26 8.56 9.26 8.53 8.28 8.56 8.13 8.66 8.08 9.41 8.08 9.75 8.23 9.80 8.32 9.77 10.20 9.84 10.61 9.84 12.38 9.77 12.64 9.84 13.58 9.73 14.67 9.90 14.83 10.09 14.72 10.39 14.72 10.33 14.82 10.42 14.87 10.59 14.78 10.59 13.46 10.70 13.43 10.59 13.31 10.67 13.09 10.67 12.15 10.59 11.74 10.59 8.43 10.63 8.28 10.74 8.25 10.72 8.15 11.62 8.15 11.83 8.25 11.79 8.32 11.87 8.43 11.79 8.66 11.87 8.70 11.87 8.81 11.79 9.07 11.87 9.22 11.91 10.72 11.83 15.34 11.72 15.60 11.51 15.81 11.02 15.92z M14.40 15.92 13.09 15.92 12.86 15.85 12.71 15.89 12.66 15.79 12.66 15.49 12.73 15.45 12.66 15.38 12.69 12.45 12.47 12.15 12.47 11.29 12.60 11.16 12.68 11.19 12.77 11.02 12.66 10.91 12.73 10.31 12.66 10.12 12.66 8.13 12.71 8.08 15.27 8.08 15.49 8.19 15.62 8.36 15.62 10.05 15.55 10.20 15.62 11.10 15.59 11.36 15.28 11.70 15.66 12.11 15.70 12.30 15.70 15.27 15.59 15.57 15.38 15.77 15.08 15.89 14.40 15.92z M14.35 11.25 14.46 11.17 14.46 9.18 13.91 9.13 13.86 9.18 13.82 9.94 13.86 10.27 13.75 10.35 13.86 10.42 13.86 11.17 14.10 11.27 14.35 11.25z M6.54 11.62 6.50 11.47 6.65 11.51 6.65 11.25 6.52 11.34 6.46 11.21 6.46 11.02 6.54 10.95 6.46 9.45 6.54 9.37 6.41 9.17 5.96 9.17 5.86 9.26 5.90 11.32 5.79 11.44 5.92 11.61 6.54 11.62z M4.74 10.20 4.75 9.95 4.70 9.97 4.74 10.20z M5.79 11.59 5.66 11.38 5.79 11.59z M14.38 14.85 14.50 14.74 14.42 14.63 14.42 14.10 14.50 14.03 14.42 13.91 14.42 12.38 14.18 12.39 14.14 12.32 13.99 12.32 13.86 12.41 13.82 12.56 13.86 14.44 13.78 14.74 13.95 14.87 14.38 14.85z M18.48 14.63 18.59 14.44 18.51 14.40 18.59 14.37 18.53 14.23 18.44 14.25 18.48 14.63z M10.03 18.27 9.97 18.14 9.84 18.12 9.86 18.21 9.90 18.14 9.95 18.27 10.03 18.27z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 배틀그라운드 — 상자 마크 추적(66번 승인, 신규)
-  overwatch: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M16.81 5.76 14.75 4.58 12.39 4.09 9.84 4.39 8.37 4.98 7.19 5.76 5.37 3.75 5.17 3.36 6.60 2.33 8.07 1.64 9.35 1.25 11.21 0.95 12.79 0.95 14.65 1.25 15.93 1.64 17.40 2.33 18.83 3.36 18.63 3.75 16.81 5.76z M13.08 23.05 10.92 23.05 9.64 22.85 7.78 22.26 5.91 21.28 3.70 19.37 2.42 17.60 1.74 16.22 1.34 15.14 0.95 13.18 0.95 10.82 1.15 9.64 1.54 8.27 2.42 6.40 3.21 5.22 4.44 3.90 6.55 6.21 6.55 6.40 5.76 7.19 5.17 8.07 4.68 9.05 4.19 10.92 4.19 13.08 4.68 14.95 5.12 15.78 9.50 11.61 11.07 8.07 11.46 7.29 11.66 7.19 11.56 14.16 7.33 18.19 8.07 18.83 9.94 19.61 10.92 19.81 13.08 19.81 15.14 19.22 16.67 18.29 12.44 14.06 12.49 7.14 14.60 11.71 18.88 15.78 19.42 14.65 19.81 13.08 19.81 10.92 19.12 8.66 18.24 7.19 17.45 6.40 17.45 6.21 19.56 3.90 20.99 5.52 22.26 7.78 22.95 10.13 23.05 13.08 22.46 15.73 21.28 18.09 19.46 20.20 17.60 21.58 15.14 22.66 13.08 23.05z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 오버워치 로고 추적(66번 승인, 신규)
+  overwatch: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="ow-top" d="M16.81 5.76 14.75 4.58 12.39 4.09 9.84 4.39 8.37 4.98 7.19 5.76 5.37 3.75 5.17 3.36 6.60 2.33 8.07 1.64 9.35 1.25 11.21 0.95 12.79 0.95 14.65 1.25 15.93 1.64 17.40 2.33 18.83 3.36 18.63 3.75 16.81 5.76z" fill="currentColor" fill-rule="evenodd"/><path class="ow-body" d="M13.08 23.05 10.92 23.05 9.64 22.85 7.78 22.26 5.91 21.28 3.70 19.37 2.42 17.60 1.74 16.22 1.34 15.14 0.95 13.18 0.95 10.82 1.15 9.64 1.54 8.27 2.42 6.40 3.21 5.22 4.44 3.90 6.55 6.21 6.55 6.40 5.76 7.19 5.17 8.07 4.68 9.05 4.19 10.92 4.19 13.08 4.68 14.95 5.12 15.78 9.50 11.61 11.07 8.07 11.46 7.29 11.66 7.19 11.56 14.16 7.33 18.19 8.07 18.83 9.94 19.61 10.92 19.81 13.08 19.81 15.14 19.22 16.67 18.29 12.44 14.06 12.49 7.14 14.60 11.71 18.88 15.78 19.42 14.65 19.81 13.08 19.81 10.92 19.12 8.66 18.24 7.19 17.45 6.40 17.45 6.21 19.56 3.90 20.99 5.52 22.26 7.78 22.95 10.13 23.05 13.08 22.46 15.73 21.28 18.09 19.46 20.20 17.60 21.58 15.14 22.66 13.08 23.05z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 오버워치 로고 추적(66번 승인, 신규)
   lol: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M7.66 23.01 7.27 23.01 7.25 22.74 5.96 22.74 5.90 23.01 5.50 22.96 5.46 22.59 5.54 22.34 5.62 22.26 5.67 21.98 6.20 21.10 6.32 20.58 6.50 20.50 6.50 20.30 6.29 20.17 6.24 20.05 5.98 19.82 5.84 19.82 5.73 19.73 5.73 19.50 5.57 19.33 5.25 19.31 4.97 19.03 4.52 18.48 4.52 18.35 4.41 18.34 4.27 18.19 3.84 17.56 3.31 16.61 2.94 15.74 2.66 14.83 2.41 14.38 2.25 13.59 2.19 11.64 2.25 11.03 2.45 10.07 2.88 8.78 3.19 8.08 4.29 6.28 4.87 5.54 5.97 4.46 6.32 3.87 6.32 3.07 6.20 2.98 5.95 2.27 5.54 1.72 5.38 1.39 5.38 1.14 5.66 0.99 6.33 1.11 9.79 1.13 9.81 1.40 11.05 1.39 11.01 18.31 11.05 18.54 11.26 18.55 11.29 18.78 11.55 18.82 11.57 18.98 12.88 18.94 13.43 18.84 14.39 18.90 18.26 18.88 18.27 18.74 18.96 17.98 19.13 17.95 19.99 16.82 19.99 16.70 20.56 15.41 20.91 14.24 21.08 13.09 21.10 11.93 20.89 10.39 20.32 8.70 19.56 7.36 19.07 6.67 18.43 5.98 16.83 4.71 15.07 3.90 13.84 3.55 13.33 3.47 11.39 3.43 11.35 2.38 11.53 2.30 11.90 2.28 14.13 2.63 14.41 2.75 14.48 2.89 15.62 3.24 16.85 3.81 17.42 4.16 17.75 4.47 17.93 4.51 18.14 4.67 18.98 5.51 19.21 5.65 19.79 6.36 20.20 6.94 20.24 7.10 20.38 7.22 21.26 9.14 21.59 10.23 21.77 11.23 21.81 12.91 21.75 13.69 21.38 15.33 20.97 16.39 20.67 16.96 20.22 17.74 19.58 18.56 19.58 18.76 19.71 18.78 19.71 18.93 19.56 19.07 18.55 22.70 15.36 22.74 15.34 22.99 14.78 22.97 14.76 22.74 7.78 22.74 7.77 22.98 7.66 23.01z M6.67 19.25 6.65 13.24 6.93 13.22 6.93 10.46 6.67 10.45 6.67 5.79 6.47 5.78 6.39 5.84 6.06 5.84 5.24 6.71 4.42 7.88 3.91 8.90 3.62 9.66 3.35 10.78 3.25 11.48 3.23 12.97 3.48 14.59 3.78 15.51 4.25 16.55 4.99 17.72 5.63 18.50 6.37 19.20 6.67 19.25z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 리그오브레전드 로고 추적(66번 승인, 신규)
   wow: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12.86 23.07 11.01 23.07 8.90 22.67 7.06 22.01 5.61 21.09 2.91 21.02 2.91 18.26 2.25 17.34 1.33 15.10 0.93 12.99 0.93 11.01 1.59 8.11 2.25 6.66 2.91 5.74 2.98 2.91 5.74 2.91 7.19 2.12 8.11 1.33 8.38 1.33 8.38 1.59 10.09 1.07 12.99 0.93 14.31 1.20 14.57 1.07 15.36 1.46 15.49 1.33 16.15 1.59 16.41 1.86 16.81 1.59 16.94 1.86 17.40 1.92 16.94 1.99 16.94 2.12 17.73 2.38 18.26 2.91 20.89 2.91 21.02 2.78 21.22 2.98 21.09 3.11 21.09 5.74 21.62 6.27 22.01 7.06 22.67 8.90 23.07 11.01 23.07 13.51 22.67 14.70 22.80 15.23 22.41 15.62 22.54 16.02 22.34 15.95 22.14 16.28 22.41 16.81 21.09 18.26 21.09 21.02 18.39 21.09 16.94 21.88 16.68 22.28 16.54 22.14 14.57 22.80 12.86 23.07z M12.26 21.55 12.59 21.35 12.86 21.49 14.17 21.35 15.75 20.83 17.20 20.04 18.52 18.72 18.65 18.85 18.85 18.65 18.72 18.52 19.90 17.34 19.90 16.94 20.30 16.68 20.17 16.54 20.96 15.23 21.49 12.99 21.49 11.01 20.96 8.77 20.04 7.46 20.17 7.06 18.92 5.41 17.73 4.36 16.02 3.31 14.57 2.78 13.38 2.51 12.59 2.65 11.93 2.38 11.41 2.65 11.14 2.51 10.62 2.51 10.35 2.78 9.96 2.65 9.56 2.91 9.43 2.78 9.30 3.04 8.25 3.17 6.80 3.96 5.02 5.48 3.83 7.06 2.91 9.17 2.51 11.01 2.51 12.99 3.04 15.23 3.57 15.89 3.44 16.15 3.96 16.54 3.90 16.74 3.70 16.68 3.90 16.87 4.10 16.81 3.96 17.07 4.23 17.47 6.40 19.77 8.64 20.96 9.43 20.96 9.43 21.22 10.49 21.49 12.26 21.55z M15.89 18.19 12.53 18.13 12.66 16.68 12.26 14.31 12.07 13.98 11.34 16.81 11.47 18.13 8.05 18.13 8.57 17.34 8.57 16.81 7.52 12.07 6.47 8.38 6.47 7.85 5.87 6.86 9.23 6.93 9.10 7.32 9.23 9.17 9.63 11.41 10.35 13.98 11.93 7.52 12.13 7.59 12.26 7.98 12.79 10.49 13.78 13.71 14.90 7.59 14.50 6.93 18.06 6.80 18.06 7.06 17.40 7.85 17.14 8.51 16.48 12.46 16.22 13.12 16.22 13.91 15.69 16.28 15.69 17.47 15.89 18.19z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 월드오브워크래프트 로고 추적(66번 승인, 신규)
   // 스위치(2026-09-02): Crenop이 SVG 파일을 직접 제공 — 워드마크(글자)를 떼고 마크만, 24칸에 22 크기로 가운데 정렬,
@@ -4128,7 +4146,7 @@ function typeToCat(et) {
 // 다시보기 목록 상태(2026-08-29). 선언만 여기 — 달력 탭이 첫 화면(#content)일 때 applyHash → renderCalendarTab → ensureVodMonth가
 // 스크립트가 아래 선언부에 닿기 전에 실행되어 'vodState 초기화 전 접근'으로 죽었다(2026-09-02 실측). sheetPulled와 같은 TDZ 회피.
 // 동작 설명·함수(ensureVodMonth 등)는 원래 자리(VOD 상태 블록)에 그대로 있다.
-const vodState = { data: {}, loading: new Set() };
+const vodState = { data: {}, at: {}, loading: new Set() };   // at: 받은 시각(당월 목록 5분 신선도)
 const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
 
 // 통계 탭(2026-08-31): 한 화면에 셋을 겹쳐 두지 않고 종류로 갈아끼운다 —
@@ -5214,6 +5232,7 @@ async function loadSchedule() {
   }
   // 최신 fetch로 갱신
   try {
+    sheetLoadedAt.schedule = Date.now();   // 요청 시각 — 10초 안의 겹침 요청 방지(pullCalendarSheets)
     const res = await fetch(SCHEDULE_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     const rows = parseCSV(await res.text());
@@ -5234,6 +5253,7 @@ const BANNER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFY
 // 현수막·컨텐츠 시트를 이번 세션에 실제로 받았는지. ensure*Sheet가 읽고, 실패 시 각 로더의 catch가 되돌린다.
 // (선언 위치: switchPage의 최초 호출이 로더 정의부보다 앞서므로 bannerData와 같은 자리에 둔다 — TDZ 방지)
 const sheetPulled = { banner: false, content: false };
+const sheetLoadedAt = { content: 0, schedule: 0 };   // 컨텐츠·일정 시트 마지막 요청 시각(각 로더가 fetch 직전에 찍는다) — 부팅 호출(loadSchedule)보다 앞에 선언
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
 let bannerData = [];
 let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
@@ -5612,16 +5632,19 @@ function renderDisco() {
   if (!el) return;
   // 크루 칸은 Favicon.webp — 멤버 칸이 정사각 얼굴이라 가로형 로고(CHUNTAVERSE.webp)는 줄에서 혼자 튄다
   const targets = [{ name: '천타버스', img: 'Favicon.webp', color: '' }].concat(MEMBERS.map(m => ({ name: m.name, img: m.img, color: m.color })));
+  // 우상단 붙박이 버튼 — 곡이 없어도 남는다(자료가 아니라 이 탭이 늘 가진 링크다).
+  // 첫 이름 행(맨 위 묶음의 제목 줄) 오른쪽 끝에 같은 행으로 선다(2026-09-02 Crenop 지정 — 종전엔 이름 위 별도 줄).
+  const btn = `<a class="page-title-link tb-sheet-btn disco-playlist" href="${DISCO_PLAYLIST_URL}" target="_blank" rel="noopener"`
+    + ` style="--tb-rgb:${hexToRgb(DISCO_PLAYLIST_HEX)};color:${DISCO_PLAYLIST_HEX}">${SVG_ICONS.youtube}<span>천타버스 플레이리스트</span></a>`;
+  let placed = false;
   const html = targets.map(t => {
     const strips = renderVideoStrips(t.name, t.img, 1200);
     if (!strips) return '';
     const color = t.color ? ` style="color:${t.color}"` : '';
-    return `<section class="disco-member"><h2 class="disco-member-name"><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span></h2>${strips}</section>`;
+    const tail = placed ? '' : btn; placed = true;
+    return `<section class="disco-member"><h2 class="disco-member-name"><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span>${tail}</h2>${strips}</section>`;
   }).join('');
-  // 우상단 붙박이 버튼 — 곡이 없어도 남는다(자료가 아니라 이 탭이 늘 가진 링크다)
-  const head = `<div class="disco-head"><a class="page-title-link tb-sheet-btn" href="${DISCO_PLAYLIST_URL}" target="_blank" rel="noopener"`
-    + ` style="--tb-rgb:${hexToRgb(DISCO_PLAYLIST_HEX)};color:${DISCO_PLAYLIST_HEX}">${SVG_ICONS.youtube}<span>천타버스 플레이리스트</span></a></div>`;
-  el.innerHTML = head + (html || '<div class="lr-msg">등록된 곡이 없습니다.</div>');
+  el.innerHTML = html || `<div class="disco-head">${btn}</div><div class="lr-msg">등록된 곡이 없습니다.</div>`;   // 곡이 하나도 없을 때만 버튼이 홀로 선다
   bindVideoStrips(el);   // 좌우 화살표는 이 배선이 넘침을 재서 켠다 — 프로필에서 옮겨올 때 빠졌다(2026-09-01)
   fitBtnIcons(el);       // 우상단 플레이리스트 버튼도 같은 규칙
 }
@@ -5645,7 +5668,8 @@ const CAL_KINDS = [
   { key: 'youtube', label: '유튜브', icon: 'youtube' },
 ];
 // 종류 태그(F열) 표기 → 아이콘 키 별칭표(2026-09-02). 시트에 자유롭게 적고, 여기 있는 표기만 그림이 된다. 대소문자 무시.
-// 모르는 태그는 기본 이름표(tagFilled — 케미 '기타'와 같은 그림). 행성(planet)은 배정 보류 — 모캡 스튜디오 마크라 모캡 대체 후보였다(Crenop).
+// 표에 없는 태그는 그림 없이 무시(2026-09-02 Crenop 지정 — 구 '모르는 태그=이름표' 폐지). 이름표는 '기타'라고 적었을 때만.
+// 행성(planet)은 배정 보류 — 모캡 스튜디오 마크라 모캡 대체 후보였다(Crenop).
 const CAL_TAG_ICON = {
   soccer: ['잔디', '축구', 'fc'], minecraft: ['마크', '마인크래프트'], steam: ['스팀'], vrchat: ['vrc', 'vrchat', '브챗', 'vr챗'],
   wak: ['왁타', '왁타버스'], mocap: ['모캡', '모션캡처', '모션캡쳐'], fulltrack: ['풀트', '풀트래킹', '풀트랙'],
@@ -5653,10 +5677,18 @@ const CAL_TAG_ICON = {
   wow: ['와우', 'wow', '월드오브워크래프트'], chuntaverse: ['천타', '천타버스'],
   switch: ['스위치', '닌텐도', '닌스', 'switch', 'ns'],
   music: ['음악', '노래'],   // 음악 탭과 같은 그림(2026-09-02 추가 — 첫 별칭표에서 빠졌던 것)
+  tagFilled: ['기타'],       // 이름표 그림은 시트에 '기타'라고 적었을 때만(2026-09-02 Crenop 지정). 표에 없는 태그는 그림 없이 무시한다
 };
+// 종류 그림 색은 태그마다 고유색(2026-09-02 Crenop 지정 — 묶음 색은 철회). 값은 CSS .cal-tag[data-tag=…]에 있다:
+// 축구공 하양 · 마크 손잡이 나무/날 다이아(경로를 둘로 나눠 칠함) · 스팀 파랑 · 배그 주황 · 옵치 위 고리 하양/몸통 주황 ·
+// 와우 노랑 · 스위치 빨강 · VRC·모캡·풀트 하양 · 왁타 #00C6A7 · 천타 민트 · 음악 노랑 · 롤 금색 · '기타'는 이름표(무채색).
 const CAL_TAG_LOOKUP = (() => { const o = {}; for (const [k, names] of Object.entries(CAL_TAG_ICON)) for (const n of names) o[n.toLowerCase()] = k; return o; })();
 function tagIconsHtml(tags) {
-  return (tags || []).map(t => `<span class="cal-tag" title="${escapeHtml(t)}">${SVG_ICONS[CAL_TAG_LOOKUP[t.toLowerCase()] || 'tagFilled']}</span>`).join('');
+  return (tags || []).map(t => {
+    const key = CAL_TAG_LOOKUP[t.toLowerCase()];
+    if (!key) return '';   // 표에 없는 태그는 그림 없음
+    return `<span class="cal-tag" data-tag="${key}" title="${escapeHtml(t)}">${SVG_ICONS[key]}</span>`;
+  }).join('');
 }
 const CAL_TYPE_ICON = { content: 'film', vod: 'soop', youtube: 'youtube' };   // 칩·종류 버튼 공용(2026-09-02 Crenop 지정): 컨텐츠=film · 다시보기=숲 ∞ 마크 · 일정은 film을 흐리게
 const calState = { year: 0, month: 0, selected: null, member: 'all', type: 'all' };
@@ -5673,16 +5705,20 @@ function calRowVisible(it) {
 
 // 보고 있는 달의 재료를 받는다 — 월 통계 1회 + 멤버별 다시보기 목록. 도착하면 각 로더가 다시 그린다.
 // loadingMonths 가드: 받는 중이면 다시 부르지 않는다(안 그러면 '즉시 반환 → 다시 그림 → 다시 요청'이 맴돈다).
+// 실패한 달은 30초 동안 다시 묻지 않는다(2026-09-02 발견·수정): 종전엔 실패 → 다시 그림 → 즉시 재요청이 맴돌아 워커 장애 중
+// 요청이 끊이지 않았다. 30초 뒤 다음 그리기에서 한 번 더 시도한다(명전의 재시도와 같은 태도, 다만 쉼 있음).
+const calStatsFailAt = {};
 function ensureCalMonth() {
   const ym = calYm();
-  if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
-    loadStatsMonth(ym).then(queueCalRender);
+  if (!statsState.data[ym] && !statsState.loadingMonths.has(ym) && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {
+    loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) { calStatsFailAt[ym] = Date.now(); calLoadingSettle(); return; } queueCalRender(); });
   }
   if (calShows('vod')) calMembers().forEach(m => ensureVodMonth(m.id, ym));
 }
 // 자료 도착에 따른 달력 재렌더를 한 프레임에 한 번으로 합친다(2026-09-02) — 다시보기 목록 13개가 잇따라 도착하면
 // 종전엔 13번 다시 그렸다(깜빡임 + 그 사이 클릭 유실). 달력 탭이 아니면 그리지 않는다(다음 진입 때 그린다).
 let calRenderQueued = false;
+let lastCalStatsSig = '';   // 1분 폴러가 달력을 다시 그릴지 판단하는 직전 당월 통계 모습
 function queueCalRender() {
   if (calRenderQueued) return;
   calRenderQueued = true;
@@ -6088,12 +6124,14 @@ function switchPage(page, opts) {
     renderHall();
   }
   if (page === 'content') {
-    // banner와 동일: 데이터 없음 = 첫 로드 실패 상태 — 재진입 재시도, 결과 렌더는 loadContent 내부가 수행
+    // 시트(컨텐츠·일정)는 달력 탭에 들어올 때마다 한 번 새로 받는다(2026-09-02 Crenop 지정) — 탭 안에서 달·종류·멤버를
+    // 옮겨 다닐 땐 그때 받은 것을 그대로 쓰고, 새로고침이나 다른 탭에 갔다 오면 다시 받는다. 워커 자료(당월 통계·다시보기)는
+    // 지난 활동과 같은 1분 폴러(loadStats)가 맡는다. 캐시본이 있으면 먼저 그리고 도착분으로 다시 그린다(사이트 공통 '캐시 먼저').
     if (contentData.length === 0) {
       const body = document.getElementById('contentBody');
       if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>컨텐츠 데이터 불러오는 중...</div></div>';
-      ensureContentSheet();
-    } else { renderContent(); ensureContentSheet(); }
+    } else renderContent();
+    pullCalendarSheets();
   }
   window.scrollTo(0, 0);   // 탭 전환은 항상 최상단에서 — 이전 탭의 스크롤 깊이가 새 탭에 이월되는 것 방지
 }
@@ -7240,8 +7278,10 @@ function vodKey(memberId, ym) { return memberId + '|' + ym; }
 function ensureVodMonth(memberId, ym) {
   if (!memberId || !ym) return;
   const key = vodKey(memberId, ym);
-  if (vodState.data[key] || vodState.loading.has(key)) return;
   const cur = isCurrentMonth(ym);
+  // 당월 목록은 5분 지나면 다시 받는다(2026-09-02) — 방송이 끝나면 새 다시보기가 생긴다. 지난달은 사실상 불변이라 한 번이면 된다.
+  const stale = cur && vodState.data[key] && Date.now() - (vodState.at[key] || 0) > 5 * 60 * 1000;
+  if ((vodState.data[key] && !stale) || vodState.loading.has(key)) return;
   if (!cur) {
     const cachedRaw = lsGet(LS_VOD_PREFIX + key, null);
     if (cachedRaw) { try { const arr = JSON.parse(cachedRaw); if (Array.isArray(arr)) { vodState.data[key] = arr; return; } } catch (e) {} }
@@ -7252,7 +7292,7 @@ function ensureVodMonth(memberId, ym) {
     .then(j => {
       vodState.loading.delete(key);
       if (j && j.ok && Array.isArray(j.vods)) {
-        vodState.data[key] = j.vods;
+        vodState.data[key] = j.vods; vodState.at[key] = Date.now();
         if (!cur) lsSet(LS_VOD_PREFIX + key, JSON.stringify(j.vods));
         if (currentPage === 'stats') renderStatsBody();
         else if (currentPage === 'content') queueCalRender();   // 달력 탭(2026-09-02): 크루 썸네일 모아보기가 같은 목록을 쓴다 — 도착마다 그리지 않고 한 프레임에 합친다
@@ -8378,6 +8418,13 @@ async function loadStats() {
     // (fetchStationInfo null 지속)이나 전월 시작 자정 걸친 방송(표본이 전월 키에 기록돼 당월 무변)에서 표시가 동결되는 것 방지.
     // 즉 생방송 중엔 기존처럼 매 틱 렌더, 전원 오프라인일 때만 스킵. sig는 stats 탭에 있을 때만 갱신 —
     // 탭 밖에서의 변화를 재진입 후 첫 틱이 감지해 렌더(switchPage는 stats 재진입 시 렌더하지 않고 DOM 유지에 의존).
+    // 달력 탭이 당월을 보고 있으면 같은 1분 틱에 다시 그린다(2026-09-02 Crenop 지정 — 지난 활동과 같은 주기). 무변화면 생략.
+    // 당월 다시보기 목록도 이 틱에 신선도(5분)를 본다 — 워커의 당월 목록 캐시가 5분이라 그보다 자주 물어도 새 것이 없다.
+    if (currentPage === 'content' && calYm() === cur) {
+      const csig = JSON.stringify(statsState.data[cur] || null);
+      if (csig !== lastCalStatsSig) { lastCalStatsSig = csig; queueCalRender(); }
+      ensureCalMonth();
+    }
     if (currentPage === 'stats') {
       const hasOpen = Object.values(statsState.data[cur] || {}).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
       const sig = JSON.stringify(statsState.data[cur] || null) + '|' + fancntLoadedDate + (hasOpen ? '|' + Math.floor(Date.now() / 60000) : '');   // fancntLoadedDate: 자정 fancnt 재조회가 sig를 1회 바꿔 애청자 셀·그래프에 반영되게(월 데이터만 보면 fancnt 갱신이 화면에 안 실림)
@@ -8707,30 +8754,8 @@ function calibrateBadgeValign() {
     if (dayInk !== null) document.documentElement.style.setProperty('--daytag-valign', Math.max(-12, Math.min(0, -dayInk - 9.5)).toFixed(2) + 'px');
   } catch (e) { /* 계측 실패 시 CSS 폴백(정적 근사) 유지 */ }
 }
-// ── 보조바 버튼 글자 세로 자가 보정(2026-09-02, 69번) ──
-// 위 6/아래 4의 고정 보정(2026-08-09)은 한 기기의 실측이었다 — 같은 Pretendard도 OS별로 글리프가 라인박스에 앉는 높이가
-// 다르다(47번 실측: 삼성 +0.95px 위 / Windows -0.2px 아래)라 Windows 100%에선 글자가 아래 경계 쪽으로 치우쳤다(Crenop 지적).
-// 47번의 배지 보정과 같은 원리로 이 기기에서 잰다: 라인박스 안 베이스라인 위치(DOM — 높이 0 inline-block의 아래변이 베이스라인)
-// + 베이스라인 대비 잉크 중심(scanInkCenter, 캔버스 픽셀 스캔). 라인박스 중심과 잉크 중심의 차 = 글자를 내려야 할 양(--tb-vnudge).
-// 문맥은 .page-title-link(600·11px·line-height 1.4). CSS 변경 시 함께 갱신. 실패하면 CSS 폴백(1px)이 남는다.
-function calibrateSubbarText() {
-  try {
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;left:-9999px;top:0;font-size:11px;line-height:1.4;font-weight:600;white-space:nowrap;visibility:hidden';
-    probe.innerHTML = '<span>천타버스 합동 방송</span><span style="display:inline-block;width:0;height:0"></span>';
-    document.body.appendChild(probe);
-    const box = probe.getBoundingClientRect();
-    const baseline = probe.lastElementChild.getBoundingClientRect().top - box.top;   // 라인박스 위에서 베이스라인까지
-    probe.remove();
-    const fam = getComputedStyle(document.body).fontFamily;
-    const ink = scanInkCenter(`600 11px ${fam}`, '천타버스 합동 방송', 11);   // 베이스라인 대비 잉크 중심(+=아래)
-    if (ink === null || !box.height) return;
-    const nudge = box.height / 2 - (baseline + ink);   // + = 글자를 아래로
-    document.documentElement.style.setProperty('--tb-vnudge', Math.max(-2, Math.min(2, nudge)).toFixed(2) + 'px');
-  } catch (e) { /* 계측 실패 시 CSS 폴백(1px) 유지 */ }
-}
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { calibrateBadgeValign(); calibrateSubbarText(); });   // 웹폰트 적용 후 계측(폴백 폰트 오계측 방지)
-else { calibrateBadgeValign(); calibrateSubbarText(); }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(calibrateBadgeValign);   // 웹폰트 적용 후 계측(폴백 폰트 오계측 방지)
+else calibrateBadgeValign();
 
 // ── 이미지 프리로드 부팅 훅 (선언부는 switchPage 초기 호출 이전에 위치) ──
 (function bootPreload() {
@@ -8901,6 +8926,7 @@ async function loadContent() {
         try { contentData = JSON.parse(cached); if (currentPage === 'content') renderContent(); } catch (e) {}
       }
     }
+    sheetLoadedAt.content = Date.now();   // 요청 시각 — 10초 안의 겹침 요청 방지(pullCalendarSheets)
     const res = await fetch(CONTENT_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     const csv = await res.text();
@@ -8976,6 +9002,13 @@ function openContentCollect(key) {
 
 // renderContent는 renderCalendarTab으로 대체(2026-08-31) — 컨텐츠 카드 격자 → 달력
 function renderContent() { renderCalendarTab(); }
+// 달력 탭 진입 시 시트 두 장을 새로 받는다. 10초 안에 요청한 것이면 건너뛴다 — 부팅 직후 #content 진입(부팅이 방금 요청함)이나
+// 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 각 로더가 달력을 다시 그린다.
+function pullCalendarSheets() {
+  const now = Date.now();
+  if (now - sheetLoadedAt.content > 10000) { sheetPulled.content = true; loadContent(); }
+  if (now - sheetLoadedAt.schedule > 10000) loadSchedule();
+}
 
 async function loadChemistry() {
   try {

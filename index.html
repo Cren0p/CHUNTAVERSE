@@ -366,12 +366,11 @@
   .tb-br { display: none; }
   .page-title-link, .celebration-box, .celebration-box * { white-space: nowrap; }   /* 문구의 <br>도 함께 제거했다 — 줄바꿈 금지만으로는 <br>을 못 막는다(2026-09-02) */
   .page-title { flex-wrap: nowrap; }   /* 보조바가 한 줄이므로 버튼 묶음도 안 접힌다 */
-  /* 일정 줄(2026-08-31): 버튼이 아니라 표시다. 누를 일이 없고(동선은 달력 탭이 가진다) 테두리도 없다.
-     제목 · 남은 시간 한 줄, 같은 날 일정이 더 있으면 +N. 칸을 넘치면 제목만 말줄임된다. */
-  /* 한 색으로 통일하고 남은 시간만 굵게(2026-09-01). 종전엔 아이콘 파랑·제목 무채색·D-day 민트라 색이 셋이었다.
-     제목은 --text2(본문에 딸린 강조 보조), 남은 시간은 --accent. 보조바에서 유일하게 '사람이 궁금해하는 값'이라
-     4차 스캔용 메타(--muted)로 깔면 눈에 안 들어온다. 아이콘은 달력 탭 아이콘과 중복이라 뺐다. */
-  .sch-line { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; font-weight: 600; color: var(--text2); }
+  /* 일정 줄 → 다시 버튼(2026-09-02): 2026-08-31에 '표시'로 바꾸며 벗겼던 버튼 모양(민트 박스·달력 아이콘, 옛 .sch-btn)을
+     되돌렸다 — 누르면 다가올 일정 목록 모달이 뜨므로 눌리게 보여야 한다(Crenop 지적). 한 줄(제목 · 남은 시간)은 유지,
+     같은 날 2건+는 +N 없이 첫 건만(옛 두 줄 격자는 사이트의 한 줄 버튼 규칙에 어긋나 복원하지 않는다). 칸을 넘치면 제목만 말줄임. */
+  .sch-line { min-width: 0; }
+  .sch-list-modal { width: 520px; max-width: calc(100vw - 32px); }
   .sch-line-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sch-line-when { flex: none; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
   /* 일정 줄은 좌우 한 칸씩 더 쓴다 — 양옆 탭(통계·현수막)은 보조바를 안 쓰므로 자리가 비어 있고,
@@ -468,7 +467,8 @@
     width: 9px; height: 9px; border-radius: 50%;
     background: #f87171; box-shadow: 0 0 0 1.5px var(--bg);
   }
-  /* 일정 버튼: 천타버스 메인 민트(--accent) 박스 — 좋아요(에메랄드)·블루발(파랑)과 색으로 구분 */
+  /* 일정 버튼: 천타버스 메인 민트(--accent) 박스 — 좋아요(에메랄드)·블루발(파랑)과 색으로 구분.
+     2026-08-31 표시화로 잠시 안 쓰이다 2026-09-02 목록 모달 버튼으로 복원 */
   button.page-title-link.sch-btn {
     background: rgba(97,255,236,0.12);
     border: 1px solid rgba(97,255,236,0.4);
@@ -2057,7 +2057,10 @@
   .cal-thumb:empty { background: transparent; }   /* 빈 상자는 높이만 잡고 음영 없이(옛 폼 v5 Crenop 지정) */
   .cal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* 그림이 없는 날에 일정만 있으면 상자 자리에 일정 제목 — 예정을 칩 하나로만 남기면 무엇인지 안 보인다 */
-  .cal-t { position: absolute; inset: 0; padding: 2px 3px; font-size: 11px; line-height: 1.3; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .cal-t { position: absolute; inset: 0; padding: 2px 3px; font-size: 11px; line-height: 1.3; color: var(--text); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+  .cal-tl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 일정 한 건 = 한 줄(2026-09-02 Crenop). 상자 높이를 넘는 줄은 잘린다 */
+  .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
+  .cal-tag svg { width: 12px; height: 12px; vertical-align: -2px; }
   /* 미래 = 칸 테두리 점선. 색은 그대로 — 민트는 '누를 수 있음/선택됨'의 색이라 '아직 안 왔음'에 쓰면 뜻이 겹친다(2026-09-01) */
   .cal-cell.future.has { border-style: dashed; }
   .cal-cell.has:hover { border-color: var(--accent); }
@@ -2079,7 +2082,7 @@
   .cal-row-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .cal-row-body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
   .cal-row .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; min-width: 0; }
-  .cal-row-title { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-row-title { font-size: 12px; color: var(--text); min-width: 0; }   /* 줄 단위 말줄임은 안쪽 .cal-tl이 맡는다 */
   .cal-detail-row { margin: 0; }
   /* 상세 — 일정·컨텐츠 행(있으면) → 다시보기 타일 → 유튜브 타일. 타일은 일별 요약과 같은 200px 문법(.ds-vod), 크루 화면이라 멤버 이름줄을 위에 */
   .cal-di-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
@@ -2794,7 +2797,7 @@
     .tab-aux { justify-self: start; position: relative; z-index: 1; pointer-events: none; }
     /* 누를 것만 클릭을 받는다 — 생방송 카운터·일정 줄은 표시라 눌릴 이유가 없고,
        칸이 클릭을 먹으면 그 자리에서 탭 자체가 안 눌린다(2026-09-02). */
-    .tab-aux .nav-notify-bell, .tab-aux .celebration-box, .tab-aux #guideLink { pointer-events: auto; }
+    .tab-aux .nav-notify-bell, .tab-aux .celebration-box, .tab-aux #guideLink, .tab-aux #schBtn { pointer-events: auto; }   /* #schBtn: 일정 줄이 다시 버튼(2026-09-02) */
     .subbar-lead, .tab-aux { flex: none; justify-content: flex-start; }
     .tab-aux { height: var(--nav-row-h); }
     /* 일정 줄은 흐름 안으로 되돌린다 — 가로 보조바에서 '양옆 빈 탭 자리를 빌리는' 절대배치가
@@ -2803,9 +2806,8 @@
     /* 세로 배치에서는 흐름 안에서 왼쪽부터 오른쪽으로 나열된다 */
     .tab-aux[data-for="members"] .celeb-wrap { position: static; transform: none; }
     .tab-aux[data-for="content"] { overflow: hidden; position: static; }
-    /* 제목과 남은 시간을 두 줄로 — 한 줄이면 기둥 폭을 이 줄이 정해버린다 */
-    .tab-aux[data-for="content"] .sch-line { position: static; transform: none; width: auto; max-width: 100%;
-      flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.25; }
+    /* 한 줄 그대로, 제목만 말줄임(2026-09-02: 버튼 복원으로 두 줄 쌓기 폐지). max-width 100%라 기둥 폭을 이 줄이 넓히지 않는다 */
+    .tab-aux[data-for="content"] .sch-line { position: static; transform: none; width: auto; max-width: 100%; }
     .subbar-lead { gap: 6px; overflow-x: auto; scrollbar-width: none; }
     .page-title-link, .celebration-box { padding: 4px 10px; }
     /* 기념일만 짧은 요약('이름 종류')으로 — PC 문구는 길어 세로형 행 폭을 넘긴다(2026-09-01) */
@@ -3196,7 +3198,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02o';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02q';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3965,7 +3967,7 @@ function titleBadgeHtml(title) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .cal-t, .cal-row-title';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .cal-t, .cal-tl, .cal-row-title';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -4387,7 +4389,7 @@ function getTodayCelebrations() {
 // 열: A=링크(https) 또는 모달 gid(숫자) B=아이콘 이름(SVG_ICONS 키, 빈칸/미지=youtube) C=모바일 라벨 D=PC 첫줄 E=PC 둘째줄(빈칸=한 줄) F=hex 색(#RRGGBB, 빈칸/무효=커버곡 핑크)
 // 헤더 없음(1행부터 데이터), 행 수만큼 버튼 생성(0행=버튼 없음). 로드는 크루 시트와 동일 정책: 캐시 선표시 → fetch → 실패 시 캐시 유지.
 const TOPBAR_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=981813639';
-const LS_TOPBAR_CACHE = 'chuntaverse_topbar_links_v1';
+const LS_TOPBAR_CACHE = 'chuntaverse_topbar_links_v2';   // v2: E열 삭제로 색·만료·좌우가 한 칸 당겨짐(2026-09-02) — 구 캐시를 새 파서로 읽으면 어긋난다
 let topbarLinks = [];
 
 function parseTopbarRows(rows) {
@@ -4397,27 +4399,27 @@ function parseTopbarRows(rows) {
     // A열 세 갈래(2026-08-13, 2026-08-19): 주소면 새 창 링크, 숫자면 그 gid 탭을 내용으로 읽는 모달.
     //   예약어 'title'은 버튼이 아니라 좌상단 로고 교체 행(parseTitleOverride가 따로 읽음) — 여기서는 아래 판정으로 자연 제외된다.
     //   셋 다 아니면 빈 행·메모성 행으로 보고 제외 — 주소 판정은 프로토콜 화이트리스트 유지(javascript: 등 차단, 채팅 링크와 동일 정책).
-    //   B~F(아이콘·라벨·색)는 링크·모달이 같은 값을 쓴다. 버튼 생김새가 같아야 하므로 여기서 갈라지지 않는다.
+    //   B~E(아이콘·모바일 라벨·라벨·색)는 링크·모달이 같은 값을 쓴다. 버튼 생김새가 같아야 하므로 여기서 갈라지지 않는다.
     const isUrl = /^https?:\/\//.test(a);
     const gid = /^\d+$/.test(a) ? a : '';
     if (!isUrl && !gid) continue;
-    // G열(만료일 · 2026-08-19): 값이 해석되면 그 시각까지만 노출(kstExpiryMs — 날짜=그날 자정, +HH:mm=그 분). 지나면 버튼 숨김.
+    // F열(구 G, 만료일 · 2026-08-19): 값이 해석되면 그 시각까지만 노출(kstExpiryMs — 날짜=그날 자정, +HH:mm=그 분). 지나면 버튼 숨김.
     //   빈 칸·형식 밖은 무기한 노출 — hex 무효→기본색과 같은 관대 관례(G에 메모를 적어도 버튼이 사라지지 않게).
-    const until = (r[6] || '').trim();
+    // E열(2행 라벨) 삭제(2026-09-02, Crenop 지정) — 한 줄 버튼이라 2행이 없다. 이후 열이 한 칸씩 당겨졌다: E=색 F=만료 G=좌/우.
+    const until = (r[5] || '').trim();
     if (until) { const ex = kstExpiryMs(until); if (ex !== null && Date.now() > ex) continue; }
     const iconKey = (r[1] || '').trim();
-    const hexRaw = (r[5] || '').trim();
+    const hexRaw = (r[4] || '').trim();
     out.push({
       url: isUrl ? a : '',
       gid,
       icon: Object.prototype.hasOwnProperty.call(SVG_ICONS, iconKey) ? iconKey : 'youtube',
       mb: (r[2] || '').trim(),
-      l1: (r[3] || '').trim(),
-      l2: (r[4] || '').trim(),
+      l1: (r[3] || '').trim(),   // D=라벨(한 줄)
       hex: /^#[0-9A-Fa-f]{6}$/.test(hexRaw) ? hexRaw : '#EC4899',
-      // H열(2026-08-31): 보조바에서 어느 쪽에 설지. '우'/'right'/'r'이면 가이드 왼쪽, 그 밖(빈칸 포함)은 기념일 오른쪽.
+      // G열(구 H, 2026-08-31): 보조바에서 어느 쪽에 설지. '우'/'right'/'r'이면 가이드 왼쪽, 그 밖(빈칸 포함)은 기념일 오른쪽.
       // 모바일(세로)에서는 같은 값이 위/아래가 된다 — 좌=기념일 아래, 우=가이드 위.
-      side: /^(우|right|r)$/i.test((r[7] || '').trim()) ? 'right' : 'left',
+      side: /^(우|right|r)$/i.test((r[6] || '').trim()) ? 'right' : 'left',
     });
   }
   return out;
@@ -4425,8 +4427,7 @@ function parseTopbarRows(rows) {
 
 function topbarLinksHtml(side) {
   return topbarLinks.filter(b => (b.side || 'left') === side).map(b => {
-    // 1행·2행을 한 줄로 잇는다(2026-09-02) — 두 줄짜리 버튼은 사이트 어디에도 없다.
-    const pc = escapeHtml(b.l1) + (b.l2 ? ' ' + escapeHtml(b.l2) : '');
+    const pc = escapeHtml(b.l1);   // 라벨 한 줄(2026-09-02 E열 삭제) — 두 줄짜리 버튼은 사이트 어디에도 없다
     const tx = lightenForText(b.hex);   // 아이콘은 지정색 원본, 글자만 보정 — 순위 버튼과 동일 규칙(2026-08-04 일괄 적용)
     const inner = `${SVG_ICONS[b.icon] || SVG_ICONS.link}<span class="tb-t-pc" style="color:${tx}">${pc}</span><span class="tb-t-mb" style="color:${tx}">${escapeHtml(b.mb)}</span>`;
     const style = `--tb-rgb:${hexToRgb(b.hex)};color:${b.hex}`;
@@ -4480,7 +4481,7 @@ async function openSheetModal(gid) {
   const btn = topbarLinks.find(b => b.gid === gid) || null;
   // 버튼 색을 테두리·헤더에 물린다(순위 모달과 같은 훅 --rk-c/--rk-rgb). 원복은 다음 modalPanel 호출이 통째로 한다.
   const panel = modalPanel('tbm-modal', btn ? { '--rk-c': lightenForText(btn.hex), '--rk-rgb': hexToRgb(btn.hex) } : null);
-  const label = btn ? ([btn.l1, btn.l2].filter(Boolean).join(' ') || btn.mb) : '';
+  const label = btn ? (btn.l1 || btn.mb) : '';
   head.innerHTML = `<span>${(btn && SVG_ICONS[btn.icon]) || SVG_ICONS.link}${escapeHtml(label)}</span>`
     + `<button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
@@ -4939,11 +4940,13 @@ document.addEventListener('click', (e) => {
 // CSV: 페이지 로드 시 1회(버튼 표시용) + 모달 열 때 재풀링(최신 반영). 좋아요 모달과 동일한 lrOverlay·선로딩 패턴 재사용.
 // 컨텐츠 시트와 통합(같은 gid). 일정 행 = A열이 날짜(YYMMDD 또는 YYYY-MM-DD)인 행. 컨텐츠 행(A=http URL)은 parseScheduleRows의 날짜 정규화에서 null→자동 제외.
 const SCHEDULE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
-const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache_v2';  // v2: 통합 시트 칼럼 재배치(C=링크/D=간략/E=상세)로 구 캐시(raw rows) 무효화
+const LS_SCHEDULE_CACHE = 'chuntaverse_schedule_cache_v3';   // v3: F=종류 신설로 멤버가 G~로 밀림(2026-09-02) — 구 캐시는 종류 칸을 멤버로 읽는다  // v2: 통합 시트 칼럼 재배치(C=링크/D=간략/E=상세)로 구 캐시(raw rows) 무효화
 let scheduleData = [];   // 파싱·정렬 완료된 일정
 let scheduleSig = '';    // 버튼 구조(headline·개수) 식별자 — 변할 때만 상단바 전체 재구성, 평소엔 카운트다운 숫자만 갱신
 let schedulePreload = null;
 
+// 종류 태그 칸(컨텐츠·일정 시트 F열) — 쉼표·|·/ 다중(케미 시트 종류 칸과 같은 구분자 관례). 빈 칸이면 [].
+function parseTags(cell) { return String(cell || '').split(/[,|/]/).map(t => t.trim()).filter(Boolean); }
 function parseScheduleRows(rows) {
   const out = [];
   for (const r of rows) {
@@ -4967,7 +4970,8 @@ function parseScheduleRows(rows) {
       title: detail || brief,        // 모달·기준 제목(상세 우선)
       shortTitle: brief || detail,   // 버튼 제목(간략 우선)
       link: (r[2] || '').trim(),     // C=링크
-      members: r.slice(5).filter(c => c.length > 0),  // F~ 멤버 (loadContent와 동일 열·동일 방식)
+      tags: parseTags(r[5]),         // F=종류(2026-09-02 신설, 쉼표·|·/ 다중) — 아이콘 별칭표(CAL_TAG_ICON)로 그림이 된다
+      members: r.slice(6).filter(c => c.length > 0),  // G~ 멤버 (loadContent와 동일 열·동일 방식)
       hasTime, target,
       hideAfter: dayStart + 86400000,  // 시간 유무 무관 그날 자정까지 유지(시간 지나면 D-DAY로 표기)
     });
@@ -5026,13 +5030,13 @@ function scheduleBtnHTML() {
   scheduleSig = h.sig;
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (!h.vis.length) {
-    return `<span class="sch-line" id="schBtn"><span class="sch-line-txt">불러오는 중</span></span>`;
+    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">불러오는 중</span></button>`;
   }
   const head = h.vis[0];
   // 단일 일정 — 현행: 제목 + (당일부터 D-time, 그 전 D-day). 모바일은 항상 D-day.
   if (h.group.length < 2) {
     const when = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
-    return `<span class="sch-line" id="schBtn"><span class="sch-line-txt">${escapeHtml(head.shortTitle)}</span><span class="sch-line-when">${when}</span></span>`;
+    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head.shortTitle)}</span><span class="sch-line-when">${when}</span></button>`;
   }
   // 같은 날 2건+: 종전엔 제목 열 + dtime 열을 격자로 폈지만, 보조바 칸이 92px이라 들어가지 않는다.
   // 건수만 덧붙이고 내용은 달력 탭에서 본다(버튼의 역할 = '언제'까지).
@@ -5040,11 +5044,37 @@ function scheduleBtnHTML() {
   // 자세한 것은 달력 탭이 담당하므로 보조바는 '다음이 언제인가'만 알려주면 된다.
   const head2 = h.vis[0];
   const when2 = (head2.hasTime && ddayNum(head2) === 0) ? dtimeText(head2) : ddayText(head2);
-  return `<span class="sch-line" id="schBtn"><span class="sch-line-txt">${escapeHtml(head2.shortTitle)}</span><span class="sch-line-when">${when2}</span></span>`;
+  return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head2.shortTitle)}</span><span class="sch-line-when">${when2}</span></button>`;
 }
 
 
 // 1초마다: 구조(묶음 구성·병합/분리)가 바뀌었으면 상단바 전체 재구성, 아니면 카운트다운 숫자만 교체.
+// 다가올 일정 목록 모달(2026-09-02) — 옛 일정 모달의 '목록 보기'가 달력 탭으로 오면서 사라졌던 것. 달력 탭은 달 단위라
+// "앞으로 뭐가 있나"를 한 화면에 못 모은다(Crenop 지적). 월 구분 없이 아직 안 지난 일정 전부, 여는 곳은 보조바의 일정 한 줄 자체
+// (종전 일정 버튼이 있던 자리 — 새 버튼을 늘리지 않는다). 모달 판정: 없어져도 되는 것 + 짧음 + 보던 자리 보존.
+function openScheduleList() {
+  const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
+  if (!head || !body) return;
+  modalPanel('sch-list-modal');
+  const items = visibleSchedule();
+  const WD = ['일', '월', '화', '수', '목', '금', '토'];
+  head.innerHTML = `<span>${SVG_ICONS.calendar}다가올 일정${items.length ? ` · ${items.length}건` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  const rows = items.map(s => {
+    // 날짜 글자는 문자열에서 바로 — KST 자정을 Date로 만들어 getUTC*로 읽으면 하루가 밀린다(2026-09-02 실측 사고)
+    const [yy, mm, dd] = s.date.split('-').map(Number);
+    const dateTxt = `${mm}월 ${dd}일 (${WD[new Date(Date.UTC(yy, mm - 1, dd)).getUTCDay()]})`;
+    const when = (s.hasTime && ddayNum(s) === 0) ? dtimeText(s) : ddayText(s);
+    const who = (s.members || []).map(n => MEMBERS.find(m => m.name === n)).filter(Boolean)
+      .map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
+    const cols = Math.max(1, Math.ceil(((s.members || []).length || 1) / (((s.members || []).length || 1) > 7 ? 2 : 1)));
+    const inner = `<div class="cal-di-body"><div class="cal-di-title">${tagIconsHtml(s.tags)}${escapeHtml(s.title)}</div>`
+      + `<div class="cal-di-meta"><span class="cal-di-time">${dateTxt}${s.time ? ' ' + escapeHtml(s.time) : ''}</span><span class="sch-line-when">${when}</span><span class="cal-di-who" style="--who-cols:${cols}">${who}</span></div></div>`;
+    return s.link ? `<a class="cal-di schedule" href="${escapeHtml(s.link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="cal-di schedule">${inner}</div>`;
+  }).join('');
+  body.innerHTML = rows ? `<div class="cal-di-list sch-list">${rows}</div>` : '<div class="lr-msg">다가올 일정이 없습니다.</div>';
+  showModal();
+}
+
 function tickSchedule() {
   const h = scheduleHead();
   if (h.sig !== scheduleSig) { updatePageTitle(); return; }
@@ -5088,7 +5118,7 @@ let bannerData = [];
 let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
 const CONTENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
-const LS_CONTENT_CACHE = 'chuntaverse_content_cache';
+const LS_CONTENT_CACHE = 'chuntaverse_content_cache_v2';   // v2: F=종류 신설(2026-09-02) — 구 캐시엔 tags가 없고 멤버 열이 다르다
 let contentData = [];
 let _contentRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
@@ -5477,6 +5507,18 @@ function renderDisco() {
 // 두 폼(7열 썸네일 / 1열 목록)을 다 그려 두고 CSS가 폭에 따라 하나만 보인다 — 상세 세 자리(주 아래·행 아래·오른쪽 열)도 같은 태도.
 const CAL_TYPES = ['content', 'vod', 'youtube'];   // 종류 필터. 일정은 필터 대상이 아니다(항상 표시 — 2026-09-02 Crenop 지정)
 const CAL_TYPE_LABEL = { content: '컨텐츠', vod: '다시보기', youtube: '유튜브' };
+// 종류 태그(F열) 표기 → 아이콘 키 별칭표(2026-09-02). 시트에 자유롭게 적고, 여기 있는 표기만 그림이 된다. 대소문자 무시.
+// 모르는 태그는 기본 이름표(tagFilled — 케미 '기타'와 같은 그림). 행성(planet)은 배정 보류 — 모캡 스튜디오 마크라 모캡 대체 후보였다(Crenop).
+const CAL_TAG_ICON = {
+  soccer: ['잔디', '축구', 'fc'], minecraft: ['마크', '마인크래프트'], steam: ['스팀'], vrchat: ['vrc', 'vrchat', '브챗', 'vr챗'],
+  wak: ['왁타', '왁타버스'], mocap: ['모캡', '모션캡처', '모션캡쳐'], fulltrack: ['풀트', '풀트래킹', '풀트랙'],
+  pubg: ['배그', 'pubg', '배틀그라운드'], overwatch: ['옵치', '오버워치'], lol: ['롤', 'lol', '리그오브레전드'],
+  wow: ['와우', 'wow', '월드오브워크래프트'], chuntaverse: ['천타', '천타버스'],
+};
+const CAL_TAG_LOOKUP = (() => { const o = {}; for (const [k, names] of Object.entries(CAL_TAG_ICON)) for (const n of names) o[n.toLowerCase()] = k; return o; })();
+function tagIconsHtml(tags) {
+  return (tags || []).map(t => `<span class="cal-tag" title="${escapeHtml(t)}">${SVG_ICONS[CAL_TAG_LOOKUP[t.toLowerCase()] || 'tagFilled']}</span>`).join('');
+}
 const CAL_TYPE_ICON = { content: 'film', vod: 'soop', youtube: 'youtube' };   // 칩·필터 버튼 공용(2026-09-02 Crenop 지정): 컨텐츠=film · 다시보기=숲 ∞ 마크 · 일정은 film을 흐리게
 const calState = { year: 0, month: 0, selected: null, member: 'all', types: new Set(CAL_TYPES) };
 (function () { const n = kstNow(); calState.year = n.getUTCFullYear(); calState.month = n.getUTCMonth() + 1; })();
@@ -5552,7 +5594,8 @@ function calChips(d) {
   if (d.youtube.length) c.push(chipHtml('youtube', CAL_TYPE_ICON.youtube, d.youtube.length));
   return c.join('');
 }
-function calSchedTitles(d) { return d.schedule.map(s => escapeHtml(s.shortTitle || s.title)).join(' · '); }
+// 같은 날 일정이 여럿이면 줄바꿈으로 나눈다(2026-09-02 Crenop — 가운뎃점으로 잇지 않는다). 줄 앞에 종류 그림.
+function calSchedTitles(d) { return d.schedule.map(s => `<span class="cal-tl">${tagIconsHtml(s.tags)}${escapeHtml(s.shortTitle || s.title)}</span>`).join(''); }
 
 function calPeriodHtml() {
   const now = kstNow();
@@ -5576,12 +5619,12 @@ function calDetailHtml(items) {
     .map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
   const whoCols = names => { const n = (names || []).length || 1; return Math.max(1, Math.ceil(n / (n > 7 ? 2 : 1))); };
   const rows = [
-    ...d.schedule.map(s => ({ kind: 'schedule', title: s.title, time: s.time, link: s.link, img: '', members: s.members })),
-    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, img: c.url, members: c.members })),
+    ...d.schedule.map(s => ({ kind: 'schedule', title: s.title, time: s.time, link: s.link, img: '', members: s.members, tags: s.tags })),
+    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, img: c.url, members: c.members, tags: c.tags })),
   ].map(it => {
     const img = it.img ? `<div class="cal-di-img"><img src="${escapeHtml(it.img)}" alt="" loading="lazy"></div>` : '';
     const when = it.time ? `<span class="cal-di-time">${escapeHtml(it.time)}</span>` : '';
-    const inner = `${img}<div class="cal-di-body"><div class="cal-di-title">${escapeHtml(it.title)}</div><div class="cal-di-meta">${when}<span class="cal-di-who" style="--who-cols:${whoCols(it.members)}">${whoImgs(it.members)}</span></div></div>`;
+    const inner = `${img}<div class="cal-di-body"><div class="cal-di-title">${tagIconsHtml(it.tags)}${escapeHtml(it.title)}</div><div class="cal-di-meta">${when}<span class="cal-di-who" style="--who-cols:${whoCols(it.members)}">${whoImgs(it.members)}</span></div></div>`;
     return it.link
       ? `<a class="cal-di ${it.kind}" href="${escapeHtml(it.link)}" target="_blank" rel="noopener">${inner}</a>`
       : `<div class="cal-di ${it.kind}">${inner}</div>`;
@@ -8632,8 +8675,9 @@ async function loadContent() {
       const url = r[0];
       const link = (r[2] || '').trim();        // C=링크 (B는 일정 전용 시간칸 — 컨텐츠 행은 비움)
       const title = (r[4] || '').trim();       // E=제목 (D는 일정 전용 간략제목칸 — 컨텐츠 행은 비움)
-      const members = r.slice(5).filter(c => c.length > 0);  // F~ 멤버
-      return { url, link, title, members, date: parseContentDate(url) };
+      const tags = parseTags(r[5]);                          // F=종류(2026-09-02 신설) — 일정 행과 같은 열
+      const members = r.slice(6).filter(c => c.length > 0);  // G~ 멤버
+      return { url, link, title, tags, members, date: parseContentDate(url) };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));

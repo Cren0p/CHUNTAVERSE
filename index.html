@@ -2228,14 +2228,16 @@
   .hall-heat { margin-bottom: 28px; }
   .hall-heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }   /* 520이면 본문 폭(약 1052)에서 간격 때문에 한 열로 떨어졌다 — 두 열이 서도록 낮춘다(정사각은 고집하지 않음) */
   .hall-heat-cell { background: var(--surface); border: 1px solid var(--border); padding: 12px; min-width: 0; }
-  .hall-heat-name { font-size: 12px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-  .hall-heat-name img { width: 22px; height: 22px; flex: none; }   /* 사진+이름 — 케미·순위 화면과 같은 문법 */
+  .hall-heat-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; row-gap: 4px; }   /* 14px·사진 28px(구 12·22 — 2026-09-02 Crenop: 작다). 통계 두 줄이 안 들어가는 좁은 카드에선 아랫줄로 내려간다 */
+  .hall-heat-name img { width: 28px; height: 28px; flex: none; }   /* 사진+이름 — 케미·순위 화면과 같은 문법 */
   /* 격자 묶음(y축+일자 열)을 카드 가운데에 — 달마다 열 수가 달라 왼쪽 정렬이면 2월은 오른쪽이 비어 보였다(2026-09-02 Crenop).
      카드 안 히트맵은 .toh-wrap 없이 .toh-head/.toh-body만 있으므로(구 .toh-wrap 규칙은 닿는 곳이 없었다) 몸통에서 가운데 맞춤. */
   .hall-heat-cell .toh-body { justify-content: center; }
   .hall-heat-cell .toh-right { flex: 0 1 auto; }
   /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
-  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: none; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만(2026-09-02 Crenop — 늘 보이면 난잡) */
+  .hall-heat-grid.show-stats .hall-heat-stats { display: flex; }
+  .hall-heat-stats .hl { color: var(--accent); font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 민트 */
 
   .hall-main { min-width: 0; }
   .hall-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -3249,7 +3251,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zj';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zk';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8304,9 +8306,11 @@ function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
     if (dow === 0 || dow === 6) we += dayMin; else wd += dayMin;
   });
   const b = pctRound(bands), w = pctRound([wd, we]);
+  // 가장 큰 항목의 이름과 숫자에 색(시간대·주중주말 각각, 같은 값이면 둘 다) — 2026-09-02 Crenop 지정
+  const hl = (labels, vals) => { const mx = Math.max(...vals); const L = labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l}</span>` : l).join('/'); const V = vals.map(v => v === mx ? `<span class="hl">${v}</span>` : v).join('/'); return `${L} ${V}%`; };
   return {
     line1: `평균 시작 ${hm(circularMeanMinutes(starts))} · 평균 종료 ${hm(circularMeanMinutes(ends))} · 평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`,
-    line2: `새벽/오전/오후/야간 ${b.join('/')}% · 주중/주말 ${w.join('/')}%`,
+    line2: `${hl(['새벽', '오전', '오후', '야간'], b)} · ${hl(['주중', '주말'], w)}`,
     tip: `그 달 ${n}회 기준. 평균 시각은 시계 위 평균(23시와 1시의 평균 = 0시). 새벽 0~6 · 오전 6~12 · 오후 12~18 · 야간 18~24, 방송한 분(分) 기준. 주말 = 토·일.`,
   };
 }
@@ -9450,6 +9454,7 @@ function longestStreak(dateSet) {
 
 // 명전 토글 상태(세로↔수평). 세션 내 유지, localStorage 저장 안 함(새로고침 시 끔=세로로 복귀)
 let hallShowRanks = false;
+let heatShowStats = false;   // 시간대 카드 이름 옆 통계 두 줄 '통계 보기' 토글(2026-09-02) — 2·3위·설명 보기와 같이 비저장
 // 값 내림차순 dense 순위로 상위 3개 그룹 추출(값 같으면 동순위, 0은 제외). [{rank,value,members}] 최대 3개.
 function hallTopRanks(getVal) {
   const distinct = [...new Set(MEMBERS.map(m => getVal(m.id)))].filter(v => v > 0).sort((a, b) => b - a);
@@ -9595,8 +9600,18 @@ function renderHallStats() {
         renderHallStats();
       }));
     } else {
-      side.innerHTML = `<div><div class="filter-title">기간</div>${periodSelectorHtml(hallKind === 'stats')}</div>`;   // 라벨+버튼은 한 칸. 시간대는 월 단위라 '전체'를 두지 않는다
+      // 시간대는 '통계 보기' 토글(이름 옆 두 줄 — 2026-09-02 Crenop: 늘 보이면 난잡)이 기간 위에 선다. 명전 2·3위 토글과 같은 문법·같은 자리.
+      const statsToggle = hallKind === 'heat' ? `<div class="hall-bar"><span class="hall-bar-label">통계 보기</span>
+          <button class="notify-switch ${heatShowStats ? 'on' : ''}" id="heatStatsToggle" type="button" aria-label="통계 보기"></button></div>` : '';
+      side.innerHTML = `${statsToggle}<div><div class="filter-title">기간</div>${periodSelectorHtml(hallKind === 'stats')}</div>`;   // 라벨+버튼은 한 칸. 시간대는 월 단위라 '전체'를 두지 않는다
       bindPeriodSelector(side, hallKind === 'stats', renderHallStats);
+      const ht = document.getElementById('heatStatsToggle');
+      if (ht) ht.addEventListener('click', () => {
+        heatShowStats = !heatShowStats;
+        const g = document.querySelector('#hallHeatBox .hall-heat-grid');
+        if (g) g.classList.toggle('show-stats', heatShowStats);
+        ht.classList.toggle('on', heatShowStats);
+      });
     }
   }
   if (!statsState.viewMonth) { const n = kstNow(); statsState.viewMonth = { year: n.getUTCFullYear(), month: n.getUTCMonth() + 1 }; }
@@ -9613,7 +9628,7 @@ function renderHallStats() {
       const stats = ts ? `<span class="hall-heat-stats" title="${ts.tip}"><span>${ts.line1}</span><span>${ts.line2}</span></span>` : '';
       return h ? `<div class="hall-heat-cell"><div class="hall-heat-name"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span style="color:${m.color}">${escapeHtml(m.name)}</span>${stats}</div>${h}</div>` : '';
     }).filter(Boolean).join('');
-    heat.innerHTML = cells ? `<div class="hall-heat-grid">${cells}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
+    heat.innerHTML = cells ? `<div class="hall-heat-grid${heatShowStats ? ' show-stats' : ''}">${cells}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
   }
 }
 

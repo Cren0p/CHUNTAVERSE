@@ -2228,16 +2228,17 @@
   .hall-heat { margin-bottom: 28px; }
   .hall-heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }   /* 520이면 본문 폭(약 1052)에서 간격 때문에 한 열로 떨어졌다 — 두 열이 서도록 낮춘다(정사각은 고집하지 않음) */
   .hall-heat-cell { background: var(--surface); border: 1px solid var(--border); padding: 12px; min-width: 0; }
-  .hall-heat-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; row-gap: 4px; }   /* 14px·사진 28px(구 12·22 — 2026-09-02 Crenop: 작다). 통계 두 줄이 안 들어가는 좁은 카드에선 아랫줄로 내려간다 */
+  .hall-heat-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; row-gap: 4px; min-height: 33px; }   /* 14px·사진 28px(구 12·22 — 2026-09-02 Crenop: 작다). 통계 두 줄이 안 들어가는 좁은 카드에선 아랫줄로 내려간다.
+     min-height 33 = 통계 두 줄 높이 — 통계가 없는 달·꺼진 상태에서도 줄 높이가 같다(카드 크기는 큰 쪽 기준으로 고정, 2·3위 보기와 같은 원칙 — 2026-09-02 Crenop) */
   .hall-heat-name img { width: 28px; height: 28px; flex: none; }   /* 사진+이름 — 케미·순위 화면과 같은 문법 */
   /* 격자 묶음(y축+일자 열)을 카드 가운데에 — 달마다 열 수가 달라 왼쪽 정렬이면 2월은 오른쪽이 비어 보였다(2026-09-02 Crenop).
      카드 안 히트맵은 .toh-wrap 없이 .toh-head/.toh-body만 있으므로(구 .toh-wrap 규칙은 닿는 곳이 없었다) 몸통에서 가운데 맞춤. */
   .hall-heat-cell .toh-body { justify-content: center; }
   .hall-heat-cell .toh-right { flex: 0 1 auto; }
   /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
-  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: none; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만(2026-09-02 Crenop — 늘 보이면 난잡) */
-  .hall-heat-grid.show-stats .hall-heat-stats { display: flex; }
-  .hall-heat-stats .hl { color: var(--accent); font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 민트 */
+  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; visibility: hidden; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만 보이되 자리는 늘 차지한다(display가 아니라 visibility — 켜고 끌 때 카드 크기가 안 바뀐다, 2026-09-02 Crenop) */
+  .hall-heat-grid.show-stats .hall-heat-stats { visibility: visible; }
+  .hall-heat-stats .hl { color: #ffffff; font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 흰색(민트는 아래 격자 색과 겹쳐 2026-09-02 Crenop이 흰색 지정) */
 
   .hall-main { min-width: 0; }
   .hall-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -3251,7 +3252,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zk';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zl';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8298,20 +8299,25 @@ function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
   if (!n) return null;
   const hm = m => m === null ? '—' : `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   const avgMin = Math.round(durMs / n / 60000);
-  const bands = [0, 0, 0, 0]; let wd = 0, we = 0;
+  const bands = [0, 0, 0, 0]; let wd = 0, we = 0, wdDays = 0, weDays = 0;
+  // 주중/주말은 하루 평균으로 비교한다(2026-09-02 Crenop 정정): 주중 5일·주말 2일이라 분(分) 합계로 비교하면 늘 주중이 크다.
+  // 이번 달은 오늘까지의 날수로, 지난달은 그 달 전체 날수로 나눈다.
+  const lastDom = isCurrentMonth ? Math.min(grid.length, new Date(nowMs + 9 * 3600 * 1000).getUTCDate()) : grid.length;
   grid.forEach((row, i) => {
     row.forEach((mins, b) => { bands[Math.floor(b / 2)] += mins; });
     const dow = new Date(Date.UTC(year, month1 - 1, i + 1)).getUTCDay();
     const dayMin = row.reduce((a, b) => a + b, 0);
-    if (dow === 0 || dow === 6) we += dayMin; else wd += dayMin;
+    const weekend = dow === 0 || dow === 6;
+    if (weekend) we += dayMin; else wd += dayMin;
+    if (i < lastDom) { if (weekend) weDays++; else wdDays++; }
   });
-  const b = pctRound(bands), w = pctRound([wd, we]);
+  const b = pctRound(bands), w = pctRound([wdDays ? wd / wdDays : 0, weDays ? we / weDays : 0]);
   // 가장 큰 항목의 이름과 숫자에 색(시간대·주중주말 각각, 같은 값이면 둘 다) — 2026-09-02 Crenop 지정
   const hl = (labels, vals) => { const mx = Math.max(...vals); const L = labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l}</span>` : l).join('/'); const V = vals.map(v => v === mx ? `<span class="hl">${v}</span>` : v).join('/'); return `${L} ${V}%`; };
   return {
     line1: `평균 시작 ${hm(circularMeanMinutes(starts))} · 평균 종료 ${hm(circularMeanMinutes(ends))} · 평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`,
     line2: `${hl(['새벽', '오전', '오후', '야간'], b)} · ${hl(['주중', '주말'], w)}`,
-    tip: `그 달 ${n}회 기준. 평균 시각은 시계 위 평균(23시와 1시의 평균 = 0시). 새벽 0~6 · 오전 6~12 · 오후 12~18 · 야간 18~24, 방송한 분(分) 기준. 주말 = 토·일.`,
+    tip: `그 달 ${n}회 기준. 평균 시각은 시계 위 평균(23시와 1시의 평균 = 0시). 새벽 0~6 · 오전 6~12 · 오후 12~18 · 야간 18~24, 방송한 분(分) 기준. 주중/주말(토·일)은 하루 평균 방송량으로 비교.`,
   };
 }
 function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {

@@ -2055,6 +2055,7 @@
   .cal-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cal-thumb:empty { background: transparent; }   /* 빈 상자는 높이만 잡고 음영 없이(옛 폼 v5 Crenop 지정) */
   .cal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cal-thumb img.tall, .cal-row-thumb img.tall { object-position: top; }   /* 세로로 긴 그림(셀 전용 -t가 없을 때)은 맨 위 — 포스터 제목 띠(2026-09-02) */
   /* 그림이 없는 날에 일정만 있으면 상자 자리에 일정 제목 — 예정을 칩 하나로만 남기면 무엇인지 안 보인다 */
   .cal-t { position: absolute; inset: 0; padding: 2px 3px; font-size: 12px; line-height: 1.3; color: var(--text); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }   /* 12px(구 11): 가독성(2026-09-02 Crenop) */
   .cal-tl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 일정 한 건 = 한 줄(2026-09-02 Crenop). 상자 높이를 넘는 줄은 잘린다 */
@@ -3243,7 +3244,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zg';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zi';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5788,6 +5789,23 @@ function calRepImg(d) {
   if (d.youtube.length) { const id = ytVideoId(d.youtube[0].y.url); if (id) return `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; }
   return '';
 }
+// 칸·1열 목록의 작은 그림(2026-09-02 Crenop 지정 '-t'). 컨텐츠 그림은 세로로 긴 포스터가 많아 16:9 칸에 정중앙만 잘려 나온다 —
+// ① 원본과 같은 이름에 -t를 붙인 셀 전용 그림(251130.webp → 251130-t.webp)이 레포에 있으면 그것을 쓴다. 시트는 원본 이름만 적는다.
+//    있는지는 불러 봐서 안다: 없으면(404) 원본으로 되돌리고 이번 세션엔 다시 묻지 않는다(calThumbMissing).
+// ② 셀 전용 그림이 없는 세로 그림(세로 > 가로×1.5)은 정중앙 대신 맨 위를 보여 준다(포스터는 제목이 위에 있다) — 불러온 뒤 크기를 보고 표시.
+// 날짜 상세·모달은 언제나 원본. 다시보기·유튜브 썸네일은 밖에서 오는 그림이라 이 규칙 밖.
+const calThumbMissing = new Set();
+function calThumbUrl(url) { return url.replace(/\.webp$/i, '-t.webp'); }
+function calRepImgTag(d) {
+  const img = calRepImg(d);
+  if (!img) return '';
+  const isContent = d.content.length && d.content[0].url;
+  if (!isContent || !/\.webp$/i.test(img)) return `<img src="${img}" alt="" loading="lazy">`;
+  const useThumb = !calThumbMissing.has(img);
+  const src = useThumb ? calThumbUrl(img) : img;
+  const onerror = useThumb ? ` onerror="this.onerror=null;calThumbMissing.add(this.dataset.orig);this.src=this.dataset.orig"` : '';
+  return `<img src="${src}" data-orig="${img}" alt="" loading="lazy" onload="if(this.naturalHeight>this.naturalWidth*1.5)this.classList.add('tall')"${onerror}>`;
+}
 function calChips(d) {
   const c = [];   // 순서 = 일정 → 컨텐츠 → 다시보기 → 유튜브(2026-09-02 Crenop 지정). 일정은 같은 film을 흐린 색으로 — '아직 안 온 컨텐츠'
   if (d.schedule.length) c.push(chipHtml('schedule', 'film', d.schedule.length));
@@ -5798,6 +5816,13 @@ function calChips(d) {
 }
 // 같은 날 일정이 여럿이면 줄바꿈으로 나눈다(2026-09-02 Crenop — 가운뎃점으로 잇지 않는다). 줄 앞에 종류 그림.
 function calSchedTitles(d) { return d.schedule.map(s => `<span class="cal-tl">${tagIconsHtml(s.tags)}${escapeHtml(s.shortTitle || s.title)}</span>`).join(''); }
+// 종류 '전체'에서는 그림 대신 글자(2026-09-02 Crenop 지정): 일정 줄 + 컨텐츠 제목 줄. 그림은 종류를 하나 고른 화면(컨텐츠·다시보기·유튜브)에서만 —
+// '전체'의 대표 그림은 컨텐츠·다시보기·유튜브가 뒤섞여 무엇의 그림인지 알 수 없었다. 다시보기·유튜브는 '전체'에서 칩(개수)으로만.
+function calAllTextLines(d) { return calSchedTitles(d) + d.content.map(c => `<span class="cal-tl">${tagIconsHtml(c.tags)}${escapeHtml(c.title || '컨텐츠')}</span>`).join(''); }
+function calBoxHtml(d) {
+  if (calState.type === 'all') { const t = calAllTextLines(d); return t ? `<span class="cal-t">${t}</span>` : ''; }
+  return calRepImg(d) ? calRepImgTag(d) : (d.schedule.length ? `<span class="cal-t">${calSchedTitles(d)}</span>` : '');
+}
 
 // 미래 월에 시트(일정·컨텐츠) 항목이 하나라도 있는지 — 두 시트는 통째로 받아 두므로 월을 열어보지 않고도 안다.
 function calMonthHasSheet(year, mo) {
@@ -5879,14 +5904,13 @@ function renderCalendarTab() {
   const detail = calState.selected ? calDetailHtml(items) : '<div class="cal-di-none">날짜를 누르면 그날의 활동이 나옵니다.</div>';
   const stateCls = (key, d) => [d && d.count ? 'has' : '', key > todayKey ? 'future' : '', calState.selected === key ? 'selected' : '', key === todayKey ? 'today' : ''].filter(Boolean).join(' ');
 
-  // ① 7열 썸네일 칸 — 상단 [날짜 | 칩], 아래 16:9 대표 그림(없고 일정만 있으면 그 자리에 일정 제목)
+  // ① 7열 썸네일 칸 — 상단 [날짜 | 칩], 아래 16:9 상자: 종류를 골랐으면 대표 그림(없으면 일정 제목), '전체'면 일정·컨텐츠 제목 글자(calBoxHtml)
   // 앞쪽 빈칸도 .cal-cell — .calendar-day의 정사각 비율(aspect-ratio 1)이 남으면 첫 주 행이 그 높이로 늘어난다(2026-09-02 실측)
   const cells = gridCells.map(c => {
     if (!c) return '<div class="calendar-day cal-cell outside"></div>';
     const { key, dow } = c;
     const d = items[key];
-    const img = d ? calRepImg(d) : '';
-    const box = img ? `<img src="${img}" alt="" loading="lazy">` : (d && d.schedule.length ? `<span class="cal-t">${calSchedTitles(d)}</span>` : '');
+    const box = d ? calBoxHtml(d) : '';
     return `<button class="calendar-day cal-cell ${stateCls(key, d)}" data-caldate="${key}"><span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${c.label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${box}</span></button>`;
   });
   const weeks = [];
@@ -5907,11 +5931,13 @@ function renderCalendarTab() {
   const dayKeys = Object.keys(items).filter(k => dayInStatsMonth(k, ym) && items[k].count).sort();
   const listRows = dayKeys.map(key => {
     const d = items[key]; const dow = new Date(key + 'T00:00:00Z').getUTCDay();
-    const img = calRepImg(d);
+    const all = calState.type === 'all';   // '전체'는 그림 없이 글자만(칸과 같은 규칙)
+    const img = all ? '' : calRepImg(d);
+    const lines = all ? calAllTextLines(d) : (d.schedule.length ? calSchedTitles(d) : '');
     const row = `<button class="cal-row ${stateCls(key, d)}" data-caldate="${key}">`
       + `<span class="cal-row-date${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일 (${WD[dow]})</span>`
-      + `<span class="cal-row-thumb">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</span>`
-      + `<span class="cal-row-body"><span class="cd-chips">${calChips(d)}</span>${d.schedule.length ? `<span class="cal-row-title">${calSchedTitles(d)}</span>` : ''}</span></button>`;
+      + `<span class="cal-row-thumb">${img ? calRepImgTag(d) : ''}</span>`
+      + `<span class="cal-row-body"><span class="cd-chips">${calChips(d)}</span>${lines ? `<span class="cal-row-title">${lines}</span>` : ''}</span></button>`;
     return row + (key === calState.selected ? `<div class="cal-detail cal-detail-row">${detail}</div>` : '');   // 좁은 폭에서만 보이는 자리
   }).join('');
   const listForm = `<div class="cal-list-form">${loadingTag}<div class="cal-rows">${listRows || '<div class="cal-di-none">이 달에는 기록이 없습니다.</div>'}</div><div class="cal-detail cal-list-side">${detail}</div></div>`;

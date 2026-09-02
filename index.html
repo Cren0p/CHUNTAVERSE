@@ -2230,7 +2230,12 @@
   .hall-heat-cell { background: var(--surface); border: 1px solid var(--border); padding: 12px; min-width: 0; }
   .hall-heat-name { font-size: 12px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
   .hall-heat-name img { width: 22px; height: 22px; flex: none; }   /* 사진+이름 — 케미·순위 화면과 같은 문법 */
-  .hall-heat-cell .toh-wrap { margin: 0; }
+  /* 격자 묶음(y축+일자 열)을 카드 가운데에 — 달마다 열 수가 달라 왼쪽 정렬이면 2월은 오른쪽이 비어 보였다(2026-09-02 Crenop).
+     카드 안 히트맵은 .toh-wrap 없이 .toh-head/.toh-body만 있으므로(구 .toh-wrap 규칙은 닿는 곳이 없었다) 몸통에서 가운데 맞춤. */
+  .hall-heat-cell .toh-body { justify-content: center; }
+  .hall-heat-cell .toh-right { flex: 0 1 auto; }
+  /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
+  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   .hall-main { min-width: 0; }
   .hall-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -3244,7 +3249,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zi';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zj';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8256,6 +8261,55 @@ function computeBroadcastTendency(sessionsByDate, year, month1, isCurrentMonth) 
 
 // 히트맵 렌더: 가로=일(월별, 1fr로 폭은 달력에 맞춤), 세로=3시간 8밴드(경계눈금 00..24), 농도=선형 min(분/180,1).
 // 주말만 날짜를 색으로 표기(토 파랑·일 빨강), 간격 없이 연속. 세션이 전혀 없는 달은 '' 반환(숨김).
+// 시간대 카드의 이름 옆 통계(2026-09-02 Crenop 지정). 그 달 회차 기준.
+// 평균 시각은 '시계 위 평균'(원형 평균): 시각을 시계판의 방향으로 보고 방향의 평균을 낸다 — 23시와 1시의 평균이 0시가 되고(단순 평균이면 12시),
+// 새벽 시작은 새벽 시작 그대로 계산된다. 방향이 서로 상쇄돼 평균을 정할 수 없으면(고르게 퍼진 경우) '—'.
+// 평균 시간 = 총 방송시간 ÷ 회차(명전 후보 '평균 방송 길이'와 같은 정의). 진행 중 방송은 이번 달에서만 지금까지로 세고 종료 평균에선 뺀다.
+// 시간대 분포 = 방송한 분(分)을 새벽 0~6 · 오전 6~12 · 오후 12~18 · 야간 18~24로(격자의 3시간 띠 둘씩) · 주중/주말 = 방송한 분의 요일(토·일=주말).
+// 백분율은 반올림 뒤 합이 100이 되게 나머지가 큰 순으로 1씩 보정.
+function circularMeanMinutes(list) {
+  if (!list.length) return null;
+  let x = 0, y = 0;
+  for (const m of list) { const a = m / 1440 * 2 * Math.PI; x += Math.cos(a); y += Math.sin(a); }
+  if (Math.hypot(x, y) / list.length < 0.05) return null;   // 방향이 상쇄됨
+  let frac = Math.atan2(y, x) / (2 * Math.PI); if (frac < 0) frac += 1;
+  return Math.round(frac * 1440) % 1440;
+}
+function pctRound(parts) {
+  const total = parts.reduce((a, b) => a + b, 0);
+  if (total <= 0) return parts.map(() => 0);
+  const raw = parts.map(p => p / total * 100), out = raw.map(Math.floor);
+  let rest = 100 - out.reduce((a, b) => a + b, 0);
+  raw.map((r, i) => [r - out[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (rest > 0) { out[i]++; rest--; } });
+  return out;
+}
+function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
+  const nowMs = Date.now();
+  const kstMin = ms => { const k = new Date(ms + 9 * 3600 * 1000); return k.getUTCHours() * 60 + k.getUTCMinutes(); };
+  const starts = [], ends = []; let durMs = 0, n = 0;
+  for (const arr of Object.values(sum.sessionsByDate || {})) for (const s of arr) {
+    const st = new Date(s.start).getTime(); if (isNaN(st)) continue;
+    let en = s.end ? new Date(s.end).getTime() : (isCurrentMonth ? nowMs : NaN);
+    if (isNaN(en) || en <= st) continue;
+    n++; durMs += en - st; starts.push(kstMin(st)); if (s.end) ends.push(kstMin(en));
+  }
+  if (!n) return null;
+  const hm = m => m === null ? '—' : `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const avgMin = Math.round(durMs / n / 60000);
+  const bands = [0, 0, 0, 0]; let wd = 0, we = 0;
+  grid.forEach((row, i) => {
+    row.forEach((mins, b) => { bands[Math.floor(b / 2)] += mins; });
+    const dow = new Date(Date.UTC(year, month1 - 1, i + 1)).getUTCDay();
+    const dayMin = row.reduce((a, b) => a + b, 0);
+    if (dow === 0 || dow === 6) we += dayMin; else wd += dayMin;
+  });
+  const b = pctRound(bands), w = pctRound([wd, we]);
+  return {
+    line1: `평균 시작 ${hm(circularMeanMinutes(starts))} · 평균 종료 ${hm(circularMeanMinutes(ends))} · 평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`,
+    line2: `새벽/오전/오후/야간 ${b.join('/')}% · 주중/주말 ${w.join('/')}%`,
+    tip: `그 달 ${n}회 기준. 평균 시각은 시계 위 평균(23시와 1시의 평균 = 0시). 새벽 0~6 · 오전 6~12 · 오후 12~18 · 야간 18~24, 방송한 분(分) 기준. 주말 = 토·일.`,
+  };
+}
 function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
   const grid = computeTimeOfDayMinutes(sum.sessionsByDate, year, month1, isCurrentMonth);
   // 방송이 없어도 빈 격자를 그린다(2026-09-01): 카드가 통째로 사라지면 '그 달에 없었다'와
@@ -9555,7 +9609,9 @@ function renderHallStats() {
     const cells = MEMBERS.map(m => {
       const sum = computeMonthSummary(getMemberStatsForView(m.id), year, month);
       const h = renderTimeOfDayHeatmap(year, month, sum, isCur);
-      return h ? `<div class="hall-heat-cell"><div class="hall-heat-name"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span style="color:${m.color}">${escapeHtml(m.name)}</span></div>${h}</div>` : '';
+      const ts = computeMonthTimeStats(sum, computeTimeOfDayMinutes(sum.sessionsByDate, year, month, isCur), year, month, isCur);
+      const stats = ts ? `<span class="hall-heat-stats" title="${ts.tip}"><span>${ts.line1}</span><span>${ts.line2}</span></span>` : '';
+      return h ? `<div class="hall-heat-cell"><div class="hall-heat-name"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span style="color:${m.color}">${escapeHtml(m.name)}</span>${stats}</div>${h}</div>` : '';
     }).filter(Boolean).join('');
     heat.innerHTML = cells ? `<div class="hall-heat-grid">${cells}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
   }

@@ -3252,7 +3252,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zl';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02zm';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8312,8 +8312,8 @@ function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
     if (i < lastDom) { if (weekend) weDays++; else wdDays++; }
   });
   const b = pctRound(bands), w = pctRound([wdDays ? wd / wdDays : 0, weDays ? we / weDays : 0]);
-  // 가장 큰 항목의 이름과 숫자에 색(시간대·주중주말 각각, 같은 값이면 둘 다) — 2026-09-02 Crenop 지정
-  const hl = (labels, vals) => { const mx = Math.max(...vals); const L = labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l}</span>` : l).join('/'); const V = vals.map(v => v === mx ? `<span class="hl">${v}</span>` : v).join('/'); return `${L} ${V}%`; };
+  // '이름 숫자%'를 항목마다 붙여 쓴다(2026-09-02 Crenop — 구 '이름/이름 숫자/숫자%' 묶음 표기 철회). 가장 큰 항목은 이름·숫자에 색(같은 값이면 둘 다).
+  const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
   return {
     line1: `평균 시작 ${hm(circularMeanMinutes(starts))} · 평균 종료 ${hm(circularMeanMinutes(ends))} · 평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`,
     line2: `${hl(['새벽', '오전', '오후', '야간'], b)} · ${hl(['주중', '주말'], w)}`,

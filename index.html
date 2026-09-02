@@ -370,8 +370,9 @@
      되돌렸다 — 누르면 다가올 일정 목록 모달이 뜨므로 눌리게 보여야 한다(Crenop 지적). 한 줄(제목 · 남은 시간)은 유지,
      같은 날 2건+는 +N 없이 첫 건만(옛 두 줄 격자는 사이트의 한 줄 버튼 규칙에 어긋나 복원하지 않는다). 칸을 넘치면 제목만 말줄임. */
   .sch-line { min-width: 0; }
-  .sch-line-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sch-line-when { flex: none; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .sch-line-txt, .sch-line-shell { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sch-line-when, .sch-line-mb { flex: none; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .sch-line-mb { display: none; }   /* 세로 배치 전용 D-day 칸 — 기념일의 PC 문구/약식 문구와 같은 갈아끼우기 문법 */
   /* 일정 줄은 좌우 한 칸씩 더 쓴다 — 양옆 탭(통계·현수막)은 보조바를 안 쓰므로 자리가 비어 있고,
      제목이 잘리면 표시의 뜻이 사라진다. 흐름에서 빼내야(absolute) 칸 폭(64px)에 눌리지 않는다. */
   /* 기념일은 프로필 칸의 오른쪽 끝에 붙는다 — 오른쪽 경계가 프로필 탭의 오른쪽 경계와 일치한다.
@@ -401,11 +402,12 @@
   .drawer-btn:hover { border-color: var(--accent); }
   .drawer-btn svg { width: 18px; height: 18px; display: block; }
   /* 걸린 필터 개수 — 필터가 서랍에 숨으면 "왜 안 나오지"가 되므로 버튼에 남겨 둔다 */
-  /* 켜둔 비율만큼 채운다. 아이콘 자체가 양을 보여주므로 곁에 붙는 숫자·점을 해석할 일이 없다.
-     --funnel-fill = 켜진 비율(0~1)을 JS가 넣는다. 이 '채움' 장치는 아이콘 모양과 무관하게 재사용 가능하다. */
-  .drawer-btn .funnel-fill { clip-path: inset(calc((1 - var(--funnel-fill, 1)) * 100%) 0 0 0); }
+  /* 남은 만큼 안쪽이 진해진다(2026-09-02 Crenop 지정). 종전엔 아래에서 차오르는 방식이었는데 0%가 '빈 상자 + 채운 체크'라
+     멀쩡한 버튼처럼 읽혔다(실사고 사진 4장). 이제 테두리는 그대로 두고 안쪽 면만 옅어지며, 다 옅어지면 체크가 점선으로 남는다 —
+     아주 사라지면 무슨 버튼인지 안 읽힌다. --funnel-fill = 화면에 남은 항목 비율(0~1), JS가 넣는다. */
+  .drawer-btn .funnel-fill { opacity: var(--funnel-fill, 1); }
+  .drawer-btn .cb-check { opacity: calc(1 - var(--funnel-fill, 1)); }   /* 안쪽이 옅어진 만큼 점선 체크가 드러난다 */
   .drawer-btn.filtered { color: var(--accent); border-color: var(--accent); }
-  .drawer-btn.fill-low .cb-check { fill: currentColor; }   /* 체크박스 3구간 중 마지막 — 빈 상자에 채운 체크 */
   #drawerBtnR svg { width: 22px; height: 22px; }   /* 체크박스는 상자 2~22 + 22px(66번 확정) — 18px에선 상자가 좁게 읽혔다 */
   /* 드로어 뒤 가림막 — 누르면 닫힌다(우측 드로어의 유일한 닫기 경로이므로 값이 싸야 한다) */
   .drawer-scrim {
@@ -2806,11 +2808,13 @@
     /* 세로 배치에서는 흐름 안에서 왼쪽부터 오른쪽으로 나열된다 */
     .tab-aux[data-for="members"] .celeb-wrap { position: static; transform: none; }
     .tab-aux[data-for="content"] { overflow: hidden; position: static; }
-    /* 세로 배치의 일정 버튼은 예외적으로 두 줄(2026-09-02 Crenop 지정 — 원래도 두 줄이었다): 한 줄이면 기둥 폭을 이 줄이 정해버린다.
-       아이콘은 왼쪽에서 두 줄에 걸치고, 오른쪽에 제목 / 남은 시간. max-width 100%라 기둥 폭을 넓히지 않는다. */
-    .tab-aux[data-for="content"] .sch-line { position: static; transform: none; width: auto; max-width: 100%;
-      display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; row-gap: 0; align-items: center; line-height: 1.25; }
-    .tab-aux[data-for="content"] .sch-line svg { grid-row: 1 / span 2; }
+    /* 세로 배치는 제목 없이 D-day만(2026-09-02 Crenop 지정). 두 줄 예외는 함께 철회한다 —
+       세로에서 일정 제목을 주지 않던 종전 규칙으로 돌아가는 것이고, 두 줄이 필요했던 이유(제목이 길다)도 같이 사라진다.
+       가장 긴 표기가 'D-DAY'라 버튼이 달력 탭 줄의 가운데를 덮지 않는다(덮으면 그 자리에서 탭이 안 눌린다). */
+    .tab-aux[data-for="content"] .sch-line { position: static; transform: none; width: auto; max-width: 100%; }
+    .tab-aux[data-for="content"] .sch-line-txt,
+    .tab-aux[data-for="content"] .sch-line-when { display: none; }
+    .tab-aux[data-for="content"] .sch-line-mb { display: inline; }
     .subbar-lead { gap: 6px; overflow-x: auto; scrollbar-width: none; }
     .page-title-link, .celebration-box { padding: 4px 10px; }
     /* 기념일만 짧은 요약('이름 종류')으로 — PC 문구는 길어 세로형 행 폭을 넘긴다(2026-09-01) */
@@ -2876,8 +2880,8 @@
     body.drawer-l .sidebar { transform: none; }
     .drawer-btn#drawerBtnL { display: inline-flex; }
     #drawerClose { display: flex; }   /* 왼쪽(메뉴) 닫기만 — 공용 클래스로 켜면 우측 서랍의 ✕까지 상시 노출된다(우상단 점거 사고) */
-    /* ✕가 왼쪽 칸의 첫 행을 차지하므로 부속 칸도 같은 행에서 시작해야 한다.
-       종전 grid-row: 1 / span 2 그대로면 부속만 ✕ 높이만큼 위로 올라가 탭과 한 줄씩 어긋난다(실사고). */
+    /* ✕가 왼쪽 칸의 첫 행을 차지하므로 부속 칸도 같은 행에서 시작해야 한다(그래서 여기서 행을 덮어쓰지 않는다).
+       일정 버튼의 두 줄 격자는 2026-09-02에 폐지 — 세로 배치는 D-day 한 칸뿐이라 행이 어긋날 여지가 없다. */
 
   }
   /* 통합탭 카드: 지표 행 클릭=그래프 모달 (헤더→멤버 이동은 폐지 — 멤버 상세는 상단 아바타 탭이 유일 동선).
@@ -3201,7 +3205,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02u';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02w';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3339,16 +3343,15 @@ const MEMBER_BIRTHDAYS = {
     btnR.style.visibility = panel ? '' : 'hidden';
     // 여는 버튼이 없으면 서랍 상태도 반드시 내린다 — 안 그러면 겹쳐 뜨는 ✕만 화면에 남는다(실사고)
     if (!panel) { setDrawer('r', false); return; }
-    // [data-type]으로 좁히는 이유: 3열을 채우는 빈칸(evt-type-spacer·chem-type-spacer)도 .filter-type이라
-    // 그냥 세면 '꺼진 필터'로 잡힌다 — 다 켜둔 상태에서 이벤트 1·케미 2가 뜨던 것이 정확히 그 빈칸 수였다.
-    // 깔때기를 켜진 비율만큼 채운다. 숫자를 쓰지 않는 이유: 그 값이 켠 수인지 끈 수인지를 다시 해석해야 한다.
-    // 고르는 기둥(.side-pick)에는 필터가 없어 비율이 1(가득) — 걸린 게 없다는 뜻으로 자연스럽다.
-    const all = panel.querySelectorAll('.filter-member, .filter-type[data-type]');
-    const on = panel.querySelectorAll('.filter-member.on, .filter-type[data-type].on');
-    const ratio = all.length ? on.length / all.length : 1;
+    // 채움 = '필터가 없을 때 있었을 항목 수' 대비 '지금 화면에 남은 항목 수'(2026-09-02 Crenop 지정).
+    // 종전엔 '켜둔 필터 칸 수 ÷ 전체 칸 수'라 화면과 어긋났다: 케미에서 멤버를 다 꺼 화면이 텅 비어도 종류 칸이 켜져 있으면
+    // 절반쯤 차 보였고, 케미 종류 칸은 data-ctype이라 아예 세지도 않아 '종류 전부 끔'이 가득 찬 버튼으로 보였다(실사고 사진 4장).
+    // 각 탭이 그리면서 filterCounts에 남긴 수를 그대로 쓴다. 고르는 기둥(.side-pick)만 있는 탭은 기록이 없어 1(가득).
+    const pageId = (document.querySelector('.page.active') || {}).id || '';
+    const c = filterCounts[pageId.replace('page-', '')];
+    const ratio = (c && c.total) ? c.shown / c.total : 1;
     btnR.style.setProperty('--funnel-fill', String(ratio));
     btnR.classList.toggle('filtered', ratio < 1);
-    btnR.classList.toggle('fill-low', ratio <= 0.221);   // 체크박스: 채움선이 체크 아래로 내려간 구간 — 체크를 채운다(66번 확정 22.1%)
   };
   // 폭에 따라 실제로 요소를 옮긴다(CSS로는 부모를 못 바꾼다).
   //  PC   : [기념일·링크] [탭별 부속 11칸] [가이드]  — 보조바 한 줄
@@ -3752,10 +3755,10 @@ const SVG_ICONS = {
   // 종전엔 마크업에 직접 박아 넣었는데, 그러면 새 아이콘이 이 표에 없어 다음 사람이 못 찾는다.
   menu: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>`,
   close: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
-  // 서랍 우측 버튼 = 체크박스(2026-09-02, 66번 승인 개정 A — 깔때기 폐지). 상자 면이 켜진 비율만큼 아래에서 차오른다(.funnel-fill의
-  // clip-path 장치를 그대로 — 이름은 장치의 것이지 모양의 것이 아니다). 체크는 파낸 구멍이라 채움선이 지나는 동안 테두리만 보이고,
-  // 채움선이 체크 아래(22.1%)로 내려가면 JS가 fill-low를 붙여 체크를 채운다. 상자 테두리·체크 윤곽은 항상 그린다.
-  checkbox: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="funnel-fill" d="M2 2h20v20H2z M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="currentColor" fill-rule="evenodd"/><path class="cb-check" d="M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+  // 서랍 우측 버튼 = 체크박스(2026-09-02, 66번 승인 개정 A — 깔때기 폐지). 상자 테두리는 늘 그대로, 안쪽 면(.funnel-fill)만
+  // 화면에 남은 항목 비율만큼 진해진다(개정 B, 2026-09-02 Crenop — 아래에서 차오르는 방식 폐지). 체크는 그 면에서 파낸 구멍이라
+  // 면이 옅어지면 같이 옅어지고, 대신 점선 윤곽(.cb-check)이 반대로 진해져 0%에서도 무슨 버튼인지 읽힌다.
+  checkbox: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="funnel-fill" d="M2 2h20v20H2z M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="currentColor" fill-rule="evenodd"/><path class="cb-check" d="M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-dasharray="2 1.6"/><rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
   // 달력 항목 종류(2026-09-01). 같은 규격: viewBox 24 · 16×16 · stroke 2 · round.
   soccer: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2.6999999999999993a9.3 9.3 0 1 1 -0.01 0z M9.62 11.23 10.53 14.02 13.47 14.02 14.38 11.23 12.00 9.50z M10.41 2.92 9.43 5.93 12.00 7.80 14.57 5.93 13.59 2.92z M2.87 10.70 5.44 12.57 8.01 10.70 7.02 7.68 3.85 7.68z M7.94 20.28 10.51 18.42 9.53 15.40 6.36 15.40 5.38 18.42z M18.62 18.42 17.64 15.40 14.47 15.40 13.49 18.42 16.06 20.28z M20.15 7.68 16.98 7.68 15.99 10.70 18.56 12.57 21.13 10.70z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 잔디(축구) — 채운 공에 오각형을 파냄(2026-09-02, 66번 승인. 64판 폐기)
   steam: `<svg viewBox="0 0 24 24" width="16" height="16"><g transform="translate(-0.73 -2.63) scale(1.2103)"><path d="M9.12 19.29 7.98 19.29 7.02 18.94 6.02 18.02 5.54 16.85 1.79 15.36 1.57 15.06 1.22 13.40 1.22 11.39 6.67 13.62 7.90 13.18 8.68 13.18 11.43 9.21 11.43 8.51 11.69 7.55 12.31 6.50 12.96 5.85 13.92 5.23 15.23 4.88 16.54 4.97 17.85 5.50 19.03 6.59 19.73 7.98 19.81 9.90 19.38 11.13 19.03 11.65 17.85 12.74 16.63 13.27 15.49 13.35 11.83 15.97 11.61 16.19 11.52 17.15 11.08 18.02 10.08 18.94 9.12 19.29z M16.15 11.91 17.06 11.61 17.98 10.78 18.42 9.82 18.50 8.94 18.07 7.63 17.33 6.81 16.45 6.37 15.23 6.28 14.10 6.72 13.27 7.55 12.83 8.60 12.83 9.64 13.09 10.43 13.83 11.35 14.79 11.87 16.15 11.91z M15.84 11.26 15.06 11.17 14.27 10.73 13.79 10.17 13.53 9.47 13.62 8.51 13.96 7.81 14.53 7.33 15.58 6.98 16.28 7.07 16.89 7.42 17.46 7.98 17.72 8.60 17.72 9.64 17.46 10.25 16.80 10.91 15.84 11.26z M9.16 18.55 9.90 18.24 10.56 17.59 10.91 16.80 10.91 15.67 10.30 14.53 9.64 14.05 8.60 13.79 7.90 13.88 7.81 14.05 9.47 14.75 9.86 15.14 10.21 15.84 10.12 16.80 9.38 17.72 8.77 17.98 7.90 17.89 6.50 17.28 6.46 17.41 7.20 18.24 7.72 18.50 9.16 18.55z" fill="currentColor" fill-rule="evenodd"/></g></svg>`,   // 스팀 로고 추적본 22.5(66번 승인. 64판 폐기)
@@ -3973,7 +3976,7 @@ function titleBadgeHtml(title) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .cal-t, .cal-tl, .cal-row-title';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .cal-t, .cal-tl, .cal-row-title';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -4003,6 +4006,8 @@ let lastContentUpdate = null;
 let lastBannerUpdate = null;
 let lastHallUpdate = null;
 let currentPage = 'live';
+// 서랍 우측 버튼 채움용 — 각 탭이 그릴 때마다 { shown, total }을 적는다(2026-09-02). 기록이 없는 탭 = 필터가 없는 탭.
+const filterCounts = {};
 
 const ALL_TYPE_KEYS = ['soop', 'chat', 'post', 'youtube', 'cafe'];
 const LS_FILTER_MEMBERS = 'chuntaverse_filter_members';
@@ -4098,6 +4103,19 @@ function typeToCat(et) {
 // 동작 설명·함수(ensureVodMonth 등)는 원래 자리(VOD 상태 블록)에 그대로 있다.
 const vodState = { data: {}, loading: new Set() };
 const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
+
+// 통계 탭(2026-08-31): 한 화면에 셋을 겹쳐 두지 않고 종류로 갈아끼운다 —
+// 명예의 전당(기본) · 통계(크루 숫자) · 시간대(멤버별 분포). 셋 다 '멤버를 가로질러 보는' 것이라 한 탭이지만
+// 한 번에 하나만 본다. 기간 버튼도 종류를 따라간다(명전=통산·반기 / 나머지=연·월).
+// 선언만 여기 — vodState와 같은 이유다. #hall로 새로고침하면 applyHash → renderHallStats가 아래 선언부보다 먼저
+// 실행돼 'HALL_KINDS 초기화 전 접근'으로 부팅이 통째로 죽고 화면이 영영 로딩 표시에 머물렀다(2026-09-02 헤드리스 실측).
+let hallKind = 'hall';
+// '통계' 탭 안의 '통계'는 이름이 겹쳐 '지표'로(2026-09-01). 셋 다 아이콘을 얹어 칸만으로 구분되게 한다.
+const HALL_KINDS = [
+  { key: 'hall', label: '명예의 전당', icon: 'trophy' },
+  { key: 'stats', label: '지표', icon: 'barChart' },
+  { key: 'heat', label: '시간대', icon: 'clockTime' },
+];
 
 const statsState = {
   tabsInited: false,
@@ -4264,7 +4282,10 @@ async function loadCrewSheets() {
   try { const c = JSON.parse(lsGet(LS_CREWACT_CACHE, 'null')); if (c) crewActs = parseCrewActRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_MEMBERINFO_CACHE, 'null')); if (c) MEMBER_INFO = parseMemberInfoRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_VACATION_CACHE, 'null')); if (c) VACATION = parseVacationRows(c); } catch (e) {}
+  // 음악 탭도 같은 시트(영상 목록)를 쓴다 — 빠져 있어서 #disco로 새로고침하면 시트가 와도 다시 안 그려
+  // '등록된 곡이 없습니다'에 머물렀다(2026-09-02 헤드리스 대조로 확인). 프로필과 같은 자리에서 같이 처리한다.
   if (currentPage === 'members') renderMembersBody();
+  else if (currentPage === 'disco') renderDisco();
   // 최신 fetch(병렬, 실패 격리) — 실패 시 캐시본 유지(확정: 시트 단일 소스, 첫 방문+장애 조합만 해당 섹션 공백)
   const pull = (url, lsKey, apply) => fetch(url)
     .then(r => { if (!r.ok) throw new Error('no data'); return r.text(); })
@@ -4277,6 +4298,7 @@ async function loadCrewSheets() {
   ]);
   crewSheetsDone = true;
   if (currentPage === 'members') renderMembersBody();
+  else if (currentPage === 'disco') renderDisco();
   updatePageTitle();   // 상단바 축하 박스(N번째 생일·방송 N주년)가 MEMBER_INFO를 읽음 — 시트 도착 후 재구성
 }
 
@@ -5036,13 +5058,13 @@ function scheduleBtnHTML() {
   scheduleSig = h.sig;
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (!h.vis.length) {
-    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">불러오는 중</span></button>`;
+    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-shell">불러오는 중</span></button>`;
   }
   const head = h.vis[0];
-  // 단일 일정 — 현행: 제목 + (당일부터 D-time, 그 전 D-day). 모바일은 항상 D-day.
+  // 단일 일정 — 가로 배치: 제목 + (당일부터 D-time, 그 전 D-day). 세로 배치: D-day만(.sch-line-mb, CSS가 갈아 끼운다).
   if (h.group.length < 2) {
     const when = (head.hasTime && ddayNum(head) === 0) ? dtimeText(head) : ddayText(head);
-    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head.shortTitle)}</span><span class="sch-line-when">${when}</span></button>`;
+    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head.shortTitle)}</span><span class="sch-line-when">${when}</span><span class="sch-line-mb">${ddayText(head)}</span></button>`;
   }
   // 같은 날 2건+: 종전엔 제목 열 + dtime 열을 격자로 폈지만, 보조바 칸이 92px이라 들어가지 않는다.
   // 건수만 덧붙이고 내용은 달력 탭에서 본다(버튼의 역할 = '언제'까지).
@@ -5050,7 +5072,7 @@ function scheduleBtnHTML() {
   // 자세한 것은 달력 탭이 담당하므로 보조바는 '다음이 언제인가'만 알려주면 된다.
   const head2 = h.vis[0];
   const when2 = (head2.hasTime && ddayNum(head2) === 0) ? dtimeText(head2) : ddayText(head2);
-  return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head2.shortTitle)}</span><span class="sch-line-when">${when2}</span></button>`;
+  return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-txt">${escapeHtml(head2.shortTitle)}</span><span class="sch-line-when">${when2}</span><span class="sch-line-mb">${ddayText(head2)}</span></button>`;
 }
 
 
@@ -5099,6 +5121,8 @@ function tickSchedule() {
   // 한 줄 표시(2026-08-31): 남은 시간 칸 하나만 갈아끼운다. 제목·+N은 구조가 바뀔 때 updatePageTitle이 다시 그린다.
   const el = document.querySelector('#schBtn .sch-line-when');
   if (el) el.textContent = (h.vis[0].hasTime && ddayNum(h.vis[0]) === 0) ? dtimeText(h.vis[0]) : ddayText(h.vis[0]);
+  const mb = document.querySelector('#schBtn .sch-line-mb');   // 세로 배치 칸 — 자정을 넘기면 D-3 → D-2로 바뀐다
+  if (mb) mb.textContent = ddayText(h.vis[0]);
 }
 
 async function loadSchedule() {
@@ -5106,7 +5130,9 @@ async function loadSchedule() {
   if (scheduleData.length === 0) {
     try {
       const cached = JSON.parse(lsGet(LS_SCHEDULE_CACHE, '[]'));
-      if (cached.length) { scheduleData = parseScheduleRows(cached); updatePageTitle(); }
+      // 달력 탭도 일정을 칸에 그린다(2026-08-31 이관) — 빠져 있어서 #content로 새로고침하면 일정 칸만 빈 채로
+      // 남았다(2026-09-02 헤드리스 대조로 확인). 보조바 한 줄(updatePageTitle)과 같은 자리에서 같이 처리한다.
+      if (cached.length) { scheduleData = parseScheduleRows(cached); updatePageTitle(); if (currentPage === 'content') renderCalendarTab(); }
     } catch (e) {}
   }
   // 최신 fetch로 갱신
@@ -5117,6 +5143,7 @@ async function loadSchedule() {
     lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows));
     scheduleData = parseScheduleRows(rows);
     updatePageTitle();
+    if (currentPage === 'content') renderCalendarTab();
   } catch (e) {
     // fetch 실패 시: 위에서 캐시를 이미 그렸으면 유지. 캐시도 없으면 셸 버튼 유지.
   }
@@ -5565,29 +5592,53 @@ function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
   const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], youtube: [], vodPending: false, count: 0 });
-  if (calState.types.has('content')) for (const c of contentData) {
+  // 서랍 버튼 채움용 개수(2026-09-02): 꺼진 종류도 '있었을 것'으로 세되 담지는 않는다 — 그래야 '이 달에 원래 몇 개'와
+  // '지금 몇 개 남았나'를 같은 한 번의 순회로 얻는다. 일정은 종류 필터 대상이 아니라 양쪽에서 뺀다.
+  // 이 달 밖 날짜는 세지 않는다 — 컨텐츠 시트는 달 구분 없이 통째로 들어오고 화면은 이 달 칸만 쓴다.
+  let shown = 0, total = 0;
+  const inMonth = k => k.startsWith(ym);
+  const onType = t => calState.types.has(t);
+  for (const c of contentData) {
     const key = c.date && c.date.sort ? String(c.date.sort).slice(0, 6) : '';
     if (key.length !== 6 || !calRowVisible(c)) continue;
-    day(`20${key.slice(0, 2)}-${key.slice(2, 4)}-${key.slice(4, 6)}`).content.push(c);
+    const dk = `20${key.slice(0, 2)}-${key.slice(2, 4)}-${key.slice(4, 6)}`;
+    if (inMonth(dk)) total++;
+    if (!onType('content')) continue;
+    if (inMonth(dk)) shown++;
+    day(dk).content.push(c);
   }
   for (const s of scheduleData) if (calRowVisible(s)) day(s.date).schedule.push(s);
   const monthData = statsState.data[ym];
+  const seenVod = {};   // 날짜별 이미 센 다시보기 — 꺼져 있어도 중복은 한 번만 센다(종전엔 담긴 목록에서 뽑아 썼다)
   if (monthData) for (const m of calMembers()) {
     const mi = MEMBERS.indexOf(m);
     const sum = computeMonthSummary(monthData[m.id], year, month);
-    if (calState.types.has('vod')) for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
-      const d = day(dk); const seen = new Set(d.vods.map(x => x.v.title_no));
+    for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
+      const seen = seenVod[dk] || (seenVod[dk] = new Set());
       for (const s of sessions) {
         const parts = vodsForBroad(m.id, ym, s.broad_no);   // null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
-        if (parts === null) { d.vodPending = true; continue; }
+        if (parts === null) { if (onType('vod')) day(dk).vodPending = true; continue; }
         const at = new Date(s.start).getTime();
-        for (const v of parts) if (!seen.has(v.title_no)) { seen.add(v.title_no); d.vods.push({ m, mi, v, at }); }
+        for (const v of parts) {
+          if (seen.has(v.title_no)) continue;
+          seen.add(v.title_no);
+          if (inMonth(dk)) total++;
+          if (!onType('vod')) continue;
+          if (inMonth(dk)) shown++;
+          day(dk).vods.push({ m, mi, v, at });
+        }
       }
     }
-    if (calState.types.has('youtube')) for (const [dk, ys] of Object.entries(sum.youtubeByDate)) {
-      for (const y of ys) day(dk).youtube.push({ m, mi, y, at: new Date(y.time).getTime() });
+    for (const [dk, ys] of Object.entries(sum.youtubeByDate)) {
+      for (const y of ys) {
+        if (inMonth(dk)) total++;
+        if (!onType('youtube')) continue;
+        if (inMonth(dk)) shown++;
+        day(dk).youtube.push({ m, mi, y, at: new Date(y.time).getTime() });
+      }
     }
   }
+  filterCounts.content = { shown, total };
   for (const d of Object.values(map)) {
     // 순서 = 사이트 멤버 순서(MEMBERS) → 시각 → 파트(2026-09-02 Crenop 지정). 대표 그림도 상세 타일도 같은 순서라
     // 크루 화면에서 13명이 섞여도 늘 같은 자리에서 같은 사람을 찾는다(생방송 카드·스트립과 같은 문법).
@@ -5944,7 +5995,10 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 // 옛 형식(#members:dalta20 — 숲 아이디)도 계속 해석한다: 기념일 박스가 2026-08-31 이전까지 그 형식을 링크로
 // 뿌려왔기 때문. 다만 legacy=true로 표시해 두고, 화면을 띄운 직후 주소를 영문명 형식으로 바꿔 쓴다
 // (syncHash) — 주소창에 아이디가 남지 않고, 앞으로 복사되는 주소는 전부 영문명 형식이 된다.
-const SUBTAB_PAGES = { members: 'crew', stats: 'all' };   // 하위탭을 가진 탭 → 그 탭의 '접미사 없음' 기본값
+// 지난 활동의 기본값이 'all'이던 것을 첫 멤버로 바로잡음(2026-09-02): '통합' 하위탭은 2026-08-31에 통계 탭으로 옮기며
+// 없어졌는데 이 표만 남아, #stats로 새로고침하면 selectStatsTab('all') → 있지도 않은 멤버 'all'을 그리려다
+// 본문이 통째로 비었다(탭을 눌러 들어가면 selectedTab이 비어 있어 첫 멤버로 그려져 멀쩡했다 — 헤드리스 대조로 확인).
+const SUBTAB_PAGES = { members: 'crew', stats: MEMBERS[0].id };   // 하위탭을 가진 탭 → 그 탭의 '접미사 없음' 기본값
 function parseHash(hash) {
   const raw = decodeURIComponent((hash || '').replace('#', ''));
   const i = raw.indexOf(':');
@@ -6029,8 +6083,7 @@ const initHash = parseHash(location.hash);
 updatePageTitle();
 loadTopbarLinks();   // 상단바 링크 버튼 시트 — 캐시 선표시 후 최신화(완료 시 updatePageTitle 재호출)
 loadLikeRankBtn();   // 좋아요 순위 버튼 — 활성 대회 유무·버튼색만 판정(순위 데이터는 모달 열 때 /like-ranking에서)
-applyHash(initHash);
-syncHash(false);     // 옛 아이디 형식·대문자·알 수 없는 값으로 들어왔으면 여기서 정규 형식으로 덮어쓴다
+// (첫 화면을 실제로 여는 applyHash·syncHash는 스크립트 맨 끝으로 — 2026-09-02, 그 자리의 주석 참조)
 // 로고 클릭 → 생방송(홈). nav 클릭과 동일 경로(뒤로가기 한 칸 쌓임).
 {
   const logoEl = document.getElementById('siteLogoImg');
@@ -6696,6 +6749,7 @@ function applyFilter() {
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
   });
+  filterCounts.events = { shown: filtered.length, total: allEvents.length };   // 서랍 버튼 채움용(2026-09-02)
   const sortLabel = eventSortAsc ? '과거순' : '최신순';   // 두 라벨 3자 등장(2026-08-09) — 토글해도 버튼 폭·아이콘-글자 간격이 그대로, 옆 버튼들과 위화감 없음
   const arrowSvg = eventSortAsc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp;   // SVG_ICONS로 통합(2026-08-08)
   const scrollDownSvg = SVG_ICONS.chevronsDown;
@@ -8905,12 +8959,13 @@ function renderChemistry() {
   const excluded = (ids) => topActive && allIncluded(ids);             // 상단에 올라간 카드는 하단에서 중복 제외
 
   // ── 상단: 모두 포함 — 선택 멤버가 전부 든 조합만, 2인·그룹 통합 평면 나열(인원수 적은 순 → 같은 인원수면 채팅 합 내림차순) ──
-  let topHtml = '';
+  let topHtml = '', topCount = 0;
   if (topActive) {
     const matched = [];
     for (const p of pairs) if (allIncluded([p.m1.id, p.m2.id]) && typeMatch(pairTypes(p))) matched.push({ size: 2, total: p.total, html: pairCardHtml(p) });
     for (const g of CHEM_GROUPS) if (allIncluded(g.members) && typeMatch(groupTypes(g))) matched.push({ size: g.members.length, total: groupChatTotal(g), html: groupCardHtml(g) });
     matched.sort((a, b) => a.size - b.size || b.total - a.total);
+    topCount = matched.length;
     // 2명 선택 시 그 쌍이 항상 매칭되므로, '없음'은 사실상 3~12명에서만 발생
     const matchedBody = matched.length > 0
       ? matched.map(x => x.html).join('')
@@ -8919,17 +8974,21 @@ function renderChemistry() {
   }
 
   // ── 하단: 일부 포함 — 기존 OR 결과(상단에 올라간 카드는 제외). 우산 라벨은 상단이 떴을 때만. ──
-  const botPairCards = pairs
-    .filter(p => (chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id)) && !excluded([p.m1.id, p.m2.id]) && typeMatch(pairTypes(p)))
-    .map(pairCardHtml).join('');
+  const botPairs = pairs
+    .filter(p => (chemFilterMembers.has(p.m1.id) || chemFilterMembers.has(p.m2.id)) && !excluded([p.m1.id, p.m2.id]) && typeMatch(pairTypes(p)));
+  const botPairCards = botPairs.map(pairCardHtml).join('');   // 배열로 한 번 받는다 — 서랍 버튼 채움에 개수가 필요하다
+  let botGroupCount = 0;
   const botGroupSections = [...new Set(CHEM_GROUPS.map(g => g.members.length))].sort((a, b) => a - b).map(n => {
     const groups = CHEM_GROUPS
       .filter(g => g.members.length === n && g.members.some(id => chemFilterMembers.has(id)) && !excluded(g.members) && typeMatch(groupTypes(g)))
       .sort((a, b) => groupChatTotal(b) - groupChatTotal(a));   // 2인 케미와 동일하게 주고받은 채팅 합 내림차순
+    botGroupCount += groups.length;
     if (groups.length === 0) return '';
     return secBlock(`${n}인 케미`, groups.map(groupCardHtml).join(''), false, false);
   }).join('');
 
+  // 서랍 버튼 채움용(2026-09-02): 화면에 실제로 뜬 카드 수 ÷ 필터가 없을 때 카드 수. 위·아래 트랙은 겹치지 않는다(excluded).
+  filterCounts.chemistry = { shown: topCount + botPairs.length + botGroupCount, total: pairs.length + CHEM_GROUPS.length };
   let botHtml = '';
   if (topActive) botHtml += sec('일부 포함', false, true);   // 우산 라벨(상단과 구분하는 트랙 구분선)
   botHtml += secBlock('2인 케미', botPairCards.length > 0 ? botPairCards : '<div class="chem-empty">필터 조건에 맞는 케미가 없습니다</div>', true, false);   // 그리드 첫 줄(또는 우산 라벨 바로 아래)이라 구분선 제거
@@ -9218,16 +9277,7 @@ function hallSumMonths(monthList, nowMs = Date.now()) {
   return sums;
 }
 
-// 통계 탭(2026-08-31): 한 화면에 셋을 겹쳐 두지 않고 종류로 갈아끼운다 —
-// 명예의 전당(기본) · 통계(크루 숫자) · 시간대(멤버별 분포). 셋 다 '멤버를 가로질러 보는' 것이라 한 탭이지만
-// 한 번에 하나만 본다. 기간 버튼도 종류를 따라간다(명전=통산·반기 / 나머지=연·월).
-let hallKind = 'hall';
-// '통계' 탭 안의 '통계'는 이름이 겹쳐 '지표'로(2026-09-01). 셋 다 아이콘을 얹어 칸만으로 구분되게 한다.
-const HALL_KINDS = [
-  { key: 'hall', label: '명예의 전당', icon: 'trophy' },
-  { key: 'stats', label: '지표', icon: 'barChart' },
-  { key: 'heat', label: '시간대', icon: 'clockTime' },
-];
+// (hallKind·HALL_KINDS 선언은 statsState 옆으로 — 2026-09-02, 위쪽 TDZ 주석 참조)
 
 function renderHallStats() {
   const kindBox = document.getElementById('hallKindBox');
@@ -9782,6 +9832,14 @@ function renderMembersProfile(body, memberId) {
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { switchPage('links'); syncHash(true); });
   body.querySelectorAll('[data-mi]').forEach(row => row.addEventListener('click', () => openMiCollect(row.dataset.mi, memberId)));   // 항목 모아보기
 }
+// ── 첫 화면 열기 — 반드시 스크립트의 맨 끝 ──
+// 여기가 끝인 이유(2026-09-02): 이 아래가 아니라 위쪽에도 아직 만들어지지 않은 값이 스물몇 개 남아 있었고,
+// 화면을 먼저 열면 그 탭의 그리기가 '아직 안 만들어진 값'에 손을 대 부팅이 통째로 멈춘다 —
+// #hall(통계)로 새로고침하면 HALL_KINDS·hallShowRanks에서 실제로 그랬고, 화면은 영영 '불러오는 중'에 머물렀다.
+// 값을 하나씩 위로 옮기는 대신 '전부 만들어진 다음에 연다'로 뒤집었다. 새 탭을 붙여도 같은 사고가 안 난다.
+// (여는 시점만 늦춘 것이고 같은 동기 블록 안이라 화면이 두 번 그려지거나 깜빡이지 않는다 — 헤드리스 11탭 실측)
+applyHash(initHash);
+syncHash(false);     // 옛 아이디 형식·대문자·알 수 없는 값으로 들어왔으면 여기서 정규 형식으로 덮어쓴다
 </script>
 
   <!-- 상단바 모달(좋아요/일정): body 직속이어야 z-index 1000이 nav(sidebar, z-index:2) 위로 올라감 -->

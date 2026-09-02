@@ -119,20 +119,7 @@
     word-break: keep-all;
     overflow-wrap: break-word;
   }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 55% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 80% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(2px 2px at 15% 50%, rgba(97,255,236,0.3) 0%, transparent 100%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  /* 배경은 단색(--bg). 화면에 고정된 별 점 6개(body::before의 radial-gradient)는 2026-09-03 Crenop 지정으로 제거 — 지저분해 보였다. */
 
   /* ── 상단바 (2026-08-31 개편) ─────────────────────────────────────────────────────
      PC와 모바일의 탐색 UI를 맞바꿨다. 여기(가로 · 아이콘 위 · 글자 아래)가 종전 모바일 모양이고,
@@ -402,13 +389,12 @@
   }
   .drawer-btn:hover { border-color: var(--accent); }
   .drawer-btn svg { width: 18px; height: 18px; display: block; }
-  /* 걸린 필터 개수 — 필터가 서랍에 숨으면 "왜 안 나오지"가 되므로 버튼에 남겨 둔다 */
-  /* 남은 만큼 안쪽이 진해진다(2026-09-02 Crenop 지정). 종전엔 아래에서 차오르는 방식이었는데 0%가 '빈 상자 + 채운 체크'라
-     멀쩡한 버튼처럼 읽혔다(실사고 사진 4장). 이제 테두리는 그대로 두고 안쪽 면만 옅어지며, 다 옅어지면 체크가 점선으로 남는다 —
-     아주 사라지면 무슨 버튼인지 안 읽힌다. --funnel-fill = 화면에 남은 항목 비율(0~1), JS가 넣는다. */
-  .drawer-btn .funnel-fill { opacity: var(--funnel-fill, 1); }
-  .drawer-btn .cb-check { opacity: calc(1 - var(--funnel-fill, 1)); }   /* 안쪽이 옅어진 만큼 점선 체크가 드러난다 */
-  .drawer-btn.filtered { color: var(--accent); border-color: var(--accent); }
+  /* 필터가 걸려 있으면(화면에 남은 항목 수 < 원래 수 — 전부 꺼져 0이어도 같다) 체크박스 안쪽 면만 절반 투명(2026-09-03 Crenop 확정).
+     비율만큼 옅어지던 방식(2026-09-02)은 폐지 — 본문이 걸러진 상태라는 것만 알리면 되고, 텅 비면 걸러졌음을 모를 수 없다.
+     색은 바꾸지 않는다(민트 없음). 점선 체크(.cb-check)는 안 쓴다. */
+  .drawer-btn .funnel-fill { opacity: 1; }
+  .drawer-btn.filtered .funnel-fill { opacity: 0.5; }
+  .drawer-btn .cb-check { opacity: 0; }
   #drawerBtnR svg { width: 22px; height: 22px; }   /* 체크박스는 상자 2~22 + 22px(66번 확정) — 18px에선 상자가 좁게 읽혔다 */
   /* 드로어 뒤 가림막 — 누르면 닫힌다(우측 드로어의 유일한 닫기 경로이므로 값이 싸야 한다) */
   .drawer-scrim {
@@ -3252,7 +3238,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02zm';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-03b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3396,15 +3382,11 @@ const MEMBER_BIRTHDAYS = {
     btnR.style.visibility = panel ? '' : 'hidden';
     // 여는 버튼이 없으면 서랍 상태도 반드시 내린다 — 안 그러면 겹쳐 뜨는 ✕만 화면에 남는다(실사고)
     if (!panel) { setDrawer('r', false); return; }
-    // 채움 = '필터가 없을 때 있었을 항목 수' 대비 '지금 화면에 남은 항목 수'(2026-09-02 Crenop 지정).
-    // 종전엔 '켜둔 필터 칸 수 ÷ 전체 칸 수'라 화면과 어긋났다: 케미에서 멤버를 다 꺼 화면이 텅 비어도 종류 칸이 켜져 있으면
-    // 절반쯤 차 보였고, 케미 종류 칸은 data-ctype이라 아예 세지도 않아 '종류 전부 끔'이 가득 찬 버튼으로 보였다(실사고 사진 4장).
-    // 각 탭이 그리면서 filterCounts에 남긴 수를 그대로 쓴다. 고르는 기둥(.side-pick)만 있는 탭은 기록이 없어 1(가득).
+    // 걸러짐 여부만 본다(2026-09-03 Crenop 확정 — 비율 계산 폐지): 화면에 남은 항목 수 < 원래 수. 전부 꺼져 0이어도 같은 '걸러짐'.
+    // 각 탭이 그리면서 filterCounts에 남긴 수를 쓴다. 고르는 기둥(.side-pick)만 있는 탭은 기록이 없어 걸러짐 아님.
     const pageId = (document.querySelector('.page.active') || {}).id || '';
     const c = filterCounts[pageId.replace('page-', '')];
-    const ratio = (c && c.total) ? c.shown / c.total : 1;
-    btnR.style.setProperty('--funnel-fill', String(ratio));
-    btnR.classList.toggle('filtered', ratio < 1);
+    btnR.classList.toggle('filtered', !!(c && c.total && c.shown < c.total));
   };
   // 폭에 따라 실제로 요소를 옮긴다(CSS로는 부모를 못 바꾼다).
   //  PC   : [기념일·링크] [탭별 부속 11칸] [가이드]  — 보조바 한 줄
@@ -3489,7 +3471,8 @@ const MEMBER_BIRTHDAYS = {
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     const openL = body.classList.contains('drawer-l'), openR = body.classList.contains('drawer-r');
     if (dx > 0) { if (openR) setDrawer('r', false); else if (!openL) setDrawer('l', true); }
-    else { if (openL) setDrawer('l', false); else if (!openR && btnR && btnR.style.display !== 'none') setDrawer('r', true); }
+    // 우측 서랍이 없는 탭(버튼이 visibility:hidden)에서는 열지 않는다 — 종전엔 display만 봐서 가림막과 ✕만 떴다(2026-09-03 실사고)
+    else { if (openL) setDrawer('l', false); else if (!openR && btnR && btnR.style.visibility !== 'hidden') setDrawer('r', true); }
   }, { passive: true });
 })();
 
@@ -3810,8 +3793,7 @@ const SVG_ICONS = {
   menu: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>`,
   close: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
   // 서랍 우측 버튼 = 체크박스(2026-09-02, 66번 승인 개정 A — 깔때기 폐지). 상자 테두리는 늘 그대로, 안쪽 면(.funnel-fill)만
-  // 화면에 남은 항목 비율만큼 진해진다(개정 B, 2026-09-02 Crenop — 아래에서 차오르는 방식 폐지). 체크는 그 면에서 파낸 구멍이라
-  // 면이 옅어지면 같이 옅어지고, 대신 점선 윤곽(.cb-check)이 반대로 진해져 0%에서도 무슨 버튼인지 읽힌다.
+  // 필터가 걸려 있을 때 절반 투명(2026-09-03 Crenop 확정 — 비율만큼 옅어지던 개정 B 폐지). 점선 윤곽(.cb-check)은 남겨 두되 안 보인다.
   checkbox: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="funnel-fill" d="M2 2h20v20H2z M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="currentColor" fill-rule="evenodd"/><path class="cb-check" d="M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-dasharray="2 1.6"/><rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
   // 달력 항목 종류(2026-09-01). 같은 규격: viewBox 24 · 16×16 · stroke 2 · round.
   soccer: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2.6999999999999993a9.3 9.3 0 1 1 -0.01 0z M9.62 11.23 10.53 14.02 13.47 14.02 14.38 11.23 12.00 9.50z M10.41 2.92 9.43 5.93 12.00 7.80 14.57 5.93 13.59 2.92z M2.87 10.70 5.44 12.57 8.01 10.70 7.02 7.68 3.85 7.68z M7.94 20.28 10.51 18.42 9.53 15.40 6.36 15.40 5.38 18.42z M18.62 18.42 17.64 15.40 14.47 15.40 13.49 18.42 16.06 20.28z M20.15 7.68 16.98 7.68 15.99 10.70 18.56 12.57 21.13 10.70z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 잔디(축구) — 채운 공에 오각형을 파냄(2026-09-02, 66번 승인. 64판 폐기)

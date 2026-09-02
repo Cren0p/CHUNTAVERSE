@@ -2058,10 +2058,11 @@
   /* 그림이 없는 날에 일정만 있으면 상자 자리에 일정 제목 — 예정을 칩 하나로만 남기면 무엇인지 안 보인다 */
   .cal-t { position: absolute; inset: 0; padding: 2px 3px; font-size: 12px; line-height: 1.3; color: var(--text); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }   /* 12px(구 11): 가독성(2026-09-02 Crenop) */
   .cal-tl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }   /* 제목은 최대 2줄(2026-09-03 Crenop — 한 줄은 너무 짧다). 상자 높이를 넘는 줄은 잘린다 */
-  .cal-tl.cal-lab { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }   /* '뱅온'·'휴뱅' 줄: 글자 뒤에 얼굴이 흘러가며 줄바꿈 */
-  .cal-tl.cal-lab > span:first-child { color: var(--muted); font-weight: 600; flex: none; margin-right: 2px; }
-  .cal-faces { display: flex; flex-wrap: wrap; gap: 2px; }
-  .cal-faces img, .cal-lab img { width: 14px; height: 14px; display: block; }
+  .cal-tl.cal-lab { display: flex; align-items: flex-start; gap: 4px; }   /* '뱅온'·'휴뱅' 줄: 글자 오른쪽에 색 사각 묶음 */
+  .cal-tl.cal-lab > span:first-child { color: var(--muted); font-weight: 600; flex: none; }
+  /* 멤버 색 사각(2026-09-03): 14px 정사각, 8명 넘으면 두 줄 균등(--who-cols는 JS), 왼쪽 정렬. 일정 모달의 .cal-di-who와 같은 격자 규칙(정렬만 반대) */
+  .cal-faces { display: grid; grid-template-columns: repeat(var(--who-cols, 99), 14px); gap: 2px; justify-content: start; margin-top: 1px; }
+  .cal-face { width: 14px; height: 14px; display: block; }
   .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
   .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop) */
   /* 태그별 고유색(2026-09-02 Crenop 지정) — 달력 칸·목록·상세·일정 모달 어디서나 같은 색. 브랜드 색 출처는 응답 기록(69번).
@@ -3262,7 +3263,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-03u';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-03v';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5847,8 +5848,13 @@ function calSchedTitles(d) { return d.schedule.map(s => `<span class="cal-tl">${
 // '전체' 칸의 구성(2026-09-03 Crenop 지정): 일정·컨텐츠 제목(최대 2줄) 아래 참여 멤버 얼굴 → 그날 방송했지만 어느 컨텐츠에도 없는 멤버 얼굴
 // (컨텐츠가 있는 날은 '그 외 방송', 없는 날은 '뱅온') → '휴뱅' + 방송 안 한 멤버 얼굴. 컨텐츠가 없는 날도 뱅온/휴뱅으로 칸이 찬다.
 // 얼굴은 멤버 고르기(calMembers)를 따른다. 두 줄은 그 달 통계가 도착한 뒤 지난 날에만(오늘·미래는 없음 — Crenop 지정).
-function calFaceImgs(members) { return members.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join(''); }
-function calFaces(members) { return members.length ? `<span class="cal-faces">${calFaceImgs(members)}</span>` : ''; }
+// 칸 안의 멤버 표시는 사진이 아니라 대표색 정사각(14px, 2026-09-03 Crenop — 사진은 그 크기에서 알아볼 수 없었다). 이름은 글상자로.
+// 8명을 넘으면 두 줄로, 위아래 개수가 비슷하게(일정 모달의 --who-cols 규칙) — 모달은 오른쪽 정렬이지만 여기는 왼쪽 정렬.
+function calWhoCols(n) { return Math.max(1, n > 7 ? Math.ceil(n / 2) : n); }
+function calFaces(members) {
+  if (!members.length) return '';
+  return `<span class="cal-faces" style="--who-cols:${calWhoCols(members.length)}">${members.map(m => `<span class="cal-face" style="background:${m.color}" title="${escapeHtml(m.name)}"></span>`).join('')}</span>`;
+}
 function calAllTextLines(d, key) {
   const byName = names => (names || []).map(n => MEMBERS.find(m => m.name === n)).filter(Boolean);
   const line = (tags, title, members) => `<span class="cal-tl">${tagIconsHtml(tags)}${escapeHtml(title)}</span>${calFaces(byName(members))}`;
@@ -5859,7 +5865,7 @@ function calAllTextLines(d, key) {
   const live = d ? d.live : new Set();
   const on = calMembers().filter(m => live.has(m.id) && !assigned.has(m.id));
   const off = calMembers().filter(m => !live.has(m.id) && !assigned.has(m.id));
-  const lab = (label, members) => members.length ? `<span class="cal-tl cal-lab"><span>${label}</span>${calFaceImgs(members)}</span>` : '';   // 얼굴을 글자 바로 뒤에 흘려 붙인다(묶음이면 글자만 남기고 통째로 내려간다)
+  const lab = (label, members) => members.length ? `<span class="cal-tl cal-lab"><span>${label}</span>${calFaces(members)}</span>` : '';   // 글자 오른쪽에 색 사각 묶음(두 줄이면 위아래 균등)
   return items + lab(d && d.content.length ? '그 외 방송' : '뱅온', on) + lab('휴뱅', off);
 }
 function calBoxHtml(d, key) {

@@ -2349,9 +2349,13 @@
   .hall-period-btn .pb-y { font-size: 12px; opacity: 0.85; }
   .hall-period-btn .pb-m { font-size: 12px; font-weight: 700; }
   .hall-kind-btn, #hallPeriodSide .hall-period-btn {
-    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    padding: 2px; white-space: normal; line-height: 1.2; text-align: center; font-size: 12px;
+    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2px; white-space: normal; text-align: center; font-size: 12px;
   }
+  /* 줄 간격은 지난 활동 기간 버튼(.stats-period-btn)과 같은 값(2026-09-02 Crenop 지적) — 같은 두 줄 표기인데
+     여기만 gap 4px·line-height 1.2라 '26년 / 상반기' 사이가 '26년 / 1월'보다 벌어져 보였다. */
+  #hallPeriodSide .hall-period-btn { gap: 1px; line-height: 1.15; }
+  .hall-kind-btn { gap: 4px; line-height: 1.2; }   /* 아이콘과 글자 사이는 넓은 쪽을 유지 — 글자끼리가 아니다 */
   .hall-kind-btn svg { width: 16px; height: 16px; display: block; }
   .members-tabs-wrap {
     display: grid;
@@ -2491,7 +2495,7 @@
   .disco-wrap { padding: 20px 24px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; }
   /* 플레이리스트 버튼(2026-09-02): 종전 상단바 시트 버튼으로 제공하던 것을 음악 탭 우상단 붙박이로 옮겼다.
      생김새는 시트 버튼(.tb-sheet-btn) 그대로 — 자리만 바뀌었지 같은 것이라 옷을 갈아입힐 이유가 없다. */
-  .disco-head { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+  .disco-head { display: flex; justify-content: flex-end; max-width: 1200px; margin: 0 auto 16px; }   /* 폭·가운데정렬은 아래 멤버 이름과 같은 값 — 버튼 오른쪽 끝이 본문 오른쪽 끝과 맞는다(2026-09-02 실측: 종전엔 76px 밖) */
   .disco-member + .disco-member { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
   .disco-member-name {
     display: flex; align-items: center; gap: 10px;
@@ -2823,6 +2827,10 @@
     .tab-aux[data-for="content"] .sch-line-mb { display: inline; }
     .subbar-lead { gap: 6px; overflow-x: auto; scrollbar-width: none; }
     .page-title-link, .celebration-box { padding: 4px 10px; }
+    /* PC의 아이콘 -2px 보정을 되돌린다 — 여기는 위아래 패딩이 대칭이라 보정할 것이 없다.
+       선언부 주석에 '모바일은 리셋'이라 적혀 있었는데 규칙이 빠져 있어, 세로 배치에서 내용이 2px 위로 떠 있었다
+       (2026-09-02 픽셀 실측: 일정 버튼 위 4.2 / 아래 7.0). */
+    .page-title-link svg, .celebration-box svg { margin-top: 0; }
     /* 기념일만 짧은 요약('이름 종류')으로 — PC 문구는 길어 세로형 행 폭을 넘긴다(2026-09-01) */
     .celebration-box .tb-t-pc { display: none; }
     .tab-aux .celebration-box { padding: 2px 8px; font-size: 10px; }   /* 탭 줄 안에 서므로 행 높이를 넘지 않게 */
@@ -3211,7 +3219,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-02x';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-02z';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3419,7 +3427,8 @@ const MEMBER_BIRTHDAYS = {
   // 케미 필터는 마크업이 아니라 렌더에서 만들어지므로 '탭을 눌렀을 때'만으론 늦다. 화면이 실제로 바뀐 뒤에
   // 다시 본다(묶어서 60ms). 감시 대상은 .main 안쪽이고 버튼은 상단바에 있어 되먹임이 생기지 않는다.
   let syncT;
-  const kick = () => { clearTimeout(syncT); syncT = setTimeout(syncDrawerFilterBtn, 60); };
+  // 화면이 바뀌면 서랍 버튼 채움과 함께 아이콘 여백도 다시 맞춘다 — 필터·기둥 버튼은 렌더에서 새로 만들어진다(2026-09-02)
+  const kick = () => { clearTimeout(syncT); syncT = setTimeout(() => { syncDrawerFilterBtn(); if (window.fitBtnIcons) fitBtnIcons(); }, 60); };
   const mainEl = document.querySelector('.main');
   if (mainEl && window.MutationObserver) new MutationObserver(kick).observe(mainEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   document.addEventListener('click', e => { if (e.target.closest('.filter-member, .filter-type, .filter-toggle-all')) setTimeout(syncDrawerFilterBtn, 0); });
@@ -4118,7 +4127,7 @@ const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
 let hallKind = 'hall';
 // '통계' 탭 안의 '통계'는 이름이 겹쳐 '지표'로(2026-09-01). 셋 다 아이콘을 얹어 칸만으로 구분되게 한다.
 const HALL_KINDS = [
-  { key: 'hall', label: '명예의 전당', icon: 'trophy' },
+  { key: 'hall', label: '명전', icon: 'trophy' },   // 60px 칸에서 혼자 두 줄이 되던 것을 약칭으로(2026-09-02 Crenop)
   { key: 'stats', label: '지표', icon: 'barChart' },
   { key: 'heat', label: '시간대', icon: 'clockTime' },
 ];
@@ -4609,6 +4618,52 @@ async function loadTopbarLinks() {
   } catch (e) {}   // 실패 시 캐시본 유지 — 첫 방문+시트 장애 조합에서만 버튼 공백(크루 시트와 동일 수용)
 }
 
+// 버튼 안 여백은 아이콘 '상자'가 아니라 '그림'에 대고 잰다(2026-09-02 Crenop 지정).
+// 왜: padding은 다 같은 10px인데 보이는 왼쪽 간격이 11~13.3px로 벌어져 있었다(픽셀 실측). 아이콘마다 24칸 안에서
+// 그림이 차지하는 크기가 달라서다 — 유튜브는 꽉 차고(0px), 달력은 좌우 1.35px, 화살표는 5.2px씩 비어 있다.
+// 그림이 비운 만큼 음수 여백으로 걷어내면 아이콘의 배치 상자가 곧 그림이 되어, padding 10px이 그림에 걸린다.
+// 배지 정렬이 잉크 bbox를 쓰는 것과 같은 원칙(2026-08-24 확정)을 버튼 여백에 확장한 것이다.
+// 잰 값은 아이콘 종류마다 한 번만 계산해 재사용한다(같은 그림이 여러 버튼에 쓰인다).
+// 세로는 건드리지 않는다 — 줄 높이를 글자 라인박스가 정하므로 아이콘 상자를 줄여도 글자 위치가 안 변한다(실측 확인).
+const btnIconInk = {};
+window.fitBtnIcons = fitBtnIcons;
+function fitBtnIcons(root) {
+  (root || document).querySelectorAll('.page-title-link svg:not([data-ink]), .celebration-box svg:not([data-ink])').forEach(sv => {
+    sv.setAttribute('data-ink', '1');   // 한 번 잰 요소는 다시 만지지 않는다(렌더마다 새로 생기면 새 요소라 다시 잰다)
+    const key = sv.getAttribute('viewBox') + '|' + sv.innerHTML.length + '|' + sv.innerHTML.slice(0, 40);
+    let m = btnIconInk[key];
+    if (!m) {
+      let bb; try { bb = sv.getBBox(); } catch (e) { return; }   // 화면에 없으면 잴 수 없다 — 그대로 둔다
+      const vb = sv.viewBox.baseVal;
+      if (!vb || !vb.width || !bb.width) return;
+      // getBBox는 선 굵기를 안 세므로 절반씩 더한다(선으로 그린 아이콘은 그만큼 더 넓게 보인다)
+      const strokeEl = sv.getAttribute('stroke') ? sv : sv.querySelector('[stroke]:not([stroke="none"])');
+      const sw = strokeEl ? parseFloat(strokeEl.getAttribute('stroke-width') || 0) : 0;
+      const half = (strokeEl && (strokeEl.getAttribute('stroke') || '') !== 'none') ? sw / 2 : 0;
+      const box = sv.getBoundingClientRect();
+      const sx = (box.width || 16) / vb.width;
+      m = [Math.max(0, bb.x - half - vb.x) * sx, Math.max(0, vb.x + vb.width - (bb.x + bb.width + half)) * sx];
+      btnIconInk[key] = m;
+    }
+    if (m[0] > 0.05) sv.style.marginLeft = `-${m[0].toFixed(2)}px`;
+    if (m[1] > 0.05) sv.style.marginRight = `-${m[1].toFixed(2)}px`;
+  });
+  // 칸 안에 놓인 아이콘(탭 줄·기둥 종류 버튼·필터)은 상자를 줄이지 않고 그림만 칸 가운데로 민다.
+  // 상자를 줄이면 그 뒤에 오는 라벨이 아이콘마다 다른 만큼 밀려 줄이 들쭉날쭉해진다 — 여기선 라벨 정렬이 우선이다.
+  // 남는 어긋남(그림 너비가 아이콘마다 다른 것)은 그림 자체의 성질이라 여백으로 못 없앤다.
+  (root || document).querySelectorAll('.nav-item svg:not([data-ink]), .hall-kind-btn svg:not([data-ink]), .filter-type svg:not([data-ink])').forEach(sv => {
+    sv.setAttribute('data-ink', '1');
+    let bb; try { bb = sv.getBBox(); } catch (e) { return; }
+    const vb = sv.viewBox.baseVal;
+    if (!vb || !vb.width || !bb.width) return;
+    const box = sv.getBoundingClientRect();
+    const sx = (box.width || 16) / vb.width;
+    const l = (bb.x - vb.x) * sx, r = (vb.x + vb.width - bb.x - bb.width) * sx;
+    const shift = (r - l) / 2;   // 왼쪽이 더 비었으면 그림을 왼쪽으로 당긴다(상자 폭은 그대로)
+    if (Math.abs(shift) > 0.05) { sv.style.marginLeft = `${shift.toFixed(2)}px`; sv.style.marginRight = `${(-shift).toFixed(2)}px`; }
+  });
+}
+
 function updatePageTitle() {
   const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 날짜의 일정 묶음(같은 날 2건+는 열 정렬, 데이터 전엔 셸)
   const celebrations = getTodayCelebrations();
@@ -4641,6 +4696,7 @@ function updatePageTitle() {
   const auxContent = document.getElementById('auxContent');
   if (auxContent) auxContent.innerHTML = scheduleBtn;
   refreshLikeDot();   // 상단바 innerHTML 재생성으로 클래스가 날아가므로 점 상태 재적용
+  fitBtnIcons();      // 새로 그린 버튼의 아이콘 여백을 그림 기준으로 맞춘다
 }
 
 // ── 좋아요 요청 모아보기 모달 ──
@@ -5484,6 +5540,7 @@ if (notifyBellEl) {
     if (el) el.innerHTML = html;
   }
   if (window.syncBtnL) window.syncBtnL();   // 아이콘 표가 준비된 지금 좌측 버튼 모양을 상태에 맞춘다
+  if (window.fitBtnIcons) fitBtnIcons();   // 마크업에 고정된 버튼(가이드·탭 줄)의 아이콘도 같은 규칙
 })();
 
 function updateHeaderCenter() {
@@ -5551,6 +5608,7 @@ function renderDisco() {
     + ` style="--tb-rgb:${hexToRgb(DISCO_PLAYLIST_HEX)};color:${DISCO_PLAYLIST_HEX}">${SVG_ICONS.youtube}<span>천타버스 플레이리스트</span></a></div>`;
   el.innerHTML = head + (html || '<div class="lr-msg">등록된 곡이 없습니다.</div>');
   bindVideoStrips(el);   // 좌우 화살표는 이 배선이 넘침을 재서 켠다 — 프로필에서 옮겨올 때 빠졌다(2026-09-01)
+  fitBtnIcons(el);       // 우상단 플레이리스트 버튼도 같은 규칙
 }
 
 
@@ -9198,7 +9256,7 @@ function hallTopRanks(getVal) {
 let hallPeriod = 'total';
 const HALL_PERIODS = [
   // 정사각 칸에 맞춘 두 줄 표기(2026-09-01) — 연/월 버튼과 같은 문법
-  { key: 'total', label: '통산' },
+  { key: 'total', label: '<span class="pb-m">통산</span>' },   // 상/하반기의 본 낱말(.pb-m)과 같은 굵기 — 혼자 여려 보이던 것 교정(2026-09-02 Crenop)
   { key: 'h1',    label: '<span class="pb-y">26년</span><span class="pb-m">상반기</span>' },
   { key: 'h2',    label: '<span class="pb-y">26년</span><span class="pb-m">하반기</span>' },
 ];

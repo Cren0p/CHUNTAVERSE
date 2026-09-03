@@ -4173,7 +4173,8 @@ function typeToCat(et) {
 // 다시보기 목록 상태(2026-08-29). 선언만 여기 — 달력 탭이 첫 화면(#content)일 때 applyHash → renderCalendarTab → ensureVodMonth가
 // 스크립트가 아래 선언부에 닿기 전에 실행되어 'vodState 초기화 전 접근'으로 죽었다(2026-09-02 실측). sheetPulled와 같은 TDZ 회피.
 // 동작 설명·함수(ensureVodMonth 등)는 원래 자리(VOD 상태 블록)에 그대로 있다.
-const vodState = { data: {}, at: {}, loading: new Set() };   // at: 받은 시각(당월 목록 5분 신선도)
+const vodState = { data: {}, at: {}, loading: new Set(), fails: {} };   // at: 받은 시각(당월 목록 5분 신선도). fails: 키별 연속 실패 수(세션 70 — VOD_FAIL_LIMIT 넘으면 '불러오지 못함')
+const VOD_FAIL_LIMIT = 3;   // 목록 받기가 이만큼 연달아 실패하면 '불러오는 중…' 대신 '불러오지 못함' — 재시도는 계속한다(다음 렌더·1분 틱)
 const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
 
 // 통계 탭(2026-08-31): 한 화면에 셋을 겹쳐 두지 않고 종류로 갈아끼운다 —
@@ -5780,7 +5781,7 @@ function calLoadingSettle() {
 function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
-  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], vodsAll: [], vodWait: new Set(), statsPending: false, youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 도착과 무관)
+  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], vodsAll: [], vodWait: new Set(), vodFail: new Set(), statsPending: false, youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 도착과 무관)
   // vodsAll·vodWait(2026-09-03 세션 70): 컨텐츠 상자의 '참여 멤버 한 칸씩'은 종류 필터와 무관하게 다시보기를 알아야 한다('컨텐츠'만 골라도 참여자가 보여야 함).
   // vods(칩·대표 그림·바깥 다시보기 줄)는 종전대로 필터를 따른다. vodWait = 그날 방송했는데 다시보기 목록이 아직 안 온 멤버(빈 칸에 '불러오는 중…').
   const wantVod = calShows('vod'), wantContent = calShows('content');
@@ -5803,6 +5804,7 @@ function calItemsByDate() {
         if (parts === null) {
           if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(종전엔 바깥 줄이 '불러오는 중'으로 남았다, 세션 70 수정)
             day(dk).vodWait.add(m.id);
+            if ((vodState.fails[vodKey(m.id, ym)] || 0) >= VOD_FAIL_LIMIT) day(dk).vodFail.add(m.id);   // 연달아 실패 — '불러오는 중'이 아니라 '불러오지 못함'
             if (wantVod) day(dk).vodPending = true;
           }
           continue;
@@ -5962,8 +5964,8 @@ function calDetailHtml(items) {
       const slots = calMembers().filter(m => names.has(m.name)).map(m => {
         const tiles = own.filter(x => x.m.id === m.id);
         if (tiles.length) return tiles.map(vodTile).join('');
-        const wait = d.statsPending || d.vodWait.has(m.id);
-        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${wait ? '불러오는 중…' : '다시보기<br>없음'}</span></div>`;
+        const text = d.vodFail.has(m.id) ? '불러오지<br>못함' : (d.statsPending || d.vodWait.has(m.id)) ? '불러오는 중…' : '다시보기<br>없음';   // 실패는 기다림보다 우선(세션 70)
+        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${text}</span></div>`;
       }).join('');
       const mine = slots ? `<div class="cal-vods cal-di-vods">${slots}</div>` : '';
       return `<div class="cal-di content">${title}${img || mine ? `<div class="cal-di-main">${img}${mine}</div>` : ''}</div>`;
@@ -5980,7 +5982,8 @@ function calDetailHtml(items) {
   }).join('');
   // 구획 라벨 앞 그림(세션 70) = 이 탭의 종류 그림 그대로(CAL_TYPE_ICON: 다시보기=숲 ∞ · 유튜브). 색은 CSS가 data-kind로 종류 버튼·칩과 같게.
   const sec = (label, kind, inner) => inner ? `<div class="cal-di-sec" data-kind="${kind}">${SVG_ICONS[CAL_TYPE_ICON[kind]]}${label}</div>${inner}` : '';
-  const vodBlock = vods ? `<div class="cal-vods">${vods}</div>` : (d.vodPending ? '<div class="ds-vod-none">다시보기 목록 불러오는 중</div>' : '');   // 전부 컨텐츠 상자로 들어갔으면 이 줄은 안 나온다
+  const allFailed = d.vodPending && d.vodWait.size > 0 && [...d.vodWait].every(id => d.vodFail.has(id));   // 기다리는 멤버 전원이 연달아 실패(세션 70)
+  const vodBlock = vods ? `<div class="cal-vods">${vods}</div>` : (d.vodPending ? `<div class="ds-vod-none">${allFailed ? '다시보기 목록을 불러오지 못했습니다' : '다시보기 목록 불러오는 중'}</div>` : '');   // 전부 컨텐츠 상자로 들어갔으면 이 줄은 안 나온다
   return `<div class="day-detail-title"><span class="ddt-date">${calState.selected}</span></div>`
     + (rowsHtml ? `<div class="cal-di-list">${rowsHtml}</div>` : '')
     + sec('다시보기', 'vod', vodBlock)
@@ -7426,13 +7429,19 @@ function ensureVodMonth(memberId, ym) {
     .then(j => {
       vodState.loading.delete(key);
       if (j && j.ok && Array.isArray(j.vods)) {
+        delete vodState.fails[key];
         vodState.data[key] = j.vods; vodState.at[key] = Date.now();
         if (!cur) lsSet(LS_VOD_PREFIX + key, JSON.stringify(j.vods));
         if (currentPage === 'stats') renderStatsBody();
         else if (currentPage === 'content') queueCalRender();   // 달력 탭(2026-09-02): 크루 썸네일 모아보기가 같은 목록을 쓴다 — 도착마다 그리지 않고 한 프레임에 합친다
-      }
+      } else vodFailed(key);
     })
-    .catch(() => { vodState.loading.delete(key); if (currentPage === 'content') calLoadingSettle(); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도). 다시 그리면 곧바로 재요청이 돌아 실패 루프가 되므로 표시만 내린다
+    .catch(() => { vodState.loading.delete(key); vodFailed(key); if (currentPage === 'content') calLoadingSettle(); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도). 다시 그리면 곧바로 재요청이 돌아 실패 루프가 되므로 표시만 내린다
+}
+// 목록 받기 실패(세션 70): 연속 실패 수를 세고, 달력 탭이면 다시 그려 칸 문구를 '불러오지 못함'으로 바꾼다(한계 넘었을 때만 그림).
+function vodFailed(key) {
+  vodState.fails[key] = (vodState.fails[key] || 0) + 1;
+  if (vodState.fails[key] === VOD_FAIL_LIMIT && currentPage === 'content') queueCalRender();
 }
 function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad_no 결측(판단 불가 — 슬롯 생략) / []=이 방송의 VOD 없음
   if (!broadNo) return null;
@@ -8292,6 +8301,7 @@ function computeTimeOfDayMinutes(sessionsByDate, year, month1, isCurrentMonth) {
     for (const s of arr) sessions.push(s);
   }
   for (const s of sessions) {
+    if (s.start_cut) continue;   // 잘린 다시보기 소급 기록(세션 70): 시작 시각을 모른다 — 시간대 분포에서 뺀다(날짜·일수·시간 합계에는 들어감)
     const startMs = new Date(s.start).getTime();
     if (isNaN(startMs)) continue;
     let endMs;
@@ -8385,6 +8395,7 @@ function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
   const kstMin = ms => { const k = new Date(ms + 9 * 3600 * 1000); return k.getUTCHours() * 60 + k.getUTCMinutes(); };
   const starts = [], ends = []; let durMs = 0, n = 0;
   for (const arr of Object.values(sum.sessionsByDate || {})) for (const s of arr) {
+    if (s.start_cut) continue;   // 시작 시각을 모르는 소급 기록은 평균 시작·종료·시간에서 뺀다(히트맵과 같은 기준, 세션 70)
     const st = new Date(s.start).getTime(); if (isNaN(st)) continue;
     let en = s.end ? new Date(s.end).getTime() : (isCurrentMonth ? nowMs : NaN);
     if (isNaN(en) || en <= st) continue;

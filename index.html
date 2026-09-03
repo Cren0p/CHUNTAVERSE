@@ -3261,7 +3261,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-03x';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-03y';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4187,7 +4187,7 @@ const statsState = {
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
 let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
-const LS_STATS_PREFIX = 'chuntaverse_stats_v16_';   // v16: 승계 재소급·이중 정리·잔재 해결(직링크/원제/시각)·항목 삭제 일괄 반영(2026-08-31) — 지난달 내용 대폭 변경. v15 무효화(무기한 캐시라 범프 필수)
+const LS_STATS_PREFIX = 'chuntaverse_stats_v17_';   // v17(2026-09-03): 25년 12월 첫 달 자료 주입 + 1~4월 시딩 잔재 32건 삭제 + 5/6~6/5 시청자 값 교체(다시보기 기준) — v16 캐시(그 전 자료) 무효화
 // 버전 범프로 사장된 구버전 캐시(v8_/v9_ 등) 잔존 키 정리 — 방문자 LS 용량 회수. 프리픽스 기준이라 이후 범프에도 재작업 불필요.
 try {
   for (let i = localStorage.length - 1; i >= 0; i--) {

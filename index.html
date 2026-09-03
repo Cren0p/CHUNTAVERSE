@@ -8559,6 +8559,24 @@ async function loadFeed() {
   updateHeaderCenter();
 }
 
+// 자료 판(2026-09-03 세션 70): 워커가 지난달 자료를 쓸 때마다(관리 명령·자정 걸친 종료 기록) 올리는 값. 매분 받는 당월 응답에 실려 온다.
+// 값이 바뀌면 굳혀 둔 지난달(localStorage + 메모리)을 전부 버리고 보고 있던 화면을 다시 그린다 — 자료를 고칠 때마다 LS_STATS_PREFIX를 올려
+// index.html을 재배포하고 순서까지 지키던 일(v18→v19 사고)을 없앤다. 처음 보는 값도 '바뀜'으로 본다(그 전 캐시는 어느 판인지 모른다 — 한 번 다시 받는 비용뿐).
+// 구 워커(값 없음)에는 아무것도 하지 않는다.
+const LS_DATA_VER = 'chuntaverse_stats_dataver';
+function syncDataVersion(ver, freshYm) {
+  if (ver === undefined || ver === null) return;
+  const v = String(ver);
+  if (lsGet(LS_DATA_VER, null) === v) return;
+  lsSet(LS_DATA_VER, v);
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith(LS_STATS_PREFIX)) localStorage.removeItem(k); }
+  } catch (e) {}
+  for (const ym of Object.keys(statsState.data)) if (!isCurrentMonth(ym) && ym !== freshYm) delete statsState.data[ym];
+  if (currentPage === 'stats') renderStatsBody();
+  else if (currentPage === 'hall') renderHall();
+  else if (currentPage === 'content') { ensureCalMonth(); queueCalRender(); }   // 빠진 달은 ensureCalMonth가 다시 받고 도착하면 다시 그린다
+}
 async function loadStatsMonth(yyyymm) {
   if (!yyyymm) return;
   if (!isCurrentMonth(yyyymm)) {
@@ -8573,6 +8591,7 @@ async function loadStatsMonth(yyyymm) {
     const data = await res.json();
     const monthData = data.stats || {};
     statsState.data[yyyymm] = monthData;
+    syncDataVersion(data.dataVersion, yyyymm);   // 자료 판이 바뀌었으면 굳혀 둔 지난달을 버린다(방금 받은 이 달은 새 것이라 남김)
     // 미종료 세션(end 없음)이 하나라도 있으면 캐시 보류 — 자정 걸친 방송이 끝나기 전에 월이 바뀌어 이 달을 받으면
     // '진행 중' 상태로 영구 동결됨(그 사용자 화면에서 방송 시간 누락 + 명전 정전위원회 최대 48h 오염).
     // 서버가 세션을 닫은 뒤의 응답부터 캐시(보류 동안의 재요청 비용은 60s 엣지캐시가 흡수).

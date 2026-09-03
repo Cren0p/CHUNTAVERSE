@@ -5953,11 +5953,13 @@ function calDetailHtml(items) {
       // 칸 = 시트의 참여 멤버 전원, 사이트 멤버 순서로 한 명 한 칸: 다시보기가 있으면 타일(회차·파트가 여럿이면 전부), 없으면 썸네일과 같은 규격의
       // 빈 상자에 '다시보기 없음'(Crenop 지정). 그 달 방송 기록이나 그 멤버의 목록이 아직 안 왔으면 '없음' 대신 '불러오는 중…'(잠깐 틀린 글자가 뜨지 않게).
       // 다시보기는 종류 필터와 무관한 vodsAll — '컨텐츠'만 골라도 참여자 칸은 나온다.
+      // 멤버 필터는 우선한다(2026-09-03 Crenop 지정): 한 멤버를 골랐으면 그 멤버 칸만 — 다른 멤버의 다시보기는 애초에 안 모으므로
+      // 칸을 만들면 있는 다시보기도 '없음'으로 찍히는 거짓이 된다(실사고: 천양 선택 상태에서 8/21 합방 참여자 8명이 전부 '없음').
       const names = new Set(it.members || []);
       const own = d.vodsAll.filter(x => names.has(x.m.name));
       own.forEach(x => inContent.add(x.v.title_no));
       const img = it.img ? wrap('cal-di-img', `<img src="${escapeHtml(it.img)}" alt="" loading="lazy">`) : '';
-      const slots = MEMBERS.filter(m => names.has(m.name)).map(m => {
+      const slots = calMembers().filter(m => names.has(m.name)).map(m => {
         const tiles = own.filter(x => x.m.id === m.id);
         if (tiles.length) return tiles.map(vodTile).join('');
         const wait = d.statsPending || d.vodWait.has(m.id);
@@ -6505,6 +6507,9 @@ function isoToKstDateKey(iso) {
 // 라이브 확인(broad_no 일치)으로 게이트하고, 불일치 고아에는 유사-now(시작+48h)를 넘겨 상한을 재현.
 // monthPrefix('YYYY-MM')를 주면 그 달 밖 날짜는 버림. 세션은 시작월 키에만 있어 월경계 마라톤의
 // 다음 달 조각은 다음 달이 셀 수 없는 알려진 한계(발생 시 수동 보정).
+// 방송 날짜 bdate(2026-09-03 세션 70): 다시보기가 잘려 계산 시작이 자정을 넘긴 소급 기록(start_cut)은 실제 시작 '날짜'만 따로 갖는다.
+// 시각·길이는 못 믿는 채로 두고 날짜만 바로잡는다 — 첫 날짜 키를 bdate로, 이어지는 날짜는 거기서 하루씩(개수는 기록된 길이대로).
+// bdate가 시작 날짜보다 앞일 때만 뜻이 있다(같거나 뒤면 무시). 첫 키가 곧 '이 달에 속하는가'의 기준이라 월 게이트도 이 함수의 결과로 판단한다.
 function sessionDateKeys(s, monthPrefix, nowMs) {
   const t = new Date(s.start).getTime();
   if (isNaN(t)) return [];
@@ -6518,8 +6523,10 @@ function sessionDateKeys(s, monthPrefix, nowMs) {
   }
   const keys = [];
   const extraDays = Math.floor((e - t) / 86400000);
+  const startKey = isoToKstDateKey(new Date(t).toISOString());
+  const base = (typeof s.bdate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.bdate) && s.bdate < startKey) ? Date.parse(s.bdate + 'T00:00:00+09:00') : t;
   for (let i = 0; i <= extraDays; i++) {
-    const dk = isoToKstDateKey(new Date(t + i * 86400000).toISOString());
+    const dk = isoToKstDateKey(new Date(base + i * 86400000).toISOString());
     if (!dk) continue;
     if (monthPrefix && !dayInStatsMonth(dk, monthPrefix)) break;   // 결성일은 첫 달에 속한다(dayInStatsMonth)
     keys.push(dk);
@@ -7265,9 +7272,9 @@ function computeMonthSummary(memberStats, year, month1, nowMs = Date.now()) {
   const dateSet = new Set();
   for (const s of (memberStats.sessions || [])) {
     const startMs = new Date(s.start).getTime();
-    if (isNaN(startMs) || startMs < monthStart || startMs >= monthEnd) continue;
+    if (isNaN(startMs)) continue;
     const dayKeys = sessionDateKeys(s, ymPrefix, nowMs);   // 걸침 규칙: 방송 일수·달력 채움 공용(24h당 +1일)
-    if (!dayKeys.length) continue;
+    if (!dayKeys.length) continue;   // 월 게이트 = 첫 날짜 키가 이 달인가(세션 70: 방송 날짜 bdate가 있으면 그 날짜 — 종전 startMs 범위 검사와 같은 뜻)
     for (const dk of dayKeys) dateSet.add(dk);
     const dateKey = dayKeys[0];                             // 회수 라벨·일별 상세는 시작일 기준 유지
     if (!result.sessionsByDate[dateKey]) result.sessionsByDate[dateKey] = [];
@@ -7590,11 +7597,7 @@ function computeAnnualSums(year, nowMs = Date.now()) {
       const monthEnd = kstMonthStartMs(year, mo + 1);
       // 자동 수집 데이터 — sessions는 '방송 일수'(그 달 방송한 날짜 수, 월간 daysWithBroadcast와 동일 기준·걸침 규칙 공용). 하루 2회 방송도 1일. 월끼리는 날짜가 안 겹치므로(월 프리픽스 필터) 월별 합 = 연간 일수.
       const daySet = new Set();
-      (ms.sessions || []).forEach(s => {
-        const t = new Date(s.start).getTime();
-        if (isNaN(t) || t < monthStart || t >= monthEnd) return;
-        for (const dk of sessionDateKeys(s, ym, nowMs)) daySet.add(dk);
-      });
+      (ms.sessions || []).forEach(s => { for (const dk of sessionDateKeys(s, ym, nowMs)) daySet.add(dk); });   // 월 게이트는 sessionDateKeys의 첫 키(세션 70 — bdate 기록도 제 달에)
       annualSums[m.id].sessions += daySet.size;
       (ms.sessions || []).forEach(s => {
         const t = new Date(s.start).getTime();
@@ -8209,7 +8212,7 @@ function renderDayDetail(year, month1, sum, memberId) {
   for (const item of items) {
     if (item.kind === 'session') {
       const s = item.data;
-      const startStr = formatHHMM(s.start);
+      const startStr = s.start_cut ? '-' : formatHHMM(s.start);   // start_cut(세션 70): 잘린 다시보기 소급 기록 — 시작 시각을 모른다('-' = 값 없음 문법, 종료·길이는 기록대로)
       const endStr = s.end ? formatHHMM(s.end) : '진행 중';
       let durSpan = '';
       if (s.end) {
@@ -9651,11 +9654,11 @@ function hallSumMonths(monthList, nowMs = Date.now()) {
       const t = sums[m.id];
       // sessions = '방송 일수'(그 달 방송한 날짜 수) — 연간탭 computeAnnualSums와 동일 기준(하루 2회도 1일)
       const daySet = new Set();
-      (ms.sessions || []).forEach(s => { const x = new Date(s.start).getTime(); if (isNaN(x) || x < monthStart || x >= monthEnd) return; for (const dk of sessionDateKeys(s, ym, nowMs)) daySet.add(dk); });   // 걸침 규칙 공용
+      (ms.sessions || []).forEach(s => { for (const dk of sessionDateKeys(s, ym, nowMs)) daySet.add(dk); });   // 걸침 규칙 공용. 월 게이트는 첫 키(세션 70)
       t.sessions += daySet.size;
       (ms.sessions || []).forEach(s => {
         const x = new Date(s.start).getTime();
-        if (isNaN(x) || x < monthStart || x >= monthEnd) return;
+        if (isNaN(x) || !sessionDateKeys(s, ym, nowMs).length) return;   // 세션 70: 같은 월 게이트(bdate 기록은 시작 시각이 다음 달이어도 제 달)
         if (s.end) { const e = new Date(s.end).getTime(); if (!isNaN(e) && e > x) t.totalDurationMs += (e - x); }
       });
       t.postCount    += (ms.posts   || []).filter(p => { const x = new Date(p.time).getTime(); return !isNaN(x) && x >= monthStart && x < monthEnd; }).length;
@@ -9810,7 +9813,8 @@ function renderHall() {
       for (const s of (ms.sessions || [])) {
         const t = new Date(s.start).getTime();
         if (isNaN(t)) continue;
-        const scored = inPeriodTs(t);   // 기간 편입은 시작 시각 기준(방송일수·마라톤과 동일 귀속)
+        const firstKey = sessionDateKeys(s, null, t)[0];   // 세션 70: 기간 편입은 첫 날짜 키(방송 날짜 bdate가 있으면 그 날) — 방송일수·마라톤과 동일 귀속
+        const scored = inPeriodTs(firstKey ? Date.parse(firstKey + 'T00:00:00+09:00') : t);
         if (scored) {
           // 연속 방송 일수: 걸침 규칙(24h당 +1일) — 스트릭은 월경계 없이 산입.
           // 프리픽스가 없어 고아가 무한히 먹을 수 있으므로, 진행 중 세션은 '지금 그 방송 중'(broad_no 일치)일 때만 진짜 now,

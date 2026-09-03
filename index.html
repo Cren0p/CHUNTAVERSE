@@ -5225,7 +5225,7 @@ function openScheduleList() {
 }
 // 목록 행 — 2026-08-31a까지 쓰던 renderScheduleItem 그대로(레포 판본에서 복원, 2026-09-02). 제목 앞에 종류 그림만 붙었다.
 // [날짜 (요일) 시간 / 제목(링크면 바깥 화살표)] · 참가 멤버 아바타(7명+는 2행) · D-day. CSS(.sch-item 계열·.sch-end)는 지운 적이 없어 그대로 산다.
-const SCH_END_HTML = '<div class="sch-end">이후 예정된 일정 없음</div>';
+const SCH_END_HTML = '<div class="sch-end">이후 예정된 일정이 없습니다</div>';   // 격식체(세션 70) — 69번에 옛 목록을 복원하며 명사형이 따라 들어왔던 것
 function renderScheduleItem(item) {
   const [schY, schMo, schD] = item.date.split('-').map(Number);
   const dateDisp = koDate(schY, schMo, schD);   // YYYY년 M월 D일 (한글 통일)
@@ -5964,8 +5964,9 @@ function calDetailHtml(items) {
       const slots = calMembers().filter(m => names.has(m.name)).map(m => {
         const tiles = own.filter(x => x.m.id === m.id);
         if (tiles.length) return tiles.map(vodTile).join('');
-        const text = d.vodFail.has(m.id) ? '불러오지<br>못함' : (d.statsPending || d.vodWait.has(m.id)) ? '불러오는 중…' : '다시보기<br>없음';   // 실패는 기다림보다 우선(세션 70)
-        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${text}</span></div>`;
+        // 문구는 격식체(사이트 규칙 — 명사형은 진행 표시뿐). 상자 아래에 타일과 같은 제목 줄·길이 줄 자리를 비워 둬 한 줄에 섞여도 높이가 같다(세션 70 Crenop).
+        const text = d.vodFail.has(m.id) ? '불러오지<br>못했습니다' : (d.statsPending || d.vodWait.has(m.id)) ? '불러오는 중…' : '다시보기가<br>없습니다';   // 실패는 기다림보다 우선(세션 70)
+        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${text}</span><span class="ds-vod-title"><span class="ds-vod-tt">&nbsp;</span></span><span class="ds-vod-dur">&nbsp;</span></div>`;
       }).join('');
       const mine = slots ? `<div class="cal-vods cal-di-vods">${slots}</div>` : '';
       return `<div class="cal-di content">${title}${img || mine ? `<div class="cal-di-main">${img}${mine}</div>` : ''}</div>`;

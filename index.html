@@ -2103,23 +2103,37 @@
   .cal-detail-row { margin: 0; }
   /* 상세 — 일정·컨텐츠 행(있으면) → 다시보기 타일 → 유튜브 타일. 타일은 일별 요약과 같은 200px 문법(.ds-vod), 크루 화면이라 멤버 이름줄을 위에 */
   .cal-di-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-  .cal-di { display: flex; gap: 10px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; }   /* 상자는 링크가 아니다(2026-09-03) — 그림·제목만 링크 */
+  /* 상자 = 세로 쌓기(2026-09-03 세션 70): 제목 줄 → 그 아래 .cal-di-main [그림 | 참여 멤버 다시보기]. 제목은 폼과 무관하게 늘 그림 위(Crenop 지정).
+     상자는 링크가 아니다 — 그림·제목만 링크. 제목~그림 6px: 시트 모달의 제목→그림 8px과 제목→설명 4px 사이 값(상자 패딩이 8px이라 8은 헐거웠다). */
+  .cal-di { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; }
   .cal-di.schedule { border-style: dashed; }
+  .cal-di-main { display: flex; gap: 10px; align-items: flex-start; }   /* flex-start: 그림 링크가 행 높이(타일 쪽이 더 길 때)만큼 늘어나 그림 아래 빈자리까지 눌리던 것을 막는다(Crenop 적발) */
   .cal-di-img { width: 96px; flex: none; display: block; }
   .cal-di.content .cal-di-img { width: 240px; }   /* 컨텐츠 그림은 칸 썸네일(200px 칸)보다 크게(2026-09-03 Crenop). 원본 비율 그대로 — 세로 포스터는 그만큼 길다 */
   .cal-di-img img { width: 100%; display: block; }
-  .cal-di-body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .cal-di-title { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; }   /* 13px(구 12, 2026-09-02) */
+  a.cal-di-img:hover { outline: 1.5px solid var(--accent); }   /* 누를 수 있는 그림 = 민트 외곽선 — 다시보기 타일(.ds-vod:hover .ds-vod-thumb)과 같은 표시 */
+  /* 제목 줄 = 일정 목록(.sch-item-title) 문법: inline-flex·gap 4·끝 externalLink 12px 0.7. align-self로 글자 폭만 링크(상자 폭 전체가 눌리지 않게). 13px(구 12, 2026-09-02) */
+  .cal-di-title { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0; align-self: flex-start; }
   a.cal-di-title:hover { color: var(--accent); }
-  .cal-di-vods { margin-top: 6px; }   /* 참여 멤버의 다시보기 — 제목·참여자 아래, 그림 오른쪽 공간에 */
-  /* 1열 폼(좁은 본문·태블릿·모바일): 상세가 320px 옆 칸이나 행 아래에 서므로 그림 옆에 세울 폭이 없다 — 그림 아래로 전부 내린다(2026-09-03 Crenop) */
-  .cal-list-form .cal-di { flex-direction: column; }
+  .cal-di-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
+  .cal-di-title .cal-tag { margin-right: 0; display: inline-flex; }   /* 오른쪽 3px 여백은 flex gap이 맡는다(.sch-item-title과 같은 이유) */
+  .cal-di-title .cal-tag svg { opacity: 1; width: 14px; height: 14px; }   /* 종류 그림은 흐리지 않게 — 0.7은 바깥 화살표용. 14px = 이 탭의 .cal-tag 기본값 */
+  .cal-di-vods { flex: 1; min-width: 0; margin-top: 0; }   /* 참여 멤버의 다시보기 — 그림 오른쪽, 그림 위 끝에 맞춤 */
+  /* 다시보기 없는 참여 멤버의 빈 상자(세션 70 Crenop 지정) — 썸네일과 같은 틀(.ds-vod-thumb: 200px·16:9)에 글자만 가운데.
+     바탕은 한 단계 어둡게(--surface): 상자(--surface2) 위에 같은 색이면 틀이 안 보인다 — 칸의 빈 그림 상자(.cal-thumb)와 같은 색. 글자는 상태라 4차(--muted) */
+  .cal-vod-none { display: flex; align-items: center; justify-content: center; text-align: center; background: var(--surface); font-size: 12px; line-height: 1.35; color: var(--muted); }
+  /* 1열 폼(좁은 본문·태블릿·모바일): 상세가 320px 옆 칸이나 행 아래에 서므로 그림 옆에 세울 폭이 없다 — 그림 아래로 내린다(2026-09-03 Crenop) */
+  .cal-list-form .cal-di-main { flex-direction: column; align-items: stretch; }
   .cal-list-form .cal-di .cal-di-img, .cal-list-form .cal-di.content .cal-di-img { width: 100%; }
-  .cal-di-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }   /* 12px(구 11, 2026-09-02) */
+  .cal-di-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }   /* 12px(구 11, 2026-09-02). 일정 상자만(컨텐츠 상자의 참여자 사진 줄은 세션 70에 폐지) */
   /* 인원이 많으면 두 줄로, 위아래 개수가 비슷하게 나눈다(한 명만 내려가는 모양 방지). 줄당 최대치는 JS가 --who-cols로 준다 */
   .cal-di-who { display: grid; grid-template-columns: repeat(var(--who-cols, 99), 18px); gap: 2px; }
   .cal-di-who img { width: 18px; height: 18px; }
-  .cal-di-sec { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin-top: 14px; }
+  /* 구획 라벨(세션 70): 앞에 종류 그림 — 크기·간격은 같은 상세의 11px 길이 표시(.ds-vod-dur: 12px·gap 3)를 따랐다. 색은 종류 버튼·칩과 같은 배정색 */
+  .cal-di-sec { display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin-top: 14px; }
+  .cal-di-sec svg { width: 12px; height: 12px; display: block; flex: none; }
+  .cal-di-sec[data-kind="vod"] svg { color: var(--ev-start); }
+  .cal-di-sec[data-kind="youtube"] svg { color: var(--ev-youtube); }
   .cal-vods { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
   .cal-vod { width: 200px; }
   .cal-vod-who { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
@@ -4186,7 +4200,7 @@ const statsState = {
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
 let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
-const LS_STATS_PREFIX = 'chuntaverse_stats_v17_';   // v17(2026-09-03): 25년 12월 첫 달 자료 주입 + 1~4월 시딩 잔재 32건 삭제 + 5/6~6/5 시청자 값 교체(다시보기 기준) — v16 캐시(그 전 자료) 무효화
+const LS_STATS_PREFIX = 'chuntaverse_stats_v18_';   // v18(2026-09-03 세션 70): 체비 5/31 기록 번호 채움 + 6/1 중복 삭제(지난달은 브라우저에 굳으므로 자료를 고치면 판을 올린다). v17: 25년 12월 첫 달 자료 주입 + 1~4월 시딩 잔재 32건 삭제 + 5/6~6/5 시청자 값 교체(다시보기 기준) — v16 캐시(그 전 자료) 무효화
 // 버전 범프로 사장된 구버전 캐시(v8_/v9_ 등) 잔존 키 정리 — 방문자 LS 용량 회수. 프리픽스 기준이라 이후 범프에도 재작업 불필요.
 try {
   for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -5737,7 +5751,7 @@ function ensureCalMonth() {
   if (!statsState.data[ym] && !statsState.loadingMonths.has(ym) && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {
     loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) { calStatsFailAt[ym] = Date.now(); calLoadingSettle(); return; } queueCalRender(); });
   }
-  if (calShows('vod')) calMembers().forEach(m => ensureVodMonth(m.id, ym));
+  if (calShows('vod') || calShows('content')) calMembers().forEach(m => ensureVodMonth(m.id, ym));   // 컨텐츠 상자의 참여 멤버 칸도 목록이 필요하다(세션 70)
 }
 // 자료 도착에 따른 달력 재렌더를 한 프레임에 한 번으로 합친다(2026-09-02) — 다시보기 목록 13개가 잇따라 도착하면
 // 종전엔 13번 다시 그렸다(깜빡임 + 그 사이 클릭 유실). 달력 탭이 아니면 그리지 않는다(다음 진입 때 그린다).
@@ -5766,8 +5780,11 @@ function calLoadingSettle() {
 function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
-  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 도착과 무관)
-  if (calShows('content')) for (const c of contentData) {
+  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], vodsAll: [], vodWait: new Set(), statsPending: false, youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 도착과 무관)
+  // vodsAll·vodWait(2026-09-03 세션 70): 컨텐츠 상자의 '참여 멤버 한 칸씩'은 종류 필터와 무관하게 다시보기를 알아야 한다('컨텐츠'만 골라도 참여자가 보여야 함).
+  // vods(칩·대표 그림·바깥 다시보기 줄)는 종전대로 필터를 따른다. vodWait = 그날 방송했는데 다시보기 목록이 아직 안 온 멤버(빈 칸에 '불러오는 중…').
+  const wantVod = calShows('vod'), wantContent = calShows('content');
+  if (wantContent) for (const c of contentData) {
     const key = c.date && c.date.sort ? String(c.date.sort).slice(0, 6) : '';
     if (key.length !== 6 || !calRowVisible(c)) continue;
     day(`20${key.slice(0, 2)}-${key.slice(2, 4)}-${key.slice(4, 6)}`).content.push(c);
@@ -5779,16 +5796,22 @@ function calItemsByDate() {
     const mi = MEMBERS.indexOf(m);
     const sum = computeMonthSummary(monthData[m.id], year, month);   // 첫 달(2025-12)은 결성일 11/30 세션·유튜브도 포함(kstMonthStartMs)
     for (const dk of Object.keys(sum.sessionsByDate)) day(dk).live.add(m.id);   // '전체'의 뱅온/휴뱅 줄 재료
-    if (calShows('vod')) for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
+    if (wantVod || wantContent) for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
       const seen = seenVod[dk] || (seenVod[dk] = new Set());
       for (const s of sessions) {
         const parts = vodsForBroad(m.id, ym, s.broad_no);   // null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
-        if (parts === null) { day(dk).vodPending = true; continue; }
+        if (parts === null) {
+          if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(종전엔 바깥 줄이 '불러오는 중'으로 남았다, 세션 70 수정)
+            day(dk).vodWait.add(m.id);
+            if (wantVod) day(dk).vodPending = true;
+          }
+          continue;
+        }
         const at = new Date(s.start).getTime();
         for (const v of parts) {
           if (seen.has(v.title_no)) continue;
           seen.add(v.title_no);
-          day(dk).vods.push({ m, mi, v, at });
+          day(dk).vodsAll.push({ m, mi, v, at });
         }
       }
     }
@@ -5799,7 +5822,9 @@ function calItemsByDate() {
   for (const d of Object.values(map)) {
     // 순서 = 사이트 멤버 순서(MEMBERS) → 시각 → 파트(2026-09-02 Crenop 지정). 대표 그림도 상세 타일도 같은 순서라
     // 크루 화면에서 13명이 섞여도 늘 같은 자리에서 같은 사람을 찾는다(생방송 카드·스트립과 같은 문법).
-    d.vods.sort((a, b) => a.mi - b.mi || a.at - b.at || (a.v.part || 0) - (b.v.part || 0));
+    d.vodsAll.sort((a, b) => a.mi - b.mi || a.at - b.at || (a.v.part || 0) - (b.v.part || 0));
+    d.vods = wantVod ? d.vodsAll : [];
+    d.statsPending = !monthData;   // 그 달 방송 기록이 아직 안 왔으면 누가 방송했는지도 모른다 — 빈 칸은 '없음'이 아니라 '불러오는 중…'
     d.youtube.sort((a, b) => a.mi - b.mi || a.at - b.at);
     d.count = d.content.length + d.schedule.length + d.vods.length + d.youtube.length;
   }
@@ -5920,17 +5945,29 @@ function calDetailHtml(items) {
   const rowsHtml = rows.map(it => {
     const link = it.link ? escapeHtml(it.link) : '';
     const wrap = (cls, inner) => link ? `<a class="${cls}" href="${link}" target="_blank" rel="noopener">${inner}</a>` : `<div class="${cls}">${inner}</div>`;
-    const img = it.img ? wrap('cal-di-img', `<img src="${escapeHtml(it.img)}" alt="" loading="lazy">`) : '';
-    const when = it.time ? `<span class="cal-di-time">${escapeHtml(it.time)}</span>` : '';
-    let mine = '';
+    // 제목 줄 끝 externalLink = 링크 있음(2026-09-03 세션 70) — 일정 목록(.sch-item-title)·상단바 시트 모달(.tbm-title)과 같은 표시.
+    // 남은 링크가 유튜브뿐이라도 유튜브 마크를 쓰지 않는다: 시트 링크 칸은 어떤 주소든 올 수 있고, 사이트 문법은 '바깥으로 나감' 하나다.
+    const title = wrap('cal-di-title', `${tagIconsHtml(it.tags)}${escapeHtml(it.title)}${link ? ' ' + SVG_ICONS.externalLink : ''}`);
     if (it.kind === 'content') {
+      // 컨텐츠 상자(세션 70 재배치): 제목 → 아래 [그림 | 참여 멤버 칸](1열 폼은 세로). 참여 멤버 사진 줄은 뺀다 — 칸의 이름줄이 그 자리를 맡는다(Crenop 지정).
+      // 칸 = 시트의 참여 멤버 전원, 사이트 멤버 순서로 한 명 한 칸: 다시보기가 있으면 타일(회차·파트가 여럿이면 전부), 없으면 썸네일과 같은 규격의
+      // 빈 상자에 '다시보기 없음'(Crenop 지정). 그 달 방송 기록이나 그 멤버의 목록이 아직 안 왔으면 '없음' 대신 '불러오는 중…'(잠깐 틀린 글자가 뜨지 않게).
+      // 다시보기는 종류 필터와 무관한 vodsAll — '컨텐츠'만 골라도 참여자 칸은 나온다.
       const names = new Set(it.members || []);
-      const own = d.vods.filter(x => names.has(x.m.name));
+      const own = d.vodsAll.filter(x => names.has(x.m.name));
       own.forEach(x => inContent.add(x.v.title_no));
-      if (own.length) mine = `<div class="cal-vods cal-di-vods">${own.map(vodTile).join('')}</div>`;
+      const img = it.img ? wrap('cal-di-img', `<img src="${escapeHtml(it.img)}" alt="" loading="lazy">`) : '';
+      const slots = MEMBERS.filter(m => names.has(m.name)).map(m => {
+        const tiles = own.filter(x => x.m.id === m.id);
+        if (tiles.length) return tiles.map(vodTile).join('');
+        const wait = d.statsPending || d.vodWait.has(m.id);
+        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${wait ? '불러오는 중…' : '다시보기<br>없음'}</span></div>`;
+      }).join('');
+      const mine = slots ? `<div class="cal-vods cal-di-vods">${slots}</div>` : '';
+      return `<div class="cal-di content">${title}${img || mine ? `<div class="cal-di-main">${img}${mine}</div>` : ''}</div>`;
     }
-    const body = `<div class="cal-di-body">${wrap('cal-di-title', `${tagIconsHtml(it.tags)}${escapeHtml(it.title)}`)}<div class="cal-di-meta">${when}<span class="cal-di-who" style="--who-cols:${whoCols(it.members)}">${whoImgs(it.members)}</span></div>${mine}</div>`;
-    return `<div class="cal-di ${it.kind}">${img}${body}</div>`;
+    const when = it.time ? `<span class="cal-di-time">${escapeHtml(it.time)}</span>` : '';
+    return `<div class="cal-di schedule">${title}<div class="cal-di-meta">${when}<span class="cal-di-who" style="--who-cols:${whoCols(it.members)}">${whoImgs(it.members)}</span></div></div>`;
   }).join('');
   const vods = d.vods.filter(x => !inContent.has(x.v.title_no)).map(vodTile).join('');
   const yts = d.youtube.map(({ m, y }) => {
@@ -5939,12 +5976,13 @@ function calDetailHtml(items) {
       `<span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>` +
       `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(y.title || '')}</span></span></a></div>`;
   }).join('');
-  const sec = (label, inner) => inner ? `<div class="cal-di-sec">${label}</div>${inner}` : '';
+  // 구획 라벨 앞 그림(세션 70) = 이 탭의 종류 그림 그대로(CAL_TYPE_ICON: 다시보기=숲 ∞ · 유튜브). 색은 CSS가 data-kind로 종류 버튼·칩과 같게.
+  const sec = (label, kind, inner) => inner ? `<div class="cal-di-sec" data-kind="${kind}">${SVG_ICONS[CAL_TYPE_ICON[kind]]}${label}</div>${inner}` : '';
   const vodBlock = vods ? `<div class="cal-vods">${vods}</div>` : (d.vodPending ? '<div class="ds-vod-none">다시보기 목록 불러오는 중</div>' : '');   // 전부 컨텐츠 상자로 들어갔으면 이 줄은 안 나온다
   return `<div class="day-detail-title"><span class="ddt-date">${calState.selected}</span></div>`
     + (rowsHtml ? `<div class="cal-di-list">${rowsHtml}</div>` : '')
-    + sec('다시보기', vodBlock)
-    + sec('유튜브', yts ? `<div class="cal-vods">${yts}</div>` : '');
+    + sec('다시보기', 'vod', vodBlock)
+    + sec('유튜브', 'youtube', yts ? `<div class="cal-vods">${yts}</div>` : '');
 }
 
 function renderCalendarTab() {

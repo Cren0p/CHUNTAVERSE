@@ -3338,18 +3338,23 @@ const MEMBER_BIRTHDAYS = {
     const w = sideEl.getBoundingClientRect().width;
     if (w > 0) document.documentElement.style.setProperty('--drawer-w', Math.round(w) + 'px');
   }
-  // 붙어 있는 머리(띠+보조바) 높이 — 기둥·버튼바가 그 아래에서 멈추도록 실측해 넘긴다
+  // 붙어 있는 머리(띠+보조바) 높이 — 기둥·버튼바가 그 아래에서 멈추도록 실측해 넘긴다.
+  // 반올림하지 않는다(2026-09-03 세션 70, Crenop 실사고): 브라우저 배율에 따라 띠 높이가 54.4px처럼 소수가 되는데, 올림된 값에 보조바를
+  // 붙이면 그 차이만큼 띠와 보조바 사이가 벌어져 본문이 비친다. 실측값 그대로(소수 2자리) 넘기면 보조바 윗변 = 띠 아랫변.
+  // 다시 재는 때: 크기 변화(ResizeObserver — 시트 스트립과 같은 방식)와 웹폰트 적용 뒤(폴백 폰트로 잰 높이가 어긋나던 것 방지).
   function syncHeadH() {
     const tb = document.querySelector('.topbar');
     const mh = document.querySelector('.main-header');
     const th = tb ? tb.getBoundingClientRect().height : 0;
     const mhH = (mh && getComputedStyle(mh).display !== 'none') ? mh.getBoundingClientRect().height : 0;
-    document.documentElement.style.setProperty('--topbar-h', Math.round(th) + 'px');
-    document.documentElement.style.setProperty('--head-h', Math.round(th + mhH) + 'px');
+    document.documentElement.style.setProperty('--topbar-h', th.toFixed(2) + 'px');
+    document.documentElement.style.setProperty('--head-h', (th + mhH).toFixed(2) + 'px');
   }
   window.addEventListener('resize', syncHeadH);
   setTimeout(syncHeadH, 0);
   setTimeout(syncHeadH, 400);
+  if (window.ResizeObserver) { const ro = new ResizeObserver(syncHeadH); ['.topbar', '.main-header'].forEach(sel => { const el = document.querySelector(sel); if (el) ro.observe(el); }); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeadH);
   window.syncHeadH = syncHeadH;
   window.addEventListener('resize', syncDrawerW);
   setTimeout(syncDrawerW, 0);

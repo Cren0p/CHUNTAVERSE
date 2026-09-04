@@ -2076,10 +2076,11 @@
   .cal-tl-yt svg { width: 12px; height: 12px; display: block; }
   /* 링크 둘 이상일 때 제목·그림이 버튼(고르기 모달) — <a>일 때와 같은 모양 */
   button.cal-di-title, button.cal-di-img { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
-  button.cal-di-title:hover { color: var(--accent); }   /* 제목은 최대 2줄(2026-09-03 Crenop — 한 줄은 너무 짧다). 상자 높이를 넘는 줄은 잘린다 */
-  /* 멤버 색 사각(2026-09-03): 10px 정사각·간격 2px, 글자 줄 아래 자기 줄에 왼쪽 정렬(글자와 같은 왼쪽 선). 넘치면 두 줄 균등(--who-cols는 JS) */
-  .cal-faces { display: grid; grid-template-columns: repeat(var(--who-cols, 99), 10px); gap: 2px; justify-content: start; margin: 2px 0 4px; }
-  .cal-face { width: 10px; height: 10px; display: block; }
+  button.cal-di-title:hover { color: var(--accent); }
+  /* '전체' 칸의 제목은 한 줄(2026-09-04 Crenop) — 참여 멤버 사각·뱅온 줄을 걷어내고 제목만 쌓기로 하면서 한 줄로 낮췄다.
+     종류를 고른 화면(그림 없는 날의 일정 제목)은 자리가 남으므로 종전 두 줄(.cal-tl) 그대로. */
+  .cal-tl-1 { -webkit-line-clamp: 1; }
+  .cal-more { color: var(--muted); }   /* 상자에 안 들어간 줄 수 — 전부 보기는 칸을 눌러 여는 상세가 맡는다 */
   .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
   .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop) */
   /* 태그별 고유색(2026-09-02 Crenop 지정) — 달력 칸·목록·상세·일정 모달 어디서나 같은 색. 브랜드 색 출처는 응답 기록(69번).
@@ -3287,7 +3288,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-03z';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4073,7 +4074,7 @@ function titleBadgeHtml(title) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .cal-t, .cal-tl, .cal-row-title';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .cal-t, .cal-tl, .cal-tl-1, .cal-row-title';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -5919,7 +5920,7 @@ function calLoadingSettle() {
 function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
-  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], vodsAll: [], vodWait: new Set(), vodFail: new Set(), statsPending: false, youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 도착과 무관)
+  const day = d => (map[d] = map[d] || { content: [], schedule: [], vods: [], vodsAll: [], vodWait: new Set(), vodFail: new Set(), statsPending: false, youtube: [], vodPending: false, count: 0, live: new Set() });   // live: 그날 방송한 멤버 id(세션 기준 — 다시보기 유무와 무관). '전체' 칸의 뱅온 줄 재료
   // vodsAll·vodWait(2026-09-03 세션 70): 컨텐츠 상자의 '참여 멤버 한 칸씩'은 종류 필터와 무관하게 다시보기를 알아야 한다('컨텐츠'만 골라도 참여자가 보여야 함).
   // vods(칩·대표 그림·바깥 다시보기 줄)는 종전대로 필터를 따른다. vodWait = 그날 방송했는데 다시보기 목록이 아직 안 온 멤버(빈 칸에 '불러오는 중…').
   const wantVod = calShows('vod'), wantContent = calShows('content');
@@ -5934,7 +5935,7 @@ function calItemsByDate() {
   if (monthData) for (const m of calMembers()) {
     const mi = MEMBERS.indexOf(m);
     const sum = computeMonthSummary(monthData[m.id], year, month);   // 첫 달(2025-12)은 결성일 11/30 세션·유튜브도 포함(kstMonthStartMs)
-    for (const dk of Object.keys(sum.sessionsByDate)) day(dk).live.add(m.id);   // '전체'의 뱅온/휴뱅 줄 재료
+    for (const dk of Object.keys(sum.sessionsByDate)) day(dk).live.add(m.id);   // '전체' 칸의 뱅온 줄 재료
     if (wantVod || wantContent) for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
       const seen = seenVod[dk] || (seenVod[dk] = new Set());
       for (const s of sessions) {
@@ -6007,28 +6008,47 @@ function calChips(d) {
 function calSchedTitles(d) { return d.schedule.map(s => `<span class="cal-tl">${tagIconsHtml(s.tags)}${escapeHtml(s.title)}</span>`).join(''); }   // 제목은 E(상세) — D(간략)는 보조바 전용(2026-09-03 Crenop 지정). 칸이 2줄을 잡는 이유가 이것
 // 종류 '전체'에서는 그림 대신 글자(2026-09-02 Crenop 지정): 일정 줄 + 컨텐츠 제목 줄. 그림은 종류를 하나 고른 화면(컨텐츠·다시보기·유튜브)에서만 —
 // '전체'의 대표 그림은 컨텐츠·다시보기·유튜브가 뒤섞여 무엇의 그림인지 알 수 없었다. 다시보기·유튜브는 '전체'에서 칩(개수)으로만.
-// '전체' 칸의 구성(2026-09-03 Crenop 재지정 — 1판이 난잡했다): 일정·컨텐츠 제목(최대 2줄) → 그 아래 줄에 참여 멤버 색 사각 →
-// '뱅온'(제목과 같은 흰 글자) → 그 아래 줄에 컨텐츠에 없는 방송 멤버의 색 사각. '휴뱅'은 적지 않는다(없으면 휴뱅). 뱅온은 컨텐츠 유무와
-// 무관하게 같은 이름. 멤버 고르기(calMembers)를 따르고, 그 달 통계가 도착한 뒤 지난 날에만(오늘·미래는 없음).
-// 칸 안의 멤버 표시는 사진이 아니라 대표색 정사각(10px, 2026-09-03 Crenop — 사진은 그 크기에서 알아볼 수 없었고 14px은 난잡했다). 이름은 글상자로.
-// 10px 사각은 13명이 한 줄(154px)에 들어간다 — 왼쪽 정렬 한 줄. 넘치면 위아래 개수가 비슷하게 두 줄(일정 모달의 --who-cols 규칙).
-function calWhoCols(n) { return Math.max(1, n > 14 ? Math.ceil(n / 2) : n); }
-function calFaces(members) {
-  if (!members.length) return '';
-  return `<span class="cal-faces" style="--who-cols:${calWhoCols(members.length)}">${members.map(m => `<span class="cal-face" style="background:${m.color}" title="${escapeHtml(m.name)}"></span>`).join('')}</span>`;
-}
+// '전체' 칸의 구성(2026-09-04 Crenop 재지정): 일정·컨텐츠 제목만 한 줄씩. 종전의 참여 멤버 색 사각과 '뱅온' 줄은 폐지 —
+//   합방을 소급해 넣으면서 하루 3건 이상이 생겼는데 한 건이 47px(제목 2줄+사각)이라 105px 상자에 두 건밖에 안 들어가 말없이 잘렸다.
+//   사각을 빼면 '뱅온'은 그 사각의 이름표만 남아 뜻이 없어지므로 함께 뺀다(Crenop 지적). 참여 멤버는 칸을 눌러 여는 상세에 사진·이름으로 그대로 있다.
+//   한 건이 16.6px이 되어 칸 폭 200px에서 6건, 좁은 칸(126px)에서 3건이 들어간다. 그래도 넘치면 아래 calFitCellLines가 '+n'으로 알린다.
+// 뱅온 줄만 남긴다(2026-09-04 Crenop): 멤버를 한 명 고른 '전체' 화면에서, 그 멤버가 그날 방송했는데 그 멤버의 컨텐츠 줄이 없으면 '뱅온'.
+//   종류를 '다시보기'로 두면 썸네일이 그 자리를 채워 방송한 날인 줄 알지만 '전체'는 글자뿐이라 상자가 비어 '아무 일 없던 날'로 보인다.
+//   크루 전체(천타버스)일 땐 거의 매일 누군가 방송이라 뜻이 없어 넣지 않는다. 색 사각은 없다 — 누구인지는 이미 고른 한 명이다.
+//   판정은 다시보기가 아니라 방송 기록(sessionsByDate): 다시보기를 안 남긴 방송이야말로 칸이 통째로 비는 경우다.
+//   지난 날만·그 달 통계가 온 뒤에만(오늘·미래는 방송 기록이 아직 안 닫혔다).
 function calAllTextLines(d, key) {
-  const byName = names => (names || []).map(n => MEMBERS.find(m => m.name === n)).filter(Boolean);
+  if (!d) return '';
   // 컨텐츠 제목 뒤 유튜브 마크(세션 70 Crenop): 편집본(C열 링크)이 있다는 유/무 표시 — 개수는 안 센다. 상세의 제목 끝은 종전대로 externalLink(바깥으로 나감)
-  const line = (tags, title, members, tail) => `<span class="cal-tl">${tagIconsHtml(tags)}${escapeHtml(title)}${tail || ''}</span>${calFaces(byName(members))}`;
+  const line = (tags, title, tail) => `<span class="cal-tl cal-tl-1">${tagIconsHtml(tags)}${escapeHtml(title)}${tail || ''}</span>`;
   const ytMark = c => ((c.links || (c.link ? [c.link] : [])).length ? ` <span class="cal-tl-yt">${SVG_ICONS.youtube}</span>` : '');
-  const items = d ? d.schedule.map(s => line(s.tags, s.title, s.members)).concat(d.content.map(c => line(c.tags, c.title || '컨텐츠', c.members, ytMark(c)))).join('') : '';   // 일정도 E(상세) — D는 보조바 전용
+  const items = d.schedule.map(s => line(s.tags, s.title)).concat(d.content.map(c => line(c.tags, c.title || '컨텐츠', ytMark(c)))).join('');   // 일정도 E(상세) — D는 보조바 전용
+  if (calState.member === 'all' || !key || !statsState.data[calYm()]) return items;
   const t = kstNow(), todayKey = `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}-${String(t.getUTCDate()).padStart(2, '0')}`;
-  if (!key || key >= todayKey || !statsState.data[calYm()]) return items;   // 지난 날만
-  const assigned = new Set(d ? d.schedule.concat(d.content).flatMap(x => byName(x.members).map(m => m.id)) : []);
-  const live = d ? d.live : new Set();
-  const on = calMembers().filter(m => live.has(m.id) && !assigned.has(m.id));
-  return items + (on.length ? `<span class="cal-tl">뱅온</span>${calFaces(on)}` : '');   // 글자 줄 + 그 아래 색 사각 줄(컨텐츠 줄과 같은 짜임)
+  if (key >= todayKey) return items;
+  const byName = names => (names || []).map(n => MEMBERS.find(m => m.name === n)).filter(Boolean);
+  const assigned = new Set(d.schedule.concat(d.content).flatMap(x => byName(x.members).map(m => m.id)));
+  const on = calMembers().filter(m => d.live.has(m.id) && !assigned.has(m.id));
+  return items + (on.length ? `<span class="cal-tl cal-tl-1">뱅온</span>` : '');
+}
+// 칸 글상자(.cal-t)에 안 들어간 줄은 감추고 마지막에 '+n'을 세운다(2026-09-04 Crenop) — 종전엔 말없이 잘려 더 있다는 것조차 안 보였다.
+// 전부 보기는 칸을 눌러 여는 상세가 맡는다: 칸이 통째로 버튼이라 안에 스크롤을 두면 휠과 클릭이 한자리에서 겹친다(사이트에 그런 선례도 없다 — 안쪽 스크롤은 모달·서랍처럼 화면을 채우는 판뿐).
+// 폭이 바뀌면 들어가는 줄 수가 달라지므로 다시 잰다(칸 126~200px). 안 보이는 폼은 clientHeight가 0이라 건드리지 않는다.
+function calFitCellLines() {
+  document.querySelectorAll('.cal-grid-form .cal-t').forEach(box => {
+    box.querySelectorAll('.cal-more').forEach(el => el.remove());
+    const rows = Array.from(box.children);
+    rows.forEach(el => { el.style.display = ''; });
+    if (!box.clientHeight || box.scrollHeight <= box.clientHeight) return;
+    const more = document.createElement('span');
+    more.className = 'cal-tl cal-tl-1 cal-more';
+    box.appendChild(more);
+    for (let i = rows.length - 1, n = 0; i >= 0; i--) {
+      rows[i].style.display = 'none';
+      more.textContent = `+${++n}`;
+      if (box.scrollHeight <= box.clientHeight) break;
+    }
+  });
 }
 function calBoxHtml(d, key) {
   if (calState.type === 'all') { const t = calAllTextLines(d, key); return t ? `<span class="cal-t">${t}</span>` : ''; }
@@ -6157,7 +6177,7 @@ function renderCalendarTab() {
     if (!c) return '<div class="calendar-day cal-cell outside"></div>';
     const { key, dow } = c;
     const d = items[key];
-    const box = calBoxHtml(d, key);   // '전체'는 자료 없는 날도 뱅온/휴뱅으로 찬다
+    const box = calBoxHtml(d, key);
     return `<button class="calendar-day cal-cell ${stateCls(key, d)}" data-caldate="${key}"><span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${c.label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${box}</span></button>`;
   });
   const weeks = [];
@@ -6190,6 +6210,7 @@ function renderCalendarTab() {
   const listForm = `<div class="cal-list-form">${loadingTag}<div class="cal-rows">${listRows || '<div class="cal-di-none">이 달에는 기록이 없습니다.</div>'}</div><div class="cal-detail cal-list-side">${detail}</div></div>`;
 
   body.innerHTML = gridForm + listForm;
+  calFitCellLines();   // 그린 직후 한 번 — 넘친 줄을 '+n'으로 접는다
   body.querySelectorAll('[data-caldate]').forEach(btn => btn.addEventListener('click', () => {
     const k = btn.dataset.caldate;
     calState.selected = (calState.selected === k) ? null : k;
@@ -6300,6 +6321,8 @@ function placeApplyRank() {
   if (src && slot && slot.innerHTML !== src.innerHTML) slot.innerHTML = src.innerHTML;
 }
 window.addEventListener('resize', () => { if (likeReqShown) renderLikeReqBody(); placeApplyRank(); });
+let calFitT = null;   // 칸 폭이 바뀌면 들어가는 줄 수가 달라진다 — 다시 재서 '+n'을 고쳐 단다(다시 그리지는 않는다)
+window.addEventListener('resize', () => { clearTimeout(calFitT); calFitT = setTimeout(calFitCellLines, 120); });
 // 우측 칸의 순위가 바뀌면(불러오는 중 → 표) 자리도 따라 바뀐다
 (function () {
   const src = document.getElementById('applyRankBody');

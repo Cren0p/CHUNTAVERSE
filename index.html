@@ -3288,7 +3288,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9405,7 +9405,10 @@ async function loadContent() {
       // B열은 컨텐츠 행에서 '사진 파일 이름을 이기는 날짜'(2026-09-04 Crenop). 일정 행에서는 시간 칸이라 컨텐츠 행에서만 이렇게 읽는다 —
       // 형식이 안 겹치므로(HH:MM vs 날짜) 일정 행을 컨텐츠 행으로 바꿀 때 B의 시간을 지우지 않아도 된다(날짜 꼴이 아니면 그냥 무시).
       // [왜] 현수막 사진을 컨텐츠 행에 붙이면 파일 이름의 날짜가 '게시글 작성일'이라 실제 컨텐츠 날과 수시간~수일 어긋난다. 코드로는 메울 수 없어 사람이 적는다.
-      return { url, imgs, link, links, linkTitles, title, tags, members, date: parseSheetDate(r[1]) || parseContentDate(url) };
+      // B가 비었을 때 사진이 여러 장이면 content 폴더 사진의 이름을 먼저 본다(2026-09-04): 칸 대표 그림은 '첫 장'이라 그림을 고르려고 순서를 바꾸는데,
+      // 그때 날짜까지 따라 움직이면 안 된다. 믿을 수 있는 이름은 Crenop이 컨텐츠 날짜로 붙인 content 폴더 것뿐이다. 그것도 없으면 첫 장(종전과 같음).
+      const nameImg = imgs.find(u => u.toLowerCase().includes('/content/')) || '';
+      return { url, imgs, link, links, linkTitles, title, tags, members, date: parseSheetDate(r[1]) || parseContentDate(nameImg) || parseContentDate(url) };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));

@@ -3288,7 +3288,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5202,13 +5202,16 @@ function visibleSchedule() {
 function schedulePast(s) { return Date.now() >= (s.hasTime ? s.target : s.hideAfter); }
 function scheduleAsContent(s) {
   const [y, m, d] = s.date.split('-').map(Number);
-  return { url: '', link: s.link || '', links: s.link ? [s.link] : [], linkTitles: [], title: s.title, tags: s.tags, members: s.members,
+  return { url: '', imgs: [], link: s.link || '', links: s.link ? [s.link] : [], linkTitles: [], title: s.title, tags: s.tags, members: s.members,
     date: { sort: s.date.slice(2).replace(/-/g, ''), display: koDate(y, m, d) }, fromSchedule: true };   // sort = YYMMDD(그림 이름의 날짜 키와 같은 꼴)
 }
 function contentAll() { return contentData.concat(scheduleData.filter(schedulePast).map(scheduleAsContent)); }   // 컨텐츠 = 그림 행 + 지난 일정 행
-// 통계에서 '컨텐츠'로 세는 기준(2026-09-04 Crenop): 그림이 있거나(그림을 만든 것 = 컨텐츠) 링크가 있는 것(편집본이 있는 것). 둘 다 없는 지난 일정은 단순 합방 —
-// 달력에서 다시보기를 모아 주긴 하지만 컨텐츠 수에는 안 든다(게임 합방을 컨텐츠로 치지 않던 종전 규칙 유지).
-function isCountedContent(c) { return !!c.url || (c.links || []).length > 0; }
+// 통계에서 '컨텐츠'로 세는 기준(2026-09-04 Crenop 재지정): A열 사진이 content 폴더에 있는 행만.
+// [왜] 종전 기준은 '그림이 있거나 링크가 있으면'이었는데, 현수막 사진(banner 폴더)을 컨텐츠 행에 붙이기 시작하면 축하만 받은 합방까지 컨텐츠로 세어진다.
+//   'Crenop이 컨텐츠 사진을 만들어 content 폴더에 올렸다'가 곧 '천타버스가 차린 컨텐츠'라는 표시다. 링크는 남이 올린 편집본일 수도 있어 기준이 흐려진다.
+// 폴더만 보고 도메인은 안 본다(주소가 옮겨져도 안 깨지게). 컨텐츠도 현수막도 아닌 사진은 제3의 폴더에 올리면 자동으로 빠진다 — 폴더 이름을 여기 적을 필요가 없다.
+// 사진이 여러 장이면 하나라도 content 폴더면 센다. 지난 일정 행(사진 없음)은 종전대로 안 든다.
+function isCountedContent(c) { return (c.imgs || (c.url ? [c.url] : [])).some(u => String(u).toLowerCase().includes('/content/')); }
 
 // KST 기준 D-day 일수(오늘=0). 자정끼리의 차이라 시:분과 무관.
 function ddayNum(item) {
@@ -5428,7 +5431,7 @@ let bannerData = [];
 let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
 const CONTENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
-const LS_CONTENT_CACHE = 'chuntaverse_content_cache_v3';   // v3: C=링크 여러 개(links, 2026-09-03 세션 70) — 구 캐시엔 links가 없다. v2: F=종류 신설(2026-09-02)
+const LS_CONTENT_CACHE = 'chuntaverse_content_cache_v4';   // v4: A=사진 여러 장(imgs) + B열 날짜 우선(2026-09-04) — 구 캐시엔 imgs가 없고 날짜가 파일 이름으로 굳어 있다. v3: C=링크 여러 개(links, 세션 70). v2: F=종류 신설(2026-09-02)
 let contentData = [];
 let _contentRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
 
@@ -6095,8 +6098,8 @@ function calDetailHtml(items) {
     .map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
   const whoCols = names => { const n = (names || []).length || 1; return Math.max(1, Math.ceil(n / (n > 7 ? 2 : 1))); };
   const rows = [
-    ...d.schedule.map(s => ({ kind: 'schedule', title: s.title, time: s.time, link: s.link, img: '', members: s.members, tags: s.tags })),
-    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, links: c.links || (c.link ? [c.link] : []), linkTitles: c.linkTitles || [], img: c.url, members: c.members, tags: c.tags })),
+    ...d.schedule.map(s => ({ kind: 'schedule', title: s.title, time: s.time, link: s.link, imgs: [], members: s.members, tags: s.tags })),
+    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, links: c.links || (c.link ? [c.link] : []), linkTitles: c.linkTitles || [], imgs: c.imgs || (c.url ? [c.url] : []), members: c.members, tags: c.tags })),
   ];
   // 컨텐츠 상자(2026-09-03 Crenop 지정): 그림은 칸 썸네일보다 크게(240px), 그 컨텐츠에 참여한 멤버의 다시보기는 상자 안(제목·참여자 아래)에,
   // 나머지 멤버의 다시보기는 상자 밖 '다시보기' 줄에 종전처럼. 타일은 같은 것이고 자리만 다르다. 상자 전체를 링크로 만들면 안의 타일 링크와
@@ -6123,7 +6126,8 @@ function calDetailHtml(items) {
       const names = new Set(it.members || []);
       const own = d.vodsAll.filter(x => names.has(x.m.name));
       own.forEach(x => inContent.add(x.v.title_no));
-      const img = it.img ? wrap('cal-di-img', `<img src="${escapeHtml(it.img)}" alt="" loading="lazy">`) : '';
+      // 사진이 여러 장이면 묶음 안에 세로로 잇는다(2026-09-04 Crenop) — 폭은 그대로 200px이라 옆 타일과 위가 계속 맞는다.
+      const img = (it.imgs || []).map(u => wrap('cal-di-img', `<img src="${escapeHtml(u)}" alt="" loading="lazy">`)).join('');
       // 2026-09-04 Crenop: 제목은 그림 폭(200px = 타일 폭)만 차지하고 길면 줄바꿈 → [제목/그림] 묶음이 타일과 같은 꼴이 되어 옆 타일과 위가 맞는다(제목 줄 ≈ 이름줄, 그림 ≈ 썸네일)
       const col = `<div class="cal-di-col">${title}${img}</div>`;
       const slots = calMembers().filter(m => names.has(m.name)).map(m => {
@@ -9347,6 +9351,19 @@ function membersRowStyle(count) {
   return '';
 }
 
+// 시트 칸의 날짜를 컨텐츠 날짜 꼴({sort:'YYMMDD', display})로. 구글 시트가 자동 서식으로 바꾼 '2026. 8. 14.'까지 받는다.
+// 날짜가 아니면(빈칸·'14:30' 같은 일정 시간) null → 부르는 쪽이 사진 파일 이름으로 되돌아간다.
+function parseSheetDate(cell) {
+  const t = String(cell || '').trim();
+  let y, mo, d;
+  const m1 = t.match(/^(\d{4})[.\-\/]\s?(\d{1,2})[.\-\/]\s?(\d{1,2})\.?$/);
+  if (m1) { y = +m1[1]; mo = +m1[2]; d = +m1[3]; }
+  else if (/^\d{6}$/.test(t)) { y = 2000 + +t.slice(0, 2); mo = +t.slice(2, 4); d = +t.slice(4, 6); }
+  else return null;
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  const yy = String(y % 100).padStart(2, '0'), mm = String(mo).padStart(2, '0'), dd = String(d).padStart(2, '0');
+  return { sort: `${yy}${mm}${dd}`, display: koDate(y, mo, d) };
+}
 function parseContentDate(url) {
   const match = url.match(/(\d{6})(?:-\d+)?\.webp/);
   if (!match) return null;
@@ -9373,7 +9390,10 @@ async function loadContent() {
     const csv = await res.text();
     const rows = parseCSV(csv);
     contentData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-      const url = r[0];
+      // A=사진 — 여러 장 가능(2026-09-04 Crenop): 줄바꿈·쉼표로 나눈다(C열 링크와 같은 구분자 관례).
+      // url = 첫 장(칸 대표 그림·모아보기 링크 등 종전 소비처가 전부 이것을 본다), imgs = 전부(상세 상자가 세로로 잇는다).
+      const imgs = String(r[0] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
+      const url = imgs[0] || '';
       // C=링크 — 여러 개 가능(2026-09-03 세션 70, Crenop): 줄바꿈(또는 쉼표)으로 나눈 항목마다 '주소' 또는 '주소 제목'(주소 뒤 공백, 제목은 자유 — 2026-09-04).
       // link = 첫 주소(카드 등 종전 소비처), links = 주소 전부, linkTitles = 항목별 제목(없으면 ''). 달력 상세: 둘 이상이면 고르기 모달에 제목 표시
       const entries = (r[2] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
@@ -9382,7 +9402,10 @@ async function loadContent() {
       const title = (r[4] || '').trim();       // E=제목 (D는 일정 전용 간략제목칸 — 컨텐츠 행은 비움)
       const tags = parseTags(r[5]);                          // F=종류(2026-09-02 신설) — 일정 행과 같은 열
       const members = r.slice(6).filter(c => c.length > 0);  // G~ 멤버
-      return { url, link, links, linkTitles, title, tags, members, date: parseContentDate(url) };
+      // B열은 컨텐츠 행에서 '사진 파일 이름을 이기는 날짜'(2026-09-04 Crenop). 일정 행에서는 시간 칸이라 컨텐츠 행에서만 이렇게 읽는다 —
+      // 형식이 안 겹치므로(HH:MM vs 날짜) 일정 행을 컨텐츠 행으로 바꿀 때 B의 시간을 지우지 않아도 된다(날짜 꼴이 아니면 그냥 무시).
+      // [왜] 현수막 사진을 컨텐츠 행에 붙이면 파일 이름의 날짜가 '게시글 작성일'이라 실제 컨텐츠 날과 수시간~수일 어긋난다. 코드로는 메울 수 없어 사람이 적는다.
+      return { url, imgs, link, links, linkTitles, title, tags, members, date: parseSheetDate(r[1]) || parseContentDate(url) };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));

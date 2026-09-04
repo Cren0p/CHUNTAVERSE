@@ -2127,15 +2127,19 @@
   .cal-detail-row { margin: 0; }
   /* 상세 — 일정·컨텐츠 행(있으면) → 다시보기 타일 → 유튜브 타일. 타일은 일별 요약과 같은 200px 문법(.ds-vod), 크루 화면이라 멤버 이름줄을 위에 */
   .cal-di-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-  /* 컨텐츠 상자(2026-09-04 Crenop 개정): .cal-di-main [ .cal-di-col(제목 → 그림, 폭 200px = 타일 폭) | 참여 멤버 타일 ]. 제목은 그림 폭 안에서 줄바꿈 —
-     종전처럼 제목이 상자 첫 줄을 통째로 차지하면 옆 타일 위에 빈 줄이 생겼다. 제목 줄이 타일의 이름줄, 그림이 썸네일 자리라 위가 맞는다. 일정 상자는 제목 → 시간·참여자 줄(세로).
-     상자는 링크가 아니다 — 그림·제목만 링크. 제목~그림 4px = 타일의 이름줄~썸네일(.cal-vod-who margin-bottom)과 같게. */
+  /* 컨텐츠 상자(2026-09-04 Crenop 재개정): 제목 → 참여 멤버 사진 줄 → 사진(들). 일정 상자와 앞 두 줄이 같은 꼴이 된다.
+     [왜 다시보기 타일을 상자에서 뺐나] 어느 다시보기가 어느 컨텐츠인지 시스템은 모른다 — 그날 그 멤버의 다시보기를 전부 담았기에,
+     한 멤버가 컨텐츠 둘에 참여하면 양쪽 상자에 같은 것이 두 번씩 들어가 난잡했다. 다시보기는 아래 '다시보기' 줄에 한 번씩만 두고,
+     어느 것이 이 컨텐츠 것인지는 마우스를 올렸을 때의 강조가 알려 준다(calWireVodFocus).
+     [사진 크기] 폭 320 · 높이 240 두 상한 안에서 원본 비율 유지(2026-09-04 Crenop 지적으로 개정 — 높이만 묶으면 가로로 긴 그림이 한 줄을 독식한다).
+     폭 320 = 칸 썸네일(188)의 1.7배 — 상세는 더 크게 보는 자리이고, 옆의 다시보기 타일(200)과 나란히 놓아도 어색하지 않다.
+     높이 240 = 현수막 카드(.content-card-img)가 그림을 담는 칸의 높이 — 사이트에 이미 있는 값이라 새 수치를 만들지 않는다.
+     어떤 비율이든 320×240 안에 들어간다: 16:9=320×180 / 1:1=240×240 / 3:4=180×240 / 4:1=320×80. 좁은 화면에서는 폭이 먼저 걸려 높이가 따라 줄어든다. */
   .cal-di { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; }
   .cal-di.schedule { border-style: dashed; }
-  .cal-di-main { display: flex; gap: 12px; align-items: flex-start; }   /* flex-start: 그림 링크가 행 높이(타일 쪽이 더 길 때)만큼 늘어나 그림 아래 빈자리까지 눌리던 것을 막는다(Crenop 적발). 12px = 타일 사이 간격(.cal-vods gap) */
-  .cal-di-col { width: 200px; flex: none; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .cal-di-img { width: 100%; flex: none; display: block; }   /* 그림 폭 = 묶음 폭(200px, 썸네일과 같음 — 2026-09-04 Crenop). 원본 비율 그대로 — 세로 포스터는 그만큼 길다 */
-  .cal-di-img img { width: 100%; display: block; }
+  .cal-di-imgs { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }   /* 12px = 다시보기 타일 사이 간격(.cal-vods gap). 폭이 모자라면 저절로 다음 줄로 — 좁은 화면용 별도 규칙이 필요 없다 */
+  .cal-di-img { display: block; max-width: 100%; }
+  .cal-di-img img { display: block; max-width: min(320px, 100%); max-height: 240px; width: auto; height: auto; }
   a.cal-di-img:hover { outline: 1.5px solid var(--accent); }   /* 누를 수 있는 그림 = 민트 외곽선 — 다시보기 타일(.ds-vod:hover .ds-vod-thumb)과 같은 표시 */
   /* 제목 줄 = 일정 목록(.sch-item-title) 문법: inline-flex·gap 4·끝 externalLink 12px 0.7. align-self로 글자 폭만 링크(상자 폭 전체가 눌리지 않게). 13px(구 12, 2026-09-02) */
   .cal-di-title { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0; align-self: flex-start; }
@@ -2143,13 +2147,16 @@
   .cal-di-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
   .cal-di-title .cal-tag { margin-right: 0; display: inline-flex; }   /* 오른쪽 3px 여백은 flex gap이 맡는다(.sch-item-title과 같은 이유) */
   .cal-di-title .cal-tag svg { opacity: 1; width: 14px; height: 14px; }   /* 종류 그림은 흐리지 않게 — 0.7은 바깥 화살표용. 14px = 이 탭의 .cal-tag 기본값 */
-  .cal-di-vods { flex: 1; min-width: 0; margin-top: 0; }   /* 참여 멤버의 다시보기 — 그림 오른쪽, 그림 위 끝에 맞춤 */
-  /* 다시보기 없는 참여 멤버의 빈 상자(세션 70 Crenop 지정) — 썸네일과 같은 틀(.ds-vod-thumb: 200px·16:9)에 글자만 가운데.
-     바탕은 한 단계 어둡게(--surface): 상자(--surface2) 위에 같은 색이면 틀이 안 보인다 — 칸의 빈 그림 상자(.cal-thumb)와 같은 색. 글자는 상태라 4차(--muted) */
-  .cal-vod-none { display: flex; align-items: center; justify-content: center; text-align: center; background: var(--surface); font-size: 12px; line-height: 1.35; color: var(--muted); }
-  /* 1열 폼(좁은 본문·태블릿·모바일): 상세가 320px 옆 칸이나 행 아래에 서므로 그림 옆에 세울 폭이 없다 — 타일을 묶음 아래로 내린다(2026-09-03 Crenop). 묶음 폭은 그대로 200px(타일과 같은 꼴) */
-  .cal-list-form .cal-di-main { flex-direction: column; align-items: stretch; }
-  .cal-di-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }   /* 12px(구 11, 2026-09-02). 일정 상자만(컨텐츠 상자의 참여자 사진 줄은 세션 70에 폐지) */
+  /* 다시보기 강조(2026-09-04 Crenop): 참여자 아이콘이나 상자에 마우스를 올리면 그 사람 것만 남기고 나머지를 흐린다.
+     hover: hover — 마우스가 있는 환경에서만. 손가락으로 쓰는 화면에서는 상자와 다시보기 줄이 세로로 멀리 떨어져 있어
+     눌러도 변화가 화면 밖에서 일어나고, 잘못 눌렀을 때 되돌리기도 어렵다(Crenop 지적). 그래서 터치에서는 아예 켜지 않는다.
+     흐리게 하는 쪽을 고른 이유: 민트 테두리는 '누를 수 있음/선택됨' 뜻으로 이미 예약돼 있다. 흐림은 지난달 칸(.calendar-day.outside)과 같은 문법. */
+  @media (hover: hover) {
+    .cal-vods.focusing .cal-vod:not(.vf-on) { opacity: 0.25; }
+    .cal-vods .cal-vod { transition: opacity 0.12s; }
+    .cal-di-who img { cursor: default; }
+  }
+  .cal-di-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }   /* 12px(구 11, 2026-09-02). 일정 상자는 시각+참여자, 컨텐츠 상자는 참여자만(2026-09-04 복귀) */
   /* 인원이 많으면 두 줄로, 위아래 개수가 비슷하게 나눈다(한 명만 내려가는 모양 방지). 줄당 최대치는 JS가 --who-cols로 준다 */
   .cal-di-who { display: grid; grid-template-columns: repeat(var(--who-cols, 99), 18px); gap: 2px; }
   .cal-di-who img { width: 18px; height: 18px; }
@@ -3291,7 +3298,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04h';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5223,7 +5230,9 @@ function visibleSchedule() {
 function schedulePast(s) { return Date.now() >= (s.hasTime ? s.target : s.hideAfter); }
 function scheduleAsContent(s) {
   const [y, m, d] = s.date.split('-').map(Number);
-  return { url: '', imgs: [], link: s.link || '', links: s.link ? [s.link] : [], linkTitles: [], title: s.title, tags: s.tags, members: s.members,
+  // 지난 일정 행: B열이 시각이므로 그 시각이 곧 컨텐츠 시작 시각이다(그림 행은 B에 '날짜 시각'을 적는다 — 결국 둘 다 B가 '언제')
+  const startMs = s.time ? Date.parse(`${s.date}T${s.time}:00+09:00`) : NaN;
+  return { url: '', imgs: [], startMs: isNaN(startMs) ? null : startMs, link: s.link || '', links: s.link ? [s.link] : [], linkTitles: [], title: s.title, tags: s.tags, members: s.members,
     date: { sort: s.date.slice(2).replace(/-/g, ''), display: koDate(y, m, d) }, fromSchedule: true };   // sort = YYMMDD(그림 이름의 날짜 키와 같은 꼴)
 }
 function contentAll() { return contentData.concat(scheduleData.filter(schedulePast).map(scheduleAsContent)); }   // 컨텐츠 = 그림 행 + 지난 일정 행
@@ -6123,14 +6132,21 @@ function calDetailHtml(items) {
   const whoCols = names => { const n = (names || []).length || 1; return Math.max(1, Math.ceil(n / (n > 7 ? 2 : 1))); };
   const rows = [
     ...d.schedule.map(s => ({ kind: 'schedule', title: s.title, time: s.time, link: s.link, imgs: [], members: s.members, tags: s.tags })),
-    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, links: c.links || (c.link ? [c.link] : []), linkTitles: c.linkTitles || [], imgs: c.imgs || (c.url ? [c.url] : []), members: c.members, tags: c.tags })),
+    ...d.content.map(c => ({ kind: 'content', title: c.title || '컨텐츠', time: '', link: c.link, links: c.links || (c.link ? [c.link] : []), linkTitles: c.linkTitles || [], imgs: c.imgs || (c.url ? [c.url] : []), members: c.members, tags: c.tags, startMs: c.startMs || null })),
   ];
-  // 컨텐츠 상자(2026-09-03 Crenop 지정): 그림은 칸 썸네일보다 크게(240px), 그 컨텐츠에 참여한 멤버의 다시보기는 상자 안(제목·참여자 아래)에,
-  // 나머지 멤버의 다시보기는 상자 밖 '다시보기' 줄에 종전처럼. 타일은 같은 것이고 자리만 다르다. 상자 전체를 링크로 만들면 안의 타일 링크와
-  // 겹치므로(중첩 링크) 그림과 제목만 링크로 둔다. 한 멤버가 그날 컨텐츠 둘에 다 참여했으면 두 상자에 다 들어간다(한 방송이 두 컨텐츠를 담은 것).
+  // 컨텐츠 상자(2026-09-04 Crenop 재개정): 제목 → 참여 멤버 사진 줄 → 사진(들). 다시보기 타일은 상자에서 뺐다 —
+  // 어느 다시보기가 어느 컨텐츠 것인지 시스템은 모르므로 그 멤버의 그날 다시보기를 통째로 담았고, 한 멤버가 컨텐츠 둘에 참여하면
+  // 양쪽 상자에 같은 것이 두 번씩 들어갔다(다시보기는 방송을 끄지 않아도 구간만 나눌 수 있어 세션으로도 못 가른다 — Crenop 정정).
+  // 대신 다시보기는 아래 '다시보기' 줄에 한 번씩만 두고, 어느 것이 이 컨텐츠 것인지는 마우스를 올렸을 때 흐림으로 알린다.
   const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
-  const vodTile = ({ m, v }) => `<div class="cal-vod">${whoLine(m)}${vodTileHtml(v)}</div>`;
-  const inContent = new Set();
+  // 타일에 주인 멤버와 파트 구간을 실어 둔다 — 강조가 이 값만 보고 고른다. 구간 = [time − 길이, time]:
+  // 실측 결과 다시보기의 time은 '그 파트가 끝난 시각'이고 파트들이 초 단위로 이어 붙는다(2026-09-04, 세 방송 대조).
+  // 방송 시작·종료 시각은 안 쓴다 — 방송 시간과 실제 녹화 길이가 어긋나는 사례가 있었다(시네티 건, Crenop).
+  const vodTile = ({ m, v }) => {
+    const end = v.time ? Date.parse(v.time) : NaN;
+    const span = isNaN(end) ? '' : ` data-vs="${end - (v.duration_ms || 0)}" data-ve="${end}"`;
+    return `<div class="cal-vod" data-mid="${m.id}"${span}>${whoLine(m)}${vodTileHtml(v)}</div>`;
+  };
   const rowsHtml = rows.map(it => {
     const link = it.link ? escapeHtml(it.link) : '';
     // 링크가 둘 이상(컨텐츠 C열, 세션 70): 제목·그림을 누르면 바깥으로 바로 가지 않고 고르기 모달(최근 활동의 다시보기 고르기와 같은 틀). 하나면 종전대로 바로 링크
@@ -6141,33 +6157,23 @@ function calDetailHtml(items) {
     // 남은 링크가 유튜브뿐이라도 유튜브 마크를 쓰지 않는다: 시트 링크 칸은 어떤 주소든 올 수 있고, 사이트 문법은 '바깥으로 나감' 하나다.
     const title = wrap('cal-di-title', `${tagIconsHtml(it.tags)}${escapeHtml(it.title)}${link ? ' ' + SVG_ICONS.externalLink : ''}`);
     if (it.kind === 'content') {
-      // 컨텐츠 상자(세션 70 재배치): 제목 → 아래 [그림 | 참여 멤버 칸](1열 폼은 세로). 참여 멤버 사진 줄은 뺀다 — 칸의 이름줄이 그 자리를 맡는다(Crenop 지정).
-      // 칸 = 시트의 참여 멤버 전원, 사이트 멤버 순서로 한 명 한 칸: 다시보기가 있으면 타일(회차·파트가 여럿이면 전부), 없으면 썸네일과 같은 규격의
-      // 빈 상자에 '다시보기 없음'(Crenop 지정). 그 달 방송 기록이나 그 멤버의 목록이 아직 안 왔으면 '없음' 대신 '불러오는 중…'(잠깐 틀린 글자가 뜨지 않게).
-      // 다시보기는 종류 필터와 무관한 vodsAll — '컨텐츠'만 골라도 참여자 칸은 나온다.
-      // 멤버 필터는 우선한다(2026-09-03 Crenop 지정): 한 멤버를 골랐으면 그 멤버 칸만 — 다른 멤버의 다시보기는 애초에 안 모으므로
-      // 칸을 만들면 있는 다시보기도 '없음'으로 찍히는 거짓이 된다(실사고: 천양 선택 상태에서 8/21 합방 참여자 8명이 전부 '없음').
+      // 참여자 줄은 일정 상자와 같은 규격(.cal-di-who 18px, 인원 많으면 두 줄 — whoCols 그대로 재사용, Crenop 지정).
+      // 멤버 필터는 여기서도 우선한다: 한 멤버를 골랐으면 그 멤버만 — 다른 멤버의 다시보기는 애초에 안 모으므로 강조할 대상이 없다.
       const names = new Set(it.members || []);
-      const own = d.vodsAll.filter(x => names.has(x.m.name));
-      own.forEach(x => inContent.add(x.v.title_no));
-      // 사진이 여러 장이면 묶음 안에 세로로 잇는다(2026-09-04 Crenop) — 폭은 그대로 200px이라 옆 타일과 위가 계속 맞는다.
+      const shown = calMembers().filter(m => names.has(m.name));
+      const who = shown.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}" data-mid="${m.id}">`).join('');
+      const whoBox = who ? `<span class="cal-di-who" style="--who-cols:${whoCols(shown)}">${who}</span>` : '';
+      // 사진이 여러 장이면 가로로 늘어놓고 넘치면 줄바꿈(2026-09-04 Crenop) — 높이가 같아 위아래가 맞고, 좁은 화면은 저절로 세로가 된다.
       const img = (it.imgs || []).map(u => wrap('cal-di-img', `<img src="${escapeHtml(u)}" alt="" loading="lazy">`)).join('');
-      // 2026-09-04 Crenop: 제목은 그림 폭(200px = 타일 폭)만 차지하고 길면 줄바꿈 → [제목/그림] 묶음이 타일과 같은 꼴이 되어 옆 타일과 위가 맞는다(제목 줄 ≈ 이름줄, 그림 ≈ 썸네일)
-      const col = `<div class="cal-di-col">${title}${img}</div>`;
-      const slots = calMembers().filter(m => names.has(m.name)).map(m => {
-        const tiles = own.filter(x => x.m.id === m.id);
-        if (tiles.length) return tiles.map(vodTile).join('');
-        // 문구는 격식체(사이트 규칙 — 명사형은 진행 표시뿐). 상자 아래에 타일과 같은 제목 줄·길이 줄 자리를 비워 둬 한 줄에 섞여도 높이가 같다(세션 70 Crenop).
-        const text = d.vodFail.has(m.id) ? '불러오지<br>못했습니다' : (d.statsPending || d.vodWait.has(m.id)) ? '불러오는 중…' : '다시보기가<br>없습니다';   // 실패는 기다림보다 우선(세션 70)
-        return `<div class="cal-vod">${whoLine(m)}<span class="ds-vod-thumb cal-vod-none">${text}</span><span class="ds-vod-title"><span class="ds-vod-tt">&nbsp;</span></span><span class="ds-vod-dur">&nbsp;</span></div>`;
-      }).join('');
-      const mine = slots ? `<div class="cal-vods cal-di-vods">${slots}</div>` : '';
-      return `<div class="cal-di content"><div class="cal-di-main">${col}${mine}</div></div>`;
+      // 상자에 참여자 id와 (있으면) 컨텐츠 시작 시각을 실어 둔다 — 강조가 이 값으로 대상을 고른다
+      const at = it.startMs ? ` data-at="${it.startMs}"` : '';
+      return `<div class="cal-di content" data-mids="${shown.map(m => m.id).join(' ')}"${at}>${title}${whoBox}` +
+        (img ? `<div class="cal-di-imgs">${img}</div>` : '') + `</div>`;
     }
     const when = it.time ? `<span class="cal-di-time">${escapeHtml(it.time)}</span>` : '';
     return `<div class="cal-di schedule">${title}<div class="cal-di-meta">${when}<span class="cal-di-who" style="--who-cols:${whoCols(it.members)}">${whoImgs(it.members)}</span></div></div>`;
   }).join('');
-  const vods = d.vods.filter(x => !inContent.has(x.v.title_no)).map(vodTile).join('');
+  const vods = d.vods.map(vodTile).join('');   // 상자로 빼돌리지 않는다 — 그날 다시보기는 여기 한 번씩만(2026-09-04)
   const yts = d.youtube.map(({ m, y }) => {
     const id = ytVideoId(y.url);
     return `<div class="cal-vod">${whoLine(m)}<a class="ds-vod" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">` +
@@ -6177,11 +6183,42 @@ function calDetailHtml(items) {
   // 구획 라벨 앞 그림(세션 70) = 이 탭의 종류 그림 그대로(CAL_TYPE_ICON: 다시보기=숲 ∞ · 유튜브). 색은 CSS가 data-kind로 종류 버튼·칩과 같게.
   const sec = (label, kind, inner) => inner ? `<div class="cal-di-sec" data-kind="${kind}">${SVG_ICONS[CAL_TYPE_ICON[kind]]}${label}</div>${inner}` : '';
   const allFailed = d.vodPending && d.vodWait.size > 0 && [...d.vodWait].every(id => d.vodFail.has(id));   // 기다리는 멤버 전원이 연달아 실패(세션 70)
-  const vodBlock = vods ? `<div class="cal-vods">${vods}</div>` : (d.vodPending ? `<div class="ds-vod-none">${allFailed ? '다시보기 목록을 불러오지 못했습니다' : '다시보기 목록 불러오는 중'}</div>` : '');   // 전부 컨텐츠 상자로 들어갔으면 이 줄은 안 나온다
+  const vodBlock = vods ? `<div class="cal-vods" id="calVods">${vods}</div>` : (d.vodPending ? `<div class="ds-vod-none">${allFailed ? '다시보기 목록을 불러오지 못했습니다' : '다시보기 목록 불러오는 중'}</div>` : '');
   return `<div class="day-detail-title"><span class="ddt-date">${calState.selected}</span></div>`
     + (rowsHtml ? `<div class="cal-di-list">${rowsHtml}</div>` : '')
     + sec('다시보기', 'vod', vodBlock)
     + sec('유튜브', 'youtube', yts ? `<div class="cal-vods">${yts}</div>` : '');
+}
+
+// 다시보기 강조(2026-09-04 Crenop): 컨텐츠 상자나 그 안 참여자 사진에 마우스를 올리면 그 사람 것만 남기고 나머지를 흐린다.
+// 대상 고르기 — ① 멤버가 맞고 ② 상자에 시작 시각이 적혀 있으면 그 시각을 품은 파트만, 안 적혀 있으면 그 멤버 것 전부.
+// 파트 구간은 타일에 실어 둔 [data-vs, data-ve]다(다시보기의 time = 그 파트가 끝난 시각, 길이를 빼면 시작 — 2026-09-04 실측).
+// 손가락으로 쓰는 화면에서는 켜지 않는다: 상자와 다시보기 줄이 세로로 멀리 떨어져 변화가 화면 밖에서 일어나고, 잘못 켜면 되돌리기 어렵다(Crenop 지적).
+function calWireVodFocus(root) {
+  if (!root || !window.matchMedia || !matchMedia('(hover: hover)').matches) return;
+  const vods = root.querySelector('#calVods');
+  if (!vods) return;
+  const tiles = Array.from(vods.querySelectorAll('.cal-vod'));
+  const clear = () => { vods.classList.remove('focusing'); tiles.forEach(t => t.classList.remove('vf-on')); };
+  // 시각으로 좁혔는데 하나도 안 걸리면 그 멤버 것 전부로 되돌아간다(2026-09-04 Crenop 지적).
+  // [왜] 다시보기가 방송 구간을 다 담지 못하는 사례가 있다(6시간 방송에 4시간짜리 VOD). 그러면 계산한 구간이 실제와 어긋나
+  // 맞는 파트도 안 걸린다. 그때 아무것도 강조하지 않는 것보다 '이 멤버 것들'까지라도 좁혀 주는 편이 낫다 — 모르면 좁히지 않는다.
+  const focus = (ids, at) => {
+    const mine = tiles.filter(t => ids.includes(t.dataset.mid));
+    const inSpan = t => (at == null || !t.dataset.vs) ? true : (at >= +t.dataset.vs && at <= +t.dataset.ve);
+    const narrowed = mine.filter(inSpan);
+    const target = narrowed.length ? narrowed : mine;
+    for (const t of tiles) t.classList.toggle('vf-on', target.includes(t));
+    vods.classList.toggle('focusing', target.length > 0);   // 걸리는 게 하나도 없으면 아무것도 흐리지 않는다 — 다 흐린 화면은 고장으로 보인다
+  };
+  root.addEventListener('mouseover', e => {
+    const box = e.target.closest('.cal-di.content');
+    if (!box) { clear(); return; }
+    const face = e.target.closest('.cal-di-who img');
+    const ids = face ? [face.dataset.mid] : String(box.dataset.mids || '').split(' ').filter(Boolean);
+    focus(ids, box.dataset.at ? +box.dataset.at : null);
+  });
+  root.addEventListener('mouseleave', clear);
 }
 
 function renderCalendarTab() {
@@ -6239,6 +6276,7 @@ function renderCalendarTab() {
 
   body.innerHTML = gridForm + listForm;
   calFitCellLines();   // 그린 직후 한 번 — 넘친 줄을 '+n'으로 접는다
+  body.querySelectorAll('.cal-detail').forEach(calWireVodFocus);   // 상세는 두 폼에 각각 그려지므로 둘 다 배선
   body.querySelectorAll('[data-caldate]').forEach(btn => btn.addEventListener('click', () => {
     const k = btn.dataset.caldate;
     calState.selected = (calState.selected === k) ? null : k;
@@ -9375,18 +9413,27 @@ function membersRowStyle(count) {
   return '';
 }
 
-// 시트 칸의 날짜를 컨텐츠 날짜 꼴({sort:'YYMMDD', display})로. 구글 시트가 자동 서식으로 바꾼 '2026. 8. 14.'까지 받는다.
+// 시트 칸의 날짜를 컨텐츠 날짜 꼴({sort:'YYMMDD', display, startMs?})로. 구글 시트가 자동 서식으로 바꾼 '2026. 8. 14.'까지 받는다.
+// 뒤에 시각을 붙이면(예: '2026-08-14 23:30') 그 컨텐츠가 시작한 시각으로 읽어 startMs(한국시간 절대 시각)를 같이 준다 —
+// 다시보기 강조가 '그 시각을 품은 파트'만 고르는 데 쓴다. 시각을 안 적으면 startMs가 없고 그 멤버 다시보기 전부가 대상이 된다.
 // 날짜가 아니면(빈칸·'14:30' 같은 일정 시간) null → 부르는 쪽이 사진 파일 이름으로 되돌아간다.
 function parseSheetDate(cell) {
   const t = String(cell || '').trim();
+  const hm = t.match(/(\d{1,2}):(\d{2})/);
+  const head = hm ? t.slice(0, hm.index).trim() : t;
   let y, mo, d;
-  const m1 = t.match(/^(\d{4})[.\-\/]\s?(\d{1,2})[.\-\/]\s?(\d{1,2})\.?$/);
+  const m1 = head.match(/^(\d{4})[.\-\/]\s?(\d{1,2})[.\-\/]\s?(\d{1,2})\.?$/);
   if (m1) { y = +m1[1]; mo = +m1[2]; d = +m1[3]; }
-  else if (/^\d{6}$/.test(t)) { y = 2000 + +t.slice(0, 2); mo = +t.slice(2, 4); d = +t.slice(4, 6); }
+  else if (/^\d{6}$/.test(head)) { y = 2000 + +head.slice(0, 2); mo = +head.slice(2, 4); d = +head.slice(4, 6); }
   else return null;
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
   const yy = String(y % 100).padStart(2, '0'), mm = String(mo).padStart(2, '0'), dd = String(d).padStart(2, '0');
-  return { sort: `${yy}${mm}${dd}`, display: koDate(y, mo, d) };
+  const out = { sort: `${yy}${mm}${dd}`, display: koDate(y, mo, d) };
+  if (hm && +hm[1] < 24 && +hm[2] < 60) {
+    const ms = Date.parse(`${y}-${mm}-${dd}T${String(+hm[1]).padStart(2, '0')}:${hm[2]}:00+09:00`);
+    if (!isNaN(ms)) out.startMs = ms;
+  }
+  return out;
 }
 function parseContentDate(url) {
   const match = url.match(/(\d{6})(?:-\d+)?\.webp/);
@@ -9432,7 +9479,8 @@ async function loadContent() {
       // B가 비었을 때 사진이 여러 장이면 content 폴더 사진의 이름을 먼저 본다(2026-09-04): 칸 대표 그림은 '첫 장'이라 그림을 고르려고 순서를 바꾸는데,
       // 그때 날짜까지 따라 움직이면 안 된다. 믿을 수 있는 이름은 Crenop이 컨텐츠 날짜로 붙인 content 폴더 것뿐이다. 그것도 없으면 첫 장(종전과 같음).
       const nameImg = imgs.find(u => u.toLowerCase().includes('/content/')) || '';
-      return { url, imgs, link, links, linkTitles, title, tags, members, date: parseSheetDate(r[1]) || parseContentDate(nameImg) || parseContentDate(url) };
+      const cdate = parseSheetDate(r[1]) || parseContentDate(nameImg) || parseContentDate(url);
+      return { url, imgs, link, links, linkTitles, title, tags, members, date: cdate, startMs: (cdate && cdate.startMs) || null };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));

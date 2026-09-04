@@ -519,7 +519,7 @@
      상시 외곽선은 폐지(음악 이름줄처럼 감쌀 범위가 애매한 곳에서 넓거나 좁게 보였다). 색은 멤버 고유색 — 생방송 카드의 민트 테두리(방송 중)와 섞이지 않게. 붙어 있는 머리 아래에 서도록 scroll-margin */
   [data-member] { scroll-margin-top: calc(var(--head-h, 0px) + 20px); }
   .fav-flash { outline: 1.5px solid var(--fav-color, var(--accent)); outline-offset: -1.5px; transition: outline-color 0.35s; }
-  .fav-col { position: absolute; pointer-events: none; z-index: 1; }   /* 관련 링크 가로 표의 열 덧그림(favColumnOverlay) — 크기는 JS가 잰다 */
+  .fav-col { position: absolute; pointer-events: none; z-index: 3; }   /* 관련 링크 가로 표의 열 덧그림(favColumnOverlay) — 크기는 JS가 잰다. z-index 3: 머리 칸(.links-table th, sticky z-index 2)이 덧그림의 위·양옆을 덮던 것(2026-09-04 Crenop 적발) 위로 */
   /* 좋아요 순위 모달 — lr-panel 골격 재사용. 행은 grid로 열을 고정(flex는 값 길이에 따라 열이 흔들려 눈금이 안 맞음) */
   .rk-ev { padding: 12px 16px; border-bottom: 1px solid var(--border); }
   .rk-ev:last-child { border-bottom: none; }

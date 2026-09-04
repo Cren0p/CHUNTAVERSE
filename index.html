@@ -71,6 +71,9 @@
                            4×12 + 공백 약 3 + 좌우 여백 12 ≈ 63 → 64. 라벨이 길어지면 이 값과 전환점을 함께 다시 잡을 것. */
     --nav-row-h: 40px;  /* 드로어 한 행 높이 — 탭과 부속이 같은 행에 서려면 두 쪽이 같은 값을 써야 한다 */
   }
+  /* 대비 접근성(2026-09-04 Crenop): 운영체제 '고대비'를 켠 사람에게만 4차 글자색을 한 단계 밝힌다 — 기본 화면은 그대로.
+     --muted #7c8aa3은 바탕 대비 5.0~5.7:1(기준 4.5 통과, 여유 적음) → #9aa8bf는 7.3~8.2:1. 대비 감도가 떨어진 사용자(망막색소변성·백내장 등)를 위한 것 */
+  @media (prefers-contrast: more) { :root { --muted: #9aa8bf; } }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   /* 전역 미니멀 스크롤바 (초미니 6px·거의 안 보이다 hover 시 진해짐). webkit=Edge/Chrome/Safari, scrollbar-*=Firefox */
   * { scrollbar-width: thin; scrollbar-color: rgba(226,232,240,0.14) transparent; }
@@ -670,7 +673,7 @@
   }
   .sch-item:last-child { border-bottom: none; }
   .sch-item-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .sch-item-when { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .sch-item-when { font-size: 11px; color: var(--text2); font-weight: 600; }   /* 사실 값(시각) = 2차(2026-09-04 대비 점검: 11px 캡션 중 시각·날짜·길이·축 숫자는 4차 회색이 아니라 2차 — 무채색은 유지) */
   .sch-item-title {
     font-size: 14px; color: var(--text); font-weight: 700;
     text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0;   /* gap 4(구 6): 종류 그림끼리·그림-제목 사이가 넓어 보였다(2026-09-03 Crenop) */
@@ -899,7 +902,7 @@
   .card-btime svg { width: 12px; height: 12px; }   /* 시계 아이콘(구 ⏱) — flex 중앙정렬이라 오프셋 불요 */
   .card-btime {
     font-size: 11px;
-    color: var(--muted);   /* 무채색 — 이벤트 목록 경과 표시와 통일(2026-07-17 확정, 구 앰버 var(--time)) */
+    color: var(--text2);   /* 무채색 — 이벤트 목록 경과 표시와 통일(2026-07-17 확정, 구 앰버 var(--time)). 4차→2차(2026-09-04 대비 점검: 사실 값) */
     font-weight: 600;
     flex-shrink: 0;
     display: inline-flex;
@@ -1108,7 +1111,7 @@
   .event-time-rel { display: block; }
   .event-time-abs {
     display: block; font-size: 11px;
-    color: var(--muted); opacity: 0.7;
+    color: var(--text2);   /* 구 muted + opacity 0.7 = 실효 대비 3.3:1(기준 4.5 미달) → 2차 색, 투명도 없음(2026-09-04 대비 점검) */
     white-space: nowrap;   /* 기본 1줄 고정(PC·일반 모바일) — 날짜/시간 inline */
   }
   /* 좁은 화면(≤480px)에서만 날짜·시간 2줄 분리. '좁을때'를 480px로 정의 — 이 숫자만 바꾸면 조정됨 */
@@ -1126,7 +1129,7 @@
     color: inherit; text-decoration: none;
   }
   .chat-bundle-row:hover .cbr-msg { color: var(--accent); }
-  .cbr-time { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+  .cbr-time { color: var(--text2); font-size: 11px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
   .cbr-name { font-weight: 700; flex-shrink: 0; }
   .cbr-msg { color: var(--text3); min-width: 0; overflow-wrap: anywhere; }
   /* 아이콘+텍스트 뱃지: align-items가 center면 baseline 참여 아이템이 없어 박스 하단이 기준선으로 합성 →
@@ -1467,7 +1470,7 @@
   /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
   /* v5 색 분류: 인라인 시간 배지는 무채색 — 생방송 카드 .card-btime의 2026-07-17 확정("무채색, 경과 표시와 통일")과 동일 부류.
      파랑(--ev-start)은 '방송 시간' 지표 라벨 아이콘과 세션 행 시간 아이콘에만. */
-  .ds-vod-dur { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; font-size: 11px; color: var(--muted); font-weight: 600; }
+  .ds-vod-dur { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; font-size: 11px; color: var(--text2); font-weight: 600; }   /* 사실 값(길이) = 2차 */
   .ds-vod-dur svg { width: 12px; height: 12px; display: block; flex: none; }
   /* 일별 요약 변경 로그의 경과 배지 — 이벤트 탭 .event-elapsed 재사용, 10px 라인에 맞게 축소 */
   .day-session-change .event-elapsed { font-size: 11px; margin-left: 2px; }
@@ -1517,7 +1520,7 @@
   .toh-tendency svg { width: 12px; height: 12px; }
   .toh-body { display: flex; align-items: flex-start; padding: 7px 0; }
   .toh-yaxis { position: relative; width: 22px; flex: none; }
-  .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--muted); }
+  .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--text2); }   /* 축 숫자 = 2차 */
   .toh-right { flex: 1; min-width: 0; }   /* v4: 스크롤 제거 — 열을 minmax(0,15px)로 두어 좁으면 셀이 줄어든다(스크롤바 억제) */
   .toh-grid { display: grid; gap: 0; }
   .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
@@ -1629,7 +1632,7 @@
     font-size: 11px; color: var(--text3);
     display: flex; align-items: center; gap: 6px;
   }
-  .day-session-change-time { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+  .day-session-change-time { color: var(--text2); font-size: 11px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
   .day-session-change-icon {
     flex-shrink: 0; width: 16px; display: flex; align-items: center; justify-content: center;
     color: var(--ev-yellow); font-weight: 700;
@@ -2235,7 +2238,7 @@
   .content-card-date {
     font-size: 11px;
     font-weight: 600;
-    color: var(--muted);
+    color: var(--text2);   /* 사실 값(날짜) = 2차(2026-09-04 대비 점검) */
   }
   .content-card-members {
     display: flex;
@@ -4325,6 +4328,11 @@ const MEMBER_INFO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq
 const VACATION_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=964295196';
 const PROFILE_VIDEO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1122643231';
 const LS_PROFVIDEO_CACHE = 'chuntaverse_profvideo_cache_v1';
+// 크루 핫클립(2026-09-04 세션 70, Crenop): 프로필 → 천타버스 탭 맨 아래에 유튜브 영상 줄을 되살린다(64번에 음악 탭으로 옮긴 프로필 하단 스트립의 크루분 복구).
+// 시트 gid=1220312645. 열: A=목록제목 B=영상제목 C=URL D=이미지URL(선택). 헤더 행 없음, 대상 열 없음(크루 전용 시트). 연속된 같은 목록제목이 한 줄(음악 탭 시트와 같은 묶기 규칙).
+const CREW_CLIP_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1220312645';
+const LS_CREWCLIP_CACHE = 'chuntaverse_crewclip_cache_v1';
+let crewClips = [];   // [{section, title, url, img}]
 const LS_CREWACT_CACHE = 'chuntaverse_crewact_cache_v1';
 const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v2';   // v2: I열(숲 기준) 삽입으로 열 배치가 바뀜 — 옛 캐시를 새 파서로 읽으면 득표가 한 칸 밀려 보이므로 키를 올려 무효화
 const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
@@ -4342,6 +4350,12 @@ function parseProfileVideoRows(rows) {
   return rows
     .map(r => ({ target: (r[0] || '').trim(), section: (r[1] || '').trim(), title: (r[2] || '').trim(), url: (r[3] || '').trim(), img: (r[4] || '').trim() }))
     .filter(v => v.target && v.section && v.title && v.url);
+}
+// 크루 핫클립 시트: 대상 열이 없어 한 칸씩 앞이다. 앞 3열 중 하나라도 비면 버린다(같은 이유).
+function parseCrewClipRows(rows) {
+  return rows
+    .map(r => ({ section: (r[0] || '').trim(), title: (r[1] || '').trim(), url: (r[2] || '').trim(), img: (r[3] || '').trim() }))
+    .filter(v => v.section && v.title && v.url);
 }
 
 // 유튜브 영상 ID. watch?v= / youtu.be / shorts / live 네 형태를 받는다(embed 포함).
@@ -4374,6 +4388,7 @@ function parseVacationRows(rows) {
 async function loadCrewSheets() {
   // 캐시 선표시(재방문 첫 페인트) — 배너 패턴과 동일
   try { const c = JSON.parse(lsGet(LS_PROFVIDEO_CACHE, 'null')); if (c) profileVideos = parseProfileVideoRows(c); } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_CREWCLIP_CACHE, 'null')); if (c) crewClips = parseCrewClipRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_CREWACT_CACHE, 'null')); if (c) crewActs = parseCrewActRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_MEMBERINFO_CACHE, 'null')); if (c) MEMBER_INFO = parseMemberInfoRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_VACATION_CACHE, 'null')); if (c) VACATION = parseVacationRows(c); } catch (e) {}
@@ -4387,6 +4402,7 @@ async function loadCrewSheets() {
     .then(t => { const rows = parseCSV(t); lsSet(lsKey, JSON.stringify(rows)); apply(rows); });
   await Promise.allSettled([
     pull(PROFILE_VIDEO_SHEET_URL, LS_PROFVIDEO_CACHE, rows => { profileVideos = parseProfileVideoRows(rows); }),
+    pull(CREW_CLIP_SHEET_URL, LS_CREWCLIP_CACHE, rows => { crewClips = parseCrewClipRows(rows); }),   // 크루 핫클립(프로필 → 천타버스 탭 맨 아래)
     pull(CREW_ACT_SHEET_URL, LS_CREWACT_CACHE, rows => { crewActs = parseCrewActRows(rows); }),
     pull(MEMBER_INFO_SHEET_URL, LS_MEMBERINFO_CACHE, rows => { MEMBER_INFO = parseMemberInfoRows(rows); }),
     pull(VACATION_SHEET_URL, LS_VACATION_CACHE, rows => { VACATION = parseVacationRows(rows); }),   // 카드 반영은 다음 loadFeed 폴링(≤10초)
@@ -10213,7 +10229,10 @@ function crewTagHtml(tag) {
 // target: '천타버스' 또는 멤버 이름(시트에 사람이 적는 값이라 id가 아니라 이름으로 맞춘다).
 // 폭은 호출부가 정한다(크루 1300 / 멤버 1000) — 위 블록과 좌우가 어긋나면 안 되므로.
 function renderVideoStrips(target, fallbackImg, maxWidth) {
-  const rows = profileVideos.filter(v => v.target === target);
+  return videoStripsHtml(profileVideos.filter(v => v.target === target), fallbackImg, maxWidth);
+}
+// 줄 그리기 본체(2026-09-04 분리): 음악 탭(멤버별 시트 행)과 크루 핫클립(전용 시트)이 같은 타일·화살표·묶기를 쓴다
+function videoStripsHtml(rows, fallbackImg, maxWidth) {
   if (rows.length === 0) return '';   // 행이 없으면 섹션 자체가 안 나온다
   // 연속된 같은 목록제목을 한 덩어리로 — crewActs의 섹션 묶기와 같은 규칙(시트 관리 감각을 맞춘다)
   const groups = [];
@@ -10296,8 +10315,9 @@ function renderMembersCrew(body) {
         <div class="crew-act-body">${actsHtml}</div>
       </div>
     </div>
+    ${videoStripsHtml(crewClips, 'Favicon.webp', 1300)}
   `;
-  bindVideoStrips(body);
+  bindVideoStrips(body);   // 크루 핫클립 줄의 좌우 화살표(2026-09-04 복구 — 폭 1300은 옛 크루 스트립과 같은 값, 위 블록과 좌우를 맞춘다)
   body.querySelectorAll('.crew-act-link').forEach(btn => btn.addEventListener('click', () => openContentCollect(btn.dataset.key)));
 }
 

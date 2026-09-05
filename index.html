@@ -3306,7 +3306,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04l';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9435,7 +9435,8 @@ function membersRowStyle(count) {
 function parseSheetDate(cell) {
   const t = String(cell || '').trim();
   const hm = t.match(/(\d{1,2}):(\d{2})/);
-  const head = hm ? t.slice(0, hm.index).trim() : t;
+  // 시각 앞까지가 날짜 부분. 구글 시트가 날짜+시각으로 바꿔 버리면 '2025. 11. 30 오후 4:00'처럼 오전/오후가 끼므로 떼어 낸다.
+  const head = (hm ? t.slice(0, hm.index) : t).replace(/(오전|오후|AM|PM)\s*$/i, '').trim();
   let y, mo, d;
   const m1 = head.match(/^(\d{4})[.\-\/]\s?(\d{1,2})[.\-\/]\s?(\d{1,2})\.?$/);
   if (m1) { y = +m1[1]; mo = +m1[2]; d = +m1[3]; }
@@ -9454,8 +9455,16 @@ function pickWhen(a, b) {
     if (!cell || /^https?:\/\//i.test(cell)) continue;
     if (!date) date = parseSheetDate(cell);
     if (!time) {
-      const m = cell.match(/(?:^|\s)(\d{1,2}):(\d{2})(?:\s|$)/);
-      if (m && +m[1] < 24 && +m[2] < 60) time = `${String(+m[1]).padStart(2, '0')}:${m[2]}`;
+      // 오전/오후(AM/PM)까지 받는다 — 시트가 시각 서식을 먹이면 한국어 표기로 나오고, 그걸 못 읽으면 오후 4시가 04:00으로 조용히 뒤집힌다.
+      // (링크정정 스크립트가 v7에서 겪은 것과 같은 함정 — 같은 규칙을 쓴다)
+      const m = cell.match(/(?:^|\s)(?:(오전|오후|AM|PM)\s*)?(\d{1,2}):(\d{2})(?:\s|$)/i);
+      if (m && +m[2] < 24 && +m[3] < 60) {
+        let h = +m[2];
+        const ap = (m[1] || '').toUpperCase();
+        if ((ap === '오후' || ap === 'PM') && h < 12) h += 12;
+        if ((ap === '오전' || ap === 'AM') && h === 12) h = 0;
+        time = `${String(h).padStart(2, '0')}:${m[3]}`;
+      }
     }
   }
   return { date, ymd: ymdOf(date), time, startMs: whenStartMs(date, time) };

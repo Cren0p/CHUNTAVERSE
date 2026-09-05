@@ -2139,12 +2139,16 @@
         칸 높이가 격자 줄에 맞춰 늘어난다. 그래서 그 탭 그림에는 사실상 높이 제한이 없고, 240은 근거가 못 된다.
      320을 고른 근거: 달력 칸 썸네일(188)의 1.7배 — 상세는 더 크게 보는 자리(세션 70 지정)이고, 옆의 다시보기 타일(200)보다 크다.
      그리고 상자 하나가 사진 폭 + 여백 18 = 338px이라, 넓은 화면(상세 안쪽 약 1400px)에서 컨텐츠 상자 4개가 한 줄에 선다.
-     한 변만 쓰면 비율이 극단이어도 한쪽이 뭉개지지 않는다: 16:9=320×180 / 1:1=320×320 / 3:4=240×320 / 4:1=320×80. */
+     한 변만 쓰면 비율이 극단이어도 한쪽이 뭉개지지 않는다: 16:9=320×180 / 1:1=320×320 / 3:4=240×320 / 4:1=320×80.
+     ※ 상한에 퍼센트를 섞지 말 것(min(320px,100%) 금지) — 퍼센트가 들어가면 브라우저가 상자 폭을 잴 때 그 상한을 못 쓰고 사진 '원본 폭'으로 잡아,
+        사진은 320으로 줄어드는데 상자만 원본만큼 넓어져 오른쪽에 빈 바닥이 생긴다(2026-09-04 Crenop 화면에서 실제 발생).
+        좁은 화면(1열 폼)에서만 아래 규칙으로 100%를 걸어 준다 — 거기서는 상자가 어차피 줄을 다 쓴다. */
   .cal-di { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; max-width: 100%; }
   .cal-di.schedule { border-style: dashed; }
   .cal-di-imgs { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }   /* 12px = 다시보기 타일 사이 간격(.cal-vods gap). 폭이 모자라면 저절로 다음 줄로 — 좁은 화면용 별도 규칙이 필요 없다 */
   .cal-di-img { display: block; max-width: 100%; }
-  .cal-di-img img { display: block; max-width: min(320px, 100%); max-height: 320px; width: auto; height: auto; }
+  .cal-di-img img { display: block; max-width: 320px; max-height: 320px; width: auto; height: auto; }
+  .cal-list-form .cal-di-img img { max-width: 100%; }
   a.cal-di-img:hover { outline: 1.5px solid var(--accent); }   /* 누를 수 있는 그림 = 민트 외곽선 — 다시보기 타일(.ds-vod:hover .ds-vod-thumb)과 같은 표시 */
   /* 제목 줄 = 일정 목록(.sch-item-title) 문법: inline-flex·gap 4·끝 externalLink 12px 0.7. align-self로 글자 폭만 링크(상자 폭 전체가 눌리지 않게). 13px(구 12, 2026-09-02) */
   .cal-di-title { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0; align-self: flex-start; }
@@ -2159,7 +2163,6 @@
   @media (hover: hover) {
     .cal-vods.focusing .cal-vod:not(.vf-on) { opacity: 0.25; }
     .cal-vods .cal-vod { transition: opacity 0.12s; }
-    .cal-di-who img { cursor: default; }
   }
   .cal-di-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }   /* 12px(구 11, 2026-09-02). 일정 상자는 시각+참여자, 컨텐츠 상자는 참여자만(2026-09-04 복귀) */
   /* 인원이 많으면 두 줄로, 위아래 개수가 비슷하게 나눈다(한 명만 내려가는 모양 방지). 줄당 최대치는 JS가 --who-cols로 준다 */
@@ -3303,7 +3306,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5189,19 +5192,17 @@ function parseTags(cell) { return String(cell || '').split(/[,|/]/).map(t => t.t
 function parseScheduleRows(rows) {
   const out = [];
   for (const r of rows) {
-    // A열: YYMMDD(통합 시트 일정 행) 또는 YYYY-MM-DD 둘 다 허용 → YYYY-MM-DD로 정규화.
-    // A가 http(컨텐츠 카드 행)·헤더·빈칸이면 null → 자동 제외(한 시트를 일정/컨텐츠 두 필터로 가르는 기준).
-    const rawDate = (r[0] || '').trim();
-    let date = null;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) date = rawDate;
-    else if (/^\d{6}$/.test(rawDate)) date = `20${rawDate.slice(0, 2)}-${rawDate.slice(2, 4)}-${rawDate.slice(4, 6)}`;
+    // A가 사진 주소인 행은 그림 행 — 컨텐츠 쪽(loadContent)에서 읽으므로 여기선 건너뛴다(한 행이 양쪽에 잡히지 않게).
+    // 그 밖의 행은 날짜·시각을 A·B 어느 칸에서든 찾는다: 옛 형식 A=날짜·B=시각, 새 형식 B='날짜 시각' 둘 다 그대로 읽힌다.
+    if (/^https?:\/\//i.test((r[0] || '').trim())) continue;
+    const when = pickWhen(r[0], r[1]);
+    const date = when.ymd;
     if (!date) continue;
     const brief = (r[3] || '').trim();   // D=간략제목(버튼)
     const detail = (r[4] || '').trim();  // E=상세제목(모달)
     if (!brief && !detail) continue;     // 제목이 둘 다 없으면 무효 행
-    const timeRaw = (r[1] || '').trim(); // B=시간
-    const hasTime = /^\d{1,2}:\d{2}$/.test(timeRaw);
-    const hhmm = hasTime ? timeRaw.padStart(5, '0') : '00:00';
+    const hasTime = !!when.time;
+    const hhmm = hasTime ? when.time : '00:00';
     const target = new Date(`${date}T${hhmm}:00+09:00`).getTime();
     const dayStart = new Date(`${date}T00:00:00+09:00`).getTime();
     out.push({
@@ -6171,7 +6172,7 @@ function calDetailHtml(items) {
       // 멤버 필터는 여기서도 우선한다: 한 멤버를 골랐으면 그 멤버만 — 다른 멤버의 다시보기는 애초에 안 모으므로 강조할 대상이 없다.
       const names = new Set(it.members || []);
       const shown = calMembers().filter(m => names.has(m.name));
-      const who = shown.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}" data-mid="${m.id}">`).join('');
+      const who = shown.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
       const whoBox = who ? `<span class="cal-di-who" style="--who-cols:${whoCols(shown)}">${who}</span>` : '';
       // 사진이 여러 장이면 가로로 늘어놓고 넘치면 줄바꿈(2026-09-04 Crenop) — 높이가 같아 위아래가 맞고, 좁은 화면은 저절로 세로가 된다.
       const img = (it.imgs || []).map(u => wrap('cal-di-img', `<img src="${escapeHtml(u)}" alt="" loading="lazy">`)).join('');
@@ -6200,7 +6201,9 @@ function calDetailHtml(items) {
     + sec('유튜브', 'youtube', yts ? `<div class="cal-vods">${yts}</div>` : '');
 }
 
-// 다시보기 강조(2026-09-04 Crenop): 컨텐츠 상자나 그 안 참여자 사진에 마우스를 올리면 그 사람 것만 남기고 나머지를 흐린다.
+// 다시보기 강조(2026-09-04 Crenop): 컨텐츠 상자에 마우스를 올리면 그 상자 참여자들 것만 남기고 나머지를 흐린다.
+// 참여자 사진 하나하나에 따로 반응하던 것은 폐지 — 사진 없는 상자는 아주 작은데 그 안에 서로 다른 행동이 열몇 개라 난잡했다(Crenop 사용 후 지적).
+// 상자 하나에 행동 하나.
 // 대상 고르기 — ① 멤버가 맞고 ② 상자에 시작 시각이 적혀 있으면 그 시각을 품은 파트만, 안 적혀 있으면 그 멤버 것 전부.
 // 파트 구간은 타일에 실어 둔 [data-vs, data-ve]다(다시보기의 time = 그 파트가 끝난 시각, 길이를 빼면 시작 — 2026-09-04 실측).
 // 손가락으로 쓰는 화면에서는 켜지 않는다: 상자와 다시보기 줄이 세로로 멀리 떨어져 변화가 화면 밖에서 일어나고, 잘못 켜면 되돌리기 어렵다(Crenop 지적).
@@ -6228,9 +6231,7 @@ function calWireVodFocus(root) {
   root.addEventListener('mouseover', e => {
     const box = e.target.closest('.cal-di.content');
     if (!box) { clear(); return; }
-    const face = e.target.closest('.cal-di-who img');
-    const ids = face ? [face.dataset.mid] : String(box.dataset.mids || '').split(' ').filter(Boolean);
-    focus(ids, box.dataset.at ? +box.dataset.at : null);
+    focus(String(box.dataset.mids || '').split(' ').filter(Boolean), box.dataset.at ? +box.dataset.at : null);
   });
   root.addEventListener('mouseleave', clear);
 }
@@ -9442,12 +9443,29 @@ function parseSheetDate(cell) {
   else return null;
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
   const yy = String(y % 100).padStart(2, '0'), mm = String(mo).padStart(2, '0'), dd = String(d).padStart(2, '0');
-  const out = { sort: `${yy}${mm}${dd}`, display: koDate(y, mo, d) };
-  if (hm && +hm[1] < 24 && +hm[2] < 60) {
-    const ms = Date.parse(`${y}-${mm}-${dd}T${String(+hm[1]).padStart(2, '0')}:${hm[2]}:00+09:00`);
-    if (!isNaN(ms)) out.startMs = ms;
+  return { sort: `${yy}${mm}${dd}`, display: koDate(y, mo, d) };
+}
+// 한 행의 '언제'를 A·B 두 칸에서 찾는다(2026-09-04 Crenop): 날짜도 시각도 어느 칸에 있든 읽는다.
+// 옛 형식은 A=날짜·B=시각, 새 형식은 B='날짜 시각'. 사진 주소(A)는 건너뛴다. 앞 칸에서 찾은 것이 이긴다.
+// 날짜와 시각이 다 있으면 그 컨텐츠가 시작한 절대 시각(startMs)도 같이 준다 — 다시보기 강조가 쓴다.
+function pickWhen(a, b) {
+  let date = null, time = '';
+  for (const cell of [String(a || '').trim(), String(b || '').trim()]) {
+    if (!cell || /^https?:\/\//i.test(cell)) continue;
+    if (!date) date = parseSheetDate(cell);
+    if (!time) {
+      const m = cell.match(/(?:^|\s)(\d{1,2}):(\d{2})(?:\s|$)/);
+      if (m && +m[1] < 24 && +m[2] < 60) time = `${String(+m[1]).padStart(2, '0')}:${m[2]}`;
+    }
   }
-  return out;
+  return { date, ymd: ymdOf(date), time, startMs: whenStartMs(date, time) };
+}
+function ymdOf(d) { return d ? `20${d.sort.slice(0, 2)}-${d.sort.slice(2, 4)}-${d.sort.slice(4, 6)}` : ''; }   // sort는 YYMMDD(뒤에 -n이 붙어도 앞 여섯 자리만 쓴다)
+function whenStartMs(date, time) {
+  const ymd = ymdOf(date);
+  if (!ymd || !time) return null;
+  const ms = Date.parse(`${ymd}T${time}:00+09:00`);
+  return isNaN(ms) ? null : ms;
 }
 function parseContentDate(url) {
   const match = url.match(/(\d{6})(?:-\d+)?\.webp/);
@@ -9493,8 +9511,10 @@ async function loadContent() {
       // B가 비었을 때 사진이 여러 장이면 content 폴더 사진의 이름을 먼저 본다(2026-09-04): 칸 대표 그림은 '첫 장'이라 그림을 고르려고 순서를 바꾸는데,
       // 그때 날짜까지 따라 움직이면 안 된다. 믿을 수 있는 이름은 Crenop이 컨텐츠 날짜로 붙인 content 폴더 것뿐이다. 그것도 없으면 첫 장(종전과 같음).
       const nameImg = imgs.find(u => u.toLowerCase().includes('/content/')) || '';
-      const cdate = parseSheetDate(r[1]) || parseContentDate(nameImg) || parseContentDate(url);
-      return { url, imgs, link, links, linkTitles, title, tags, members, date: cdate, startMs: (cdate && cdate.startMs) || null };
+      const when = pickWhen(r[0], r[1]);   // A는 사진이라 건너뛰고 B에서 날짜·시각을 읽는다(같은 규칙을 두 파서가 공유)
+      const cdate = when.date || parseContentDate(nameImg) || parseContentDate(url);   // 날짜가 B에 없으면 종전대로 사진 파일 이름에서
+      // 시작 시각은 '최종 날짜 + 시각'으로 만든다 — 날짜가 파일 이름에서 오고 시각만 B에 있는 흔한 조합에서도 살아야 한다(2026-09-04 Crenop 지적).
+      return { url, imgs, link, links, linkTitles, title, tags, members, date: cdate, startMs: whenStartMs(cdate, when.time) };
     });
     contentData.sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));
     lsSet(LS_CONTENT_CACHE, JSON.stringify(contentData));

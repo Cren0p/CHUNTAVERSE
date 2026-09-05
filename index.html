@@ -2126,20 +2126,25 @@
   .cal-row-title { font-size: 13px; color: var(--text); min-width: 0; }   /* 줄 단위 말줄임은 안쪽 .cal-tl이 맡는다. 13px(구 12, 2026-09-02) */
   .cal-detail-row { margin: 0; }
   /* 상세 — 일정·컨텐츠 행(있으면) → 다시보기 타일 → 유튜브 타일. 타일은 일별 요약과 같은 200px 문법(.ds-vod), 크루 화면이라 멤버 이름줄을 위에 */
-  .cal-di-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  /* 상자는 내용이 필요로 하는 만큼만 차지하고 넘치면 다음 줄로(2026-09-04 Crenop) — 넓은 화면에서 컨텐츠 상자가 가로로 선다.
+     좁은 폭(태블릿·휴대폰 1열)에서는 상자 하나가 줄을 다 쓰므로 저절로 세로가 된다 — 별도 규칙이 필요 없다.
+     align-items: flex-start — 사진 높이가 제각각이라 늘어나면 짧은 상자에 빈 바닥이 생긴다. */
+  .cal-di-list { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; margin-top: 8px; }
   /* 컨텐츠 상자(2026-09-04 Crenop 재개정): 제목 → 참여 멤버 사진 줄 → 사진(들). 일정 상자와 앞 두 줄이 같은 꼴이 된다.
      [왜 다시보기 타일을 상자에서 뺐나] 어느 다시보기가 어느 컨텐츠인지 시스템은 모른다 — 그날 그 멤버의 다시보기를 전부 담았기에,
      한 멤버가 컨텐츠 둘에 참여하면 양쪽 상자에 같은 것이 두 번씩 들어가 난잡했다. 다시보기는 아래 '다시보기' 줄에 한 번씩만 두고,
      어느 것이 이 컨텐츠 것인지는 마우스를 올렸을 때의 강조가 알려 준다(calWireVodFocus).
-     [사진 크기] 폭 320 · 높이 240 두 상한 안에서 원본 비율 유지(2026-09-04 Crenop 지적으로 개정 — 높이만 묶으면 가로로 긴 그림이 한 줄을 독식한다).
-     폭 320 = 칸 썸네일(188)의 1.7배 — 상세는 더 크게 보는 자리이고, 옆의 다시보기 타일(200)과 나란히 놓아도 어색하지 않다.
-     높이 240 = 현수막 카드(.content-card-img)가 그림을 담는 칸의 높이 — 사이트에 이미 있는 값이라 새 수치를 만들지 않는다.
-     어떤 비율이든 320×240 안에 들어간다: 16:9=320×180 / 1:1=240×240 / 3:4=180×240 / 4:1=320×80. 좁은 화면에서는 폭이 먼저 걸려 높이가 따라 줄어든다. */
-  .cal-di { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; }
+     [사진 크기] 한 변 320px 상자 안에 원본 비율로 앉힌다(2026-09-04 Crenop 지적으로 재개정).
+     ※ 앞서 근거로 든 '현수막 카드 240px'은 철회 — .content-card-img는 flex:1(=flex-basis 0)이라 height:240px가 실제로는 무시되고
+        칸 높이가 격자 줄에 맞춰 늘어난다. 그래서 그 탭 그림에는 사실상 높이 제한이 없고, 240은 근거가 못 된다.
+     320을 고른 근거: 달력 칸 썸네일(188)의 1.7배 — 상세는 더 크게 보는 자리(세션 70 지정)이고, 옆의 다시보기 타일(200)보다 크다.
+     그리고 상자 하나가 사진 폭 + 여백 18 = 338px이라, 넓은 화면(상세 안쪽 약 1400px)에서 컨텐츠 상자 4개가 한 줄에 선다.
+     한 변만 쓰면 비율이 극단이어도 한쪽이 뭉개지지 않는다: 16:9=320×180 / 1:1=320×320 / 3:4=240×320 / 4:1=320×80. */
+  .cal-di { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); padding: 8px; max-width: 100%; }
   .cal-di.schedule { border-style: dashed; }
   .cal-di-imgs { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }   /* 12px = 다시보기 타일 사이 간격(.cal-vods gap). 폭이 모자라면 저절로 다음 줄로 — 좁은 화면용 별도 규칙이 필요 없다 */
   .cal-di-img { display: block; max-width: 100%; }
-  .cal-di-img img { display: block; max-width: min(320px, 100%); max-height: 240px; width: auto; height: auto; }
+  .cal-di-img img { display: block; max-width: min(320px, 100%); max-height: 320px; width: auto; height: auto; }
   a.cal-di-img:hover { outline: 1.5px solid var(--accent); }   /* 누를 수 있는 그림 = 민트 외곽선 — 다시보기 타일(.ds-vod:hover .ds-vod-thumb)과 같은 표시 */
   /* 제목 줄 = 일정 목록(.sch-item-title) 문법: inline-flex·gap 4·끝 externalLink 12px 0.7. align-self로 글자 폭만 링크(상자 폭 전체가 눌리지 않게). 13px(구 12, 2026-09-02) */
   .cal-di-title { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0; align-self: flex-start; }
@@ -3298,7 +3303,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-04h';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-04i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5985,10 +5990,11 @@ function calItemsByDate() {
           continue;
         }
         const at = new Date(s.start).getTime();
+        const atEnd = s.end ? new Date(s.end).getTime() : null;   // 실시간 감지가 잰 방송 구간 — 다시보기 길이로 계산한 것보다 믿을 수 있다(잘린 다시보기 대비)
         for (const v of parts) {
           if (seen.has(v.title_no)) continue;
           seen.add(v.title_no);
-          day(dk).vodsAll.push({ m, mi, v, at });
+          day(dk).vodsAll.push({ m, mi, v, at, atEnd });
         }
       }
     }
@@ -6139,13 +6145,17 @@ function calDetailHtml(items) {
   // 양쪽 상자에 같은 것이 두 번씩 들어갔다(다시보기는 방송을 끄지 않아도 구간만 나눌 수 있어 세션으로도 못 가른다 — Crenop 정정).
   // 대신 다시보기는 아래 '다시보기' 줄에 한 번씩만 두고, 어느 것이 이 컨텐츠 것인지는 마우스를 올렸을 때 흐림으로 알린다.
   const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
-  // 타일에 주인 멤버와 파트 구간을 실어 둔다 — 강조가 이 값만 보고 고른다. 구간 = [time − 길이, time]:
-  // 실측 결과 다시보기의 time은 '그 파트가 끝난 시각'이고 파트들이 초 단위로 이어 붙는다(2026-09-04, 세 방송 대조).
-  // 방송 시작·종료 시각은 안 쓴다 — 방송 시간과 실제 녹화 길이가 어긋나는 사례가 있었다(시네티 건, Crenop).
-  const vodTile = ({ m, v }) => {
+  // 타일에 주인 멤버와 두 가지 구간을 실어 둔다 — 강조가 이 값으로 고른다(넓은 것 → 좁은 것 순).
+  //  ① 방송 구간(data-ss/se) = 실시간 감지가 잰 세션의 시작·종료. 믿을 수 있는 값이다.
+  //  ② 다시보기 구간(data-vs/ve) = [등록 시각 − 길이, 등록 시각]. 더 정확하지만 **잘린 다시보기에서 어긋난다** —
+  //     시네티(저작권 컨텐츠 같이보기)는 생방송만 되고 다시보기에는 안 남아 그만큼 잘린다. 체비 5/31 방송이 6시간 12분인데
+  //     다시보기는 4시간 21분이었고, 이 계산으로 시작을 잡았다가 실제 시작을 늦은 값으로 갈아치운 실사고가 있다(worker.js 소급 병합 주석).
+  //     그래서 ②는 ① 안에서만 쓰고, ②로 좁혀지지 않으면 ①까지만 좁힌다.
+  const vodTile = ({ m, v, at, atEnd }) => {
     const end = v.time ? Date.parse(v.time) : NaN;
-    const span = isNaN(end) ? '' : ` data-vs="${end - (v.duration_ms || 0)}" data-ve="${end}"`;
-    return `<div class="cal-vod" data-mid="${m.id}"${span}>${whoLine(m)}${vodTileHtml(v)}</div>`;
+    const part = isNaN(end) ? '' : ` data-vs="${end - (v.duration_ms || 0)}" data-ve="${end}"`;
+    const sess = (at && atEnd) ? ` data-ss="${at}" data-se="${atEnd}"` : '';
+    return `<div class="cal-vod" data-mid="${m.id}"${sess}${part}>${whoLine(m)}${vodTileHtml(v)}</div>`;
   };
   const rowsHtml = rows.map(it => {
     const link = it.link ? escapeHtml(it.link) : '';
@@ -6200,14 +6210,18 @@ function calWireVodFocus(root) {
   if (!vods) return;
   const tiles = Array.from(vods.querySelectorAll('.cal-vod'));
   const clear = () => { vods.classList.remove('focusing'); tiles.forEach(t => t.classList.remove('vf-on')); };
-  // 시각으로 좁혔는데 하나도 안 걸리면 그 멤버 것 전부로 되돌아간다(2026-09-04 Crenop 지적).
-  // [왜] 다시보기가 방송 구간을 다 담지 못하는 사례가 있다(6시간 방송에 4시간짜리 VOD). 그러면 계산한 구간이 실제와 어긋나
-  // 맞는 파트도 안 걸린다. 그때 아무것도 강조하지 않는 것보다 '이 멤버 것들'까지라도 좁혀 주는 편이 낫다 — 모르면 좁히지 않는다.
+  // 넓은 것부터 좁혀 들어가고, 좁혀지지 않으면 직전 단계에서 멈춘다 — 모르면 좁히지 않는다.
+  //  멤버 → (시각이 있으면) 그 시각에 방송 중이던 세션 → 그 안에서 시각을 담은 다시보기.
+  const inRange = (t, a, b, at) => !!t.dataset[a] && at >= +t.dataset[a] && at <= +t.dataset[b];
   const focus = (ids, at) => {
     const mine = tiles.filter(t => ids.includes(t.dataset.mid));
-    const inSpan = t => (at == null || !t.dataset.vs) ? true : (at >= +t.dataset.vs && at <= +t.dataset.ve);
-    const narrowed = mine.filter(inSpan);
-    const target = narrowed.length ? narrowed : mine;
+    let target = mine;
+    if (at != null) {
+      const bySession = target.filter(t => inRange(t, 'ss', 'se', at));
+      if (bySession.length) target = bySession;
+      const byPart = target.filter(t => inRange(t, 'vs', 've', at));
+      if (byPart.length) target = byPart;
+    }
     for (const t of tiles) t.classList.toggle('vf-on', target.includes(t));
     vods.classList.toggle('focusing', target.length > 0);   // 걸리는 게 하나도 없으면 아무것도 흐리지 않는다 — 다 흐린 화면은 고장으로 보인다
   };

@@ -3289,7 +3289,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06n';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06o';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6160,7 +6160,9 @@ function contentPickInfo(c) {
   if (!c.date || !c.date.sort) return null;
   const ymd = ymdOf(c.date);
   const members = (c.members || []).map(n => { const m = MEMBERS.find(x => x.name === String(n).trim()); return m ? m.id : ''; }).filter(Boolean);
-  return members.length ? { ymd, ym: ymd.slice(0, 7), members } : null;
+  // 달 키는 첫 달 규칙을 따른다(2026-09-06 Crenop 발견): 결성일 2025-11-30은 '2025-12'에 속한다(dayInStatsMonth와 같은 경계) —
+  // 종전엔 날짜의 앞 일곱 자리('2025-11')를 그대로 써서 워커가 '없는 달'로 거절했고 합격자 발표 날의 다시보기가 안 잡혔다.
+  return members.length ? { ymd, ym: ymd === CREW_START_DAY ? STATS_FIRST_YM : ymd.slice(0, 7), members } : null;
 }
 // 그날 참여 멤버들의 다시보기 타일 — 재료는 썸네일 탭과 같다(월 통계의 세션 → 방송번호 → 다시보기 목록). 멤버마다 이름줄을 단다.
 // 순서 = 사이트 멤버 순서 → 시각·파트(2026-09-06 Crenop: 시트로 뒤늦게 넣은 것도 제 멤버 자리에). 시트 포함(pick.include)의 멤버는

@@ -2799,12 +2799,12 @@
     .main-header { display: none; }   /* 보조바 폐지 — 내용물은 기둥의 우측 칸으로 내려간다 */
 
     /* 3열 격자(2026-09-06 Crenop): 탭 12개 = 3열 × 4행, 행 하나가 곧 묶음(매일 · 쌓인 것 · 모아 보기 · 도구). 타일은 PC 탭과 같은 모양(그림 위 + 글자 아래).
-       폭 280 고정(구 244~300 내용 맞춤). 왼쪽 여백 16은 기념일 상자가 프로필 열 밖(왼쪽)으로 넘칠 자리 — PC와 같은 문법(칸 오른쪽 끝에 붙고 왼쪽으로 넘침). */
+       폭 280 고정(구 244~300 내용 맞춤), 좌우 여백 8. 행 사이 10px(Crenop: 열 사이는 좌우 여백 덕에 널널한데 행은 붙어 보였다). */
     .sidebar {
       position: fixed; top: var(--strip-h, 44px); left: 0; bottom: 0;
       width: 280px; max-width: 300px;
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; row-gap: 2px; column-gap: 2px;
-      padding: 2px 8px 2px 16px;   /* 왼쪽 16 = 기념일 상자(세 글자 이름 약 97px)가 프로필 열(약 85px) 밖으로 넘칠 자리 */
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; row-gap: 10px; column-gap: 2px;
+      padding: 2px 8px;
       background: var(--surface); border-right: 1px solid var(--border); border-bottom: none;
       overflow-y: auto; overscroll-behavior: contain;   /* contain 없으면 끝까지 민 뒤 뒤 본문이 따라 움직인다 */
       z-index: 40;
@@ -2841,7 +2841,9 @@
     /* 부속의 자리는 위 격자 규칙(2행)이 정한다 — 세로 목록 시절의 '행 오른쪽 끝'(세션 70)과 행별 손 여백은 2026-09-06 3열 격자로 폐지. */
     /* 칸 자체는 클릭을 통과시킨다 — 행 위에 겹쳐 있어 라벨 쪽 클릭을 가로채고 있었다(2026-09-02 실사고).
        실제 부속(벨·기념일·일정)만 클릭을 받는다. */
-    .tab-aux { position: relative; z-index: 1; pointer-events: none; }   /* 자리·정렬은 PC 규칙(가운데, 기념일은 칸 오른쪽 끝에서 왼쪽으로 넘침) 그대로 */
+    .tab-aux { position: relative; z-index: 1; pointer-events: none; }   /* 자리·정렬은 PC 규칙(가운데) 그대로 — 기념일만 아래 예외 */
+    /* 서랍 예외(2026-09-06 Crenop): 기념일 상자는 프로필 타일과 가운데 정렬. 열(약 88px)보다 넓으면 양옆으로 고르게 넘친다 — 옆 열의 생방송 수는 가운데 점 하나라 안 부딪힌다 */
+    .tab-aux[data-for="members"] .celeb-wrap { right: auto; left: 50%; transform: translate(-50%, -50%); }
     /* 누를 것만 클릭을 받는다 — 생방송 카운터·일정 줄은 표시라 눌릴 이유가 없고,
        칸이 클릭을 먹으면 그 자리에서 탭 자체가 안 눌린다(2026-09-02). */
     .tab-aux .nav-notify-bell, .tab-aux .celebration-box, .tab-aux #guideLink { pointer-events: auto; }   /* 일정 줄(#schBtn)은 2026-09-06부터 왼쪽 묶음에 있어 여기 안 든다 */
@@ -3274,7 +3276,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06q';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06r';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

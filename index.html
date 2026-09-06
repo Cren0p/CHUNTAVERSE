@@ -2055,22 +2055,18 @@
     display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start;
   }
   .calendar-grid + .calendar-grid { margin-top: 4px; }
-  .cal-detail { background: var(--surface2); border: 1px solid var(--border); padding: 12px; margin: 4px 0; min-width: 0; }
-  /* 달력 '안'에 들어갈 때만 지난 활동의 주간 확장(.cal-week-detail)과 같은 배경·여백을 쓴다.
-     오른쪽 열로 설 때는 종전 문법 그대로 — 안쪽 문법을 밖에까지 밀면 두 탭이 되레 갈린다(2026-09-01). */
-  .cal-detail-week { background: var(--bg); padding: 16px; }
+  /* 상세 펼침(주 아래·행 아래·오른쪽 열, 2026-09-01~09-06)은 폐지 — 칸을 누르면 1개는 그 영상으로 직행, 2개 이상은 영상 선택 모달(사이트 공통 규칙, 2026-09-06 Crenop).
+     한 사람으로 좁힌 뒤엔 칸에 1~2개가 대부분이라 펼쳐 봐야 같은 그림 + 제목·길이뿐이었다. 제목은 PC에서 칸에 마우스를 올리면 뜬다(title). */
   .cal-di-none { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 0; }
   .cal-loading { font-size: 11px; color: var(--muted); text-align: right; line-height: 14px; margin-bottom: 4px; }   /* 자료 도착 중 표시 — 자리를 잡아 두지 않아 다 오면 사라진다 */
-  .cal-detail + .calendar-grid { margin-top: 4px; }   /* 상세가 끼면 '격자+격자' 규칙이 안 걸려 아래 주가 붙어 버린다 */
-  /* 폼 전환 — 두 폼을 다 그려 두고 CSS가 하나만 보인다(상세 두 자리 장치와 같은 태도). 기본 = 1열 목록. */
+  /* 폼 전환 — 두 폼을 다 그려 두고 CSS가 하나만 보인다. 기본 = 타일 흐름(좁은 폭), PC 넓은 폭 = 7열 달력. */
   .cal-grid-form { display: none; max-width: 1450px; }   /* 200px 칸 ×7 + 간격 24 + .calendar 패딩 24 + 테두리 2(옛 폼 상한과 같은 값) — 본문이 더 넓어도 칸은 200에서 멈춘다 */
-  .cal-list-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
-  .cal-list-side { display: none; margin: 0; }
-  @container (min-width: 720px) {   /* 목록 380 + 상세 320 + 간격 16 — 폭이 남으면 상세를 오른쪽 열로 */
-    .cal-list-form { grid-template-columns: minmax(0, 1fr) 320px; }
-    .cal-list-side { display: block; position: sticky; top: 20px; }
-    .cal-detail-row { display: none; }
-  }
+  .cal-list-form { display: block; }
+  /* 타일 흐름(2026-09-06 Crenop): 기록이 있는 날만 날짜순, 빈 날 없음. 타일 = 7열의 칸과 같은 부품(위 [날짜 | 칩], 아래 16:9 그림), 최소 폭 200 = PC 칸 —
+     휴대폰 1~2열, 태블릿 2~4열이 되어 그림이 PC보다 작아지지 않는다. 주(일~토)가 바뀌는 첫 타일은 새 줄에서 시작(.wk-first) — 주 단위 리듬을 남기고
+     빈 자리는 각 주의 끝에만 생긴다(빈 날마다 상자를 두는 것보다 싸다). 기록이 없는 주는 줄이 안 생긴다(아쉬우면 주 표시 한 줄을 붙일 수 있다). */
+  .cal-flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .cal-flow .cal-cell.wk-first { grid-column-start: 1; }
   @media (min-width: 1151px) {   /* PC 모드에서만 7열 — 태블릿은 폭이 남아도 1열(Crenop 지정: PC=썸네일 격자 / 태블릿·모바일=1열) */
     @container (min-width: 934px) {   /* .calendar 안쪽 908 = 칸 약 126px. 1366 노트북(기둥 280 포함)에서 칸 약 132px — 피드백으로 조정하는 시작값 */
       .cal-grid-form { display: block; }
@@ -2108,24 +2104,8 @@
   .cal-tag[data-tag="chuntaverse"] { color: var(--accent); }
   .cal-tag[data-tag="music"] { color: var(--ev-yellow); }
   .cal-cell.has:hover { border-color: var(--accent); }
-  .cal-cell.selected { border-color: var(--accent); background: var(--surface2); }
-  /* 1열 목록 행 — 그림이 있는 날만. 날짜 · 대표 그림 96px · 칩 */
-  .cal-rows { display: flex; flex-direction: column; gap: 6px; }
-  .cal-row { display: flex; align-items: center; gap: 10px; width: 100%; background: var(--surface); border: 1px solid var(--border); padding: 6px 8px; cursor: pointer; color: inherit; font-family: inherit; text-align: left; min-width: 0; transition: border-color 0.15s; }
-  .cal-row:hover { border-color: var(--accent); }
-  .cal-row.selected { border-color: var(--accent); background: var(--surface2); }
-  .cal-row.today { box-shadow: inset 0 0 0 1.5px var(--time); }   /* 달력 칸의 오늘 표시(.calendar-day.today)와 같은 링 */
-  .cal-row-date { flex: none; width: 88px; font-size: 12px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  .cal-row-date.sun { color: #f87171; }   /* 요일색 규칙(.calendar-daynum.sun/.sat)과 같은 값 */
-  .cal-row-date.sat { color: #60a5fa; }
-  .cal-row-thumb { flex: none; width: 96px; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface2); }
-  .cal-row-thumb:empty { background: transparent; }
-  .cal-row-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cal-row-body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .cal-row .cd-chips { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; min-width: 0; }
-  .cal-detail-row { margin: 0; }
-  /* 상세 = 그날 타일(고른 종류만). 타일은 일별 요약과 같던 200px 문법(.ds-vod). 이름줄(.cal-vod-who)은 링크 고르기 모달이 쓴다 */
-  .cal-vods { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  a.cal-cell { text-decoration: none; color: inherit; }   /* 1개인 날 = 그 영상으로 직행하는 링크 — 버튼(2개 이상, 모달)·상자(없음)와 같은 모양 */
+  /* 타일 200px 문법(.ds-vod)의 겉상자 — 영상 선택 모달(그날 타일·컨텐츠 카드)이 쓴다. 이름줄(.cal-vod-who)은 컨텐츠 모달용 */
   .cal-vod { width: 200px; }
   .cal-vod-who { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
   .cal-vod-who img { width: 18px; height: 18px; display: block; }
@@ -3269,7 +3249,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06t';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06u';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5358,7 +5338,7 @@ function openFavPicker() {
     // 지금 보고 있는 화면에 바로 반영 — 다음 방문까지 기다리게 하지 않는다
     if (currentPage === 'stats' && id) selectStatsTab(id);
     else if (currentPage === 'members') selectMembersTab(id || 'crew');
-    else if (currentPage === 'thumbs' && id) { calState.member = id; calState.selected = null; queueCalRender(); }   // 최애 해제면 보던 멤버 그대로(크루 칸이 없다)
+    else if (currentPage === 'thumbs' && id) { calState.member = id; queueCalRender(); }   // 최애 해제면 보던 멤버 그대로(크루 칸이 없다)
     else if (currentPage === 'disco' && id) { discoState.member = id; renderDisco(); }   // 곡이 없는 멤버면 renderDisco가 크루로 되돌린다
   }));
   showModal();
@@ -5875,7 +5855,7 @@ function renderDiscoSide(targets) {
 //   '전체' 종류 폐지: 다시보기·유튜브 중 하나만 — 칸 그림도, 칸을 눌러 여는 그날 타일도 고른 종류 것만.
 // 재료는 지난 활동 탭 것: 월 통계(/stats?month= — 유튜브 업로드 목록 포함) · 다시보기 목록(/vods, 멤버·월별 — 지난달은 브라우저 저장) ·
 //   타일(vodTileHtml) · 유튜브 썸네일 주소(ytVideoId).
-// 두 폼(7열 썸네일 / 1열 목록)을 다 그려 두고 CSS가 폭에 따라 하나만 보인다 — 상세 세 자리(주 아래·행 아래·오른쪽 열)도 같은 태도.
+// 두 폼(7열 달력 / 타일 흐름)을 다 그려 두고 CSS가 폭에 따라 하나만 보인다. 칸·타일은 같은 부품이고 누르는 규칙도 같다(1개 직행 · 2개 이상 모달).
 // 종류 = 단일 선택 버튼(2026-09-02 69번, Crenop 지정). 통계 탭 종류 버튼(HALL_KINDS·.hall-kind-btn)과 같은 모양·같은 자리 문법.
 // 멤버 스트립과 같은 '고르기'라 서랍 체크 버튼의 채움에는 세지 않는다(통계 탭과 동일).
 const CAL_KINDS = [
@@ -5910,7 +5890,7 @@ function tagIconsHtml(tags) {
   }).join('');
 }
 const CAL_TYPE_ICON = { vod: 'soop', youtube: 'youtube' };   // 칩·종류 버튼 공용(2026-09-02 Crenop 지정): 다시보기=숲 ∞ 마크 · 유튜브
-const calState = { year: 0, month: 0, selected: null, member: '', type: 'vod' };
+const calState = { year: 0, month: 0, member: '', type: 'vod' };   // selected(고른 날)는 2026-09-06 폐지 — 칸은 직행/모달
 calState.member = favMemberId() || MEMBERS[0].id;   // 첫 선택 = 최애(세션 70), 없으면 첫 멤버(지난 활동과 같은 기본값). 화면에서 바꾸면 그 값이 남는다(저장 안 함)
 (function () { const n = kstNow(); calState.year = n.getUTCFullYear(); calState.month = n.getUTCMonth() + 1; })();
 function calYm() { return `${calState.year}-${String(calState.month).padStart(2, '0')}`; }
@@ -6037,23 +6017,34 @@ function calPeriodHtml() {
     <div class="stats-period-row"><button class="stats-month-btn" data-calydir="prev" ${prevDis}>${SVG_ICONS.chevronLeft}</button><div class="stats-period-wrap no-all">${btns.join('')}</div><button class="stats-month-btn" data-calydir="next" ${nextDis}>${SVG_ICONS.chevronRight}</button></div>`;
 }
 
-// 고른 날의 타일 전부 — 고른 종류만(다시보기면 그날 다시보기, 유튜브면 그날 유튜브). 한 멤버 화면이라 타일 위 이름줄은 없다.
-function calDetailHtml(items) {
-  const d = items[calState.selected];
-  const head = `<div class="day-detail-title"><span class="ddt-date">${calState.selected}</span></div>`;
-  if (!d || !d.count) {
-    if (d && d.vodPending) return head + `<div class="ds-vod-none">${d.vodFail ? '다시보기 목록을 불러오지 못했습니다' : '다시보기 목록 불러오는 중'}</div>`;
-    return head + `<div class="day-detail-empty">${calState.type === 'vod' ? '그날 다시보기가 없습니다' : '그날 유튜브 업로드가 없습니다'}</div>`;
+// 유튜브 타일 — 다시보기 타일(vodTileHtml)과 같은 200px 문법(.ds-vod)에 썸네일 + 제목
+function ytTileHtml(y) {
+  const id = ytVideoId(y.url);
+  return `<a class="ds-vod" href="${escapeHtml(y.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>` +
+    `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(y.title || '')}</span></span></a>`;
+}
+// 그날 영상이 둘 이상인 칸을 누르면 — 영상 선택 모달(사이트 공통 패널, 제목 자리에 날짜). 타일엔 제목·길이가 있다(칸엔 없다).
+function openDayPickModal(key, d) {
+  const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
+  if (!head || !body) return;
+  modalPanel('vod-pick-panel');
+  head.innerHTML = `<span>영상 선택 — ${escapeHtml(calDateLabel(key))}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  const tiles = calState.type === 'vod' ? d.vods.map(({ v }) => `<div class="cal-vod">${vodTileHtml(v)}</div>`) : d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y)}</div>`);
+  body.innerHTML = `<div class="ds-vods">${tiles.join('')}</div>`;
+  showModal();
+}
+const CAL_WD = ['일', '월', '화', '수', '목', '금', '토'];
+function calDateLabel(key) { const dow = new Date(key + 'T00:00:00Z').getUTCDay(); return `${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일 (${CAL_WD[dow]})`; }
+// 칸 하나(달력 칸·흐름 타일 공용): 1개 = 그 영상으로 직행하는 링크(제목·길이는 title 툴팁) / 2개 이상 = 모달 버튼(툴팁 'n개') / 없음 = 상자.
+function calCellHtml(key, label, dow, d, extraCls) {
+  const cls = ['calendar-day', 'cal-cell', d && d.count ? 'has' : '', extraCls || ''].filter(Boolean).join(' ');
+  const inner = `<span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${d ? calRepImgTag(d) : ''}</span>`;
+  if (!d || !d.count) return `<div class="${cls}">${inner}</div>`;
+  if (d.count === 1) {
+    const one = d.vods[0] ? { href: vodPlayerUrl(d.vods[0].v), tip: `${d.vods[0].v.title || ''}${d.vods[0].v.duration_ms ? ` · ${formatDuration(d.vods[0].v.duration_ms)}` : ''}` } : { href: d.youtube[0].y.url, tip: d.youtube[0].y.title || '' };
+    return `<a class="${cls}" href="${escapeHtml(one.href)}" target="_blank" rel="noopener" title="${escapeHtml(one.tip)}">${inner}</a>`;
   }
-  const tiles = calState.type === 'vod'
-    ? d.vods.map(({ v }) => `<div class="cal-vod">${vodTileHtml(v)}</div>`)
-    : d.youtube.map(({ y }) => {
-      const id = ytVideoId(y.url);
-      return `<div class="cal-vod"><a class="ds-vod" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">` +
-        `<span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>` +
-        `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(y.title || '')}</span></span></a></div>`;
-    });
-  return head + `<div class="cal-vods">${tiles.join('')}</div>`;
+  return `<button class="${cls}" type="button" data-caldate="${key}" title="${d.count}개">${inner}</button>`;
 }
 
 function renderCalendarTab() {
@@ -6066,51 +6057,31 @@ function renderCalendarTab() {
   const t = kstNow();
   const todayKey = `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}-${String(t.getUTCDate()).padStart(2, '0')}`;
   const gridCells = monthGridCells(year, month);   // 앞 빈칸·날짜·첫 달의 결성일(11/30) — 지난 활동 멤버 달력과 같은 배열
-  const WD = ['일', '월', '화', '수', '목', '금', '토'];
-  // 고른 날이 없어도 상세 자리는 늘 잡아 둔다 — 누를 때마다 폭이 변하면 칸이 움직인다(오른쪽 열일 때).
-  const detail = calState.selected ? calDetailHtml(items) : '<div class="cal-di-none">날짜를 누르면 그날 썸네일이 전부 나옵니다.</div>';
-  const stateCls = (key, d) => [d && d.count ? 'has' : '', calState.selected === key ? 'selected' : '', key === todayKey ? 'today' : ''].filter(Boolean).join(' ');
 
-  // ① 7열 썸네일 칸 — 상단 [날짜 | 칩], 아래 16:9 상자에 대표 그림. 그림 없는 날도 상자를 예약해 행 높이가 안 흔들린다.
+  // ① 7열 달력 — 칸 = 상단 [날짜 | 칩], 아래 16:9 상자에 대표 그림. 그림 없는 날도 상자를 예약해 행 높이가 안 흔들린다.
   // 앞쪽 빈칸도 .cal-cell — .calendar-day의 정사각 비율(aspect-ratio 1)이 남으면 첫 주 행이 그 높이로 늘어난다(2026-09-02 실측)
-  const cells = gridCells.map(c => {
-    if (!c) return '<div class="calendar-day cal-cell outside"></div>';
-    const { key, dow } = c;
-    const d = items[key];
-    return `<button class="calendar-day cal-cell ${stateCls(key, d)}" data-caldate="${key}"><span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${c.label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${d ? calRepImgTag(d) : ''}</span></button>`;
-  });
+  const cells = gridCells.map(c => c ? calCellHtml(c.key, c.label, c.dow, items[c.key], c.key === todayKey ? 'today' : '') : '<div class="calendar-day cal-cell outside"></div>');
   const weeks = [];
-  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
-  const selPos = calState.selected ? gridCells.findIndex(c => c && c.key === calState.selected) : -1;   // 고른 날의 칸 위치(없으면 -1)
-  const selIdx = selPos < 0 ? -1 : Math.floor(selPos / 7);
-  const weekRows = weeks.map((w, i) => {
-    const grid = `<div class="calendar-grid">${w.join('')}</div>`;
-    return i === selIdx ? grid + `<div class="cal-detail cal-detail-week">${detail}</div>` : grid;   // 고른 날이 속한 주 바로 아래
-  }).join('');
-  // 자료가 오는 중이면 요일 머리줄 위 오른쪽(목록 폼은 목록 위)에 '불러오는 중…' — 달력은 막지 않는다(2026-09-02 Crenop 지정). 진행 표시 명사형 규칙.
+  for (let i = 0; i < cells.length; i += 7) weeks.push(`<div class="calendar-grid">${cells.slice(i, i + 7).join('')}</div>`);
+  // 자료가 오는 중이면 요일 머리줄 위 오른쪽(흐름 폼은 타일 위)에 '불러오는 중…' — 달력은 막지 않는다(2026-09-02 Crenop 지정). 진행 표시 명사형 규칙.
   const loadingTag = calMonthLoading() ? '<div class="cal-loading">불러오는 중…</div>' : '';
   const gridForm = `<div class="cal-grid-form"><div class="calendar">${loadingTag}`
-    + `<div class="calendar-grid cal-head">${WD.map((w, i) => `<div class="calendar-weekday${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${w}</div>`).join('')}</div>`
-    + weekRows + `</div></div>`;
+    + `<div class="calendar-grid cal-head">${CAL_WD.map((w, i) => `<div class="calendar-weekday${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${w}</div>`).join('')}</div>`
+    + weeks.join('') + `</div></div>`;
 
-  // ② 1열 목록 — 그림이 있는 날만 한 행씩. 눌러야 그날 전부(좁으면 그 행 아래, 폭이 남으면 오른쪽 열)
+  // ② 타일 흐름(좁은 폭) — 기록이 있는 날만 날짜순, 같은 칸 부품. 주가 바뀌는 첫 타일은 새 줄(wk-first). 날짜 글자는 '8월 3일 (월)'(달력 칸의 숫자만으로는 모자란다)
+  const weekOf = {}; gridCells.forEach((c, i) => { if (c) weekOf[c.key] = Math.floor(i / 7); });
   const dayKeys = Object.keys(items).filter(k => dayInStatsMonth(k, ym) && items[k].count).sort();
-  const listRows = dayKeys.map(key => {
-    const d = items[key]; const dow = new Date(key + 'T00:00:00Z').getUTCDay();
-    const row = `<button class="cal-row ${stateCls(key, d)}" data-caldate="${key}">`
-      + `<span class="cal-row-date${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일 (${WD[dow]})</span>`
-      + `<span class="cal-row-thumb">${calRepImgTag(d)}</span>`
-      + `<span class="cal-row-body"><span class="cd-chips">${calChips(d)}</span></span></button>`;
-    return row + (key === calState.selected ? `<div class="cal-detail cal-detail-row">${detail}</div>` : '');   // 좁은 폭에서만 보이는 자리
+  let prevWeek = -1;
+  const tiles = dayKeys.map(key => {
+    const dow = new Date(key + 'T00:00:00Z').getUTCDay();
+    const wk = weekOf[key] ?? -1; const first = wk !== prevWeek; prevWeek = wk;
+    return calCellHtml(key, calDateLabel(key), dow, items[key], (first ? 'wk-first ' : '') + (key === todayKey ? 'today' : ''));
   }).join('');
-  const listForm = `<div class="cal-list-form">${loadingTag}<div class="cal-rows">${listRows || `<div class="cal-di-none">${calState.type === 'vod' ? '이 달에는 다시보기가 없습니다.' : '이 달에는 유튜브 업로드가 없습니다.'}</div>`}</div><div class="cal-detail cal-list-side">${detail}</div></div>`;
+  const listForm = `<div class="cal-list-form">${loadingTag}${tiles ? `<div class="cal-flow">${tiles}</div>` : `<div class="cal-di-none">${calState.type === 'vod' ? '이 달에는 다시보기가 없습니다.' : '이 달에는 유튜브 업로드가 없습니다.'}</div>`}</div>`;
 
   body.innerHTML = gridForm + listForm;
-  body.querySelectorAll('[data-caldate]').forEach(btn => btn.addEventListener('click', () => {
-    const k = btn.dataset.caldate;
-    calState.selected = (calState.selected === k) ? null : k;
-    renderCalendarTab();
-  }));
+  body.querySelectorAll('button[data-caldate]').forEach(btn => btn.addEventListener('click', () => openDayPickModal(btn.dataset.caldate, items[btn.dataset.caldate])));
   renderCalSide();
 }
 // 링크 고르기 모달(세션 70) — 최근 활동의 다시보기 고르기(openVodPickModal)와 같은 패널·타일. 유튜브면 썸네일, 아니면 빈 틀.
@@ -6269,11 +6240,7 @@ function renderCalSide() {
     mBox.dataset.inited = '1';
     mBox.innerHTML = MEMBERS.map(m =>
       `<button class="cal-tab" data-member="${m.id}" title="${escapeHtml(m.name)}"><img src="${m.img}" alt="${escapeHtml(m.name)}"></button>`).join('');
-    mBox.querySelectorAll('.cal-tab').forEach(b => b.addEventListener('click', () => {
-      calState.member = b.dataset.member;
-      calState.selected = null;   // 다른 사람의 달로 옮기면 고른 날도 푼다 — 그 사람 그날 타일이 열려 있는 것처럼 보이지 않게
-      renderCalendarTab();
-    }));
+    mBox.querySelectorAll('.cal-tab').forEach(b => b.addEventListener('click', () => { calState.member = b.dataset.member; renderCalendarTab(); }));
   }
   if (mBox) mBox.querySelectorAll('.cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === calState.member));
   const kBox = document.getElementById('calKindBox');
@@ -6301,13 +6268,13 @@ function renderCalSide() {
     side.dataset.year = String(calState.year);
     side.innerHTML = calPeriodHtml();
     side.querySelectorAll('[data-calmonth]').forEach(b => b.addEventListener('click', () => {
-      calState.month = Number(b.dataset.calmonth); calState.selected = null; renderCalendarTab();
+      calState.month = Number(b.dataset.calmonth); renderCalendarTab();
     }));
     side.querySelectorAll('[data-calydir]').forEach(b => b.addEventListener('click', () => {
       const now = kstNow();
       const y = calState.year + (b.dataset.calydir === 'prev' ? -1 : 1);
       if (y < STATS_START_YEAR || y > now.getUTCFullYear()) return;
-      calState.year = y; calState.selected = null;
+      calState.year = y;
       if (y === STATS_START_YEAR && calState.month < STATS_START_MONTH) calState.month = STATS_START_MONTH;   // 2025년으로 내려가면 12월로
       else if (y === now.getUTCFullYear() && calState.month > now.getUTCMonth() + 1) calState.month = now.getUTCMonth() + 1;   // 올해로 올라오면 오지 않은 달은 이번 달로
       renderCalendarTab();
@@ -6418,7 +6385,7 @@ function switchPage(page, opts) {
   if (favNow && !keepPick) {
     if (page === 'members') membersState.selectedTab = favNow;
     if (page === 'stats' && statsState.selectedTab !== favNow) selectStatsTab(favNow, { fromHash: true });   // 그 멤버의 최근 활동 달·날짜도 같이 잡는다
-    if (page === 'thumbs' && calState.member !== favNow) { calState.member = favNow; calState.selected = null; }
+    if (page === 'thumbs' && calState.member !== favNow) calState.member = favNow;
     if (page === 'disco') discoState.member = favNow;   // 곡이 없는 최애면 renderDisco가 크루로 되돌린다(2026-09-06)
   }
   // 최애 강조·자동 스크롤(2단계): 멤버별 구획이 늘어서는 탭은 그려진 뒤 최애 자리로 한 번 내려간다(favScrollPending)

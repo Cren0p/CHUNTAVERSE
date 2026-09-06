@@ -1492,6 +1492,7 @@
   .vod-pick-sec { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }
   .vod-pick-sec svg { width: 14px; height: 14px; display: block; flex: none; }
   .vod-pick-sec[data-kind="youtube"] svg { color: var(--ev-youtube); }
+  .vod-pick-sec[data-kind="post"] svg { color: var(--ev-post); }   /* 숲 게시글 — 최근 활동의 글 색 */
   .vod-pick-sec[data-kind="vod"] svg { color: var(--ev-start); }
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
@@ -3288,7 +3289,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06l';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6199,30 +6200,46 @@ function pickVodTiles(pick) {
   return { html: html + manualTiles(), pending };
 }
 let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
+// 숲 게시글 주소(sooplive.com/station/아이디/post/번호) — 일정 행이 예고 글을 C열에 달아 두는 꼴(2026-09-06 Crenop). 번호만 돌려준다.
+function soopPostNo(u) { const m = String(u || '').match(/sooplive\.(?:com|co\.kr)\/station\/[^/]+\/post\/(\d+)/i); return m ? m[1] : ''; }
+// 불러온 월 통계(멤버 글 목록)에서 같은 게시글을 찾는다 — 제목·멤버 이름줄용(findLoadedYoutube와 같은 태도, 바깥 조회 없음)
+function findLoadedPost(postNo) {
+  if (!postNo) return null;
+  for (const monthData of Object.values(statsState.data || {})) for (const m of MEMBERS) {
+    const p = ((monthData[m.id] || {}).posts || []).find(x => soopPostNo(x.url) === postNo);
+    if (p) return { m, p };
+  }
+  return null;
+}
 function openLinkPickModal(links, title, pick) {
   const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
   head.innerHTML = `<span>영상 선택${title ? ` — ${escapeHtml(title)}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  const tiles = (links || []).map((it, i) => {
+  // 수동 링크는 종류별 구획(2026-09-06 Crenop: 게시글 링크가 '유튜브'로 묶이던 것): 유튜브(썸네일) · 게시글(숲 글 — 제목은 시트 > 불러온 글 목록 > '게시글') · 링크(그 밖).
+  // 구획 그림·색 = 최근 활동의 종류 그림·색(유튜브 빨강 · 게시글 board 에메랄드 · 링크 사슬 무채).
+  const groups = { youtube: [], post: [], link: [] };
+  (links || []).forEach((it, i) => {
     const u = typeof it === 'string' ? it : it.url, manual = typeof it === 'string' ? '' : (it.title || '');
-    const id = ytVideoId(u);
-    const found = manual ? null : findLoadedYoutube(id);
+    const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
+    const found = manual ? null : (id ? findLoadedYoutube(id) : (postNo ? findLoadedPost(postNo) : null));
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
-    const label = manual || (found && found.y.title) || (id ? `유튜브 ${i + 1}` : (host || `링크 ${i + 1}`));
+    const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
     const who = found ? `<span class="cal-vod-who"><img src="${found.m.img}" alt="">${escapeHtml(found.m.name)}</span>` : '';
-    return `<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>`
-      + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`;
-  }).join('');
-  if (!pick) { body.innerHTML = tiles ? `<div class="ds-vods">${tiles}</div>` : '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
+    groups[id ? 'youtube' : postNo ? 'post' : 'link'].push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>`
+      + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
+  });
+  const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'] };
+  const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div><div class="ds-vods">${groups[k].join('')}</div>` : '';
+  const tiles = secHtml('youtube') + secHtml('post') + secHtml('link');
+  if (!pick) { body.innerHTML = tiles || '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
   // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
   const token = ++linkPickToken;
   const paint = (gaveUp) => {
     const r = pickVodTiles(pick);
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
       : `<div class="vod-pick-empty">${r.pending ? (gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중') : '그날 다시보기가 없습니다.'}</div>`;
-    body.innerHTML = (tiles ? `<div class="vod-pick-sec" data-kind="youtube">${SVG_ICONS.youtube}<span>유튜브</span></div><div class="ds-vods">${tiles}</div>` : '')
-      + `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody;
+    body.innerHTML = tiles + `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody;
     return r.pending;
   };
   if (paint(false)) {

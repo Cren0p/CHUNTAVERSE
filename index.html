@@ -2871,7 +2871,8 @@
        종전 '여기는 패딩이 대칭이라 보정할 것이 없다'는 6/4 패딩 시절(-2px)의 사유였고, PC가 5/5 + -1px로 바뀐 뒤엔 되레 이 리셋이 어긋남을 만들었다. */
     /* 기념일만 짧은 요약('이름 종류')으로 — PC 문구는 길어 세로형 행 폭을 넘긴다(2026-09-01) */
     .celebration-box .tb-t-pc { display: none; }
-    .tab-aux .celebration-box { padding: 2px 8px; font-size: 11px; }   /* 탭 줄 안에 서므로 행 높이를 넘지 않게 */
+    /* 종전 2px 8px('행 높이를 넘지 않게')는 행이 40px가 되기 전 값 — 4px 10px 25px 상자도 행 안에 넉넉히 든다. 다른 버튼(알림 종·일정·최애·가이드)과 같은 높이로(2026-09-06 Crenop: 혼자 작았다) */
+    .tab-aux .celebration-box { padding: 4px 10px; font-size: 11px; }
     .celebration-box .tb-t-mb { display: inline; }
     #guideLink .tb-t-pc { display: none; }   /* 세로 배치의 가이드는 짧은 글자('가이드') — 아이콘만으론 설명이 모자랐다(2026-09-03 Crenop). 긴 문구는 기둥 폭을 이 버튼이 정하게 만들었다 */
     #guideLink .tb-t-mb { display: inline; }
@@ -3283,7 +3284,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

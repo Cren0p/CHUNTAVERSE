@@ -1447,18 +1447,17 @@
   .stats-detail-body .calendar-daynum { color: var(--text); }
   .calendar-daynum.sun { color: #f87171; }
   .calendar-daynum.sat { color: #60a5fa; }
-  /* v9: 컴팩트 셀 — Crenop 지정 슬롯 복원(제가 컨펌 없이 되돌렸던 것 원위치): 1행 [빈칸|유튜브] ·
-     2행 [숲방송|숲게시글] · 3행 [빈칸|카페]. 1행1열 빈칸은 좌상단 고정 날짜와의 충돌 회피 — 묶음이 '셀 전체'
-     정중앙(지정)에 앉아도 날짜 영역과 안 겹치는 이유가 이 빈칸이다. 0개 항목은 비표시하되 슬롯 고정.
-     3행1열은 다시보기 칩 자리였다(2026-09-06 폐지 — 다시보기는 썸네일 탭 몫). 다른 칩의 자리는 그대로. */
+  /* v9: 컴팩트 셀 — Crenop 지정 슬롯. 2026-09-06 재배치(다시보기 칩 폐지 뒤): 1행 [숲 방송|유튜브] · 2행 [숲 게시글|카페].
+     (구: 1행 [빈칸|유튜브] · 2행 [숲방송|숲게시글] · 3행 [다시보기|카페] — 1행1열 빈칸은 좌상단 날짜와의 충돌 회피였다.)
+     빈칸이 없어졌으므로 날짜 줄 높이만큼 위를 비워(padding-top) 묶음이 날짜 아래 영역의 가운데에 앉게 한다. 0개 항목은 비표시하되 슬롯 고정. */
   /* 폭 조건 없음(2026-08-31): 썸네일 폼이 사라져 폭으로 셀 모양을 가를 이유가 없다 — 어느 폭에서나 컴팩트 */
-  .stats-detail-body .calendar-day { position: relative; padding: 3px; justify-content: center; align-items: center; gap: 0; }
+  .stats-detail-body .calendar-day { position: relative; padding: 16px 3px 3px; justify-content: center; align-items: center; gap: 0; }   /* 위 16 = 날짜 줄(3 + 13) — 칩 묶음은 그 아래 가운데 */
   .stats-detail-body .calendar-day .calendar-daynum { position: absolute; top: 3px; left: 5px; line-height: 13px; }
   .stats-detail-body .cd-chips { display: grid; grid-template-columns: auto auto; gap: 2px 6px; justify-items: start; }
+  .stats-detail-body .cd-s-soop { grid-area: 1 / 1; }
   .stats-detail-body .cd-s-yt   { grid-area: 1 / 2; }
-  .stats-detail-body .cd-s-soop { grid-area: 2 / 1; }
-  .stats-detail-body .cd-s-post { grid-area: 2 / 2; }
-  .stats-detail-body .cd-s-cafe { grid-area: 3 / 2; }
+  .stats-detail-body .cd-s-post { grid-area: 2 / 1; }
+  .stats-detail-body .cd-s-cafe { grid-area: 2 / 2; }
   .stats-detail-body .calendar-day .cd-chip .cd-full { display: none; }   /* v13: '달력 셀'만 아이콘 단독(숫자 제거) — 일별 요약 헤더 숫자까지 사라지던 과대 스코프 교정(Crenop 적발) */
   .stats-detail-body .calendar-day .cd-chip .cd-ic { display: inline-flex; }
   /* 다시보기 타일 묶음 — 다시보기 고르기 모달·링크 고르기 모달(2026-09-06부터는 여기서만 — 일별 요약의 슬롯은 폐지). 타일은 200px 문법 */
@@ -3270,7 +3269,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06s';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06t';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

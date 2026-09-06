@@ -3289,7 +3289,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06o';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06p';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9353,7 +9353,7 @@ function renderBanners() {
   _bannerRenderSig = sig;
 
   // 카드·그리드는 컨텐츠 탭과 공용(2026-08-24 통일 — 디자인 준용 지시). 전용 CSS(.banner-*)는 제거.
-  body.innerHTML = `<div class="content-grid">${bannerData.map(contentCardHtml).join('')}</div>`;
+  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c)).join('')}</div>`;   // 현수막은 직링크 카드만(다시보기 모달 없음)
 }
 
 function membersRowStyle(count) {
@@ -9485,6 +9485,7 @@ async function loadContent() {
 
 // 컨텐츠 카드 1장 마크업 — 컨텐츠 탭·현수막 탭·모아보기 모달 공용. 제목 말줄임 hover는 전수 위임(ELLIPSIS_TIP_SEL) 소관.
 function contentCardHtml(c, withVods) {
+  withVods = withVods === true;   // 배열 map(contentCardHtml)이 둘째 인자로 색인을 넘긴다 — 현수막 탭에서 둘째 카드부터 참이 되어 모달 버튼이 됐다(2026-09-06 실사고). 명시적 true만 인정
   // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
   // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
   const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);

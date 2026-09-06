@@ -1488,7 +1488,11 @@
   .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* 좁은 폭(≤700, 휴대폰): 아래 2열 규칙 */
   /* 태블릿 이상(2026-09-06 Crenop: 폭이 넉넉하면 넓어도 된다 — 지표 그래프 모달처럼 가변): 타일은 일별 요약 규격 200px 고정으로 돌아가고
      패널은 타일이 필요한 만큼(fit-content)만 넓어진다 — 2개면 종전 440, 최대 5열 1074(= 200×5 + 간격 12×4 + 몸통 패딩 24 + 테두리 2) + 스크롤바 자리, 넘으면 줄바꿈. */
-  .vod-pick-sec { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }   /* 구획 이름 — 기둥 제목(.filter-title)과 같은 규격. 첫 구획은 위 여백 없음 */
+  /* 구획 이름(2026-09-06 Crenop): 그림 + 이름, 기둥 제목(.filter-title)과 같은 규격(13px·700·자간 1px). 그림 색은 사이트 배정색 — 유튜브 빨강·숲 ∞ 파랑(썸네일 탭 종류 버튼과 같다) */
+  .vod-pick-sec { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }
+  .vod-pick-sec svg { width: 14px; height: 14px; display: block; flex: none; }
+  .vod-pick-sec[data-kind="youtube"] svg { color: var(--ev-youtube); }
+  .vod-pick-sec[data-kind="vod"] svg { color: var(--ev-start); }
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
      scrollbar-gutter: stable(2026-09-06 Crenop 지적): 세로로 넘쳐 스크롤바가 서면 그 폭(약 17px)만큼 안쪽이 줄어 5열이 4열로 접히고 오른쪽이 비었다 —
@@ -3284,7 +3288,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6148,7 +6152,7 @@ function findLoadedYoutube(videoId) {
   return null;
 }
 // 숲 다시보기 주소에서 영상 번호(title_no) — 플레이어 주소(vodPlayerUrl과 같은 꼴)만. 아니면 ''.
-function soopVodTitleNo(u) { const m = String(u || '').match(/vod\.sooplive\.(?:com|co\.kr)\/player\/(\d+)/i); return m ? m[1] : ''; }
+function soopVodTitleNo(u) { const m = String(u || '').match(/vod\.sooplive\.(?:com|co\.kr)\/player\/(\d+)/i); return m ? m[1] : ''; }   // 앞의 '-'(제외 표시)는 무시하고 번호만
 // 컨텐츠 카드의 다시보기 재료: 날짜(YYYY-MM-DD·YYYY-MM)와 참여 멤버 id(G~ 이름을 사이트 멤버로 — 미등록 이름은 뺀다). 날짜나 멤버가 없으면 null.
 // exclude(있으면) = C열로 알려 준 제외 영상 번호들.
 function contentPickInfo(c) {
@@ -6160,10 +6164,22 @@ function contentPickInfo(c) {
 // 그날 참여 멤버들의 다시보기 타일 — 재료는 썸네일 탭과 같다(월 통계의 세션 → 방송번호 → 다시보기 목록). 멤버마다 이름줄을 단다.
 // pending = 월 통계나 누군가의 목록이 아직 안 왔다(요청은 여는 쪽이 한다).
 function pickVodTiles(pick) {
-  const monthData = statsState.data[pick.ym];
-  if (!monthData) return { html: '', pending: true };
-  const [y, mo] = pick.ym.split('-').map(Number);
+  const monthData = pick.ym ? statsState.data[pick.ym] : null;
+  if (pick.ym && !monthData) return { html: '', pending: true };
+  const [y, mo] = pick.ym ? pick.ym.split('-').map(Number) : [0, 0];
   let html = '', pending = false;
+  const shown = new Set();   // 이미 그린 영상 번호 — 수동 포함이 자동 목록과 겹치면 한 번만
+  const manualTiles = () => (pick.include || []).map((it, i) => {
+    if (shown.has(String(it.no))) return '';
+    shown.add(String(it.no));
+    // 목록에 있으면(참여 멤버 것) 그 자료로 온전한 타일, 없으면(19금·구독+ 등 목록 밖) 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
+    for (const id of pick.members) for (const v of (vodState.data[vodKey(id, pick.ym)] || [])) if (String(v.title_no) === String(it.no)) {
+      const m = MEMBER_BY_ID[id];
+      return `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
+    }
+    return `<div class="cal-vod"><a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(it.title || `다시보기 ${i + 1}`)}</span></span></a></div>`;
+  }).join('');
+  if (!monthData) return { html: manualTiles(), pending: false };
   for (const id of pick.members) {
     const m = MEMBER_BY_ID[id]; if (!m) continue;
     const sessions = computeMonthSummary(monthData[id], y, mo).sessionsByDate[pick.ymd] || [];
@@ -6174,12 +6190,13 @@ function pickVodTiles(pick) {
       for (const v of parts) {
         if (seen.has(v.title_no)) continue;
         seen.add(v.title_no);
-        if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것
+        if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것('-' 표시)
+        shown.add(String(v.title_no));
         html += `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
       }
     }
   }
-  return { html, pending };
+  return { html: html + manualTiles(), pending };
 }
 let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
 function openLinkPickModal(links, title, pick) {
@@ -6204,7 +6221,8 @@ function openLinkPickModal(links, title, pick) {
     const r = pickVodTiles(pick);
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
       : `<div class="vod-pick-empty">${r.pending ? (gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중') : '그날 다시보기가 없습니다.'}</div>`;
-    body.innerHTML = (tiles ? `<div class="vod-pick-sec">링크</div><div class="ds-vods">${tiles}</div>` : '') + `<div class="vod-pick-sec">다시보기</div>` + vodBody;
+    body.innerHTML = (tiles ? `<div class="vod-pick-sec" data-kind="youtube">${SVG_ICONS.youtube}<span>유튜브</span></div><div class="ds-vods">${tiles}</div>` : '')
+      + `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody;
     return r.pending;
   };
   if (paint(false)) {
@@ -9391,7 +9409,8 @@ async function loadContent() {
       const url = imgs[0] || '';
       // C=링크 — 여러 개 가능(2026-09-03 세션 70, Crenop): 줄바꿈(또는 쉼표)으로 나눈 항목마다 '주소' 또는 '주소 제목'(주소 뒤 공백, 제목은 자유 — 2026-09-04).
       // link = 첫 주소(카드 등 종전 소비처), links = 주소 전부, linkTitles = 항목별 제목(없으면 ''). 달력 상세: 둘 이상이면 고르기 모달에 제목 표시
-      const entries = (r[2] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
+      // 숲 다시보기 주소 앞에 '-'를 붙이면 '이 다시보기는 이 컨텐츠 것이 아니다'(자동 목록에서 제외, 2026-09-06). 붙이지 않은 숲 주소는 수동 포함(19금·구독+ 등 목록에 안 잡히는 것).
+      const entries = (r[2] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^-?https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
       const links = entries.map(e => e.url), linkTitles = entries.map(e => e.title);
       const link = links[0] || '';
       const title = (r[4] || '').trim();       // E=제목 (D는 일정 전용 간략제목칸 — 컨텐츠 행은 비움)
@@ -9435,14 +9454,17 @@ function contentCardHtml(c, withVods) {
   //   9/4에 상자 안 타일을 뺀 이유). 모달은 '이 컨텐츠 날 이 사람들의 다시보기'로만 뜻을 좁혀 두어 그 난잡함이 카드 격자로 번지지 않는다.
   // 카드 = 모달 버튼(링크 둘 이상이거나 참여 멤버가 있으면) / 링크 하나뿐이면 종전대로 카드 전체가 그 링크 / 둘 다 없으면 그냥 상자.
   // 현수막 카드(withVods 없음)는 종전 규칙 그대로 — 현수막 날짜는 게시글 작성일이라 그날 다시보기와 뜻이 안 맞는다.
-  // C열의 숲 다시보기 주소(vod.sooplive.com/player/번호)는 '이 다시보기는 이 컨텐츠 것이 아니다'라는 제외 표시다(2026-09-06 Crenop):
-  // 시스템은 같은 날 여러 다시보기 중 무엇이 이 컨텐츠인지 못 가리므로, 뺄 것만 시트로 알려 준다. 링크로는 보이지 않는다. 그 밖의 주소(유튜브 등)만 수동 링크.
-  // 현수막 카드(withVods 없음)는 이 해석을 안 한다.
+  // C열의 숲 다시보기 주소(vod.sooplive.com/player/번호) 두 가지(2026-09-06 Crenop 재개정 — 처음엔 '숲 주소 = 제외'였다):
+  //   ① 그대로 적으면 수동 포함 — 목록 API에 안 잡히는 다시보기(19금·구독+ 등)를 카드에 넣는다. 자동 목록에 이미 있으면 한 번만.
+  //   ② 앞에 '-'를 붙이면 제외 — 같은 날 여러 다시보기 중 무엇이 이 컨텐츠인지 시스템은 못 가리므로, 뺄 것만 시트로 알려 준다.
+  //   어느 쪽도 '유튜브' 구획의 링크로는 보이지 않는다. 그 밖의 주소(유튜브 등)는 수동 링크. 현수막 카드(withVods 없음)는 이 해석을 안 한다.
   const all = (c.links || (c.link ? [c.link] : [])).map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' }));
   const manual = withVods ? all.filter(e => !soopVodTitleNo(e.url)) : all;
-  const exclude = withVods ? all.map(e => soopVodTitleNo(e.url)).filter(Boolean) : [];
-  const pick = withVods ? contentPickInfo(c) : null;
+  const exclude = withVods ? all.filter(e => e.url.startsWith('-')).map(e => soopVodTitleNo(e.url)).filter(Boolean) : [];
+  const include = withVods ? all.filter(e => !e.url.startsWith('-') && soopVodTitleNo(e.url)).map(e => ({ no: soopVodTitleNo(e.url), url: e.url, title: e.title })) : [];
+  const pick = withVods ? (contentPickInfo(c) || (include.length ? { ymd: '', ym: '', members: [] } : null)) : null;   // 참여자·날짜가 없어도 수동 포함이 있으면 모달
   if (pick && exclude.length) pick.exclude = exclude;
+  if (pick && include.length) pick.include = include;
   const useModal = manual.length >= 2 || !!pick;
   const multi = useModal ? escapeHtml(JSON.stringify(manual)) : '';
   const single = !useModal && manual.length === 1 ? manual[0].url : '';

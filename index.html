@@ -2849,19 +2849,15 @@
     .tab-aux .nav-notify-bell, .tab-aux .celebration-box, .tab-aux #guideLink { pointer-events: auto; }   /* 일정 줄(#schBtn)은 2026-09-06부터 왼쪽 묶음에 있어 여기 안 든다 */
     /* 보조바 오른쪽 묶음(시트 오른쪽 버튼·최애·가이드)은 탭 목록 아래 마지막 줄 — 어느 탭에도 속하지 않는 것들이라 관련 링크 행에서 뗐다(세션 70).
        PC 띠의 '오른쪽 끝'이 세로 목록에선 '끝'이다. 탭과 조금 띄워(6px) 다른 종류의 줄임을 보인다 */
-    /* 탭과 연결성이 없는 것들(PC 보조바의 좌·우 묶음)은 격자 아래 좌·우로(2026-09-06 Crenop): 왼쪽 열 = 일정 · 시트 왼쪽 버튼(세로 쌓기, 왼쪽 정렬),
-       오른쪽 열(#subbarRightStack) = 시트 오른쪽 버튼 · 최애 · 가이드(세로 쌓기, 오른쪽 정렬). 행 리듬은 탭 행과 같다(높이·간격 2px). */
-    .subbar-right { grid-row: 7; grid-column: 1 / -1; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-top: 2px; overflow: visible; min-width: 0; }
-    .subbar-right > .subbar-lead { flex: 1 1 0; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: start; justify-content: start; overflow: hidden; }
-    .subbar-right > .subbar-lead > * { max-width: 100%; }
-    #subbarRightStack { flex: none; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: end; }
+    /* 탭과 연결성이 없는 것들(PC 보조바에서 탭 묶음을 걷어내면 왼쪽→오른쪽으로 늘어서는 것들)은 격자 아래 한 열에 위→아래로 같은 순서(2026-09-06 Crenop 재개정):
+       일정 → 시트 왼쪽 버튼 → 시트 오른쪽 버튼 → 최애 → 가이드. 왼쪽 정렬, 행 리듬은 탭 행과 같다(높이·간격 2px). 폭이 확보되어 일정 버튼은 PC와 같은 전체 문구
+       (종류 그림 + 제목 + D-day), 가이드도 '사용 가이드' 전체 이름을 쓴다. 왼쪽 묶음·오른쪽 열 상자는 display: contents로 껍데기만 남아 자식들이 이 열에 흐른다. */
+    .subbar-right { grid-row: 7; grid-column: 1 / -1; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: start; justify-content: start; margin-top: 2px; overflow: visible; min-width: 0; }   /* justify-content: start — PC 규칙(flex-end)이 격자 열을 오른쪽으로 보내지 않게 */
+    .subbar-right > .subbar-lead, #subbarRightStack { display: contents; }
+    .subbar-right .page-title-link, .subbar-right .sch-line, .subbar-right .celebration-box { max-width: 100%; }
     .tab-aux { height: var(--nav-row-h); }
     /* 일정 줄은 흐름 안으로 되돌린다 — 가로 보조바에서 '양옆 빈 탭 자리를 빌리는' 절대배치가
        세로 목록에도 남아 있어 줄이 칸 밖으로 나가 사이드 목록을 넘쳤다(반복 지적된 자리). */
-    .subbar-lead .sch-line { max-width: 100%; }
-    .subbar-lead .sch-line-txt,
-    .subbar-lead .sch-line-when { display: none; }
-    .subbar-lead .sch-line-mb { display: inline; }
     .page-title-link, .celebration-box { padding: 4px 10px; }
     /* 아이콘 -1px 되감기(선언부)는 여기서도 그대로 둔다(2026-09-03 세션 70, Crenop 실사고: 세로 배치에서만 글자와 아이콘의 위아래가 어긋남).
        -1px은 패딩 비대칭 보정이 아니라 아이콘 그림이 16px 상자 아래쪽에 치우친 것(잉크 위 1.3/아래 0.7)을 되감는 값이라 배치와 무관하게 필요하다.
@@ -2871,8 +2867,6 @@
     /* 종전 2px 8px('행 높이를 넘지 않게')는 행이 40px가 되기 전 값 — 4px 10px 25px 상자도 행 안에 넉넉히 든다. 다른 버튼(알림 종·일정·최애·가이드)과 같은 높이로(2026-09-06 Crenop: 혼자 작았다) */
     .tab-aux .celebration-box { padding: 4px 10px; font-size: 11px; }
     .celebration-box .tb-t-mb { display: inline; }
-    #guideLink .tb-t-pc { display: none; }   /* 세로 배치의 가이드는 짧은 글자('가이드') — 아이콘만으론 설명이 모자랐다(2026-09-03 Crenop). 긴 문구는 기둥 폭을 이 버튼이 정하게 만들었다 */
-    #guideLink .tb-t-mb { display: inline; }
     .nav-notify-bell { padding: 4px 8px; }   /* 세로 배치의 .page-title-link과 같은 위아래 4px. 종 아이콘의 -1px 되감기도 위와 같은 이유로 그대로 */
     /* 탭 타일은 PC 규칙 그대로(그림 위 + 글자 아래, 활성 = 아래 민트 선) — 세로 목록(한 줄 = 그림 + 글자, 왼쪽 민트 선)은 2026-09-06 3열 격자로 대체 */
     /* 세로 목록에서도 배지는 라벨을 덮는다(2026-09-02 회귀) — 부속을 탭 줄 안으로 들이는 방향과 같다.
@@ -3276,7 +3270,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06r';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06s';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

@@ -3289,7 +3289,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06l';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6163,25 +6163,20 @@ function contentPickInfo(c) {
   return members.length ? { ymd, ym: ymd.slice(0, 7), members } : null;
 }
 // 그날 참여 멤버들의 다시보기 타일 — 재료는 썸네일 탭과 같다(월 통계의 세션 → 방송번호 → 다시보기 목록). 멤버마다 이름줄을 단다.
+// 순서 = 사이트 멤버 순서 → 시각·파트(2026-09-06 Crenop: 시트로 뒤늦게 넣은 것도 제 멤버 자리에). 시트 포함(pick.include)의 멤버는
+//   ① 불러온 목록에 같은 번호가 있으면 그 멤버 ② 없으면 시트 제목의 첫 낱말이 멤버 이름일 때 그 멤버(이름은 제목에서 뗀다) ③ 그도 아니면 맨 뒤.
 // pending = 월 통계나 누군가의 목록이 아직 안 왔다(요청은 여는 쪽이 한다).
 function pickVodTiles(pick) {
   const monthData = pick.ym ? statsState.data[pick.ym] : null;
   if (pick.ym && !monthData) return { html: '', pending: true };
   const [y, mo] = pick.ym ? pick.ym.split('-').map(Number) : [0, 0];
-  let html = '', pending = false;
-  const shown = new Set();   // 이미 그린 영상 번호 — 수동 포함이 자동 목록과 겹치면 한 번만
-  const manualTiles = () => (pick.include || []).map((it, i) => {
-    if (shown.has(String(it.no))) return '';
-    shown.add(String(it.no));
-    // 목록에 있으면(참여 멤버 것) 그 자료로 온전한 타일, 없으면(19금·구독+ 등 목록 밖) 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
-    for (const id of pick.members) for (const v of (vodState.data[vodKey(id, pick.ym)] || [])) if (String(v.title_no) === String(it.no)) {
-      const m = MEMBER_BY_ID[id];
-      return `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
-    }
-    return `<div class="cal-vod"><a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(it.title || `다시보기 ${i + 1}`)}</span></span></a></div>`;
-  }).join('');
-  if (!monthData) return { html: manualTiles(), pending: false };
-  for (const id of pick.members) {
+  const mi = id => { const k = MEMBERS.findIndex(x => x.id === id); return k < 0 ? 999 : k; };
+  const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
+  const items = [];   // { mi: 멤버 순서, k: 같은 멤버 안 순서, html }
+  const shown = new Set();   // 이미 그린 영상 번호 — 시트 포함이 자동 목록과 겹치면 한 번만
+  let pending = false;
+  const members = [...pick.members].sort((a, b) => mi(a) - mi(b));
+  if (monthData) for (const id of members) {
     const m = MEMBER_BY_ID[id]; if (!m) continue;
     const sessions = computeMonthSummary(monthData[id], y, mo).sessionsByDate[pick.ymd] || [];
     const seen = new Set();
@@ -6193,11 +6188,25 @@ function pickVodTiles(pick) {
         seen.add(v.title_no);
         if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것('-' 표시)
         shown.add(String(v.title_no));
-        html += `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
+        items.push({ mi: mi(id), k: items.length, html: `<div class="cal-vod">${whoLine(m)}${vodTileHtml(v)}</div>` });
       }
     }
   }
-  return { html: html + manualTiles(), pending };
+  (pick.include || []).forEach((it, i) => {
+    if (shown.has(String(it.no))) return;
+    shown.add(String(it.no));
+    for (const id of members) for (const v of (vodState.data[vodKey(id, pick.ym)] || [])) if (String(v.title_no) === String(it.no)) {   // ① 목록에 있는 것 — 온전한 타일
+      items.push({ mi: mi(id), k: items.length, html: `<div class="cal-vod">${whoLine(MEMBER_BY_ID[id])}${vodTileHtml(v)}</div>` });
+      return;
+    }
+    const words = String(it.title || '').trim().split(/\s+/);
+    const named = MEMBERS.find(x => x.name === words[0]);   // ② 제목 첫 낱말 = 멤버 이름
+    const label = named ? (words.slice(1).join(' ') || '다시보기') : (it.title || `다시보기 ${i + 1}`);
+    // 목록 밖(19금·구독+ 등)은 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
+    items.push({ mi: named ? mi(named.id) : 999, k: items.length, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
+  });
+  items.sort((a, b) => a.mi - b.mi || a.k - b.k);
+  return { html: items.map(x => x.html).join(''), pending };
 }
 let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
 // 숲 게시글 주소(sooplive.com/station/아이디/post/번호) — 일정 행이 예고 글을 C열에 달아 두는 꼴(2026-09-06 Crenop). 번호만 돌려준다.

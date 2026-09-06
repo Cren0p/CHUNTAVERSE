@@ -2067,6 +2067,9 @@
      빈 자리는 각 주의 끝에만 생긴다(빈 날마다 상자를 두는 것보다 싸다). 기록이 없는 주는 줄이 안 생긴다(아쉬우면 주 표시 한 줄을 붙일 수 있다). */
   .cal-flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
   .cal-flow .cal-cell.wk-first { grid-column-start: 1; }
+  /* 주 사이 구분선(2026-09-06 Crenop: 줄바꿈만으로는 '왜 빈칸이 있다 없다 하나'가 안 읽힌다) — 타일 테두리와 같은 색의 1px 선, 위아래 4px.
+     한 줄 전체를 차지해 다음 주가 새 줄에서 시작하는 것도 이 선이 보장한다. 첫 주 앞에는 없다. */
+  .cal-flow .cal-wk-sep { grid-column: 1 / -1; height: 1px; background: var(--border); margin: 4px 0; }
   @media (min-width: 1151px) {   /* PC 모드에서만 7열 — 태블릿은 폭이 남아도 1열(Crenop 지정: PC=썸네일 격자 / 태블릿·모바일=1열) */
     @container (min-width: 934px) {   /* .calendar 안쪽 908 = 칸 약 126px. 1366 노트북(기둥 280 포함)에서 칸 약 132px — 피드백으로 조정하는 시작값 */
       .cal-grid-form { display: block; }
@@ -3249,7 +3252,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06u';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06v';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6075,8 +6078,8 @@ function renderCalendarTab() {
   let prevWeek = -1;
   const tiles = dayKeys.map(key => {
     const dow = new Date(key + 'T00:00:00Z').getUTCDay();
-    const wk = weekOf[key] ?? -1; const first = wk !== prevWeek; prevWeek = wk;
-    return calCellHtml(key, calDateLabel(key), dow, items[key], (first ? 'wk-first ' : '') + (key === todayKey ? 'today' : ''));
+    const wk = weekOf[key] ?? -1; const first = wk !== prevWeek; const sep = first && prevWeek !== -1 ? '<div class="cal-wk-sep"></div>' : ''; prevWeek = wk;
+    return sep + calCellHtml(key, calDateLabel(key), dow, items[key], (first ? 'wk-first ' : '') + (key === todayKey ? 'today' : ''));
   }).join('');
   const listForm = `<div class="cal-list-form">${loadingTag}${tiles ? `<div class="cal-flow">${tiles}</div>` : `<div class="cal-di-none">${calState.type === 'vod' ? '이 달에는 다시보기가 없습니다.' : '이 달에는 유튜브 업로드가 없습니다.'}</div>`}</div>`;
 

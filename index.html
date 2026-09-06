@@ -2369,7 +2369,7 @@
   /* 본문은 남은 폭 안에서 가운데 — 기둥이 오른쪽에 붙어도 본문이 치우쳐 보이지 않게 */
   /* 본문 왼쪽에 기둥의 빈 슬롯과 같은 44px을 둔다(2026-09-01, Crenop 지정).
      기둥 오른쪽 44px이 사실상 여백이므로, 왼쪽에 같은 값을 넣어야 덩어리 전체가 좌우 대칭으로 선다. */
-  .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
+  .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main, .disco-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
   /* 묶음 사이 = 여백 하나(20px)(2026-09-02 Crenop 지정). 구 '여백 20 + 구분선 1 + 여백 20'은 높이가 모자란 화면에서 기둥이 넘쳤다. */
   .side-pick > * + *, .side-pick .side-stack > * + * { margin-top: 20px; }
   /* .side-stack: 한 자리에서 내용을 갈아끼우는 묶음(#hallPeriodSide)도 안쪽 칸을 같은 간격으로 나눈다.
@@ -2528,7 +2528,9 @@
   }
 
   /* 디스코그래피 — 멤버별 묶음. 스트립 자체는 프로필에서 쓰던 것을 그대로 쓴다(문법 통일) */
-  .disco-wrap { padding: 20px 24px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; }
+  /* 좌 = 본문(줄 상한 1200) / 우 = 기둥 280(2026-09-06 기둥 신설 — 썸네일·지난 활동과 같은 두 열 문법). 1548 = 1200 + 왼쪽 슬롯 44 + 간격 20 + 기둥 280 + 좌우 패딩 48 */
+  .disco-wrap { padding: 20px 24px; max-width: 1548px; width: 100%; margin: 0 auto; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
+  @media (max-width: 1150px) { .disco-wrap { grid-template-columns: 1fr; } }
   /* 플레이리스트 버튼(2026-09-02): 종전 상단바 시트 버튼으로 제공하던 것을 음악 탭 우상단 붙박이로 옮겼다.
      생김새는 시트 버튼(.tb-sheet-btn) 그대로 — 자리만 바뀌었지 같은 것이라 옷을 갈아입힐 이유가 없다. */
   .disco-head { display: flex; justify-content: flex-end; max-width: 1200px; margin: 0 auto 16px; }   /* 곡이 하나도 없을 때만 쓰는 홀로 선 버튼 자리(폭·가운데정렬은 멤버 이름과 같은 값) */
@@ -2893,7 +2895,7 @@
     /* 필터·기둥이 서랍으로 빠지는 폭이므로 격자의 280px 칸도 여기서 함께 없앤다 — 탭마다 다른 값을 쓰면
        그 사이 폭에서 그 탭만 본문이 좁아진다(2026-09-02: 최근 활동·케미가 1100px으로 따로 놀던 것을 합침) */
     .members-wrap, .stats-wrap, .hall-wrap, .cal-wrap, .events-wrap, .chem-wrap { grid-template-columns: 1fr; }
-    .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
+    .members-wrap > #membersBody, .stats-wrap > #statsBody, .hall-main, .cal-main, .disco-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
     .events-wrap > .timeline, .chem-wrap > .chem-content { margin-left: 0; }
     .drawer-btn#drawerBtnR { display: inline-flex; }   /* 고르는 기둥이 서랍이므로 태블릿에서도 필요하다 */
   }
@@ -3236,11 +3238,17 @@
   </div>
 
   <div class="page" id="page-disco">
-    <div class="disco-wrap" id="discoBody">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>디스코그래피 불러오는 중...</div>
+    <!-- 우측 기둥(2026-09-06 Crenop): 멤버 고르기 — 크루 + 곡이 있는 멤버(시트에 행이 있는 사람만, 사이트 멤버 순서). 스트립은 썸네일 탭 문법(.stats-tabs-wrap·.cal-tab). -->
+    <div class="disco-wrap">
+      <div class="disco-main" id="discoBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>디스코그래피 불러오는 중...</div>
+        </div>
       </div>
+      <aside class="side-pick">
+        <div><div class="filter-title">멤버</div><div class="stats-tabs-wrap" id="discoMembersSide"></div></div>
+      </aside>
     </div>
   </div>
 
@@ -3271,7 +3279,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5171,7 +5179,10 @@ function parseScheduleRows(rows) {
     // 사진 행(A=사진 주소)도 B에 날짜를 적었으면 여기에 걸린다 — 사진 붙은 예고도 보조바 D-DAY·일정 목록에 떠야 하기 때문(2026-09-04 Crenop).
     //   B가 비어 파일 이름으로만 날짜를 아는 옛 그림 행은 여기서 날짜를 못 얻어 자동으로 빠진다(종전과 같음).
     //   한 행이 두 번 세어지지 않게 fromImage 표를 단다 — contentAll()이 그 표를 보고 컨텐츠 쪽에서 한 번만 세운다.
-    const fromImage = contentPhotos(r[0]).length > 0;   // content 폴더 사진이 있는 행만 사진 행(2026-09-06) — 다른 폴더 사진만 있으면 A가 빈 일정 행처럼 읽는다
+    const fromImage = contentPhotos(r[0]).length > 0;   // content 폴더 사진이 있는 행만 사진 행(2026-09-06)
+    // A에 주소가 있는데 content 폴더 사진이 아니면(현수막 등) 그 행은 통째로 뺀다(2026-09-06 Crenop 2차): 컨텐츠도 아니고 일정도 아니다 —
+    // B에 날짜가 있어도 글자 카드로 살려 두지 않는다(축하만 받은 합방을 현수막 사진과 함께 적어 둔 행이 그 예 — 9/4의 컨텐츠 세기 기준과 같은 뜻).
+    if (!fromImage && /^https?:\/\//i.test(String(r[0] || '').trim())) continue;
     const when = pickWhen(r[0], r[1]);
     const date = when.ymd;
     if (!date) continue;
@@ -5298,7 +5309,7 @@ function scheduleBtnHTML() {
 // 자리 = data-member(통계 지표 카드·시간대 칸·음악 이름·생방송 카드·관련 링크 세로 상자). 케미 탭은 대상이 아니다(강조 '문법'만 빌려 왔다 — 2026-09-04 Crenop 정정).
 // 실행 시점: 탭 전환은 마지막에 맨 위로 올리므로(switchPage 끝의 scrollTo) 그 뒤로 미뤄서(setTimeout 0) 내려간다 — 종전엔 내려간 뒤 맨 위로 되돌려져 '안 움직이는' 것처럼 보였다(실사고).
 // 사용자가 그 사이 직접 움직였으면(휠·터치·키) 잡아채지 않는다. 배치는 그대로(자리만 알려 준다).
-const FAV_SCROLL_PAGES = ['hall', 'disco', 'live', 'links'];
+const FAV_SCROLL_PAGES = ['hall', 'live', 'links'];   // 음악은 2026-09-06 기둥 신설로 뺐다(고르기 탭 — 최애는 첫 선택으로)
 let favScrollPending = '', favUserMoved = false;
 ['wheel', 'touchmove', 'keydown'].forEach(ev => window.addEventListener(ev, () => { favUserMoved = true; }, { passive: true }));
 function favArm(page) { favScrollPending = page; favUserMoved = false; }
@@ -5364,6 +5375,7 @@ function openFavPicker() {
     if (currentPage === 'stats' && id) selectStatsTab(id);
     else if (currentPage === 'members') selectMembersTab(id || 'crew');
     else if (currentPage === 'thumbs' && id) { calState.member = id; calState.selected = null; queueCalRender(); }   // 최애 해제면 보던 멤버 그대로(크루 칸이 없다)
+    else if (currentPage === 'disco' && id) { discoState.member = id; renderDisco(); }   // 곡이 없는 멤버면 renderDisco가 크루로 되돌린다
   }));
   showModal();
 }
@@ -5829,27 +5841,46 @@ function updateHeaderCenter() {
 // 음악 탭 우상단 플레이리스트(2026-09-02 Crenop 지정) — 상단바 시트에서 이리로 옮겨온 링크라 시트 행은 지우면 된다.
 const DISCO_PLAYLIST_URL = 'https://www.youtube.com/playlist?list=PLJ1RaYyFlDhQ';
 const DISCO_PLAYLIST_HEX = '#FF3D3D';
+// 음악 탭 멤버 고르기(2026-09-06 Crenop): 기둥의 버튼 = 크루 + 시트에 곡이 있는 멤버(사이트 멤버 순서 — 곡이 없는 멤버는 버튼이 안 생긴다, 지금은 천양).
+// 화면엔 고른 한 사람의 구획만. 첫 선택 = 최애(곡이 있으면), 없으면 크루. 최애 규칙(세션 70)은 지난 활동·프로필·썸네일과 같다.
+const discoState = { member: null };   // 'all' = 크루, 그 밖엔 멤버 id. null = 아직 안 골랐다(그릴 때 정한다)
 function renderDisco() {
   const el = document.getElementById('discoBody');
   if (!el) return;
   // 크루 칸은 Favicon.webp — 멤버 칸이 정사각 얼굴이라 가로형 로고(CHUNTAVERSE.webp)는 줄에서 혼자 튄다
-  const targets = [{ id: '', name: '천타버스', img: 'Favicon.webp', color: '' }].concat(MEMBERS.map(m => ({ id: m.id, name: m.name, img: m.img, color: m.color })));
+  const targets = [{ id: 'all', name: '천타버스', img: 'Favicon.webp', color: '' }].concat(MEMBERS.map(m => ({ id: m.id, name: m.name, img: m.img, color: m.color })))
+    .filter(t => profileVideos.some(v => v.target === t.name));
+  const fav = favMemberId();
+  if (!targets.some(t => t.id === discoState.member)) discoState.member = targets.some(t => t.id === fav) ? fav : (targets[0] ? targets[0].id : null);
+  renderDiscoSide(targets);
   // 우상단 붙박이 버튼 — 곡이 없어도 남는다(자료가 아니라 이 탭이 늘 가진 링크다).
   // 첫 이름 행(맨 위 묶음의 제목 줄) 오른쪽 끝에 같은 행으로 선다(2026-09-02 Crenop 지정 — 종전엔 이름 위 별도 줄).
   const btn = `<a class="page-title-link tb-sheet-btn disco-playlist" href="${DISCO_PLAYLIST_URL}" target="_blank" rel="noopener"`
     + ` style="--btn-rgb:${hexToRgb(DISCO_PLAYLIST_HEX)};color:${DISCO_PLAYLIST_HEX}">${SVG_ICONS.youtube}<span>천타버스 플레이리스트</span></a>`;
   let placed = false;
-  const html = targets.map(t => {
+  const html = targets.filter(t => t.id === discoState.member).map(t => {
     const strips = renderVideoStrips(t.name, t.img, 1200);
     if (!strips) return '';
     const color = t.color ? ` style="color:${t.color}"` : '';
     const tail = placed ? '' : btn; placed = true;
-    return `<section class="disco-member"><h2 class="disco-member-name"><span class="disco-member-id"${t.id ? ` data-member="${t.id}"` : ''}><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span></span>${tail}</h2>${strips}</section>`;
+    return `<section class="disco-member"><h2 class="disco-member-name"><span class="disco-member-id"${t.id !== 'all' ? ` data-member="${t.id}"` : ''}><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span></span>${tail}</h2>${strips}</section>`;
   }).join('');
   el.innerHTML = html || `<div class="disco-head">${btn}</div><div class="lr-msg">등록된 곡이 없습니다.</div>`;   // 곡이 하나도 없을 때만 버튼이 홀로 선다
   bindVideoStrips(el);   // 좌우 화살표는 이 배선이 넘침을 재서 켠다 — 프로필에서 옮겨올 때 빠졌다(2026-09-01)
   fitBtnIcons(el);       // 우상단 플레이리스트 버튼도 같은 규칙
-  applyFavMark(el);      // 최애 구획 이름줄 표시 + 첫 진입 스크롤(세션 70)
+  // 최애 자동 스크롤(세션 70)은 폐지 — 구획이 늘어서지 않고 기둥에서 고르므로, 최애는 '첫 선택'으로 반영된다(2026-09-06)
+}
+// 기둥 — 버튼은 자료(곡이 있는 멤버)가 바뀔 때만 다시 만들고 평소엔 켜짐만 바꾼다(썸네일 탭 멤버 스트립과 같은 태도)
+function renderDiscoSide(targets) {
+  const box = document.getElementById('discoMembersSide');
+  if (!box) return;
+  const sig = targets.map(t => t.id).join(',');
+  if (box.dataset.sig !== sig) {
+    box.dataset.sig = sig;
+    box.innerHTML = targets.map(t => `<button class="cal-tab" data-member="${t.id}" title="${escapeHtml(t.name)}"><img src="${escapeHtml(t.img)}" alt="${escapeHtml(t.name)}"></button>`).join('');
+    box.querySelectorAll('.cal-tab').forEach(b => b.addEventListener('click', () => { discoState.member = b.dataset.member; renderDisco(); }));
+  }
+  box.querySelectorAll('.cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === discoState.member));
 }
 
 
@@ -6113,7 +6144,10 @@ function findLoadedYoutube(videoId) {
   }
   return null;
 }
+// 숲 다시보기 주소에서 영상 번호(title_no) — 플레이어 주소(vodPlayerUrl과 같은 꼴)만. 아니면 ''.
+function soopVodTitleNo(u) { const m = String(u || '').match(/vod\.sooplive\.(?:com|co\.kr)\/player\/(\d+)/i); return m ? m[1] : ''; }
 // 컨텐츠 카드의 다시보기 재료: 날짜(YYYY-MM-DD·YYYY-MM)와 참여 멤버 id(G~ 이름을 사이트 멤버로 — 미등록 이름은 뺀다). 날짜나 멤버가 없으면 null.
+// exclude(있으면) = C열로 알려 준 제외 영상 번호들.
 function contentPickInfo(c) {
   if (!c.date || !c.date.sort) return null;
   const ymd = ymdOf(c.date);
@@ -6137,6 +6171,7 @@ function pickVodTiles(pick) {
       for (const v of parts) {
         if (seen.has(v.title_no)) continue;
         seen.add(v.title_no);
+        if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것
         html += `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
       }
     }
@@ -6349,6 +6384,7 @@ function switchPage(page, opts) {
     if (page === 'members') membersState.selectedTab = favNow;
     if (page === 'stats' && statsState.selectedTab !== favNow) selectStatsTab(favNow, { fromHash: true });   // 그 멤버의 최근 활동 달·날짜도 같이 잡는다
     if (page === 'thumbs' && calState.member !== favNow) { calState.member = favNow; calState.selected = null; }
+    if (page === 'disco') discoState.member = favNow;   // 곡이 없는 최애면 renderDisco가 크루로 되돌린다(2026-09-06)
   }
   // 최애 강조·자동 스크롤(2단계): 멤버별 구획이 늘어서는 탭은 그려진 뒤 최애 자리로 한 번 내려간다(favScrollPending)
   if (favNow && FAV_SCROLL_PAGES.includes(page)) favArm(page); else favScrollPending = '';
@@ -9391,12 +9427,19 @@ function contentCardHtml(c, withVods) {
   //   9/4에 상자 안 타일을 뺀 이유). 모달은 '이 컨텐츠 날 이 사람들의 다시보기'로만 뜻을 좁혀 두어 그 난잡함이 카드 격자로 번지지 않는다.
   // 카드 = 모달 버튼(링크 둘 이상이거나 참여 멤버가 있으면) / 링크 하나뿐이면 종전대로 카드 전체가 그 링크 / 둘 다 없으면 그냥 상자.
   // 현수막 카드(withVods 없음)는 종전 규칙 그대로 — 현수막 날짜는 게시글 작성일이라 그날 다시보기와 뜻이 안 맞는다.
-  const links = c.links || (c.link ? [c.link] : []);
+  // C열의 숲 다시보기 주소(vod.sooplive.com/player/번호)는 '이 다시보기는 이 컨텐츠 것이 아니다'라는 제외 표시다(2026-09-06 Crenop):
+  // 시스템은 같은 날 여러 다시보기 중 무엇이 이 컨텐츠인지 못 가리므로, 뺄 것만 시트로 알려 준다. 링크로는 보이지 않는다. 그 밖의 주소(유튜브 등)만 수동 링크.
+  // 현수막 카드(withVods 없음)는 이 해석을 안 한다.
+  const all = (c.links || (c.link ? [c.link] : [])).map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' }));
+  const manual = withVods ? all.filter(e => !soopVodTitleNo(e.url)) : all;
+  const exclude = withVods ? all.map(e => soopVodTitleNo(e.url)).filter(Boolean) : [];
   const pick = withVods ? contentPickInfo(c) : null;
-  const useModal = links.length >= 2 || !!pick;
-  const multi = useModal ? escapeHtml(JSON.stringify(links.map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' })))) : '';
-  const cardTag = useModal ? 'button' : (c.link ? 'a' : 'div');
-  const cardAttrs = useModal ? ` type="button" data-links="${multi}" data-ltitle="${escapeHtml(c.title || '')}"${pick ? ` data-pick="${escapeHtml(JSON.stringify(pick))}"` : ''}` : (c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '');
+  if (pick && exclude.length) pick.exclude = exclude;
+  const useModal = manual.length >= 2 || !!pick;
+  const multi = useModal ? escapeHtml(JSON.stringify(manual)) : '';
+  const single = !useModal && manual.length === 1 ? manual[0].url : '';
+  const cardTag = useModal ? 'button' : (single ? 'a' : 'div');
+  const cardAttrs = useModal ? ` type="button" data-links="${multi}" data-ltitle="${escapeHtml(c.title || '')}"${pick ? ` data-pick="${escapeHtml(JSON.stringify(pick))}"` : ''}` : (single ? ` href="${escapeHtml(single)}" target="_blank" rel="noopener"` : '');
   return `
     <${cardTag} class="content-card"${cardAttrs}>
       <div class="content-card-img">${imgTag}</div>

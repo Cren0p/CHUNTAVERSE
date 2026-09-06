@@ -1487,16 +1487,18 @@
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
   .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* 좁은 폭(≤700, 휴대폰): 아래 2열 규칙 */
   /* 태블릿 이상(2026-09-06 Crenop: 폭이 넉넉하면 넓어도 된다 — 지표 그래프 모달처럼 가변): 타일은 일별 요약 규격 200px 고정으로 돌아가고
-     패널은 타일이 필요한 만큼(fit-content)만 넓어진다 — 2개면 종전 440, 최대 5열 1074(= 200×5 + 간격 12×4 + 몸통 패딩 24 + 테두리 2), 넘으면 줄바꿈. */
+     패널은 타일이 필요한 만큼(fit-content)만 넓어진다 — 2개면 종전 440, 최대 5열 1074(= 200×5 + 간격 12×4 + 몸통 패딩 24 + 테두리 2) + 스크롤바 자리, 넘으면 줄바꿈. */
   .vod-pick-sec { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }   /* 구획 이름 — 기둥 제목(.filter-title)과 같은 규격. 첫 구획은 위 여백 없음 */
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
-  .vod-pick-panel .lr-body { padding: 12px; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다 */
+  .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
+     scrollbar-gutter: stable(2026-09-06 Crenop 지적): 세로로 넘쳐 스크롤바가 서면 그 폭(약 17px)만큼 안쪽이 줄어 5열이 4열로 접히고 오른쪽이 비었다 —
+     자리를 늘 잡아 두면 패널 폭(fit-content)에 그 폭이 들어가 열 수가 안 흔들린다. 안 넘칠 땐 오른쪽 여백이 그만큼 더 있다(html과 같은 태도). */
   .vod-pick-panel .ds-vods { gap: 12px; margin-top: 0; }
   .vod-pick-panel .ds-vod { width: calc(50% - 6px); }   /* 12px gap 반분 — 어떤 테두리 오차에도 2열 유지, 홀수 개는 마지막 줄 좌측 */
   .vod-pick-panel .cal-vod { width: calc(50% - 6px); }   /* 링크 고르기(이름줄 감싸개) — 감싸개가 반폭을 맡고 안의 타일은 그 안을 다 쓴다(2026-09-04: 안 타일에 반폭이 또 걸려 1/4 크기가 되던 실사고) */
   .vod-pick-panel .cal-vod .ds-vod { width: 100%; }
   @media (min-width: 701px) {   /* 위 2열 규칙보다 뒤에 있어야 이긴다(같은 특이도) */
-    .vod-pick-panel { width: fit-content; min-width: 440px; max-width: min(1074px, calc(100vw - 32px)); }
+    .vod-pick-panel { width: fit-content; min-width: 440px; max-width: min(1092px, calc(100vw - 32px)); }   /* 1092 = 1074 + 스크롤바 자리 18 */
     .vod-pick-panel .ds-vod, .vod-pick-panel .cal-vod { width: 200px; }
     .vod-pick-panel .cal-vod .ds-vod { width: 100%; }
   }
@@ -3279,7 +3281,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5220,18 +5222,12 @@ function visibleSchedule() {
   return scheduleData.filter(s => now < s.hideAfter);
 }
 // ── 지난 일정 = 컨텐츠(2026-09-04 Crenop 지정) ──
-// A열이 날짜인 행(일정)도 그 시각이 지나면(시간이 있으면 그 시각, 없으면 그날 자정) 컨텐츠로 본다 — 모든 컨텐츠에 그림을 만들어 붙여야 하던 고역을 없앤다.
-// 그림(url)만 없고 제목·종류·참여자·링크는 그대로: 달력 칸엔 글자 줄, 상세엔 제목 + 참여 멤버 칸(그림 없이), 컨텐츠 참여 수·모아보기에도 든다.
-// 판정은 볼 때마다 하므로 시각이 지나는 순간 새로 받지 않아도 바뀐다. 보조바 버튼·다가올 일정 목록은 종전대로(visibleSchedule — 그날 자정까지 D-DAY).
+// 일정 행(A열이 날짜)은 컨텐츠가 아니다(2026-09-06 Crenop: "A열 = content 폴더 사진만" — 9/4의 '지난 일정도 컨텐츠' 규칙 철회).
+// 컨텐츠 탭·모아보기·통계 컨텐츠 수는 전부 contentData(content 폴더 사진 행)만 본다. 일정은 보조바 버튼·다가올 일정 목록(visibleSchedule)에서만 산다.
 function schedulePast(s) { return Date.now() >= (s.hasTime ? s.target : s.hideAfter); }
-function scheduleAsContent(s) {
-  const [y, m, d] = s.date.split('-').map(Number);
-  return { url: '', imgs: [], link: s.link || '', links: s.link ? [s.link] : [], linkTitles: [], title: s.title, tags: s.tags, members: s.members,
-    date: { sort: s.date.slice(2).replace(/-/g, ''), display: koDate(y, m, d) }, fromSchedule: true };   // sort = YYMMDD(그림 이름의 날짜 키와 같은 꼴)
-}
 function contentPast(c) { return !c.until || Date.now() >= c.until; }   // B에 날짜를 적은 그림 행만 '아직 안 온 것'이 될 수 있다
-// 컨텐츠 = 지난 그림 행 + 지난 일정 행. 사진 행은 일정 파서에도 걸리므로(fromImage) 그쪽은 빼서 한 번만 세운다.
-function contentAll() { return contentData.filter(contentPast).concat(scheduleData.filter(s => schedulePast(s) && !s.fromImage).map(scheduleAsContent)); }
+// 컨텐츠 = 지난(시각이 온) content 폴더 사진 행뿐(2026-09-06). 일정 행은 안 든다.
+function contentAll() { return contentData.filter(contentPast); }
 // 통계에서 '컨텐츠'로 세는 기준(2026-09-04 Crenop 재지정): A열 사진이 content 폴더에 있는 행만.
 // [왜] 종전 기준은 '그림이 있거나 링크가 있으면'이었는데, 현수막 사진(banner 폴더)을 컨텐츠 행에 붙이기 시작하면 축하만 받은 합방까지 컨텐츠로 세어진다.
 //   'Crenop이 컨텐츠 사진을 만들어 content 폴더에 올렸다'가 곧 '천타버스가 차린 컨텐츠'라는 표시다. 링크는 남이 올린 편집본일 수도 있어 기준이 흐려진다.
@@ -5429,21 +5425,18 @@ async function loadSchedule() {
   if (scheduleData.length === 0) {
     try {
       const cached = JSON.parse(lsGet(LS_SCHEDULE_CACHE, '[]'));
-      // 컨텐츠 탭이 지난 일정을 카드로 그린다(2026-09-06 — 2026-08-31~09-05엔 달력 탭이 칸에 그렸다). 빠지면 #content로 새로고침했을 때
-      // 지난 일정 카드만 빈 채로 남는다(2026-09-02 헤드리스 대조로 확인된 유형). 보조바 한 줄(updatePageTitle)과 같은 자리에서 같이 처리한다.
-      if (cached.length) { scheduleData = parseScheduleRows(cached); updatePageTitle(); if (currentPage === 'content') renderContent(); }
+      if (cached.length) { scheduleData = parseScheduleRows(cached); updatePageTitle(); }   // 일정은 보조바 버튼·목록에만(2026-09-06 — 컨텐츠 탭은 일정을 안 그린다)
     } catch (e) {}
   }
   // 최신 fetch로 갱신
   try {
-    sheetLoadedAt.schedule = Date.now();   // 요청 시각 — 10초 안의 겹침 요청 방지(pullContentSheets)
+    sheetLoadedAt.schedule = Date.now();   // 요청 시각(2026-09-06부터 컨텐츠 탭 진입은 일정 시트를 안 받는다 — 값은 남겨 둔다)
     const res = await fetch(SCHEDULE_SHEET_URL);
     if (!res.ok) throw new Error('no data');
     const rows = parseCSV(await res.text());
     lsSet(LS_SCHEDULE_CACHE, JSON.stringify(rows));
     scheduleData = parseScheduleRows(rows);
     updatePageTitle();
-    if (currentPage === 'content') renderContent();
   } catch (e) {
     // fetch 실패 시: 위에서 캐시를 이미 그렸으면 유지. 캐시도 없으면 셸 버튼 유지.
   }
@@ -6445,7 +6438,7 @@ function switchPage(page, opts) {
   if (page === 'content') {
     // 시트(컨텐츠·일정)는 컨텐츠 탭에 들어올 때마다 한 번 새로 받는다(2026-09-02 Crenop 지정, 달력 탭 시절 규칙을 이어받음) —
     // 새로고침이나 다른 탭에 갔다 오면 다시 받는다. 캐시본이 있으면 먼저 그리고 도착분으로 다시 그린다(사이트 공통 '캐시 먼저').
-    if (contentData.length === 0 && scheduleData.length === 0) {
+    if (contentData.length === 0) {
       const body = document.getElementById('contentBody');
       if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>컨텐츠 데이터 불러오는 중...</div></div>';
     } else renderContent();
@@ -9459,7 +9452,7 @@ function contentCardHtml(c, withVods) {
 function contentCollectMatches(key) {
   const keys = String(key || '').split(/[|,]/).map(t => t.trim()).filter(Boolean);
   if (!keys.length) return [];
-  return contentAll().filter(c => keys.some(k => (c.title || '').includes(k)));   // 지난 일정(그림 없는 컨텐츠)도 든다
+  return contentAll().filter(c => keys.some(k => (c.title || '').includes(k)));   // 사진 행만(2026-09-06 — 일정 행은 더 안 든다)
 }
 // lrOverlay 공용 모달에 컨텐츠 카드 그리드로 표시. 과거순(1회→최신 — 컨텐츠 탭 최신순과 반대). '총 N회'는 항목 1건=1회 전제.
 function openContentCollect(key) {
@@ -9479,24 +9472,22 @@ function openContentCollect(key) {
 }
 
 // 컨텐츠 탭(2026-09-06 부활 — 2026-08-31~09-05엔 달력 탭이 이 자리를 대신했다): 현수막 탭과 같은 카드 격자, 최신순.
-// 자료 = contentAll()(지난 그림 행 + 지난 일정 행). 카드 자체는 현수막·모아보기 모달과 공용(contentCardHtml).
+// 자료 = contentAll()(지난 content 폴더 사진 행 — 일정 행은 2026-09-06부터 안 든다). 카드 자체는 현수막·모아보기 모달과 공용(contentCardHtml).
 function renderContent() {
   const body = document.getElementById('contentBody');
   if (!body) return;
   const items = contentAll().sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));   // 최신순(모아보기 모달의 과거순과 반대)
   if (items.length === 0) {
-    body.innerHTML = `<div class="loading"><div>${contentData.length === 0 && scheduleData.length === 0 ? '컨텐츠 데이터가 없습니다' : '아직 지난 컨텐츠가 없습니다'}</div></div>`;
+    body.innerHTML = `<div class="loading"><div>${contentData.length === 0 ? '컨텐츠 데이터가 없습니다' : '아직 지난 컨텐츠가 없습니다'}</div></div>`;
     return;
   }
   body.innerHTML = `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`;
   bindLinkPicks(body);   // 링크 둘 이상이거나 참여 멤버가 있는 카드 → 고르기 모달(수동 링크 + 그날 다시보기)
 }
-// 컨텐츠 탭 진입 시 시트 두 장을 새로 받는다. 10초 안에 요청한 것이면 건너뛴다 — 부팅 직후 #content 진입(부팅이 방금 요청함)이나
-// 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 각 로더가 카드 격자를 다시 그린다.
+// 컨텐츠 탭 진입 시 컨텐츠 시트를 새로 받는다(일정 시트는 2026-09-06부터 이 탭과 무관). 10초 안에 요청한 것이면 건너뛴다 —
+// 부팅 직후 #content 진입(부팅이 방금 요청함)이나 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 로더가 카드 격자를 다시 그린다.
 function pullContentSheets() {
-  const now = Date.now();
-  if (now - sheetLoadedAt.content > 10000) { sheetPulled.content = true; loadContent(); }
-  if (now - sheetLoadedAt.schedule > 10000) loadSchedule();
+  if (Date.now() - sheetLoadedAt.content > 10000) { sheetPulled.content = true; loadContent(); }
 }
 
 async function loadChemistry() {

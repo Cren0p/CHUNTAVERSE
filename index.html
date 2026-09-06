@@ -3289,7 +3289,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06n';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6164,8 +6164,19 @@ function contentPickInfo(c) {
 }
 // 그날 참여 멤버들의 다시보기 타일 — 재료는 썸네일 탭과 같다(월 통계의 세션 → 방송번호 → 다시보기 목록). 멤버마다 이름줄을 단다.
 // 순서 = 사이트 멤버 순서 → 시각·파트(2026-09-06 Crenop: 시트로 뒤늦게 넣은 것도 제 멤버 자리에). 시트 포함(pick.include)의 멤버는
-//   ① 불러온 목록에 같은 번호가 있으면 그 멤버 ② 없으면 시트 제목의 첫 낱말이 멤버 이름일 때 그 멤버(이름은 제목에서 뗀다) ③ 그도 아니면 맨 뒤.
-// pending = 월 통계나 누군가의 목록이 아직 안 왔다(요청은 여는 쪽이 한다).
+//   ① 불러온 목록 어디든(참여자·달을 안 가림) 같은 번호가 있으면 그 멤버·그 자료(온전한 타일) — 자동 목록에서 빠진 이유가 날짜(방송 시작일이 컨텐츠 날짜와 다름,
+//      달이 바뀌는 밤)일 때 이 길로 잡힌다. 그 달에 없으면 여는 쪽이 참여자들의 전달 목록도 받는다(prevYmOf).
+//   ② 없으면 시트 제목의 첫 낱말이 멤버 이름일 때 그 멤버(이름은 제목에서 뗀다 — 19금·구독+처럼 목록 자체에 안 잡히는 것) ③ 그도 아니면 맨 뒤.
+// pending = 월 통계나 누군가의 목록(전달 포함)이 아직 안 왔다(요청은 여는 쪽이 한다).
+function prevYmOf(ym) { const [y, m] = ym.split('-').map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`; }
+// 불러온 다시보기 목록 전부(멤버·달 안 가림)에서 영상 번호로 찾는다 — { m: 멤버, v: 항목 } 또는 null
+function findLoadedVod(titleNo) {
+  for (const [key, list] of Object.entries(vodState.data || {})) {
+    const v = (list || []).find(x => String(x.title_no) === String(titleNo));
+    if (v) { const m = MEMBER_BY_ID[key.split('|')[0]]; if (m) return { m, v }; }
+  }
+  return null;
+}
 function pickVodTiles(pick) {
   const monthData = pick.ym ? statsState.data[pick.ym] : null;
   if (pick.ym && !monthData) return { html: '', pending: true };
@@ -6195,10 +6206,9 @@ function pickVodTiles(pick) {
   (pick.include || []).forEach((it, i) => {
     if (shown.has(String(it.no))) return;
     shown.add(String(it.no));
-    for (const id of members) for (const v of (vodState.data[vodKey(id, pick.ym)] || [])) if (String(v.title_no) === String(it.no)) {   // ① 목록에 있는 것 — 온전한 타일
-      items.push({ mi: mi(id), k: items.length, html: `<div class="cal-vod">${whoLine(MEMBER_BY_ID[id])}${vodTileHtml(v)}</div>` });
-      return;
-    }
+    const hit = findLoadedVod(it.no);   // ① 불러온 목록 어디든
+    if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, html: `<div class="cal-vod">${whoLine(hit.m)}${vodTileHtml(hit.v)}</div>` }); return; }
+    if (pick.ym && members.some(id => vodState.loading.has(vodKey(id, prevYmOf(pick.ym))))) pending = true;   // 전달 목록이 오는 중이면 기다린다
     const words = String(it.title || '').trim().split(/\s+/);
     const named = MEMBERS.find(x => x.name === words[0]);   // ② 제목 첫 낱말 = 멤버 이름
     const label = named ? (words.slice(1).join(' ') || '다시보기') : (it.title || `다시보기 ${i + 1}`);
@@ -6251,9 +6261,12 @@ function openLinkPickModal(links, title, pick) {
     body.innerHTML = tiles + `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody;
     return r.pending;
   };
-  if (paint(false)) {
-    if (!statsState.data[pick.ym] && !statsState.loadingMonths.has(pick.ym)) loadStatsMonth(pick.ym);
+  // 시트 포함 중 불러온 목록에 없는 번호가 있으면 참여자들의 전달 목록도 받는다(월경 밤 방송 — 컨텐츠 날짜와 방송 시작일의 달이 다르다)
+  const unresolved = (pick.include || []).some(it => !findLoadedVod(it.no));
+  if (paint(false) || (unresolved && pick.ym)) {
+    if (pick.ym && !statsState.data[pick.ym] && !statsState.loadingMonths.has(pick.ym)) loadStatsMonth(pick.ym);
     pick.members.forEach(id => ensureVodMonth(id, pick.ym));
+    if (unresolved && pick.ym) pick.members.forEach(id => ensureVodMonth(id, prevYmOf(pick.ym)));
     let n = 0;
     const iv = setInterval(() => {
       const ov = document.getElementById('lrOverlay');

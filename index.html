@@ -3281,7 +3281,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06h';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7610,8 +7610,13 @@ function vodKey(memberId, ym) { return memberId + '|' + ym; }
 function ensureVodMonth(memberId, ym) {
   if (!memberId || !ym) return;
   const key = vodKey(memberId, ym);
-  const cur = isCurrentMonth(ym);
-  // 당월 목록은 5분 지나면 다시 받는다(2026-09-02) — 방송이 끝나면 새 다시보기가 생긴다. 지난달은 사실상 불변이라 한 번이면 된다.
+  // 굳은 달(settled) = 다음 달 시작 +36h가 지난 달 — 워커의 월 창(월말 +36h, 월말 자정을 넘겨 등록되는 다시보기 몫)과 같은 경계.
+  // 그전까지는 당월처럼 5분 신선도로 다시 받고 브라우저에 저장하지 않는다(2026-09-06): 종전엔 달이 바뀐 직후 받은 미완 목록이 영구 저장됐다
+  // (다시보기 저장 캐시는 지우는 길이 없다 — 통계 월 캐시만 데이터 버전으로 비운다).
+  const [vy, vm] = ym.split('-').map(Number);
+  const settled = Date.now() >= kstMonthStartMs(vm === 12 ? vy + 1 : vy, vm === 12 ? 1 : vm + 1) + 36 * 3600 * 1000;
+  const cur = !settled;
+  // 당월(굳지 않은 달) 목록은 5분 지나면 다시 받는다(2026-09-02) — 방송이 끝나면 새 다시보기가 생긴다. 굳은 달은 사실상 불변이라 한 번이면 된다.
   const stale = cur && vodState.data[key] && Date.now() - (vodState.at[key] || 0) > 5 * 60 * 1000;
   if ((vodState.data[key] && !stale) || vodState.loading.has(key)) return;
   if (!cur) {

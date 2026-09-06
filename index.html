@@ -1485,12 +1485,21 @@
   .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
   .day-detail-title .cd-chip .cd-full { height: 13px; }   /* v12: 헤더 스케일 — 배치는 칩 내부 좌표가 담당 */
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
-  .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
+  .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* 좁은 폭(≤700, 휴대폰): 아래 2열 규칙 */
+  /* 태블릿 이상(2026-09-06 Crenop: 폭이 넉넉하면 넓어도 된다 — 지표 그래프 모달처럼 가변): 타일은 일별 요약 규격 200px 고정으로 돌아가고
+     패널은 타일이 필요한 만큼(fit-content)만 넓어진다 — 2개면 종전 440, 최대 5열 1074(= 200×5 + 간격 12×4 + 몸통 패딩 24 + 테두리 2), 넘으면 줄바꿈. */
+  .vod-pick-sec { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }   /* 구획 이름 — 기둥 제목(.filter-title)과 같은 규격. 첫 구획은 위 여백 없음 */
+  .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다 */
   .vod-pick-panel .ds-vods { gap: 12px; margin-top: 0; }
   .vod-pick-panel .ds-vod { width: calc(50% - 6px); }   /* 12px gap 반분 — 어떤 테두리 오차에도 2열 유지, 홀수 개는 마지막 줄 좌측 */
   .vod-pick-panel .cal-vod { width: calc(50% - 6px); }   /* 링크 고르기(이름줄 감싸개) — 감싸개가 반폭을 맡고 안의 타일은 그 안을 다 쓴다(2026-09-04: 안 타일에 반폭이 또 걸려 1/4 크기가 되던 실사고) */
   .vod-pick-panel .cal-vod .ds-vod { width: 100%; }
+  @media (min-width: 701px) {   /* 위 2열 규칙보다 뒤에 있어야 이긴다(같은 특이도) */
+    .vod-pick-panel { width: fit-content; min-width: 440px; max-width: min(1074px, calc(100vw - 32px)); }
+    .vod-pick-panel .ds-vod, .vod-pick-panel .cal-vod { width: 200px; }
+    .vod-pick-panel .cal-vod .ds-vod { width: 100%; }
+  }
   .vod-pick-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
   .vod-pick-empty a { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
   .vod-pick-empty a svg { width: 12px; height: 12px; display: block; }
@@ -3262,7 +3271,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5162,7 +5171,7 @@ function parseScheduleRows(rows) {
     // 사진 행(A=사진 주소)도 B에 날짜를 적었으면 여기에 걸린다 — 사진 붙은 예고도 보조바 D-DAY·일정 목록에 떠야 하기 때문(2026-09-04 Crenop).
     //   B가 비어 파일 이름으로만 날짜를 아는 옛 그림 행은 여기서 날짜를 못 얻어 자동으로 빠진다(종전과 같음).
     //   한 행이 두 번 세어지지 않게 fromImage 표를 단다 — contentAll()이 그 표를 보고 컨텐츠 쪽에서 한 번만 세운다.
-    const fromImage = /^https?:\/\//i.test((r[0] || '').trim());
+    const fromImage = contentPhotos(r[0]).length > 0;   // content 폴더 사진이 있는 행만 사진 행(2026-09-06) — 다른 폴더 사진만 있으면 A가 빈 일정 행처럼 읽는다
     const when = pickWhen(r[0], r[1]);
     const date = when.ymd;
     if (!date) continue;
@@ -5180,7 +5189,7 @@ function parseScheduleRows(rows) {
       link: (r[2] || '').trim(),     // C=링크
       tags: parseTags(r[5]),         // F=종류(2026-09-02 신설, 쉼표·|·/ 다중) — 아이콘 별칭표(CAL_TAG_ICON)로 그림이 된다
       members: r.slice(6).filter(c => c.length > 0),  // G~ 멤버 (loadContent와 동일 열·동일 방식)
-      imgs: fromImage ? String(r[0] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x)) : [],
+      imgs: fromImage ? contentPhotos(r[0]) : [],
       fromImage,
       hasTime, target,
       hideAfter: dayStart + 86400000,  // 시간 유무 무관 그날 자정까지 유지(시간 지나면 D-DAY로 표기)
@@ -5218,6 +5227,9 @@ function contentAll() { return contentData.filter(contentPast).concat(scheduleDa
 // 폴더만 보고 도메인은 안 본다(주소가 옮겨져도 안 깨지게). 컨텐츠도 현수막도 아닌 사진은 제3의 폴더에 올리면 자동으로 빠진다 — 폴더 이름을 여기 적을 필요가 없다.
 // 사진이 여러 장이면 하나라도 content 폴더면 센다. 지난 일정 행(사진 없음)은 종전대로 안 든다.
 function isCountedContent(c) { return (c.imgs || (c.url ? [c.url] : [])).some(u => String(u).toLowerCase().includes('/content/')); }
+// A열에서 '사진'으로 인식하는 것은 content 폴더의 주소뿐(2026-09-06 Crenop) — 현수막(banner) 사진 등 다른 폴더 주소는 안 적은 것으로 친다.
+// 컨텐츠 행 판정(loadContent)·사진 목록·파일 이름 날짜(pickWhen)·일정 파서의 사진 행 판정(fromImage)이 전부 이 하나를 본다.
+function contentPhotos(cell) { return String(cell || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x) && x.toLowerCase().includes('/content/')); }
 
 // KST 기준 D-day 일수(오늘=0). 자정끼리의 차이라 시:분과 무관.
 function ddayNum(item) {
@@ -6101,7 +6113,38 @@ function findLoadedYoutube(videoId) {
   }
   return null;
 }
-function openLinkPickModal(links, title) {
+// 컨텐츠 카드의 다시보기 재료: 날짜(YYYY-MM-DD·YYYY-MM)와 참여 멤버 id(G~ 이름을 사이트 멤버로 — 미등록 이름은 뺀다). 날짜나 멤버가 없으면 null.
+function contentPickInfo(c) {
+  if (!c.date || !c.date.sort) return null;
+  const ymd = ymdOf(c.date);
+  const members = (c.members || []).map(n => { const m = MEMBERS.find(x => x.name === String(n).trim()); return m ? m.id : ''; }).filter(Boolean);
+  return members.length ? { ymd, ym: ymd.slice(0, 7), members } : null;
+}
+// 그날 참여 멤버들의 다시보기 타일 — 재료는 썸네일 탭과 같다(월 통계의 세션 → 방송번호 → 다시보기 목록). 멤버마다 이름줄을 단다.
+// pending = 월 통계나 누군가의 목록이 아직 안 왔다(요청은 여는 쪽이 한다).
+function pickVodTiles(pick) {
+  const monthData = statsState.data[pick.ym];
+  if (!monthData) return { html: '', pending: true };
+  const [y, mo] = pick.ym.split('-').map(Number);
+  let html = '', pending = false;
+  for (const id of pick.members) {
+    const m = MEMBER_BY_ID[id]; if (!m) continue;
+    const sessions = computeMonthSummary(monthData[id], y, mo).sessionsByDate[pick.ymd] || [];
+    const seen = new Set();
+    for (const s of sessions) {
+      const parts = vodsForBroad(id, pick.ym, s.broad_no);
+      if (parts === null) { if (!vodState.data[vodKey(id, pick.ym)]) pending = true; continue; }
+      for (const v of parts) {
+        if (seen.has(v.title_no)) continue;
+        seen.add(v.title_no);
+        html += `<div class="cal-vod"><span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>${vodTileHtml(v)}</div>`;
+      }
+    }
+  }
+  return { html, pending };
+}
+let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
+function openLinkPickModal(links, title, pick) {
   const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
@@ -6116,15 +6159,36 @@ function openLinkPickModal(links, title) {
     return `<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`;
   }).join('');
-  body.innerHTML = tiles ? `<div class="ds-vods">${tiles}</div>` : '<div class="vod-pick-empty">링크가 없습니다.</div>';
+  if (!pick) { body.innerHTML = tiles ? `<div class="ds-vods">${tiles}</div>` : '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
+  // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
+  const token = ++linkPickToken;
+  const paint = (gaveUp) => {
+    const r = pickVodTiles(pick);
+    const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
+      : `<div class="vod-pick-empty">${r.pending ? (gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중') : '그날 다시보기가 없습니다.'}</div>`;
+    body.innerHTML = (tiles ? `<div class="vod-pick-sec">링크</div><div class="ds-vods">${tiles}</div>` : '') + `<div class="vod-pick-sec">다시보기</div>` + vodBody;
+    return r.pending;
+  };
+  if (paint(false)) {
+    if (!statsState.data[pick.ym] && !statsState.loadingMonths.has(pick.ym)) loadStatsMonth(pick.ym);
+    pick.members.forEach(id => ensureVodMonth(id, pick.ym));
+    let n = 0;
+    const iv = setInterval(() => {
+      const ov = document.getElementById('lrOverlay');
+      if (token !== linkPickToken || !ov || ov.hidden) { clearInterval(iv); return; }
+      if (!paint(++n >= 37)) clearInterval(iv);
+      else if (n >= 37) clearInterval(iv);
+    }, 400);
+  }
   showModal();
 }
 // 링크가 둘 이상인 카드(data-links)를 누르면 고르기 모달 — 컨텐츠 탭·컨텐츠 모아보기 모달 공용 배선(그린 뒤 한 번 부른다)
 function bindLinkPicks(root) {
   if (!root) return;
   root.querySelectorAll('[data-links]').forEach(el => el.addEventListener('click', () => {
-    let links = []; try { links = JSON.parse(el.dataset.links); } catch (e) {}
-    openLinkPickModal(links, el.dataset.ltitle || '');
+    let links = [], pick = null; try { links = JSON.parse(el.dataset.links); } catch (e) {}
+    try { pick = el.dataset.pick ? JSON.parse(el.dataset.pick) : null; } catch (e) {}
+    openLinkPickModal(links, el.dataset.ltitle || '', pick);
   }));
 }
 
@@ -9237,10 +9301,9 @@ function pickWhen(a, b) {
     }
   }
   if (!date) {
-    // 적어 둔 날짜가 없으면 사진 파일 이름에서. 여러 장이면 content 폴더 것을 먼저 본다 —
-    // 현수막(banner) 파일 이름은 게시글 작성일이라 컨텐츠가 실제로 열린 날과 다르다.
-    const imgs = String(a || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
-    date = parseContentDate(imgs.find(u => u.toLowerCase().includes('/content/')) || '') || parseContentDate(imgs[0] || '');
+    // 적어 둔 날짜가 없으면 사진 파일 이름에서 — content 폴더 사진만(2026-09-06 Crenop). 종전엔 content 것을 먼저 보고 없으면 아무 사진이나 봤는데,
+    // 현수막(banner) 파일 이름은 게시글 작성일이라 컨텐츠가 실제로 열린 날과 달랐다. 이제 다른 폴더 사진은 사진으로 안 친다(contentPhotos).
+    date = parseContentDate(contentPhotos(a)[0] || '');
   }
   return { date, ymd: ymdOf(date), time, startMs: whenStartMs(date, time) };
 }
@@ -9276,10 +9339,11 @@ async function loadContent() {
     if (!res.ok) throw new Error('no data');
     const csv = await res.text();
     const rows = parseCSV(csv);
-    contentData = rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-      // A=사진 — 여러 장 가능(2026-09-04 Crenop): 줄바꿈·쉼표로 나눈다(C열 링크와 같은 구분자 관례).
-      // url = 첫 장(칸 대표 그림·모아보기 링크 등 종전 소비처가 전부 이것을 본다), imgs = 전부(상세 상자가 세로로 잇는다).
-      const imgs = String(r[0] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
+    contentData = rows.filter(r => contentPhotos(r[0]).length > 0).map(r => {
+      // A=사진 — 여러 장 가능(2026-09-04 Crenop): 줄바꿈·쉼표로 나눈다(C열 링크와 같은 구분자 관례). content 폴더 주소만 사진이다(2026-09-06 Crenop —
+      // 현수막 사진을 붙인 행은 파일 이름 날짜가 게시글 작성일이라 어긋나던 것. 다른 폴더 사진만 있는 행은 컨텐츠 행이 아니다).
+      // url = 첫 장(카드 그림·모아보기 링크 등 소비처가 전부 이것을 본다), imgs = 전부.
+      const imgs = contentPhotos(r[0]);
       const url = imgs[0] || '';
       // C=링크 — 여러 개 가능(2026-09-03 세션 70, Crenop): 줄바꿈(또는 쉼표)으로 나눈 항목마다 '주소' 또는 '주소 제목'(주소 뒤 공백, 제목은 자유 — 2026-09-04).
       // link = 첫 주소(카드 등 종전 소비처), links = 주소 전부, linkTitles = 항목별 제목(없으면 ''). 달력 상세: 둘 이상이면 고르기 모달에 제목 표시
@@ -9296,7 +9360,7 @@ async function loadContent() {
       // 그때 날짜까지 따라 움직이면 안 된다. 믿을 수 있는 이름은 Crenop이 컨텐츠 날짜로 붙인 content 폴더 것뿐이다. 그것도 없으면 첫 장(종전과 같음).
       // 날짜·시각은 pickWhen 하나가 정한다(B → A → 사진 파일 이름). until = '이 시점부터 기록' 경계 —
       // 시각이 있으면 그 시각, 없으면 그날 자정(일정 쪽 schedulePast와 같은 기준). 그전까지는 예고다.
-      const when = pickWhen(r[0], r[1]);
+      const when = pickWhen(r[0], r[1]);   // 파일 이름 날짜도 content 폴더 사진에서만(pickWhen이 contentPhotos를 본다, 2026-09-06)
       const until = when.date ? (when.startMs || Date.parse(`${when.ymd}T00:00:00+09:00`) + 86400000) : null;
       return { url, imgs, link, links, linkTitles, title, tags, members, date: when.date, until };
     });
@@ -9316,17 +9380,23 @@ async function loadContent() {
 }
 
 // 컨텐츠 카드 1장 마크업 — 컨텐츠 탭·현수막 탭·모아보기 모달 공용. 제목 말줄임 hover는 전수 위임(ELLIPSIS_TIP_SEL) 소관.
-function contentCardHtml(c) {
+function contentCardHtml(c, withVods) {
   // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
   // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
   const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
   const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
   const imgTag = c.url ? `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">` : '';   // 지난 일정에서 온 컨텐츠는 그림이 없다 — 빈 src는 깨진 그림이 되므로 칸만 비운다
-  // 링크가 둘 이상(C열, 세션 70)이면 카드가 버튼 — 누르면 고르기 모달(bindLinkPicks가 배선). 하나면 종전대로 카드 전체가 그 링크.
+  // 카드를 누르면(2026-09-06 Crenop): 참여 멤버(G~)의 그날 다시보기를 자동으로 모아 고르기 모달에 담는다 — 수동 링크(C열)는 유튜브 편집본만 적으면 된다.
+  // [왜 상자에 직접 넣지 않고 모달인가] 어느 다시보기가 어느 컨텐츠인지는 시스템이 모른다(같은 날 두 컨텐츠에 참여한 멤버의 다시보기는 양쪽에 다 든다 —
+  //   9/4에 상자 안 타일을 뺀 이유). 모달은 '이 컨텐츠 날 이 사람들의 다시보기'로만 뜻을 좁혀 두어 그 난잡함이 카드 격자로 번지지 않는다.
+  // 카드 = 모달 버튼(링크 둘 이상이거나 참여 멤버가 있으면) / 링크 하나뿐이면 종전대로 카드 전체가 그 링크 / 둘 다 없으면 그냥 상자.
+  // 현수막 카드(withVods 없음)는 종전 규칙 그대로 — 현수막 날짜는 게시글 작성일이라 그날 다시보기와 뜻이 안 맞는다.
   const links = c.links || (c.link ? [c.link] : []);
-  const multi = links.length >= 2 ? escapeHtml(JSON.stringify(links.map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' })))) : '';
-  const cardTag = multi ? 'button' : (c.link ? 'a' : 'div');
-  const cardAttrs = multi ? ` type="button" data-links="${multi}" data-ltitle="${escapeHtml(c.title || '')}"` : (c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '');
+  const pick = withVods ? contentPickInfo(c) : null;
+  const useModal = links.length >= 2 || !!pick;
+  const multi = useModal ? escapeHtml(JSON.stringify(links.map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' })))) : '';
+  const cardTag = useModal ? 'button' : (c.link ? 'a' : 'div');
+  const cardAttrs = useModal ? ` type="button" data-links="${multi}" data-ltitle="${escapeHtml(c.title || '')}"${pick ? ` data-pick="${escapeHtml(JSON.stringify(pick))}"` : ''}` : (c.link ? ` href="${escapeHtml(c.link)}" target="_blank" rel="noopener"` : '');
   return `
     <${cardTag} class="content-card"${cardAttrs}>
       <div class="content-card-img">${imgTag}</div>
@@ -9359,7 +9429,7 @@ function openContentCollect(key) {
   const label = String(key).split(/[|,]/)[0].trim();
   head.innerHTML = `<span style="color:var(--accent)">${escapeHtml(label)} 모아보기${items.length ? ` · 총 ${items.length}회` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   body.innerHTML = items.length
-    ? `<div class="cc-collect-grid">${items.map(contentCardHtml).join('')}</div>`
+    ? `<div class="cc-collect-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
     : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없습니다${contentData.length === 0 ? ' — 컨텐츠 데이터를 불러오는 중이거나 불러오지 못했습니다' : ''}</div>`;
   bindLinkPicks(body);   // 링크 둘 이상인 카드 → 고르기 모달(컨텐츠 탭과 같은 배선)
   showModal();
@@ -9375,8 +9445,8 @@ function renderContent() {
     body.innerHTML = `<div class="loading"><div>${contentData.length === 0 && scheduleData.length === 0 ? '컨텐츠 데이터가 없습니다' : '아직 지난 컨텐츠가 없습니다'}</div></div>`;
     return;
   }
-  body.innerHTML = `<div class="content-grid">${items.map(contentCardHtml).join('')}</div>`;
-  bindLinkPicks(body);   // 링크 둘 이상인 카드 → 고르기 모달
+  body.innerHTML = `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`;
+  bindLinkPicks(body);   // 링크 둘 이상이거나 참여 멤버가 있는 카드 → 고르기 모달(수동 링크 + 그날 다시보기)
 }
 // 컨텐츠 탭 진입 시 시트 두 장을 새로 받는다. 10초 안에 요청한 것이면 건너뛴다 — 부팅 직후 #content 진입(부팅이 방금 요청함)이나
 // 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 각 로더가 카드 격자를 다시 그린다.

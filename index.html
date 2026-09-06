@@ -332,7 +332,9 @@
      사라져 칸 정렬이 무너지고, 아낀 가로만큼 세로(54→108)를 잃어 이득이 상쇄된다. */
 
   .subbar-right { justify-content: flex-end; }
-  .subbar-lead { justify-content: flex-end; }   /* 왼쪽 묶음은 기념일(첫 탭 칸 오른쪽 끝) 바로 왼쪽에 붙는다(2026-09-04 Crenop) — 왼쪽 끝에 떨어져 서지 않게 */
+  /* 왼쪽 묶음은 왼쪽 끝(로고 왼쪽 선)부터 일정 줄 → 시트 왼쪽 버튼 순으로 선다(2026-09-06 Crenop). 종전(2026-09-04) '기념일 바로 왼쪽에 붙는다'는 철회 —
+     일정 줄이 이 묶음에 들어오면서 기준이 기념일이 아니라 일정 줄이 됐다. 기념일과 부딪히면 기념일 문구가 약식으로 줄고(syncLeadGap), 그래도 겹치면 버튼이 줄어든다. */
+  .subbar-lead { justify-content: flex-start; }
   /* 탭 줄과 같은 칸 규격 — 부속이 자기 탭 아래에 정확히 선다 */
   .subbar-mid { display: grid; grid-auto-flow: column; grid-auto-columns: var(--tab-w); gap: 2px; padding: 0 6px; }
   .tab-aux { display: flex; align-items: center; justify-content: center; min-width: 0; }
@@ -385,11 +387,13 @@
     position: absolute; right: 0; top: 50%; transform: translateY(-50%);
     display: flex; align-items: center; gap: 6px;   /* 여럿이면 왼쪽으로 나열된다(오른쪽 경계 고정) */
   }
-  /* 둘 이상이면 약식 문구로 — 전체 문구를 여러 개 늘어놓으면 옆 칸을 침범한다 */
-  .tab-aux.celeb-many .celebration-box .tb-t-pc { display: none; }
-  .tab-aux.celeb-many .celebration-box .tb-t-mb { display: inline; }
+  /* 약식 문구로 — 둘 이상이면(celeb-many: 전체 문구를 여러 개 늘어놓으면 옆 칸을 침범한다), 또는 왼쪽 묶음과 부딪히면(celeb-tight, 2026-09-06 Crenop:
+     폭이 전체 문구를 보여주기에 모자라면 기념일을 줄인다 — 판정은 syncLeadGap이 실측으로) */
+  .tab-aux.celeb-many .celebration-box .tb-t-pc, .tab-aux.celeb-tight .celebration-box .tb-t-pc { display: none; }
+  .tab-aux.celeb-many .celebration-box .tb-t-mb, .tab-aux.celeb-tight .celebration-box .tb-t-mb { display: inline; }
   /* 일정 줄(왼쪽 묶음 맨 앞, 2026-09-06): 제목이 길어도 묶음을 다 먹지 않게 탭 세 칸 폭에서 자른다(달력 탭 칸에 있을 때와 같은 상한).
-     묶음이 오른쪽 정렬(기념일에 붙음)이라 넘치면 왼쪽 끝 = 일정 줄부터 잘린다 → 시트 버튼이 먼저(3배) 줄고 글자는 말줄임, 일정 줄은 그다음(2026-09-06 실측: 1200~1366px에서 잘렸음) */
+     자리는 묶음의 왼쪽 끝 = 로고 왼쪽 선(2026-09-06 Crenop 배포본 확인 후 지정: 기념일 옆에 붙이니 자리가 애매했다), 시트 버튼은 그 오른쪽에 차례로.
+     묶음이 좁아지면 시트 버튼이 먼저(3배) 줄고 글자는 말줄임, 일정 줄은 그다음. */
   .subbar-lead .sch-line { flex: 0 1 auto; min-width: 0; max-width: calc(var(--tab-w) * 3 + 4px); }
   .subbar-lead .tb-sheet-btn { flex: 0 3 auto; min-width: 0; }
   .tb-t-pc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* 줄어들 때 글자 말줄임(왼쪽 묶음에서만 줄어든다). 잘린 글은 ELLIPSIS_TIP_SEL 글상자 */
@@ -2793,8 +2797,11 @@
     .nav-list, .subbar-mid { display: contents; }
     #drawerClose { grid-row: 1; justify-self: start; }
     /* 가이드 줄(2026-09-04): 맨 아래 묶음의 마지막 줄 — 왼쪽 묶음(시트 왼쪽 버튼)은 왼쪽 정렬, 가이드는 오른쪽 끝. 줄 폭 전체를 쓴다(묶음의 justify-items: end를 이 줄만 stretch) */
-    .subbar-guide-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; justify-self: stretch; min-width: 0; }
-    .subbar-guide-row .subbar-lead { flex: 1 1 0; justify-content: flex-start; padding-left: 16px; }   /* 탭의 아이콘 시작선(왼쪽 패딩 16)과 맞춘다 */
+    /* 가이드 줄 = [왼쪽 열: 일정 → 시트 왼쪽 버튼 세로 쌓기(2026-09-06 Crenop) | 가이드(첫 행 높이에 맞춰 위)]. 왼쪽 열은 오른쪽 묶음의 행 리듬(행 높이·간격 2px)을 그대로 쓴다 */
+    .subbar-guide-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%; justify-self: stretch; min-width: 0; }
+    .subbar-guide-row .subbar-lead { flex: 1 1 0; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: start; justify-content: start; padding-left: 16px; overflow: hidden; }   /* justify-content: start — 아래 공통 규칙(.subbar-lead flex-end)이 격자 열을 오른쪽으로 보내지 않게 */   /* 탭의 아이콘 시작선(왼쪽 패딩 16)과 맞춘다 */
+    .subbar-guide-row .subbar-lead > * { max-width: 100%; }
+    .subbar-guide-row #guideLink { height: var(--nav-row-h); display: inline-flex; align-items: center; }   /* 첫 행(일정)과 같은 높이에 선다 */
     /* 배지·점의 기준을 라벨로 되돌린다 — 상단바에서는 칸 우상단이 맞지만, 세로 목록에서는 행 오른쪽 끝에
        붙어 라벨에서 한참 떨어졌다(2026-09-02 실사고). 좋아요 점도 같은 기준으로 옮긴다. */
     .nav-lbl { position: relative; }
@@ -2829,7 +2836,7 @@
     .subbar-lead, .tab-aux { flex: none; justify-content: flex-end; }
     /* 보조바 오른쪽 묶음(시트 오른쪽 버튼·최애·가이드)은 탭 목록 아래 마지막 줄 — 어느 탭에도 속하지 않는 것들이라 관련 링크 행에서 뗐다(세션 70).
        PC 띠의 '오른쪽 끝'이 세로 목록에선 '끝'이다. 탭과 조금 띄워(6px) 다른 종류의 줄임을 보인다 */
-    .subbar-right { grid-row: 14; grid-column: 1; justify-self: end; align-self: start; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; justify-items: end; align-items: center; margin-top: 2px; padding: 0 var(--aux-right-gap) 0 0; max-width: 100%; overflow: visible; }   /* 세로 쌓기(Crenop): 위→아래 = 시트 오른쪽 버튼·최애·가이드(가이드가 맨 아래). 줄 높이·간격은 탭 줄과 같게 이어 붙인다(2026-09-04) */
+    .subbar-right { grid-row: 14; grid-column: 1; justify-self: end; align-self: start; display: grid; grid-auto-rows: minmax(var(--nav-row-h), auto); row-gap: 2px; justify-items: end; align-items: center; margin-top: 2px; padding: 0 var(--aux-right-gap) 0 0; max-width: 100%; overflow: visible; }   /* 세로 쌓기(Crenop): 위→아래 = 시트 오른쪽 버튼·최애·가이드(가이드가 맨 아래). 줄 높이·간격은 탭 줄과 같게 이어 붙인다(2026-09-04) */
     .tab-aux { height: var(--nav-row-h); }
     /* 일정 줄은 흐름 안으로 되돌린다 — 가로 보조바에서 '양옆 빈 탭 자리를 빌리는' 절대배치가
        세로 목록에도 남아 있어 줄이 칸 밖으로 나가 사이드 목록을 넘쳤다(반복 지적된 자리). */
@@ -2843,7 +2850,6 @@
     .subbar-lead .sch-line-txt,
     .subbar-lead .sch-line-when { display: none; }
     .subbar-lead .sch-line-mb { display: inline; }
-    .subbar-lead { gap: 6px; overflow-x: auto; scrollbar-width: none; }   /* 넘치면 가로로 밀린다(줄 폭은 가이드가 차지하고 남은 만큼) */
     .page-title-link, .celebration-box { padding: 4px 10px; }
     /* 아이콘 -1px 되감기(선언부)는 여기서도 그대로 둔다(2026-09-03 세션 70, Crenop 실사고: 세로 배치에서만 글자와 아이콘의 위아래가 어긋남).
        -1px은 패딩 비대칭 보정이 아니라 아이콘 그림이 16px 상자 아래쪽에 치우친 것(잉크 위 1.3/아래 0.7)을 되감는 값이라 배치와 무관하게 필요하다.
@@ -3256,7 +3262,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4764,12 +4770,20 @@ function fitBtnIcons(root) {
 // 가로 배치의 왼쪽 묶음(.subbar-lead)은 기념일 바로 왼쪽에 붙어 선다(2026-09-04 Crenop). 기념일 상자는 프로필 칸 오른쪽 끝에서 왼쪽으로 뻗는 절대 배치라
 // 칸(--tab-w)보다 길면 왼쪽 묶음 자리를 덮는다 — 넘친 폭 + 8px를 묶음의 오른쪽 여백으로 비운다. 기념일이 없으면 여백 0(묶음은 프로필 칸 왼쪽 경계에 붙는다).
 // 창 크기·글자 로드로 폭이 바뀌면 다시 잰다(syncHeadH와 같은 관찰).
+// 왼쪽 묶음(일정 → 시트 버튼, 왼쪽 정렬)과 기념일 상자(프로필 칸 오른쪽 끝에서 왼쪽으로 넘침)가 부딪히는지 실측해 푼다(2026-09-06 Crenop):
+// ① 부딪히면 기념일을 약식 문구로(celeb-tight) ② 그래도 겹치면 넘친 폭만큼 묶음의 오른쪽을 비워 버튼이 줄어들게(시트 버튼 먼저, 말줄임).
+// 종전(2026-09-04)엔 묶음이 오른쪽 정렬이라 ②만 있었다. 세로 배치(≤1150)는 기념일이 자기 행에 있어 부딪힐 일이 없다.
 function syncLeadGap() {
   const lead = document.getElementById('subbarLead'), wrap = document.querySelector('.tab-aux[data-for="members"] .celeb-wrap');
   if (!lead) return;
-  if (!wrap || innerWidth <= 1150) { lead.style.paddingRight = ''; return; }
-  const cell = wrap.parentElement.getBoundingClientRect(), box = wrap.getBoundingClientRect();
-  const over = Math.max(0, cell.left - box.left);
+  const aux = wrap && wrap.parentElement;
+  if (aux) aux.classList.remove('celeb-tight');
+  lead.style.paddingRight = '';
+  if (!wrap || innerWidth <= 1150) return;
+  const last = lead.lastElementChild;
+  const contentRight = last ? last.getBoundingClientRect().right : lead.getBoundingClientRect().left;
+  if (wrap.getBoundingClientRect().left < contentRight + 8) aux.classList.add('celeb-tight');
+  const over = Math.max(0, lead.getBoundingClientRect().right - wrap.getBoundingClientRect().left);
   lead.style.paddingRight = over > 0 ? `${Math.ceil(over) + 8}px` : '';
 }
 function updatePageTitle() {
@@ -4786,10 +4800,10 @@ function updatePageTitle() {
   if (auxMembers) {
     auxMembers.innerHTML = celebrations.length ? `<span class="celeb-wrap">${celebrations.join('')}</span>` : '';
     auxMembers.classList.toggle('celeb-many', celebrations.length > 1);
-    syncLeadGap();   // 기념일 상자가 프로필 칸 밖(왼쪽)으로 넘치면 그만큼 왼쪽 묶음을 비운다(2026-09-04 — 왼쪽 묶음이 기념일에 붙어 서게 되면서 겹칠 수 있다)
+    syncLeadGap();   // 기념일 상자가 왼쪽 묶음과 부딪히면 약식 문구로, 그래도 겹치면 묶음을 비운다(2026-09-06 — 종전 2026-09-04엔 비우기만: 왼쪽 묶음이 기념일에 붙어 서게 되면서 겹칠 수 있다)
   }
   // 일정 줄은 왼쪽 묶음 맨 앞(2026-09-06 Crenop): 어느 탭에도 속하지 않는 '다가올 것'이라 탭 칸이 아니라 묶음에 산다 —
-  // 가로 배치에선 기념일 왼쪽 묶음의 첫 자리, 세로 배치(서랍)에선 가이드 줄의 왼쪽. 2026-08-31~09-05엔 달력 탭 칸에 있었다.
+  // 가로 배치에선 묶음의 왼쪽 끝(로고 왼쪽 선)부터 시트 버튼과 차례로, 세로 배치(서랍)에선 가이드 줄 왼쪽 열에 위에서부터 세로로. 2026-08-31~09-05엔 달력 탭 칸에 있었다.
   const lead = document.getElementById('subbarLead');
   if (lead) { lead.innerHTML = scheduleBtn + topbarLinksHtml('left'); syncLeadGap(); }
   const sbRight = document.getElementById('subbarRight');

@@ -2798,11 +2798,13 @@
     .topbar-right .header-center { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; text-align: center; }
     .main-header { display: none; }   /* 보조바 폐지 — 내용물은 기둥의 우측 칸으로 내려간다 */
 
+    /* 3열 격자(2026-09-06 Crenop): 탭 12개 = 3열 × 4행, 행 하나가 곧 묶음(매일 · 쌓인 것 · 모아 보기 · 도구). 타일은 PC 탭과 같은 모양(그림 위 + 글자 아래).
+       폭 280 고정(구 244~300 내용 맞춤). 왼쪽 여백 16은 기념일 상자가 프로필 열 밖(왼쪽)으로 넘칠 자리 — PC와 같은 문법(칸 오른쪽 끝에 붙고 왼쪽으로 넘침). */
     .sidebar {
       position: fixed; top: var(--strip-h, 44px); left: 0; bottom: 0;
-      width: max-content; min-width: 244px; max-width: 300px;   /* 필요한 만큼만 — 본문 폭 고정은 아래 .main이 맡는다 */
-      display: grid; grid-template-columns: 1fr; align-content: start; row-gap: 2px;
-      padding: 2px 0;
+      width: 280px; max-width: 300px;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; row-gap: 2px; column-gap: 2px;
+      padding: 2px 8px 2px 16px;   /* 왼쪽 16 = 기념일 상자(세 글자 이름 약 97px)가 프로필 열(약 85px) 밖으로 넘칠 자리 */
       background: var(--surface); border-right: 1px solid var(--border); border-bottom: none;
       overflow-y: auto; overscroll-behavior: contain;   /* contain 없으면 끝까지 민 뒤 뒤 본문이 따라 움직인다 */
       z-index: 40;
@@ -2813,59 +2815,47 @@
        두 컨테이너를 display:contents로 풀어 자식들이 곧바로 사이드바 격자의 칸이 되고, 탭과 그 부속에
        같은 행을 지정한다. 배지가 라벨을 덮는 것과 같은 문법이고, 부속은 행의 오른쪽 끝에 선다. */
     .nav-list, .subbar-mid { display: contents; }
-    #drawerClose { grid-row: 1; justify-self: start; }
+    #drawerClose { grid-row: 1; grid-column: 1; justify-self: start; }
     /* 가이드 줄(2026-09-04): 맨 아래 묶음의 마지막 줄 — 왼쪽 묶음(시트 왼쪽 버튼)은 왼쪽 정렬, 가이드는 오른쪽 끝. 줄 폭 전체를 쓴다(묶음의 justify-items: end를 이 줄만 stretch) */
     /* 가이드 줄 = [왼쪽 열: 일정 → 시트 왼쪽 버튼 세로 쌓기(2026-09-06 Crenop) | 가이드(첫 행 높이에 맞춰 위)]. 왼쪽 열은 오른쪽 묶음의 행 리듬(행 높이·간격 2px)을 그대로 쓴다 */
-    .subbar-guide-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%; justify-self: stretch; min-width: 0; }
-    /* padding-left 19 = 탭의 아이콘 시작선(왼쪽 테두리 3 + 패딩 16). 종전 16은 테두리를 빠뜨려 3px 어긋났다(2026-09-06 실측).
-       .subbar-right의 justify-content: stretch(위) 없이는 PC 규칙(flex-end)이 격자 열을 내용 폭으로 줄여 이 열이 왼쪽 끝에서 떨어져 섰다. */
-    .subbar-guide-row .subbar-lead { flex: 1 1 0; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: start; justify-content: start; padding-left: 19px; overflow: hidden; }   /* justify-content: start — 아래 공통 규칙(.subbar-lead flex-end)이 격자 열을 오른쪽으로 보내지 않게 */   /* 탭의 아이콘 시작선(왼쪽 패딩 16)과 맞춘다 */
-    .subbar-guide-row .subbar-lead > * { max-width: 100%; }
-    .subbar-guide-slot { height: var(--nav-row-h); display: flex; align-items: center; flex: none; }   /* 가이드 버튼은 자연 크기 그대로, 첫 행(일정) 높이의 칸 가운데에(2026-09-06 Crenop: 버튼만 커 보였다) */
-    /* 배지·점의 기준을 라벨로 되돌린다 — 상단바에서는 칸 우상단이 맞지만, 세로 목록에서는 행 오른쪽 끝에
-       붙어 라벨에서 한참 떨어졌다(2026-09-02 실사고). 좋아요 점도 같은 기준으로 옮긴다. */
-    .nav-lbl { position: relative; }
     /* 배포본(2026-08-31a)과 같은 자리 — 라벨 우상단에 얹혀 글자를 상당 부분 덮는다.
        자릿수가 늘면 왼쪽(글자 쪽)으로 자라므로 벨을 밀어낼 일이 없다(Crenop 확인). */
-    .nav-badge { top: -6px; right: -10px; left: auto; margin-left: 0; }
-    .nav-item.has-new::after { top: 50%; right: auto; left: 100%; margin: -4px 0 0 6px; }
-    .nav-item[data-page="members"],    .tab-aux[data-for="members"]    { grid-row: 2; }
-    .nav-item[data-page="live"],       .tab-aux[data-for="live"]       { grid-row: 3; }
-    .nav-item[data-page="events"],     .tab-aux[data-for="events"]     { grid-row: 4; }
-    .nav-item[data-page="stats"],      .tab-aux[data-for="stats"]      { grid-row: 5; }
-    .nav-item[data-page="chemistry"],  .tab-aux[data-for="chemistry"]  { grid-row: 6; }
-    .nav-item[data-page="hall"],       .tab-aux[data-for="hall"]       { grid-row: 7; }
-    .nav-item[data-page="thumbs"],     .tab-aux[data-for="thumbs"]     { grid-row: 8; }
-    .nav-item[data-page="content"],    .tab-aux[data-for="content"]    { grid-row: 9; }
-    .nav-item[data-page="banner"],     .tab-aux[data-for="banner"]     { grid-row: 10; }
-    .nav-item[data-page="disco"],      .tab-aux[data-for="disco"]      { grid-row: 11; }
-    .nav-item[data-page="apply"],      .tab-aux[data-for="apply"]      { grid-row: 12; }
-    .nav-item[data-page="links"],      .tab-aux[data-for="links"]      { grid-row: 13; }
-    .nav-item, .tab-aux, #drawerClose, .subbar-lead { grid-column: 1; }
-    /* 부속(PC 보조바에 있던 것 전부: 시트 버튼·기념일·생방송 수·알림 종·일정·가이드)은 행 오른쪽 끝에 선다(2026-09-03 세션 70 Crenop 지정).
-       09-02에 "라벨 바로 뒤"로 두며 행마다 손으로 넣던 왼쪽 여백 11개(고정값·실측 아님)는 폐지 — 탭 이름이 바뀌어도 손댈 것이 없다.
-       그때 오른쪽 끝을 철회한 사유(라벨과 너무 벌어짐)는 서랍이 244px로 쥐어짜였을 때였고, 지금은 우측 서랍과 같은 폭이라 빈자리가 구조로 읽힌다.
-       PC 탭에 붙어 있던 것(안읽음 배지)은 그대로 라벨에 남는다. 오른쪽 여백 = 탭 왼쪽 패딩(16px)과 대칭(--aux-right-gap). */
+    /* 2행 = 탭에 묶인 부속(기념일 · 생방송 수 · 알림 종) — 첫 행 세 탭(프로필 · 생방송 · 최근 활동)의 열 위에 선다(PC 보조바가 탭 아래인 것을 위로 뒤집은 꼴,
+       2026-09-06 Crenop: 임시 해법 — 첫 행 밖의 탭에 부속이 생기면 새 대책이 필요하다). 나머지 아홉 칸은 빈 자리라 감춘다. */
+    .tab-aux[data-for="members"] { grid-row: 2; grid-column: 1; }
+    .tab-aux[data-for="live"]    { grid-row: 2; grid-column: 2; }
+    .tab-aux[data-for="events"]  { grid-row: 2; grid-column: 3; }
+    .tab-aux:not([data-for="members"]):not([data-for="live"]):not([data-for="events"]) { display: none; }
+    .nav-item[data-page="members"]   { grid-row: 3; grid-column: 1; }
+    .nav-item[data-page="live"]      { grid-row: 3; grid-column: 2; }
+    .nav-item[data-page="events"]    { grid-row: 3; grid-column: 3; }
+    .nav-item[data-page="stats"]     { grid-row: 4; grid-column: 1; }
+    .nav-item[data-page="chemistry"] { grid-row: 4; grid-column: 2; }
+    .nav-item[data-page="hall"]      { grid-row: 4; grid-column: 3; }
+    .nav-item[data-page="thumbs"]    { grid-row: 5; grid-column: 1; }
+    .nav-item[data-page="content"]   { grid-row: 5; grid-column: 2; }
+    .nav-item[data-page="banner"]    { grid-row: 5; grid-column: 3; }
+    .nav-item[data-page="disco"]     { grid-row: 6; grid-column: 1; }
+    .nav-item[data-page="apply"]     { grid-row: 6; grid-column: 2; }
+    .nav-item[data-page="links"]     { grid-row: 6; grid-column: 3; }
+    /* 부속의 자리는 위 격자 규칙(2행)이 정한다 — 세로 목록 시절의 '행 오른쪽 끝'(세션 70)과 행별 손 여백은 2026-09-06 3열 격자로 폐지. */
     /* 칸 자체는 클릭을 통과시킨다 — 행 위에 겹쳐 있어 라벨 쪽 클릭을 가로채고 있었다(2026-09-02 실사고).
        실제 부속(벨·기념일·일정)만 클릭을 받는다. */
-    .sidebar { --aux-right-gap: 16px; }
-    .tab-aux { justify-self: end; padding-right: var(--aux-right-gap); position: relative; z-index: 1; pointer-events: none; }
+    .tab-aux { position: relative; z-index: 1; pointer-events: none; }   /* 자리·정렬은 PC 규칙(가운데, 기념일은 칸 오른쪽 끝에서 왼쪽으로 넘침) 그대로 */
     /* 누를 것만 클릭을 받는다 — 생방송 카운터·일정 줄은 표시라 눌릴 이유가 없고,
        칸이 클릭을 먹으면 그 자리에서 탭 자체가 안 눌린다(2026-09-02). */
     .tab-aux .nav-notify-bell, .tab-aux .celebration-box, .tab-aux #guideLink { pointer-events: auto; }   /* 일정 줄(#schBtn)은 2026-09-06부터 왼쪽 묶음에 있어 여기 안 든다 */
-    .subbar-lead, .tab-aux { flex: none; justify-content: flex-end; }
     /* 보조바 오른쪽 묶음(시트 오른쪽 버튼·최애·가이드)은 탭 목록 아래 마지막 줄 — 어느 탭에도 속하지 않는 것들이라 관련 링크 행에서 뗐다(세션 70).
        PC 띠의 '오른쪽 끝'이 세로 목록에선 '끝'이다. 탭과 조금 띄워(6px) 다른 종류의 줄임을 보인다 */
-    .subbar-right { grid-row: 14; grid-column: 1; justify-self: stretch; align-self: start; display: grid; justify-content: stretch; grid-auto-rows: minmax(var(--nav-row-h), auto); row-gap: 2px; justify-items: end; align-items: center; margin-top: 2px; padding: 0 var(--aux-right-gap) 0 0; max-width: 100%; overflow: visible; }   /* 세로 쌓기(Crenop): 위→아래 = 시트 오른쪽 버튼·최애·가이드(가이드가 맨 아래). 줄 높이·간격은 탭 줄과 같게 이어 붙인다(2026-09-04) */
+    /* 탭과 연결성이 없는 것들(PC 보조바의 좌·우 묶음)은 격자 아래 좌·우로(2026-09-06 Crenop): 왼쪽 열 = 일정 · 시트 왼쪽 버튼(세로 쌓기, 왼쪽 정렬),
+       오른쪽 열(#subbarRightStack) = 시트 오른쪽 버튼 · 최애 · 가이드(세로 쌓기, 오른쪽 정렬). 행 리듬은 탭 행과 같다(높이·간격 2px). */
+    .subbar-right { grid-row: 7; grid-column: 1 / -1; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-top: 2px; overflow: visible; min-width: 0; }
+    .subbar-right > .subbar-lead { flex: 1 1 0; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: start; justify-content: start; overflow: hidden; }
+    .subbar-right > .subbar-lead > * { max-width: 100%; }
+    #subbarRightStack { flex: none; display: grid; grid-auto-rows: var(--nav-row-h); row-gap: 2px; align-items: center; justify-items: end; }
     .tab-aux { height: var(--nav-row-h); }
     /* 일정 줄은 흐름 안으로 되돌린다 — 가로 보조바에서 '양옆 빈 탭 자리를 빌리는' 절대배치가
        세로 목록에도 남아 있어 줄이 칸 밖으로 나가 사이드 목록을 넘쳤다(반복 지적된 자리). */
-    .tab-aux[data-for="members"] { overflow: hidden; position: static; }
-    /* 세로 배치에서는 흐름 안에서 왼쪽부터 오른쪽으로 나열된다 */
-    .tab-aux[data-for="members"] .celeb-wrap { position: static; transform: none; }
-    /* 세로 배치는 제목 없이 D-day만(2026-09-02 Crenop 지정). 두 줄 예외는 함께 철회한다 —
-       세로에서 일정 제목을 주지 않던 종전 규칙으로 돌아가는 것이고, 두 줄이 필요했던 이유(제목이 길다)도 같이 사라진다.
-       일정 줄은 서랍 맨 아래 가이드 줄의 왼쪽 묶음에 선다(2026-09-06 — 종전 달력 탭 행). */
     .subbar-lead .sch-line { max-width: 100%; }
     .subbar-lead .sch-line-txt,
     .subbar-lead .sch-line-when { display: none; }
@@ -2882,12 +2872,7 @@
     #guideLink .tb-t-pc { display: none; }   /* 세로 배치의 가이드는 짧은 글자('가이드') — 아이콘만으론 설명이 모자랐다(2026-09-03 Crenop). 긴 문구는 기둥 폭을 이 버튼이 정하게 만들었다 */
     #guideLink .tb-t-mb { display: inline; }
     .nav-notify-bell { padding: 4px 8px; }   /* 세로 배치의 .page-title-link과 같은 위아래 4px. 종 아이콘의 -1px 되감기도 위와 같은 이유로 그대로 */
-    .nav-item {
-      flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px;
-      padding: 0 8px 0 16px; height: var(--nav-row-h); font-size: 14px; text-align: left; width: 100%;   /* 오른쪽을 좁혀 부속을 바짝 붙인다 */
-      border-bottom: none; border-left: 3px solid transparent;
-    }
-    .nav-item.active { border-bottom-color: transparent; border-left-color: var(--accent); }
+    /* 탭 타일은 PC 규칙 그대로(그림 위 + 글자 아래, 활성 = 아래 민트 선) — 세로 목록(한 줄 = 그림 + 글자, 왼쪽 민트 선)은 2026-09-06 3열 격자로 대체 */
     /* 세로 목록에서도 배지는 라벨을 덮는다(2026-09-02 회귀) — 부속을 탭 줄 안으로 들이는 방향과 같다.
        옆에 두면 배지 자릿수가 기둥 폭을 밀어 '1000'일 때 기둥이 통째로 넓어졌다. */
 
@@ -3289,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06p';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-06q';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3466,30 +3451,22 @@ const MEMBER_BIRTHDAYS = {
     const side = document.getElementById('sidebar');
     if (!bar || !mid || !lead || !right || !side) return;
     if (mobile) {
-      side.appendChild(mid);        // 드로어 우측 칸 = 보조바 가운데 묶음 그대로
-      // 세로 배치(태블릿·모바일 공통, 2026-09-04 Crenop): 보조바 오른쪽 묶음(시트 오른쪽 버튼·최애·가이드)은 서랍 맨 아래 묶음으로, 왼쪽 묶음(시트 왼쪽 버튼)은
-      // 그 묶음의 가이드 줄 왼쪽에 왼쪽 정렬로 선다 — 태블릿 띠·모바일 ✕ 줄에 따로 두던 것을 한 자리로(공간 제약·규칙 단순화).
-      const row = guideRow();
-      row.appendChild(lead);
-      let slot = row.querySelector('.subbar-guide-slot');
-      if (!slot) { slot = document.createElement('div'); slot.className = 'subbar-guide-slot'; row.appendChild(slot); }
-      slot.appendChild(document.getElementById('guideLink'));   // 첫 행 높이의 칸 안에 자연 크기로(2026-09-06)
-      right.appendChild(row);
+      side.appendChild(mid);        // 탭에 묶인 부속(기념일·생방송 수·알림 종)은 격자 위 부속 줄로 — CSS가 자리를 준다
+      // 세로 배치(2026-09-06 Crenop, 3열 격자): 탭과 연결성이 없는 것들은 격자 아래 좌·우로 — PC 보조바의 좌·우 묶음과 같은 편 가르기.
+      // 오른쪽 묶음 상자(#subbarRight) 안에서 [왼쪽 묶음(일정·시트 왼쪽 버튼) | 오른쪽 열 상자(#subbarRightStack: 시트 오른쪽 버튼·최애·가이드)]로 선다.
+      let stack = document.getElementById('subbarRightStack');
+      if (!stack) { stack = document.createElement('div'); stack.id = 'subbarRightStack'; }
+      [...right.children].filter(n => n !== lead && n !== stack).forEach(n => stack.appendChild(n));
+      right.appendChild(lead); right.appendChild(stack);
       side.appendChild(right);
     } else {
       bar.appendChild(mid);
       bar.insertBefore(lead, mid);
-      right.appendChild(document.getElementById('guideLink'));   // 가이드는 오른쪽 묶음의 맨 끝으로 복귀
-      const row = document.getElementById('subbarGuideRow'); if (row) row.remove();
+      const stack = document.getElementById('subbarRightStack');
+      if (stack) { [...stack.children].forEach(n => right.appendChild(n)); stack.remove(); }   // 오른쪽 열 상자를 풀어 PC 한 줄로 복귀
       bar.appendChild(right);
     }
     // 로고·문구는 언제나 상단 띠에 있다(2026-09-01). 세로형에서도 띠는 그대로 있고 탭 목록만 내려간다.
-  }
-  // 서랍 맨 아래 묶음의 가이드 줄: [왼쪽 묶음(왼쪽 정렬) … 가이드(오른쪽)]. 한 번 만들어 재사용
-  function guideRow() {
-    let row = document.getElementById('subbarGuideRow');
-    if (!row) { row = document.createElement('div'); row.id = 'subbarGuideRow'; row.className = 'subbar-guide-row'; }
-    return row;
   }
   syncBarPlacement();
   if (window.syncBtnL) window.syncBtnL();   // 첫 페인트에서도 버튼 모양이 상태와 맞게
@@ -4842,10 +4819,11 @@ function updatePageTitle() {
   if (lead) { lead.innerHTML = scheduleBtn + topbarLinksHtml('left'); syncLeadGap(); }
   const sbRight = document.getElementById('subbarRight');
   if (sbRight) {   // 오른쪽 묶음은 어느 배치에서나 같은 상자(세션 70: 세로 배치도 이 상자째 서랍 맨 아래로 내려간다) — 시트 버튼은 최애·가이드 왼쪽
-    // 직속 자식만 지운다(:scope >) — 세로 배치에선 왼쪽 묶음(subbarLead)이 이 상자 안 가이드 줄에 들어와 있어, 종전 선택자는 방금 채운
-    // 왼쪽 묶음의 버튼(시트 왼쪽 버튼·일정)까지 지웠다(2026-09-06 헤드리스 실측 — 세로 배치에서 왼쪽 시트 버튼이 사라지던 선재 버그).
-    sbRight.querySelectorAll(':scope > .page-title-link:not(#guideLink):not(#favBtn), :scope > .celebration-box').forEach(n => n.remove());
-    sbRight.insertAdjacentHTML('afterbegin', topbarLinksHtml('right'));
+    // 세로 배치에선 오른쪽 열 상자(#subbarRightStack) 안이 '오른쪽 묶음'이다. 직속 자식만 지운다(:scope >) — 왼쪽 묶음(subbarLead)이 같은 상자 안에
+    // 들어와 있어, 종전 선택자는 방금 채운 왼쪽 묶음의 버튼(시트 왼쪽 버튼·일정)까지 지웠다(2026-09-06 헤드리스 실측 — 세로 배치에서 왼쪽 시트 버튼이 사라지던 선재 버그).
+    const host = document.getElementById('subbarRightStack') || sbRight;
+    host.querySelectorAll(':scope > .page-title-link:not(#guideLink):not(#favBtn), :scope > .celebration-box').forEach(n => n.remove());
+    host.insertAdjacentHTML('afterbegin', topbarLinksHtml('right'));
   }
   refreshLikeDot();   // 상단바 innerHTML 재생성으로 클래스가 날아가므로 점 상태 재적용
   fitBtnIcons();      // 새로 그린 버튼의 아이콘 여백을 그림 기준으로 맞춘다

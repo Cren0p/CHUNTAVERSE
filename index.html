@@ -2234,7 +2234,7 @@
   .hall-heat-grid.show-stats .hall-heat-stats { visibility: visible; }
   /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 요약 항목(.stats-summary-item[data-metric])과 같은 규칙·같은 값
      (패딩 2px 6px에 같은 크기의 음수 여백으로 글자 자리는 그대로, 테두리는 평소 투명). 점선 밑줄(선례 없는 제 발명)은 철회. */
-  .hall-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .hall-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 3px; margin: -3px -4px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }   /* 좌우 3(지표 요약은 6): 항목 사이가 ' · '뿐이라 6이면 상자가 옆 글자를 덮는다(2026-09-07 Crenop 지적) */
   .hall-heat-stats .hts-btn:hover { background: var(--surface2); border-color: var(--accent); }
   .hall-heat-stats .hl { color: #ffffff; font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 흰색(민트는 아래 격자 색과 겹쳐 2026-09-02 Crenop이 흰색 지정) */
 
@@ -2921,10 +2921,12 @@
   .g-grid { stroke:rgba(255,255,255,0.08); stroke-width:1; }
   .g-xlabel { fill:var(--muted); font-size:12px; text-anchor:middle; }
   .g-vlabel { font-size:12px; font-weight:700; paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; }
+  .g-blabel { font-size:12px; font-weight:700; fill:#ffffff; text-anchor:middle; }   /* 쌓은 막대 안 숫자(2026-09-07): 흰 글자가 색 구획 위에 서므로 선 그래프용 윤곽선은 없다 */
+  .g-legend { fill:var(--muted); font-size:12px; text-anchor:start; }   /* 막대 범례 글자 — 색 상자 오른쪽에 왼쪽 정렬(.g-xlabel의 가운데 정렬을 쓰면 상자와 겹친다) */
 
   /* evt-type-spacer: 종류 5칸을 [채팅·생방송·빈칸]/[게시글·카페·유튜브]로 나누는 빈칸(방송/글 묶음 — Crenop 의도, 2026-09-03 재확인). 어느 폭에서나 3열이므로 상시 유지 */
   /* 모바일(narrow viewBox 380×300): 차트 월·값 글씨 키움(작은 화면 가독성) */
-  @media (max-width:900px){ .g-xlabel { font-size:14px; } .g-vlabel { font-size:14px; } }
+  @media (max-width:900px){ .g-xlabel { font-size:14px; } .g-vlabel { font-size:14px; } .g-blabel { font-size:14px; } .g-legend { font-size:14px; } }
   /* 그래프 모달 (좋아요 모달 lr-panel 골격 재사용, 폭·글씨 키움) */
   .graph-modal-panel { max-width:740px; max-height:90vh; }
   .graph-modal-panel .lr-head { color:var(--text); font-size:14px; padding:14px 18px; }
@@ -3256,7 +3258,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-07b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-07c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8368,12 +8370,12 @@ function drawTimeGraph(wrap, memberId, range, def) {
     v.forEach((pct, k) => {
       const h = plotH * pct / 100; top -= h;
       bars += `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${rgba(def.alphas[k])}"/>`;
-      if (h >= 14 && pct > 0) bars += `<text x="${(x + barW / 2).toFixed(1)}" y="${(top + h / 2 + 4).toFixed(1)}" text-anchor="middle" class="g-vlabel" fill="#ffffff">${pct}</text>`;
+      if (h >= 14 && pct > 0) bars += `<text x="${(x + barW / 2).toFixed(1)}" y="${(top + h / 2 + 4).toFixed(1)}" class="g-blabel">${pct}</text>`;
     });
   });
   let legend = ''; let lx = padL;
   def.series.forEach((name, k) => {
-    legend += `<rect x="${lx}" y="10" width="10" height="10" fill="${rgba(def.alphas[k])}"/><text x="${lx + 14}" y="19" class="g-xlabel" text-anchor="start">${name}</text>`;
+    legend += `<rect x="${lx}" y="10" width="10" height="10" fill="${rgba(def.alphas[k])}"/><text x="${lx + 14}" y="19" class="g-legend">${name}</text>`;
     lx += 14 + name.length * 13 + 14;
   });
   const grid = [0, 25, 50, 75, 100].map(p => { const yy = padT + plotH * (1 - p / 100); return `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W - padR}" y2="${yy.toFixed(1)}" class="g-grid"/>`; }).join('');

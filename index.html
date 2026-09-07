@@ -2234,7 +2234,7 @@
   .hall-heat-grid.show-stats .hall-heat-stats { visibility: visible; }
   /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 요약 항목(.stats-summary-item[data-metric])과 같은 규칙·같은 값
      (패딩 2px 6px에 같은 크기의 음수 여백으로 글자 자리는 그대로, 테두리는 평소 투명). 점선 밑줄(선례 없는 제 발명)은 철회. */
-  .hall-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 3px; margin: -3px -4px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }   /* 좌우 3(지표 요약은 6): 항목 사이가 ' · '뿐이라 6이면 상자가 옆 글자를 덮는다(2026-09-07 Crenop 지적) */
+  .hall-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 3px; margin: -3px 0; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }   /* 좌우는 음수 여백 없이 상자 폭 3px이 글자 사이를 벌린다(2026-09-07 Crenop: 상자로 안 되면 글자 쪽을 조절) — 그래서 상자가 ' · '를 덮을 수 없다. 세로는 지표 요약 항목과 같다 */
   .hall-heat-stats .hts-btn:hover { background: var(--surface2); border-color: var(--accent); }
   .hall-heat-stats .hl { color: #ffffff; font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 흰색(민트는 아래 격자 색과 겹쳐 2026-09-02 Crenop이 흰색 지정) */
 
@@ -2921,7 +2921,7 @@
   .g-grid { stroke:rgba(255,255,255,0.08); stroke-width:1; }
   .g-xlabel { fill:var(--muted); font-size:12px; text-anchor:middle; }
   .g-vlabel { font-size:12px; font-weight:700; paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; }
-  .g-blabel { font-size:12px; font-weight:700; fill:#ffffff; text-anchor:middle; }   /* 쌓은 막대 안 숫자(2026-09-07): 흰 글자가 색 구획 위에 서므로 선 그래프용 윤곽선은 없다 */
+  .g-blabel { font-size:12px; font-weight:700; fill:#ffffff; text-anchor:middle; paint-order:stroke; stroke:var(--bg); stroke-width:3px; stroke-linejoin:round; }   /* 쌓은 막대 안 숫자(2026-09-07): 윤곽선은 밝은 멤버색(마다옴 노랑) 구획 위에서 흰 글자를 살린다 — 선 그래프보다 1px 얇게 */
   .g-legend { fill:var(--muted); font-size:12px; text-anchor:start; }   /* 막대 범례 글자 — 색 상자 오른쪽에 왼쪽 정렬(.g-xlabel의 가운데 정렬을 쓰면 상자와 겹친다) */
 
   /* evt-type-spacer: 종류 5칸을 [채팅·생방송·빈칸]/[게시글·카페·유튜브]로 나누는 빈칸(방송/글 묶음 — Crenop 의도, 2026-09-03 재확인). 어느 폭에서나 3열이므로 상시 유지 */
@@ -3258,7 +3258,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-07c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-07d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7441,14 +7441,15 @@ const FAN_ICON = SVG_ICONS.fan;   // 실물은 SVG_ICONS.fan으로 통합(산포
 //    평균이 '—'인 달(방향이 상쇄됨)은 점을 비운다(선이 끊긴다).
 //  · 평균 시간 = 선 그래프(시간). 방송이 없는 달은 0이 아니라 빈 점.
 //  · 시간대 분포 = 달마다 100% 쌓은 막대(새벽·오전·오후·야간). 주중/주말도 같은 막대(하루 평균 시간의 비율 — 두 줄 통계와 같은 값. 분 합계로 비교하면 5:2 날수 탓에 늘 주중이 커서 뜻이 없다).
-//    색은 멤버색의 진하기 단계(시간 순으로 옅→진, 주중 진 · 주말 옅) — 히트맵이 민트 진하기로 양을 말하는 것과 같은 태도라 새 팔레트를 만들지 않았다.
+//    쌓는 순서는 위→아래 = 표 순서(새벽이 맨 위, 야간이 맨 아래 — 히트맵 세로축 00→24와 같은 방향 · 주중 위, 주말 아래) (2026-09-07 Crenop 지정).
+//    색은 멤버색의 진하기 단계(시간 순으로 옅→진, 주말이 주중보다 진함) — 히트맵이 민트 진하기로 양을 말하는 것과 같은 태도라 새 팔레트를 만들지 않았다.
 //  · 회차가 적은 달의 평균은 튈 수 있다 — 회차 수 표기는 하지 않는다(Crenop).
 const TIME_GRAPHS = [
   { key: 'tStart', label: '평균 시작', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.startMin },
   { key: 'tEnd',   label: '평균 종료', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.endMin },
   { key: 'tAvg',   label: '평균 시간', ic: 'hourglass', icColor: 'var(--ev-start)', kind: 'line',  get: ts => ts.avgMin / 60, fmt: v => formatDuration(v * 3600000) },
   { key: 'tBands', label: '시간대 분포', ic: 'sun',      icColor: 'var(--ev-yellow)', kind: 'stack', series: ['새벽', '오전', '오후', '야간'], alphas: [0.3, 0.5, 0.72, 1], get: ts => ts.bands },
-  { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar', icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [1, 0.5], get: ts => ts.wdwe },
+  { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar', icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [0.5, 1], get: ts => ts.wdwe },
 ];
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
 function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
@@ -8347,7 +8348,7 @@ function drawTimeGraph(wrap, memberId, range, def) {
     drawGraphChart(wrap, memberId, range, proxy);
     return;
   }
-  // 쌓은 100% 막대 — 달마다 한 막대, 구획은 시간 순(아래→위). 값 라벨은 구획이 14px 이상일 때만 안에 쓴다. 범례는 위 한 줄.
+  // 쌓은 100% 막대 — 달마다 한 막대, 구획은 표 순서로 위→아래(새벽 위 … 야간 아래 / 주중 위 · 주말 아래). 값 라벨은 구획이 14px 이상일 때만 안에 쓴다. 범례는 위 한 줄.
   const color = m.color;
   const rgba = a => { const c = hexToRgb(color); return `rgba(${c},${a})`; };
   const pts = range.map(ym => { const ts = timeStatsOf(memberId, ym); return ts ? def.get(ts) : null; });
@@ -8366,11 +8367,12 @@ function drawTimeGraph(wrap, memberId, range, def) {
     xlab += `<text x="${(x + barW / 2).toFixed(1)}" y="${H - padB + 22}" class="g-xlabel">${withYear ? `'${String(y).slice(2)} ` : ''}${mo}월</text>`;
     const v = pts[i];
     if (!v) { bars += `<rect x="${x.toFixed(1)}" y="${padT}" width="${barW.toFixed(1)}" height="${plotH}" fill="rgba(255,255,255,0.04)"/>`; return; }   // 방송 없는 달 = 빈 틀
-    let top = padT + plotH;
+    let top = padT;
     v.forEach((pct, k) => {
-      const h = plotH * pct / 100; top -= h;
+      const h = plotH * pct / 100;
       bars += `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${rgba(def.alphas[k])}"/>`;
       if (h >= 14 && pct > 0) bars += `<text x="${(x + barW / 2).toFixed(1)}" y="${(top + h / 2 + 4).toFixed(1)}" class="g-blabel">${pct}</text>`;
+      top += h;
     });
   });
   let legend = ''; let lx = padL;

@@ -2230,7 +2230,7 @@
   .hall-heat-cell .toh-body { justify-content: center; }
   .hall-heat-cell .toh-right { flex: 0 1 auto; }
   /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
-  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; visibility: hidden; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만 보이되 자리는 늘 차지한다(display가 아니라 visibility — 켜고 끌 때 카드 크기가 안 바뀐다, 2026-09-02 Crenop) */
+  .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; gap: 6px; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; visibility: hidden; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만 보이되 자리는 늘 차지한다(display가 아니라 visibility — 켜고 끌 때 카드 크기가 안 바뀐다, 2026-09-02 Crenop) */   /* gap 6(2026-09-07 Crenop): 두 줄이 붙어 보였고 값 버튼의 호버 상자(세로 3px 삐져나옴)가 옆 줄에 닿았다 */
   .hall-heat-grid.show-stats .hall-heat-stats { visibility: visible; }
   /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 요약 항목(.stats-summary-item[data-metric])과 같은 규칙·같은 값
      (패딩 2px 6px에 같은 크기의 음수 여백으로 글자 자리는 그대로, 테두리는 평소 투명). 점선 밑줄(선례 없는 제 발명)은 철회. */
@@ -3258,7 +3258,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-07d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-07e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8221,7 +8221,8 @@ function drawGraphChart(wrap, memberId, range, metric) {
   const padL = narrow ? 16 : 32, padR = narrow ? 16 : 32, padT = narrow ? 22 : 30, padB = 36;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const xOf = (i) => range.length <= 1 ? padL + plotW / 2 : padL + (i / (range.length - 1)) * plotW;
-  const yOf = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+  // invertY(시각 축, 2026-09-07 Crenop): 이른 시각이 위, 늦은 시각이 아래 — 히트맵·시간대 분포 막대의 세로 방향과 같게
+  const yOf = (v) => metric.invertY ? padT + ((v - yMin) / (yMax - yMin)) * plotH : padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
 
   // 그리드 가로선만(Y축 숫자는 없음 — 값은 점마다 표기)
   let grid = '';
@@ -8344,6 +8345,7 @@ function drawTimeGraph(wrap, memberId, range, def) {
         return pts.map(v => v == null ? null : ((v - anchor + 1440) % 1440));
       };
       proxy.fmt = v => hm(Math.round(v + anchor) % 1440);
+      proxy.invertY = true;   // 이른 시각 위 · 늦은 시각 아래
     }
     drawGraphChart(wrap, memberId, range, proxy);
     return;

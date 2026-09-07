@@ -2232,6 +2232,10 @@
   /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
   .hall-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; visibility: hidden; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만 보이되 자리는 늘 차지한다(display가 아니라 visibility — 켜고 끌 때 카드 크기가 안 바뀐다, 2026-09-02 Crenop) */
   .hall-heat-grid.show-stats .hall-heat-stats { visibility: visible; }
+  /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 요약 항목(.stats-summary-item[data-metric])과 같은 규칙·같은 값
+     (패딩 2px 6px에 같은 크기의 음수 여백으로 글자 자리는 그대로, 테두리는 평소 투명). 점선 밑줄(선례 없는 제 발명)은 철회. */
+  .hall-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .hall-heat-stats .hts-btn:hover { background: var(--surface2); border-color: var(--accent); }
   .hall-heat-stats .hl { color: #ffffff; font-weight: 700; }   /* 분포에서 가장 큰 항목과 그 숫자(시간대·주중주말 각각) — 흰색(민트는 아래 격자 색과 겹쳐 2026-09-02 Crenop이 흰색 지정) */
 
   .hall-main { min-width: 0; }
@@ -3252,7 +3256,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-06v';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-07b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7430,6 +7434,20 @@ const GRAPH_METRICS = [
   { key: 'youtube',       label: '유튜브',      unit: '개', ic: 'youtube',   icColor: 'var(--ev-youtube)', get: s => s.youtubeCount },
 ];
 const FAN_ICON = SVG_ICONS.fan;   // 실물은 SVG_ICONS.fan으로 통합(산포 정리) — 별칭 유지로 호출부 무변경
+// 시간대 통계 그래프(2026-09-07 Crenop): 통계 탭 시간대 카드의 다섯 값 → 월별 추이 모달. 같은 모달 틀(openStatGraphModal)에 그리기 함수만 다르다.
+//  · 평균 시작·종료 = 선 그래프인데 값이 시각(시계)이라 축을 0시가 아니라 '창 안 평균 시각의 정반대'에서 잘라 그린다(23:30 → 00:30이 하루 벌어져 보이지 않게).
+//    평균이 '—'인 달(방향이 상쇄됨)은 점을 비운다(선이 끊긴다).
+//  · 평균 시간 = 선 그래프(시간). 방송이 없는 달은 0이 아니라 빈 점.
+//  · 시간대 분포 = 달마다 100% 쌓은 막대(새벽·오전·오후·야간). 주중/주말도 같은 막대(하루 평균 시간의 비율 — 두 줄 통계와 같은 값. 분 합계로 비교하면 5:2 날수 탓에 늘 주중이 커서 뜻이 없다).
+//    색은 멤버색의 진하기 단계(시간 순으로 옅→진, 주중 진 · 주말 옅) — 히트맵이 민트 진하기로 양을 말하는 것과 같은 태도라 새 팔레트를 만들지 않았다.
+//  · 회차가 적은 달의 평균은 튈 수 있다 — 회차 수 표기는 하지 않는다(Crenop).
+const TIME_GRAPHS = [
+  { key: 'tStart', label: '평균 시작', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.startMin },
+  { key: 'tEnd',   label: '평균 종료', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.endMin },
+  { key: 'tAvg',   label: '평균 시간', ic: 'hourglass', icColor: 'var(--ev-start)', kind: 'line',  get: ts => ts.avgMin / 60, fmt: v => formatDuration(v * 3600000) },
+  { key: 'tBands', label: '시간대 분포', ic: 'sun',      icColor: 'var(--ev-yellow)', kind: 'stack', series: ['새벽', '오전', '오후', '야간'], alphas: [0.3, 0.5, 0.72, 1], get: ts => ts.bands },
+  { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar', icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [1, 0.5], get: ts => ts.wdwe },
+];
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
 function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
 
@@ -8171,12 +8189,14 @@ function drawGraphChart(wrap, memberId, range, metric) {
 
   const valueOf = (ym) => {
     const [y, mo] = ym.split('-').map(Number);
+    if (metric.getYm) return metric.getYm(ym);   // 시간대 그래프(2026-09-07): 달 단위 값 함수 — 없는 달은 null(빈 점)
     if (metric.special) return fancntMonthEnd(id, y, mo);   // 애청자(월말 누적), 없으면 null → 라인 끊김
     const ms = statsState.data[ym] && statsState.data[ym][id];
     if (!ms) return 0;
     return metric.get(computeMonthSummary(ms, y, mo));
   };
-  const pts = range.map(ym => valueOf(ym));
+  let pts = range.map(ym => valueOf(ym));
+  if (metric.transform) pts = metric.transform(pts);   // 시각 축(시간대 그래프) — 창 안 값을 보고 축의 원점을 정한다
   const showVal = (v) => metric.fmt ? metric.fmt(v) : (v.toLocaleString() + (metric.unit || ''));
 
   // Y축: 데이터 min~max 기준으로 살짝 여유(변화폭 강조). 최소값이 0보다 높게 잡힐 수 있음.
@@ -8237,7 +8257,8 @@ function drawGraphChart(wrap, memberId, range, metric) {
 // 그래프 좌우 ‹ ›로 한 달씩 이동(가용 경계에서 disabled).
 function openStatGraphModal(memberId, metricKey) {
   const m = MEMBER_BY_ID[memberId];
-  const metric = GRAPH_METRICS.find(g => g.key === metricKey);
+  const metric = GRAPH_METRICS.find(g => g.key === metricKey) || TIME_GRAPHS.find(g => g.key === metricKey);   // 시간대 다섯 값도 같은 틀(2026-09-07)
+  const drawFn = metric && metric.kind ? drawTimeGraph : drawGraphChart;
   if (!m || !metric) return;
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
@@ -8286,9 +8307,9 @@ function openStatGraphModal(memberId, metricKey) {
     if (pending.length) {
       chart.innerHTML = '<div class="lr-msg">불러오는 중...</div>';
       const cur = range;
-      Promise.all(pending).then(() => { if (stillOpen() && range === cur) drawGraphChart(chart, memberId, range, metric); });
+      Promise.all(pending).then(() => { if (stillOpen() && range === cur) drawFn(chart, memberId, range, metric); });
     } else {
-      drawGraphChart(chart, memberId, range, metric);
+      drawFn(chart, memberId, range, metric);
     }
   };
   btns.forEach(b => b.addEventListener('click', () => {
@@ -8299,6 +8320,64 @@ function openStatGraphModal(memberId, metricKey) {
     draw();
   }));
   draw();
+}
+
+// 시간대 통계 그래프 그리기 — 선 두 종(시각 축·시간)은 drawGraphChart에 값 함수만 바꿔 넘기고, 분포 두 종은 쌓은 막대를 직접 그린다.
+function drawTimeGraph(wrap, memberId, range, def) {
+  if (!wrap) return;
+  const m = MEMBER_BY_ID[memberId]; if (!m) { wrap.innerHTML = ''; return; }
+  const hm = v => `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`;
+  if (def.kind === 'line' || def.kind === 'clock') {
+    const proxy = { key: def.key, label: def.label, unit: '', ic: def.ic, icColor: def.icColor,
+      getYm: ym => { const ts = timeStatsOf(memberId, ym); const v = ts ? def.get(ts) : null; return v == null ? null : v; },
+      fmt: def.fmt };
+    if (def.kind === 'clock') {
+      // 축 원점 = 창 안 평균 시각의 정반대(시계 위 평균). 값은 원점에서 시계 방향으로 잰 분(0~1439) — 표기는 도로 시각으로.
+      let anchor = 0;
+      proxy.transform = pts => {
+        const valid = pts.filter(v => v != null);
+        const mean = circularMeanMinutes(valid);
+        anchor = mean == null ? 0 : (mean + 720) % 1440;
+        return pts.map(v => v == null ? null : ((v - anchor + 1440) % 1440));
+      };
+      proxy.fmt = v => hm(Math.round(v + anchor) % 1440);
+    }
+    drawGraphChart(wrap, memberId, range, proxy);
+    return;
+  }
+  // 쌓은 100% 막대 — 달마다 한 막대, 구획은 시간 순(아래→위). 값 라벨은 구획이 14px 이상일 때만 안에 쓴다. 범례는 위 한 줄.
+  const color = m.color;
+  const rgba = a => { const c = hexToRgb(color); return `rgba(${c},${a})`; };
+  const pts = range.map(ym => { const ts = timeStatsOf(memberId, ym); return ts ? def.get(ts) : null; });
+  const W = wrap.clientWidth || (window.innerWidth <= 900 ? 380 : 720);
+  const narrow = W < 500;
+  const H = narrow ? 300 : 380;
+  const padL = narrow ? 16 : 32, padR = narrow ? 16 : 32, padT = 34, padB = 36;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const slot = plotW / range.length, barW = Math.min(44, slot * 0.6);
+  const spansYears = range[0].slice(0, 4) !== range[range.length - 1].slice(0, 4);
+  let bars = '', xlab = '';
+  range.forEach((ym, i) => {
+    const [y, mo] = ym.split('-').map(Number);
+    const x = padL + slot * i + (slot - barW) / 2;
+    const withYear = spansYears && (mo === 1 || i === 0);
+    xlab += `<text x="${(x + barW / 2).toFixed(1)}" y="${H - padB + 22}" class="g-xlabel">${withYear ? `'${String(y).slice(2)} ` : ''}${mo}월</text>`;
+    const v = pts[i];
+    if (!v) { bars += `<rect x="${x.toFixed(1)}" y="${padT}" width="${barW.toFixed(1)}" height="${plotH}" fill="rgba(255,255,255,0.04)"/>`; return; }   // 방송 없는 달 = 빈 틀
+    let top = padT + plotH;
+    v.forEach((pct, k) => {
+      const h = plotH * pct / 100; top -= h;
+      bars += `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${rgba(def.alphas[k])}"/>`;
+      if (h >= 14 && pct > 0) bars += `<text x="${(x + barW / 2).toFixed(1)}" y="${(top + h / 2 + 4).toFixed(1)}" text-anchor="middle" class="g-vlabel" fill="#ffffff">${pct}</text>`;
+    });
+  });
+  let legend = ''; let lx = padL;
+  def.series.forEach((name, k) => {
+    legend += `<rect x="${lx}" y="10" width="10" height="10" fill="${rgba(def.alphas[k])}"/><text x="${lx + 14}" y="19" class="g-xlabel" text-anchor="start">${name}</text>`;
+    lx += 14 + name.length * 13 + 14;
+  });
+  const grid = [0, 25, 50, 75, 100].map(p => { const yy = padT + plotH * (1 - p / 100); return `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W - padR}" y2="${yy.toFixed(1)}" class="g-grid"/>`; }).join('');
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="graph-svg" preserveAspectRatio="xMidYMid meet">${legend}${grid}${bars}${xlab}</svg>`;
 }
 
 // 축 눈금 간격을 보기 좋은 값(1·2·2.5·5·10 ×10ⁿ)으로
@@ -8605,10 +8684,22 @@ function computeMonthTimeStats(sum, grid, year, month1, isCurrentMonth) {
   const b = pctRound(bands), w = pctRound([wdDays ? wd / wdDays : 0, weDays ? we / weDays : 0]);
   // '이름 숫자%'를 항목마다 붙여 쓴다(2026-09-02 Crenop — 구 '이름/이름 숫자/숫자%' 묶음 표기 철회). 가장 큰 항목은 이름·숫자에 색(같은 값이면 둘 다).
   const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
+  const startMin = circularMeanMinutes(starts), endMin = circularMeanMinutes(ends);
+  // 값마다 버튼(2026-09-07 Crenop): 누르면 그 값의 월별 추이 그래프 모달(지표 카드 행과 같은 문법). 숫자 필드는 그래프가 쓴다.
+  const btn = (key, html) => `<button class="hts-btn" type="button" data-tkey="${key}">${html}</button>`;
   return {
-    line1: `평균 시작 ${hm(circularMeanMinutes(starts))} · 평균 종료 ${hm(circularMeanMinutes(ends))} · 평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`,
-    line2: `${hl(['새벽', '오전', '오후', '야간'], b)} · ${hl(['주중', '주말'], w)}`,
+    line1: `${btn('tStart', `평균 시작 ${hm(startMin)}`)} · ${btn('tEnd', `평균 종료 ${hm(endMin)}`)} · ${btn('tAvg', `평균 시간 ${Math.floor(avgMin / 60)}시간 ${avgMin % 60}분`)}`,
+    line2: `${btn('tBands', hl(['새벽', '오전', '오후', '야간'], b))} · ${btn('tWdWe', hl(['주중', '주말'], w))}`,
+    startMin, endMin, avgMin, bands: b, wdwe: w, n,
   };
+}
+// 한 멤버 × 한 달의 시간대 통계(그래프 재료) — 그 달 통계가 없거나 방송이 없으면 null
+function timeStatsOf(memberId, ym) {
+  const ms = statsState.data[ym] && statsState.data[ym][memberId];
+  if (!ms) return null;
+  const [y, mo] = ym.split('-').map(Number);
+  const sum = computeMonthSummary(ms, y, mo), isCur = isCurrentMonth(ym);
+  return computeMonthTimeStats(sum, computeTimeOfDayMinutes(sum.sessionsByDate, y, mo, isCur), y, mo, isCur);
 }
 function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
   const grid = computeTimeOfDayMinutes(sum.sessionsByDate, year, month1, isCurrentMonth);
@@ -10048,6 +10139,9 @@ function renderHallStats() {
       return h ? `<div class="hall-heat-cell" data-member="${m.id}"><div class="hall-heat-name"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span style="color:${m.color}">${escapeHtml(m.name)}</span>${stats}</div>${h}</div>` : '';
     }).filter(Boolean).join('');
     heat.innerHTML = cells ? `<div class="hall-heat-grid${heatShowStats ? ' show-stats' : ''}">${cells}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
+    heat.querySelectorAll('.hts-btn[data-tkey]').forEach(b => b.addEventListener('click', () => {   // 다섯 값 → 월별 추이 모달(2026-09-07)
+      const cell = b.closest('.hall-heat-cell'); if (cell) openStatGraphModal(cell.dataset.member, b.dataset.tkey);
+    }));
   }
   applyFavMark(document.getElementById('page-hall'));   // 지표 카드(data-member)·시간대 칸 — 최애 자리 표시 + 첫 진입 스크롤
 }

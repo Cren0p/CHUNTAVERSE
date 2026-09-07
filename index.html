@@ -3258,7 +3258,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-07e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-07f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5915,7 +5915,7 @@ function ensureCalMonth() {
   if (!statsState.data[ym] && !statsState.loadingMonths.has(ym) && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {
     loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) { calStatsFailAt[ym] = Date.now(); calLoadingSettle(); return; } queueCalRender(); });
   }
-  if (calState.type === 'vod') ensureVodMonth(calMember().id, ym);   // 유튜브 종류는 월 통계에 업로드 목록이 들어 있어 따로 받을 것이 없다
+  if (calState.type === 'vod' && monthNeedsVodList(calMember().id, ym)) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
 }
 // 자료 도착에 따른 재렌더를 한 프레임에 한 번으로 합친다(2026-09-02) — 통계와 다시보기 목록이 잇따라 도착해도 한 번만 그린다
 // (깜빡임 + 그 사이 클릭 유실 방지). 썸네일 탭이 아니면 그리지 않는다(다음 진입 때 그린다).
@@ -5954,7 +5954,7 @@ function calItemsByDate() {
       for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
         const seen = seenVod[dk] || (seenVod[dk] = new Set());
         for (const s of sessions) {
-          const parts = vodsForBroad(m.id, ym, s.broad_no);   // null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
+          const parts = sessionVods(s) ?? vodsForBroad(m.id, ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07) · null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
           if (parts === null) {
             if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(세션 70)
               day(dk).vodPending = true;
@@ -6126,6 +6126,9 @@ function contentPickInfo(c) {
 function prevYmOf(ym) { const [y, m] = ym.split('-').map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`; }
 // 불러온 다시보기 목록 전부(멤버·달 안 가림)에서 영상 번호로 찾는다 — { m: 멤버, v: 항목 } 또는 null
 function findLoadedVod(titleNo) {
+  for (const monthData of Object.values(statsState.data || {})) for (const m of MEMBERS) {   // 세션 스냅샷 먼저(2026-09-07)
+    for (const s of ((monthData[m.id] || {}).sessions || [])) { const v = (sessionVods(s) || []).find(x => String(x.title_no) === String(titleNo)); if (v) return { m, v }; }
+  }
   for (const [key, list] of Object.entries(vodState.data || {})) {
     const v = (list || []).find(x => String(x.title_no) === String(titleNo));
     if (v) { const m = MEMBER_BY_ID[key.split('|')[0]]; if (m) return { m, v }; }
@@ -6147,7 +6150,7 @@ function pickVodTiles(pick) {
     const sessions = computeMonthSummary(monthData[id], y, mo).sessionsByDate[pick.ymd] || [];
     const seen = new Set();
     for (const s of sessions) {
-      const parts = vodsForBroad(id, pick.ym, s.broad_no);
+      const parts = sessionVods(s) ?? vodsForBroad(id, pick.ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07)
       if (parts === null) { if (!vodState.data[vodKey(id, pick.ym)]) pending = true; continue; }
       for (const v of parts) {
         if (seen.has(v.title_no)) continue;
@@ -6220,7 +6223,7 @@ function openLinkPickModal(links, title, pick) {
   const unresolved = (pick.include || []).some(it => !findLoadedVod(it.no));
   if (paint(false) || (unresolved && pick.ym)) {
     if (pick.ym && !statsState.data[pick.ym] && !statsState.loadingMonths.has(pick.ym)) loadStatsMonth(pick.ym);
-    pick.members.forEach(id => ensureVodMonth(id, pick.ym));
+    pick.members.forEach(id => { if (monthNeedsVodList(id, pick.ym)) ensureVodMonth(id, pick.ym); });   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07)
     if (unresolved && pick.ym) pick.members.forEach(id => ensureVodMonth(id, prevYmOf(pick.ym)));
     let n = 0;
     const iv = setInterval(() => {
@@ -7676,6 +7679,18 @@ function vodFailed(key) {
   vodState.fails[key] = (vodState.fails[key] || 0) + 1;
   if (vodState.fails[key] === VOD_FAIL_LIMIT && currentPage === 'thumbs') queueCalRender();
 }
+// 세션에 저장된 다시보기(워커 2026-09-07 '감지 때 저장' — session.vods: { no, part, title, thumb, dur, auth, grade, reg, manual?, gone? })를
+// 목록 항목 꼴(title_no·thumb·duration_ms·auth_no·grade)로. gone(목록에서 사라짐)은 뺀다. 없으면(개편 전 세션·포착 대기 중) null → 종전 /vods 폴백.
+function sessionVods(s) {
+  if (!s || !Array.isArray(s.vods)) return null;
+  return s.vods.filter(v => !v.gone).map(v => ({ title_no: v.no, part: v.part, title: v.title || (v.manual ? '다시보기' : ''), thumb: v.thumb || '', duration_ms: v.dur || 0, auth_no: v.auth ?? null, grade: v.grade || 0, manual: !!v.manual }));
+}
+// 그 달의 종료 방송 중 세션 스냅샷이 없는 것이 있나 — 있으면 /vods 폴백 목록이 필요하다(통계가 아직 없으면 판단 보류 = false)
+function monthNeedsVodList(memberId, ym) {
+  const ms = statsState.data[ym] && statsState.data[ym][memberId];
+  if (!ms) return false;
+  return (ms.sessions || []).some(s => s.end && s.broad_no && !Array.isArray(s.vods));
+}
 function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad_no 결측(판단 불가 — 슬롯 생략) / []=이 방송의 VOD 없음
   if (!broadNo) return null;
   const list = vodState.data[vodKey(memberId, ym)];
@@ -7802,7 +7817,8 @@ document.getElementById('statsBody')?.addEventListener('click', (e) => {
   const b = e.target.closest('button.day-session[data-vodpick]');
   if (!b) return;
   const memberId = statsState.selectedTab;
-  openVodPickModal(vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || [], `https://www.sooplive.com/station/${memberId}/vod`);
+  const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(s => String(s.broad_no) === b.dataset.vodpick);
+  openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);   // 세션 스냅샷 우선(2026-09-07)
 });
 function renderStatsBody() {
   const body = document.getElementById('statsBody');
@@ -8056,7 +8072,7 @@ function renderStatsMember(body, memberId) {
   const { year, month } = statsState.viewMonth;
   const ms = getMemberStatsForView(memberId);
   const sum = computeMonthSummary(ms, year, month);
-  ensureVodMonth(memberId, `${year}-${String(month).padStart(2, '0')}`);   // 종료 방송 행의 링크 목적지(다시보기 직결)용 — 도착하면 재렌더
+  if (monthNeedsVodList(memberId, `${year}-${String(month).padStart(2, '0')}`)) ensureVodMonth(memberId, `${year}-${String(month).padStart(2, '0')}`);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07) — 종료 방송 행의 링크 목적지용, 도착하면 재렌더
   const now = kstNow();
   const isCurrentMonth = (year === now.getUTCFullYear() && month === now.getUTCMonth() + 1);
   // 시간대 분포는 통계 탭으로 이관(2026-08-31) — 여기선 안 그린다
@@ -8534,7 +8550,7 @@ function renderDayDetail(year, month1, sum, memberId) {
         html += `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`;
       } else if (memberId) {
         const listUrl = `https://www.sooplive.com/station/${memberId}/vod`;
-        const parts = vodsForBroad(memberId, `${year}-${String(month1).padStart(2, '0')}`, s.broad_no);
+        const parts = sessionVods(s) ?? vodsForBroad(memberId, `${year}-${String(month1).padStart(2, '0')}`, s.broad_no);   // 세션 스냅샷 우선(2026-09-07)
         if (parts && parts.length === 1) html += `<a class="day-session" href="${vodPlayerUrl(parts[0])}" target="_blank" rel="noopener">${sessionInner}</a>`;
         else if (parts) html += `<button class="day-session" type="button" data-vodpick="${escapeHtml(String(s.broad_no))}" data-vodym="${year}-${String(month1).padStart(2, '0')}">${sessionInner}</button>`;   // 2개↑·0개 → 모달(눌렀을 때 목록으로 다시 푼다)
         else html += `<a class="day-session" href="${listUrl}" target="_blank" rel="noopener">${sessionInner}</a>`;

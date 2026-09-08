@@ -819,6 +819,7 @@
     font-size: 30px; color: var(--accent);
     font-variant-numeric: tabular-nums;   /* 초가 흘러도 글자 폭이 안 흔들리게 */
   }
+  .blackout-sub { display: block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }   /* 최소·평균·최대 정전 시간(2026-09-08) — 타이머보다 작은 부가 정보 */
   @container (min-width: 1500px) { .grid { grid-template-columns: repeat(5, 1fr); } }   /* 13인 홈 역할: 넓은 화면에서 전원 한눈에(5+5+3) — 2026-08-02 확정 */
   @container (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   @container (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
@@ -3258,7 +3259,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-08a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-08b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4078,6 +4079,8 @@ let lastLiveUpdate = null;
 // 선언이 그 아래 있으면 첫 로드가 ReferenceError로 통째로 죽는다(이미지 프리로드 상수와 같은 사유).
 let blackoutDismissed = false;
 let lastLiveCount = null;   // 직전 폴링의 방송 중 인원 — 탭 재진입 때 재조회 없이 정전 판정에 재사용
+let blackoutStats = null;   // { n, min_ms, avg_ms, max_ms } — 완료된 정전 구간 통계(진행 중 제외). 월 통계(첫 달~현재, 13명)에서 계산(computeBlackoutStats)
+let blackoutStatsFor = '';  // 계산에 쓴 자료 표식(달 수·세션 수) — 같으면 다시 계산하지 않는다
 let lastServerDetect = null;   // 서버 감지 심장박동(/ 응답 last_detect_at) — 클라이언트 fetch 시각과 별개(worker가 응답해도 감지 계층이 죽어 있을 수 있음)
 const DETECT_STALE_MS = 5 * 60 * 1000;   // 정상 겉보기 나이 최대 ~3분(감지 10s + Cron 폴백 60s + KV 콜로캐시·전파 ≤120s) 위 마진
 let lastEventsUpdate = null;
@@ -8991,6 +8994,46 @@ function tickBlackout() {
   if (!el) return;
   const t = lastEndTime();
   if (t !== null) el.textContent = formatBlackout(Date.now() - t);
+  const ov = document.getElementById('blackoutOverlay');   // 달이 늦게 도착했으면 부가 정보를 그때 채운다(초마다 확인 — 자료가 같으면 계산 생략)
+  if (ov && !ov.querySelector('.blackout-sub')) { const html = blackoutSubHtml(); if (html) ov.querySelector('.blackout-msg').insertAdjacentHTML('beforeend', html); }
+}
+// 정전 통계(2026-09-08 Crenop): 정전 = 크루 전원 오프라인 구간 = 13명 세션 구간 합집합의 틈. 명전의 정전 중단·방지 위원회와 같은 재료(월 통계 전 달)·
+// 같은 합치기(mergeIntervals). 진행 중 방송은 끝을 지금으로, 마지막 틈(지금 진행 중인 정전)은 뺀다. 문턱 없이 모든 틈을 센다(한 사람이 끄고 다른 사람이 켜기까지의 몇 초도 정전).
+// 달이 아직 안 와 있으면 명전과 같은 로더(loadStatsMonth)로 받고, 도착하면 오버레이가 다음 폴링·틱에 채운다 — 첫 번만 요청, 그 뒤는 브라우저 저장본.
+function computeBlackoutStats() {
+  const now = kstNow(); const nowMs = Date.now();
+  const months = [];
+  for (let y = STATS_START_YEAR; y <= now.getUTCFullYear(); y++) {
+    const maxMo = (y === now.getUTCFullYear()) ? now.getUTCMonth() + 1 : 12, minMo = (y === STATS_START_YEAR) ? STATS_START_MONTH : 1;
+    for (let mo = minMo; mo <= maxMo; mo++) months.push(`${y}-${String(mo).padStart(2, '0')}`);
+  }
+  const missing = months.filter(ym => !statsState.data[ym]);
+  if (missing.length) { missing.filter(ym => !statsState.loadingMonths.has(ym)).forEach(ym => loadStatsMonth(ym)); return null; }
+  const list = [];
+  for (const ym of months) for (const m of MEMBERS) for (const s of (((statsState.data[ym] || {})[m.id] || {}).sessions || [])) {
+    const a = new Date(s.start).getTime(), b = s.end ? new Date(s.end).getTime() : nowMs;
+    if (!isNaN(a) && !isNaN(b) && b > a) list.push({ s: a, e: b });
+  }
+  const sig = months.length + ':' + list.length;
+  if (sig === blackoutStatsFor && blackoutStats) return blackoutStats;
+  const merged = mergeIntervals(list);
+  const gaps = [];
+  for (let i = 1; i < merged.length; i++) gaps.push(merged[i].s - merged[i - 1].e);   // 마지막 합집합 뒤(지금 진행 중인 정전)는 안 센다
+  blackoutStatsFor = sig;
+  blackoutStats = gaps.length ? { n: gaps.length, min_ms: Math.min(...gaps), max_ms: Math.max(...gaps), avg_ms: Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) } : { n: 0 };
+  return blackoutStats;
+}
+// 타이머 아래 부가 정보(2026-09-08 Crenop): 최소 · 평균 · 최대 정전 시간 — 완료된 정전만, 초는 버리고 일·시간·분(타이머보다 작은 글자)
+function formatSpanCoarse(ms) {
+  let min = Math.round(ms / 60000);
+  const d = Math.floor(min / 1440); min -= d * 1440;
+  const h = Math.floor(min / 60); min -= h * 60;
+  return d > 0 ? `${d}일 ${h}시간` : h > 0 ? `${h}시간 ${min}분` : `${min}분`;
+}
+function blackoutSubHtml() {
+  const b = computeBlackoutStats();
+  if (!b || !b.n) return '';
+  return `<span class="blackout-sub">최소 ${formatSpanCoarse(b.min_ms)} · 평균 ${formatSpanCoarse(b.avg_ms)} · 최대 ${formatSpanCoarse(b.max_ms)}</span>`;
 }
 // 현재 상태에 맞춰 오버레이를 붙이거나 뗀다. loadFeed 렌더 직후와 생방송 탭 진입 때 호출.
 function applyBlackout() {
@@ -9005,11 +9048,11 @@ function applyBlackout() {
     return;
   }
   grid.classList.add('blackout');
-  if (existing) { tickBlackout(); return; }   // 이미 떠 있으면 숫자만 갱신
+  if (existing) { tickBlackout(); const sub = existing.querySelector('.blackout-sub'); const html = blackoutSubHtml(); if ((sub ? sub.outerHTML : '') !== html) { if (sub) sub.remove(); if (html) existing.querySelector('.blackout-msg').insertAdjacentHTML('beforeend', html); } return; }   // 이미 떠 있으면 숫자만 갱신(부가 정보는 바뀌었을 때만)
   const ov = document.createElement('div');
   ov.className = 'blackout-overlay';
   ov.id = 'blackoutOverlay';
-  ov.innerHTML = `<div class="blackout-msg">천타버스 정전된지<span class="blackout-time" id="blackoutTime">${formatBlackout(Date.now() - t)}</span></div>`;
+  ov.innerHTML = `<div class="blackout-msg">천타버스 정전된지<span class="blackout-time" id="blackoutTime">${formatBlackout(Date.now() - t)}</span>${blackoutSubHtml()}</div>`;
   ov.addEventListener('click', () => {
     blackoutDismissed = true;
     ov.remove();

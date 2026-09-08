@@ -3261,7 +3261,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-08d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-08e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6148,7 +6148,7 @@ function findLoadedVod(titleNo) {
 }
 function pickVodTiles(pick) {
   const monthData = pick.ym ? statsState.data[pick.ym] : null;
-  if (pick.ym && !monthData) return { html: '', pending: true };
+  if (pick.ym && !monthData) return { html: '', pending: true, hrefs: [] };
   const [y, mo] = pick.ym ? pick.ym.split('-').map(Number) : [0, 0];
   const mi = id => { const k = MEMBERS.findIndex(x => x.id === id); return k < 0 ? 999 : k; };
   const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
@@ -6168,7 +6168,7 @@ function pickVodTiles(pick) {
         seen.add(v.title_no);
         if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것('-' 표시)
         shown.add(String(v.title_no));
-        items.push({ mi: mi(id), k: items.length, html: `<div class="cal-vod">${whoLine(m)}${vodTileHtml(v)}</div>` });
+        items.push({ mi: mi(id), k: items.length, href: vodPlayerUrl(v), html: `<div class="cal-vod">${whoLine(m)}${vodTileHtml(v)}</div>` });
       }
     }
   }
@@ -6176,16 +6176,16 @@ function pickVodTiles(pick) {
     if (shown.has(String(it.no))) return;
     shown.add(String(it.no));
     const hit = findLoadedVod(it.no);   // ① 불러온 목록 어디든
-    if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, html: `<div class="cal-vod">${whoLine(hit.m)}${vodTileHtml(hit.v)}</div>` }); return; }
+    if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, href: vodPlayerUrl(hit.v), html: `<div class="cal-vod">${whoLine(hit.m)}${vodTileHtml(hit.v)}</div>` }); return; }
     if (pick.ym && members.some(id => vodState.loading.has(vodKey(id, prevYmOf(pick.ym))))) pending = true;   // 전달 목록이 오는 중이면 기다린다
     const words = String(it.title || '').trim().split(/\s+/);
     const named = MEMBERS.find(x => x.name === words[0]);   // ② 제목 첫 낱말 = 멤버 이름
     const label = named ? (words.slice(1).join(' ') || '다시보기') : (it.title || `다시보기 ${i + 1}`);
     // 목록 밖(19금·구독+ 등)은 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
-    items.push({ mi: named ? mi(named.id) : 999, k: items.length, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
+    items.push({ mi: named ? mi(named.id) : 999, k: items.length, href: it.url, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
   });
   items.sort((a, b) => a.mi - b.mi || a.k - b.k);
-  return { html: items.map(x => x.html).join(''), pending };
+  return { html: items.map(x => x.html).join(''), pending, hrefs: items.map(x => x.href) };   // hrefs: 카드가 '전부 하나뿐'을 판정할 때 쓴다(2026-09-08)
 }
 let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
 // 숲 게시글 주소(sooplive.com/station/아이디/post/번호) — 일정 행이 예고 글을 C열에 달아 두는 꼴(2026-09-06 Crenop). 번호만 돌려준다.
@@ -6227,9 +6227,10 @@ function openLinkPickModal(links, title, pick) {
   const token = ++linkPickToken;
   const paint = (gaveUp) => {
     const r = pickVodTiles(pick);
+    // 관련 다시보기가 없으면(시트가 뺐거나 애초에 없거나) 구획을 아예 안 그린다(2026-09-08 Crenop: '그날 다시보기가 없습니다'는 뜻이 어긋난다 — 그날 것이 있어도 관련 없는 건 시트로 뺀 것)
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
-      : `<div class="vod-pick-empty">${r.pending ? (gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중') : '그날 다시보기가 없습니다.'}</div>`;
-    body.innerHTML = tiles + `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody;
+      : r.pending ? `<div class="vod-pick-empty">${gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중'}</div>` : '';
+    body.innerHTML = tiles + (vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '') || '<div class="vod-pick-empty">링크가 없습니다.</div>';
     return r.pending;
   };
   // 시트 포함 중 불러온 목록에 없는 번호가 있으면 참여자들의 전달 목록도 받는다(월경 밤 방송 — 컨텐츠 날짜와 방송 시작일의 달이 다르다)
@@ -6248,7 +6249,16 @@ function openLinkPickModal(links, title, pick) {
   }
   showModal();
 }
-// 링크가 둘 이상인 카드(data-links)를 누르면 고르기 모달 — 컨텐츠 탭·컨텐츠 모아보기 모달 공용 배선(그린 뒤 한 번 부른다)
+// 카드들이 참조하는 달의 월 통계를 미리 받는다(2026-09-08): 카드 갈래(직행/모달)를 그릴 때 알려면 그 달의 세션 스냅샷이 있어야 한다. 없는 달만 받고,
+// 지난달은 브라우저 저장본이라 두 번째부턴 요청이 없다. 다 오면 onDone(다시 그리기). 받을 게 없으면 아무 일도 안 한다.
+function prefetchCardMonths(items, onDone) {
+  const yms = new Set();
+  for (const c of items) { const pk = contentPickInfo(c); if (pk && pk.ym) yms.add(pk.ym); }
+  const missing = [...yms].filter(ym => !statsState.data[ym] && !statsState.loadingMonths.has(ym));
+  if (!missing.length) return;
+  Promise.all(missing.map(ym => loadStatsMonth(ym))).then(() => { if (missing.some(ym => statsState.data[ym])) onDone(); });
+}
+// 둘 이상인 카드(data-links)를 누르면 고르기 모달 — 컨텐츠 탭·현수막 탭·컨텐츠 모아보기 모달 공용 배선(그린 뒤 한 번 부른다)
 function bindLinkPicks(root) {
   if (!root) return;
   root.querySelectorAll('[data-links]').forEach(el => el.addEventListener('click', () => {
@@ -9476,8 +9486,9 @@ function renderBanners() {
   _bannerRenderSig = sig;
 
   // 카드·그리드는 컨텐츠 탭과 공용(2026-08-24 통일 — 디자인 준용 지시). 전용 CSS(.banner-*)는 제거.
-  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c, true, true)).join('')}</div>`;   // 2026-09-08: 누르면 모달(게시글 · 유튜브 · 참여 멤버의 B열 날짜 다시보기)
+  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c, true)).join('')}</div>`;   // 2026-09-08: 컨텐츠 카드와 같은 갈래(하나면 직행 · 둘 이상 모달 — 게시글·유튜브·B열 날짜의 다시보기)
   bindLinkPicks(body);
+  prefetchCardMonths(bannerData, () => { _bannerRenderSig = null; if (currentPage === 'banner') renderBanners(); });
 }
 
 function membersRowStyle(count) {
@@ -9608,9 +9619,8 @@ async function loadContent() {
 }
 
 // 컨텐츠 카드 1장 마크업 — 컨텐츠 탭·현수막 탭·모아보기 모달 공용. 제목 말줄임 hover는 전수 위임(ELLIPSIS_TIP_SEL) 소관.
-function contentCardHtml(c, withVods, forceModal) {
+function contentCardHtml(c, withVods) {
   withVods = withVods === true;   // 배열 map(contentCardHtml)이 둘째 인자로 색인을 넘긴다 — 현수막 탭에서 둘째 카드부터 참이 되어 모달 버튼이 됐다(2026-09-06 실사고). 명시적 true만 인정
-  forceModal = forceModal === true;   // 현수막 탭(2026-09-08 Crenop): 링크가 하나여도 누르면 모달 — 게시글·다시보기를 한 자리에서 고른다
   // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
   // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
   const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
@@ -9632,9 +9642,14 @@ function contentCardHtml(c, withVods, forceModal) {
   const pick = withVods ? (contentPickInfo(c) || (include.length ? { ymd: '', ym: '', members: [] } : null)) : null;   // 참여자·날짜가 없어도 수동 포함이 있으면 모달
   if (pick && exclude.length) pick.exclude = exclude;
   if (pick && include.length) pick.include = include;
-  const useModal = manual.length >= 2 || !!pick || (forceModal && manual.length > 0);
+  // 카드의 갈래(2026-09-08 Crenop): 수동 링크 + 관련 다시보기를 합쳐 하나뿐이면 그리로 직행, 없으면 그냥 상자, 둘 이상이면 모달.
+  // 다시보기 수는 월 통계가 있어야 아니 탭이 그려진 뒤 필요한 달을 미리 받아(prefetchCardMonths) 다시 그린다 — 그 사이엔 모달(누르면 거기서 이어 받는다).
+  const auto = pick ? pickVodTiles(pick) : null;
+  const settled = !auto || !auto.pending;   // 다시보기 수를 아는가(월 통계·목록이 다 왔는가)
+  const total = manual.length + (auto ? auto.hrefs.length : 0);
+  const useModal = !settled || total >= 2;
   const multi = useModal ? escapeHtml(JSON.stringify(manual)) : '';
-  const single = !useModal && manual.length === 1 ? manual[0].url : '';
+  const single = !useModal && total === 1 ? (manual.length ? manual[0].url : auto.hrefs[0]) : '';
   const cardTag = useModal ? 'button' : (single ? 'a' : 'div');
   const cardAttrs = useModal ? ` type="button" data-links="${multi}" data-ltitle="${escapeHtml(c.title || '')}"${pick ? ` data-pick="${escapeHtml(JSON.stringify(pick))}"` : ''}` : (single ? ` href="${escapeHtml(single)}" target="_blank" rel="noopener"` : '');
   return `
@@ -9686,7 +9701,8 @@ function renderContent() {
     return;
   }
   body.innerHTML = `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`;
-  bindLinkPicks(body);   // 링크 둘 이상이거나 참여 멤버가 있는 카드 → 고르기 모달(수동 링크 + 그날 다시보기)
+  bindLinkPicks(body);   // 둘 이상인 카드 → 고르기 모달(수동 링크 + 관련 다시보기)
+  prefetchCardMonths(items, () => { if (currentPage === 'content') renderContent(); });
 }
 // 컨텐츠 탭 진입 시 컨텐츠 시트를 새로 받는다(일정 시트는 2026-09-06부터 이 탭과 무관). 10초 안에 요청한 것이면 건너뛴다 —
 // 부팅 직후 #content 진입(부팅이 방금 요청함)이나 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 로더가 카드 격자를 다시 그린다.

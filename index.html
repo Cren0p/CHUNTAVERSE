@@ -3258,7 +3258,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-07g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-08a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9352,13 +9352,14 @@ function parseBannerDate(url) {
   return { sort: fullMatch ? fullMatch[1] : s, display: koDate(2000 + yy, parseInt(mm), parseInt(dd)) };
 }
 
-// 현수막 행 파서(2026-08-24 C열 제목 신설): A=이미지 B=링크 C=제목 D~=멤버(구 C~). 시트에 C열을 먼저 삽입한 뒤 이 코드를 배포할 것 — 역순이면 첫 멤버가 제목 자리에 뜬다.
+// 현수막 행 파서(2026-09-08 D열 종류 신설): A=이미지 B=링크 C=제목 D=종류(컨텐츠 시트 F열과 같은 문법 — 쉼표·|·/ 다중, 별칭표로 그림) E~=멤버(구 D~).
+//   시트에 D열을 먼저 삽입한 뒤 이 코드를 배포할 것 — 역순이면 첫 멤버가 종류 자리에 들어간다(2026-08-24 C열 신설 때와 같은 순서 규칙).
 // 멤버는 크루 순 정렬 — 렌더 코드는 컨텐츠 탭과 문자 단위 동일하므로 두 탭의 순서 차이는 시트 입력 순서에서 왔다(컨텐츠 시트는 멤버 고정 열, 현수막은 자유 나열). 정렬로 배치 통일.
 function parseBannerRows(rows) {
   const ord = new Map(MEMBERS.map((m, i) => [m.name, i]));
   return rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-    const members = r.slice(3).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
-    return { url: r[0], link: (r[1] || '').trim(), title: (r[2] || '').trim(), members, date: parseBannerDate(r[0]) };
+    const members = r.slice(4).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
+    return { url: r[0], link: (r[1] || '').trim(), title: (r[2] || '').trim(), tags: parseTags(r[3]), members, date: parseBannerDate(r[0]) };   // tags: 카드 제목 앞 종류 그림(contentCardHtml이 컨텐츠 카드와 같이 그린다)
   });
 }
 // 현수막·컨텐츠 시트는 첫 화면에 쓰이지 않는다 — 재방문자는 부팅에서 캐시만 되살리고(요청 0), 이 데이터를

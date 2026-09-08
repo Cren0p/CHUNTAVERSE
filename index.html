@@ -1493,6 +1493,8 @@
   .vod-pick-sec svg { width: 14px; height: 14px; display: block; flex: none; }
   .vod-pick-sec[data-kind="youtube"] svg { color: var(--ev-youtube); }
   .vod-pick-sec[data-kind="post"] svg { color: var(--ev-post); }   /* 숲 게시글 — 최근 활동의 글 색 */
+  .lp-rows { display: flex; flex-direction: column; gap: 6px; }   /* 게시글·링크 행 묶음(2026-09-08) — 행 부품은 지난 활동의 .day-item 그대로 */
+  .lp-rows .day-kind-icon.link { color: var(--muted); }
   .vod-pick-sec[data-kind="vod"] svg { color: var(--ev-start); }
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
@@ -3259,7 +3261,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-08b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-08d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5154,6 +5156,11 @@ let schedulePreload = null;
 
 // 종류 태그 칸(컨텐츠·일정 시트 F열) — 쉼표·|·/ 다중(케미 시트 종류 칸과 같은 구분자 관례). 빈 칸이면 [].
 function parseTags(cell) { return String(cell || '').split(/[,|/]/).map(t => t.trim()).filter(Boolean); }
+// 링크 칸(컨텐츠 시트 C열 · 현수막 시트 C열 공용, 2026-09-08): 항목 = 주소 또는 '주소 제목', 줄바꿈·쉼표로 나눔.
+// 숲 다시보기 주소는 수동 포함, 앞에 '-'를 붙이면 자동 목록에서 제외(2026-09-06). 그 밖의 주소(유튜브·게시글·카페)는 수동 링크.
+function parseLinkCell(cell) {
+  return String(cell || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^-?https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
+}
 function parseScheduleRows(rows) {
   const out = [];
   for (const r of rows) {
@@ -6113,8 +6120,9 @@ function soopVodTitleNo(u) { const m = String(u || '').match(/vod\.sooplive\.(?:
 // 컨텐츠 카드의 다시보기 재료: 날짜(YYYY-MM-DD·YYYY-MM)와 참여 멤버 id(G~ 이름을 사이트 멤버로 — 미등록 이름은 뺀다). 날짜나 멤버가 없으면 null.
 // exclude(있으면) = C열로 알려 준 제외 영상 번호들.
 function contentPickInfo(c) {
-  if (!c.date || !c.date.sort) return null;
-  const ymd = ymdOf(c.date);
+  const d = c.vodDate || c.date;   // 현수막은 B열의 다시보기 기준일(2026-09-08), 컨텐츠는 행의 날짜
+  if (!d || !d.sort) return null;
+  const ymd = ymdOf(d);
   const members = (c.members || []).map(n => { const m = MEMBERS.find(x => x.name === String(n).trim()); return m ? m.id : ''; }).filter(Boolean);
   // 달 키는 첫 달 규칙을 따른다(2026-09-06 Crenop 발견): 결성일 2025-11-30은 '2025-12'에 속한다(dayInStatsMonth와 같은 경계) —
   // 종전엔 날짜의 앞 일곱 자리('2025-11')를 그대로 써서 워커가 '없는 달'로 거절했고 합격자 발표 날의 다시보기가 안 잡혔다.
@@ -6206,11 +6214,13 @@ function openLinkPickModal(links, title, pick) {
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
     const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
     const who = found ? `<span class="cal-vod-who"><img src="${found.m.img}" alt="">${escapeHtml(found.m.name)}</span>` : '';
-    groups[id ? 'youtube' : postNo ? 'post' : 'link'].push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>`
+    if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
+    else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${found ? `<span class="day-item-time">${escapeHtml(found.m.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
   });
   const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'] };
-  const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div><div class="ds-vods">${groups[k].join('')}</div>` : '';
+  // 게시글·링크는 영상이 아니라 썸네일 틀이 뜻이 없다(2026-09-08 Crenop) — 지난 활동의 글 행(.day-item: 종류 그림 + 제목, 행 전체가 링크)으로. 영상(유튜브·다시보기)만 타일
+  const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div>` + (k === 'youtube' ? `<div class="ds-vods">${groups[k].join('')}</div>` : `<div class="lp-rows">${groups[k].join('')}</div>`) : '';
   const tiles = secHtml('youtube') + secHtml('post') + secHtml('link');
   if (!pick) { body.innerHTML = tiles || '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
   // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
@@ -9023,7 +9033,7 @@ function computeBlackoutStats() {
   blackoutStats = gaps.length ? { n: gaps.length, min_ms: Math.min(...gaps), max_ms: Math.max(...gaps), avg_ms: Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) } : { n: 0 };
   return blackoutStats;
 }
-// 타이머 아래 부가 정보(2026-09-08 Crenop): 최소 · 평균 · 최대 정전 시간 — 완료된 정전만, 초는 버리고 일·시간·분(타이머보다 작은 글자)
+// 타이머 아래 부가 정보(2026-09-08 Crenop): 평균 · 최대 정전 시간 — 완료된 정전만, 초는 버리고 일·시간·분(타이머보다 작은 글자). 최소는 교대(몇 초 틈)에 붙잡혀 뺐다
 function formatSpanCoarse(ms) {
   let min = Math.round(ms / 60000);
   const d = Math.floor(min / 1440); min -= d * 1440;
@@ -9033,7 +9043,7 @@ function formatSpanCoarse(ms) {
 function blackoutSubHtml() {
   const b = computeBlackoutStats();
   if (!b || !b.n) return '';
-  return `<span class="blackout-sub">최소 ${formatSpanCoarse(b.min_ms)} · 평균 ${formatSpanCoarse(b.avg_ms)} · 최대 ${formatSpanCoarse(b.max_ms)}</span>`;
+  return `<span class="blackout-sub">평균 ${formatSpanCoarse(b.avg_ms)} · 최대 ${formatSpanCoarse(b.max_ms)}</span>`;   // 최소는 뺐다(2026-09-08 Crenop): 한 사람이 끄자마자 다른 사람이 켠 몇 초짜리 교대가 늘 0분으로 잡힌다
 }
 // 현재 상태에 맞춰 오버레이를 붙이거나 뗀다. loadFeed 렌더 직후와 생방송 탭 진입 때 호출.
 function applyBlackout() {
@@ -9395,14 +9405,18 @@ function parseBannerDate(url) {
   return { sort: fullMatch ? fullMatch[1] : s, display: koDate(2000 + yy, parseInt(mm), parseInt(dd)) };
 }
 
-// 현수막 행 파서(2026-09-08 D열 종류 신설): A=이미지 B=링크 C=제목 D=종류(컨텐츠 시트 F열과 같은 문법 — 쉼표·|·/ 다중, 별칭표로 그림) E~=멤버(구 D~).
-//   시트에 D열을 먼저 삽입한 뒤 이 코드를 배포할 것 — 역순이면 첫 멤버가 종류 자리에 들어간다(2026-08-24 C열 신설 때와 같은 순서 규칙).
-// 멤버는 크루 순 정렬 — 렌더 코드는 컨텐츠 탭과 문자 단위 동일하므로 두 탭의 순서 차이는 시트 입력 순서에서 왔다(컨텐츠 시트는 멤버 고정 열, 현수막은 자유 나열). 정렬로 배치 통일.
+// 현수막 행 파서(2026-09-08 중규모 패치): A=이미지 B=날짜(다시보기 기준일 — 현수막 게시일은 컨텐츠 날짜와 다른 때가 많다. 비우면 파일 이름 날짜)
+//   C=링크(컨텐츠 시트 C열과 같은 문법 — 여러 개, 숲 다시보기 포함/'-' 제외, 유튜브·게시글) D=제목 E=종류(컨텐츠 F열 문법) F~=멤버.
+//   시트에 B열(날짜)을 먼저 삽입한 뒤 이 코드를 배포할 것 — 종전 B(링크)가 C로, C(제목)가 D로, D(종류)가 E로 한 칸씩 밀린다.
+//   카드에 찍는 날짜는 종전대로 파일 이름의 게시일. B는 카드를 눌렀을 때 참여 멤버의 그날 다시보기를 찾는 데만 쓴다(vodDate).
 function parseBannerRows(rows) {
   const ord = new Map(MEMBERS.map((m, i) => [m.name, i]));
   return rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-    const members = r.slice(4).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
-    return { url: r[0], link: (r[1] || '').trim(), title: (r[2] || '').trim(), tags: parseTags(r[3]), members, date: parseBannerDate(r[0]) };   // tags: 카드 제목 앞 종류 그림(contentCardHtml이 컨텐츠 카드와 같이 그린다)
+    const members = r.slice(5).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
+    const entries = parseLinkCell(r[2]);
+    const links = entries.map(e => e.url), linkTitles = entries.map(e => e.title);
+    const date = parseBannerDate(r[0]);
+    return { url: r[0], link: links[0] || '', links, linkTitles, title: (r[3] || '').trim(), tags: parseTags(r[4]), members, date, vodDate: parseSheetDate(r[1]) || date };   // vodDate: 다시보기 기준일(B, 없으면 게시일)
   });
 }
 // 현수막·컨텐츠 시트는 첫 화면에 쓰이지 않는다 — 재방문자는 부팅에서 캐시만 되살리고(요청 0), 이 데이터를
@@ -9462,7 +9476,8 @@ function renderBanners() {
   _bannerRenderSig = sig;
 
   // 카드·그리드는 컨텐츠 탭과 공용(2026-08-24 통일 — 디자인 준용 지시). 전용 CSS(.banner-*)는 제거.
-  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c)).join('')}</div>`;   // 현수막은 직링크 카드만(다시보기 모달 없음)
+  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c, true, true)).join('')}</div>`;   // 2026-09-08: 누르면 모달(게시글 · 유튜브 · 참여 멤버의 B열 날짜 다시보기)
+  bindLinkPicks(body);
 }
 
 function membersRowStyle(count) {
@@ -9560,7 +9575,7 @@ async function loadContent() {
       // C=링크 — 여러 개 가능(2026-09-03 세션 70, Crenop): 줄바꿈(또는 쉼표)으로 나눈 항목마다 '주소' 또는 '주소 제목'(주소 뒤 공백, 제목은 자유 — 2026-09-04).
       // link = 첫 주소(카드 등 종전 소비처), links = 주소 전부, linkTitles = 항목별 제목(없으면 ''). 달력 상세: 둘 이상이면 고르기 모달에 제목 표시
       // 숲 다시보기 주소 앞에 '-'를 붙이면 '이 다시보기는 이 컨텐츠 것이 아니다'(자동 목록에서 제외, 2026-09-06). 붙이지 않은 숲 주소는 수동 포함(19금·구독+ 등 목록에 안 잡히는 것).
-      const entries = (r[2] || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^-?https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
+      const entries = parseLinkCell(r[2]);   // 현수막 C열도 같은 파서(2026-09-08)
       const links = entries.map(e => e.url), linkTitles = entries.map(e => e.title);
       const link = links[0] || '';
       const title = (r[4] || '').trim();       // E=제목 (D는 일정 전용 간략제목칸 — 컨텐츠 행은 비움)
@@ -9593,8 +9608,9 @@ async function loadContent() {
 }
 
 // 컨텐츠 카드 1장 마크업 — 컨텐츠 탭·현수막 탭·모아보기 모달 공용. 제목 말줄임 hover는 전수 위임(ELLIPSIS_TIP_SEL) 소관.
-function contentCardHtml(c, withVods) {
+function contentCardHtml(c, withVods, forceModal) {
   withVods = withVods === true;   // 배열 map(contentCardHtml)이 둘째 인자로 색인을 넘긴다 — 현수막 탭에서 둘째 카드부터 참이 되어 모달 버튼이 됐다(2026-09-06 실사고). 명시적 true만 인정
+  forceModal = forceModal === true;   // 현수막 탭(2026-09-08 Crenop): 링크가 하나여도 누르면 모달 — 게시글·다시보기를 한 자리에서 고른다
   // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
   // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
   const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
@@ -9616,7 +9632,7 @@ function contentCardHtml(c, withVods) {
   const pick = withVods ? (contentPickInfo(c) || (include.length ? { ymd: '', ym: '', members: [] } : null)) : null;   // 참여자·날짜가 없어도 수동 포함이 있으면 모달
   if (pick && exclude.length) pick.exclude = exclude;
   if (pick && include.length) pick.include = include;
-  const useModal = manual.length >= 2 || !!pick;
+  const useModal = manual.length >= 2 || !!pick || (forceModal && manual.length > 0);
   const multi = useModal ? escapeHtml(JSON.stringify(manual)) : '';
   const single = !useModal && manual.length === 1 ? manual[0].url : '';
   const cardTag = useModal ? 'button' : (single ? 'a' : 'div');

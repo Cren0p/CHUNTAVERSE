@@ -1500,12 +1500,16 @@
   .lp-rows .day-kind-icon.chem { color: var(--accent); background: rgba(97,255,236,0.15); }   /* 연관 케미 행(2026-09-09) — 케미 탭 그림·민트 */
   .vod-pick-sec[data-kind="chem"] svg { color: var(--accent); }
   .lp-rows button.day-item { width: 100%; font: inherit; text-align: left; color: inherit; cursor: pointer; }   /* 연관 케미 행은 버튼(누르면 그 카드로) — <a> 행과 같은 모양 */
-  /* 연관 케미 카드 묶음(2026-09-09): 케미 탭 카드 부품(.chem-card)을 그대로 — 폭 300px 격자, 지금 보고 있는 카드는 민트 테두리. 카드 안 이름의 링크 그림은 모달에선 뜻이 없어 감춘다 */
-  .chem-modal-grid, .chem-modal-grid.chem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 8px 0 0; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다. .chem-grid 클래스(설명 켜짐 선택자용)의 격자 규칙보다 우선 */
+  /* 연관 케미 카드 묶음(2026-09-10 개정): 모달 전용 간단 카드 — [이름 / 설명 한 줄] + 구성원 얼굴·이름, 채팅 수 없음. 폭 300px 격자(3열까지), 모든 카드 같은 높이
+     (머리 2줄 고정 + 구성원 한 줄). 지금 보고 있는 카드는 민트 테두리. 벽의 카드 부품을 그대로 옮기던 09-09 판은 설명 자리·높이가 깨져 철회 */
+  .chem-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 8px 0 0; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다 */
   .chem-modal-card { cursor: pointer; }
   .chem-modal-card .chem-card { margin: 0; height: auto; }
   .chem-modal-card.self .chem-card { border-color: var(--accent); }
-  .chem-modal-card .chem-name-link, .chem-modal-card .chem-nicon { display: none; }
+  .chem-mhead { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 42px; }
+  .chem-mname { display: block; }
+  .chem-mdesc { font-size: 12px; font-weight: 500; color: var(--muted); line-height: 17px; min-height: 17px; text-align: center; }
+  .chem-mmembers { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 14px; }
   .vod-pick-sec[data-kind="vod"] svg, .vod-pick-sec[data-kind="clip"] svg { color: var(--ev-start); }   /* 클립·캐치(2026-09-09)도 숲 파랑 */
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
@@ -1973,29 +1977,17 @@
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
-    /* 라벨 핸드오프 연속화(2026-08-09): sticky 라벨이 붙어 있는 범위 = 이 상자의 콘텐츠 박스라서,
-       카드가 끝나면 다음 라벨이 도착하기 전에 먼저 밀려나갔다(섹션 사이 간격만큼 이른 이탈).
-       ::after 스페이서로 콘텐츠 박스를 다음 라벨 시작점까지 연장하고 margin-bottom으로 상쇄 —
-       배치는 픽셀 동일, 라벨만 들어오는 라벨에 직접 밀려나는 연속 열차가 된다.
-       49 = 그리드 gap 12 + margin-top 20 + 테두리 1 + padding-top 16. 이 값들이 바뀌면 함께 갱신. */
-    margin-bottom: -49px;
   }
-  .chem-group-section::after { content: ''; display: block; height: 49px; }
   .chem-group-title {
     font-size: 12px;
     font-weight: 700;
     color: var(--muted);
     letter-spacing: 1px;
-    /* sticky(2026-08-09): 스크롤 시 현재 섹션 라벨이 상단(여백 20px 아래 — 필터 패널과 동일 이격)에 붙고,
-       다음 섹션 라벨이 올라오면 밀어내며 교체. 라벨이 카드 묶음(.chem-group-grid)과 같은 섹션 상자 안에
-       있어야 붙을 구간이 생긴다(renderChemistry의 secBlock).
-       높이 34px 상자에 flex 중앙 — 토글 스트립(.chem-toggle-sticky)의 바 구간과 같은 높이·같은 중앙이라
-       폰트 크기가 달라도(12px 라벨·15px 트랙 제목) 토글과 세로로 어긋날 수 없다.
-       배경 없음: 붙었을 땐 뒤의 백드롭 스트립이 바탕이고, 흐름 중엔 페이지 배경 그대로. */
-    position: sticky; top: calc(var(--head-h, 0px) + 20px); z-index: 3;
+    /* 2026-08-09의 sticky 라벨(스크롤 시 상단에 붙어 교체)은 2026-09-10 폐지 — 높이 34px 상자·flex 중앙은 라벨 줄 규격으로 유지 */
+    /* sticky 폐지(2026-09-10 Crenop): 토글이 우측 기둥으로 옮겨간 뒤 남은 건 'N인 케미' 라벨뿐이고, 몇 명 케미인지는 카드를 보면 안다 — 따라다닐 이유가 없다.
+       위의 핸드오프 스페이서(::after 49px + margin-bottom -49px)도 sticky 전용 장치라 같이 걷었다. */
     height: 34px; display: flex; align-items: center;
-    margin-bottom: 0;
-    pointer-events: none;   /* 라벨은 블록이라 폭이 그리드 전체 — 이 투명 상자(z3)가 스트립(z2) 안 토글을 덮어 클릭을 삼킨다. 라벨은 비인터랙티브라 통과시켜도 잃는 게 없다 */
+    margin-bottom: 0;과시켜도 잃는 게 없다 */
   }
   /* 트랙 헤더(모두 포함·일부 포함): 하위 섹션 라벨(2인/3인 케미)보다 위계 ↑ — 더 크고 밝게 + 민트 바 */
   .chem-track-title {
@@ -3272,7 +3264,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6279,8 +6271,8 @@ function openChemModal(name, urls, refs, onJump, cardHtmlByName) {
   const linkHtml = urls.length ? manualLinkSectionsHtml(urls) : '';
   // 연관 케미 = 케미 탭의 카드 그대로(이름 줄 + 구성원 + 채팅 수). 자기 카드가 맨 앞에 민트 테두리, 카드를 누르면 닫고 그 카드로 점프(자기 카드는 닫기만)
   const cardWrap = (nm, self) => { const html = cardHtmlByName ? cardHtmlByName(nm) : ''; return html ? `<div class="chem-modal-card${self ? ' self' : ''}" data-cname="${escapeHtml(nm)}"${self ? ' data-self="1"' : ''}>${html}</div>` : ''; };
-  // 모달 안에서는 토글과 무관하게 설명 항상 켜짐(2026-09-10 Crenop): 벽은 토글로 훑고, 모달은 늘 자세히. .chem-grid.chem-show-desc 선택자를 그대로 받게 같은 두 클래스를 준다
-  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid chem-grid chem-show-desc">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
+  // 모달 안에서는 설명이 항상 보인다(2026-09-10 Crenop) — 모달 전용 간단 카드에 설명 줄이 고정으로 있다(cardHtmlByName)
+  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
   body.innerHTML = (linkHtml + refHtml) || '<div class="vod-pick-empty">링크가 없습니다.</div>';
   body.querySelectorAll('.chem-modal-card').forEach(b => b.addEventListener('click', (ev) => { ev.preventDefault(); closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
   modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (ov && !ov.hidden && head.textContent.startsWith(name)) openChemModal(name, urls, refs, onJump, cardHtmlByName); };   // 번호 조회 도착 시(2026-09-09)
@@ -10082,12 +10074,15 @@ function renderChemistry() {
     setTimeout(() => { tcard.classList.remove('chem-flash'); marks.forEach(x => x.classList.remove('hl')); }, 1400);
   };
   const entryByName = (nm) => { for (const arr of Object.values(CHEM_NAMES)) { const f = arr.find(x => x.name === nm); if (f) return f; } for (const g of CHEM_GROUPS) { const f = g.entries.find(x => x.name === nm); if (f) return f; } return null; };
-  // 케미명 → 그 케미가 사는 카드의 HTML(원본 카드 부품 그대로 — 2026-09-09 Crenop: 연관 케미는 이름만이 아니라 구성까지). 쌍은 pairCardHtml, 셋 이상은 groupCardHtml
+  // 케미명 → 모달용 간단 카드(2026-09-10 Crenop: 원본 카드를 그대로 옮기니 설명 자리·높이가 깨졌다). 명시된 그 이름 하나 + 설명 한 줄 + 구성원 얼굴·이름.
+  // 채팅 수·화살표는 없다(모달은 '무엇으로 이어지나'를 보는 자리). 쌍·그룹 모두 같은 틀이라 크기가 같다.
   const cardHtmlByName = (nm) => {
-    const p = pairs.find(x => (CHEM_NAMES[`${x.m1.id}:${x.m2.id}`] || []).some(e => e.name === nm));
-    if (p) return pairCardHtml(p);
-    const g = CHEM_GROUPS.find(x => x.entries.some(e => e.name === nm));
-    return g ? groupCardHtml(g) : '';
+    let entry = null, ids = null;
+    for (const [k, arr] of Object.entries(CHEM_NAMES)) { const f = arr.find(e => e.name === nm); if (f) { entry = f; ids = k.split(':'); break; } }
+    if (!entry) { const g = CHEM_GROUPS.find(x => x.entries.some(e => e.name === nm)); if (g) { entry = g.entries.find(e => e.name === nm); ids = g.members; } }
+    if (!entry) return '';
+    const members = ids.map(id => MEMBER_BY_ID[id]).filter(Boolean).map(m => `<div class="chem-member"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span class="chem-member-name" style="color:${m.color}">${escapeHtml(m.name)}</span></div>`).join('');
+    return `<div class="chem-card"><div class="chem-head chem-mhead"><div class="chem-name chem-mname">${escapeHtml(entry.name)}</div><div class="chem-mdesc">${escapeHtml(entry.desc || '')}</div></div><div class="chem-body"><div class="chem-mmembers">${members}</div></div></div>`;
   };
   if (grid) {
     grid.addEventListener('click', e => {

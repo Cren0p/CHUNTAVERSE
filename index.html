@@ -1503,7 +1503,6 @@
   /* 연관 케미 카드 묶음(2026-09-10 개정): 모달 전용 간단 카드 — [이름 / 설명 한 줄] + 구성원 얼굴·이름, 채팅 수 없음. 폭 300px 격자(3열까지), 모든 카드 같은 높이
      (머리 2줄 고정 + 구성원 한 줄). 지금 보고 있는 카드는 민트 테두리. 벽의 카드 부품을 그대로 옮기던 09-09 판은 설명 자리·높이가 깨져 철회 */
   .chem-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 8px 0 0; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다 */
-  .chem-name-part.chem-name-auto { color: var(--muted); font-weight: 600; }   /* 이름 없는 행(A열 빈칸 + D열 링크)의 폴백 표기 — 폴백 이름줄과 같은 흐린 글자(2026-09-10) */
   .chem-modal-card { cursor: pointer; }
   .chem-modal-card .chem-card { margin: 0; height: auto; }
   .chem-modal-card.self .chem-card { border-color: var(--accent); }
@@ -3265,7 +3264,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9877,7 +9876,7 @@ function renderChemistry() {
     const active = e.types.some(t => chemFilterTypes.has(t));
     const { isUrl, link } = linkInfo(e);
     const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
-    return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}${e.autoName ? ' chem-name-auto' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };   // chem-name-auto: 이름 없는 행의 폴백 표기(2026-09-10)
+    return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };   // 이름 없는 행의 폴백 표기도 보통 이름과 같은 글자(2026-09-10 Crenop: 흐린 글자 철회)
   };
   const rowHtml = (e) => {   // ON 3열용 행 — 래퍼(display:contents)가 데이터·클릭·오버를 행 단위로 담당
     const active = e.types.some(t => chemFilterTypes.has(t));

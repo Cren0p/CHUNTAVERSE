@@ -1501,7 +1501,7 @@
   .vod-pick-sec[data-kind="chem"] svg { color: var(--accent); }
   .lp-rows button.day-item { width: 100%; font: inherit; text-align: left; color: inherit; cursor: pointer; }   /* 연관 케미 행은 버튼(누르면 그 카드로) — <a> 행과 같은 모양 */
   /* 연관 케미 카드 묶음(2026-09-09): 케미 탭 카드 부품(.chem-card)을 그대로 — 폭 300px 격자, 지금 보고 있는 카드는 민트 테두리. 카드 안 이름의 링크 그림은 모달에선 뜻이 없어 감춘다 */
-  .chem-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 8px; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다 */
+  .chem-modal-grid, .chem-modal-grid.chem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 8px 0 0; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다. .chem-grid 클래스(설명 켜짐 선택자용)의 격자 규칙보다 우선 */
   .chem-modal-card { cursor: pointer; }
   .chem-modal-card .chem-card { margin: 0; height: auto; }
   .chem-modal-card.self .chem-card { border-color: var(--accent); }
@@ -3272,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4279,11 +4279,12 @@ function applyChemNameRows(rows) {
     if (types.length === 0) types.push('기타');
     const desc = (r[2] || '').trim();
     const clip = (r[3] || '').trim();   // 원문(한 값일 때의 옛 소비처 호환)
-    // D열 여러 항목(2026-09-09 Crenop): 줄마다 하나 — 주소('주소 제목' 허용, 한 줄에 쉼표로 여럿도 됨)거나 연관 케미명(A열 표기 그대로, 쉼표는 이름의 일부라 줄로만 나눈다).
+    // D열 여러 항목(2026-09-09 Crenop): 줄마다 하나 — 주소('주소 제목' 허용, 한 줄에 쉼표로 여럿도 됨)거나 연관 케미명.
+    // 이름 줄은 원문 그대로 둔다(refs) — 실존 이름 대조는 그릴 때(linkInfo): 줄 전체가 이름이면 그대로(쉼표 든 이름), 아니면 쉼표·|·/로 나눠 각각(2026-09-10 Crenop: 둘 이상이 안 잡혔다).
     const links = [], refs = [];
     for (const line of clip.split(/\n/).map(x => x.trim()).filter(Boolean)) {
       if (/^https?:\/\//i.test(line)) parseLinkCell(line).forEach(e => links.push(e));
-      else refs.push(line.replace(/\s*,\s*/g, ' · '));
+      else refs.push(line);
     }
     // E열~ 멤버 칸: 칸에 적힌 이름으로 멤버 매칭(빈 칸·미상 이름은 스킵)
     const ids = r.slice(4)
@@ -6278,7 +6279,8 @@ function openChemModal(name, urls, refs, onJump, cardHtmlByName) {
   const linkHtml = urls.length ? manualLinkSectionsHtml(urls) : '';
   // 연관 케미 = 케미 탭의 카드 그대로(이름 줄 + 구성원 + 채팅 수). 자기 카드가 맨 앞에 민트 테두리, 카드를 누르면 닫고 그 카드로 점프(자기 카드는 닫기만)
   const cardWrap = (nm, self) => { const html = cardHtmlByName ? cardHtmlByName(nm) : ''; return html ? `<div class="chem-modal-card${self ? ' self' : ''}" data-cname="${escapeHtml(nm)}"${self ? ' data-self="1"' : ''}>${html}</div>` : ''; };
-  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
+  // 모달 안에서는 토글과 무관하게 설명 항상 켜짐(2026-09-10 Crenop): 벽은 토글로 훑고, 모달은 늘 자세히. .chem-grid.chem-show-desc 선택자를 그대로 받게 같은 두 클래스를 준다
+  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid chem-grid chem-show-desc">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
   body.innerHTML = (linkHtml + refHtml) || '<div class="vod-pick-empty">링크가 없습니다.</div>';
   body.querySelectorAll('.chem-modal-card').forEach(b => b.addEventListener('click', (ev) => { ev.preventDefault(); closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
   modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (ov && !ov.hidden && head.textContent.startsWith(name)) openChemModal(name, urls, refs, onJump, cardHtmlByName); };   // 번호 조회 도착 시(2026-09-09)
@@ -9856,8 +9858,19 @@ function renderChemistry() {
   // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink)·실존 케미명이면 연관 케미(link), 오타는 링크 강등.
   // 2026-09-09: D열이 여러 항목(주소들 + 연관 케미명들)이 되고 누르면 언제나 모달 — 주소는 유튜브 타일·게시글/링크 행, 연관 케미는 이름 행(누르면 그 카드로 점프).
   // isUrl은 그림 분기(주소가 하나라도 있으면 externalLink, 참조뿐이면 link). 오타 참조는 걸러진다(allEntryNames).
+  // 이름 줄 해석(2026-09-10): 줄 전체(쉼표 → 가운뎃점 표기)가 실존 이름이면 그것, 아니면 쉼표·|·/로 나눈 조각 각각. 자기 자신·중복·오타는 뺀다
+  const normName = (x) => String(x || '').trim().replace(/\s*,\s*/g, ' · ').replace(/\s+/g, ' ');
+  const resolveRefs = (e) => {
+    const out = [];
+    for (const line of (e.refs || [])) {
+      const whole = normName(line);
+      if (allEntryNames.has(whole)) { out.push(whole); continue; }
+      for (const part of line.split(/[,|/]/).map(normName).filter(Boolean)) if (allEntryNames.has(part)) out.push(part);
+    }
+    return [...new Set(out)].filter(n => n !== e.name);
+  };
   const linkInfo = (e) => {
-    const urls = e.links || [], refs = (e.refs || []).filter(n => allEntryNames.has(n) && n !== e.name);
+    const urls = e.links || [], refs = resolveRefs(e);
     const isUrl = urls.length > 0;
     return { isUrl, link: (urls.length || refs.length) ? e.name : '', urls, refs };
   };

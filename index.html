@@ -1500,8 +1500,13 @@
   .lp-rows .day-kind-icon.chem { color: var(--accent); background: rgba(97,255,236,0.15); }   /* 연관 케미 행(2026-09-09) — 케미 탭 그림·민트 */
   .vod-pick-sec[data-kind="chem"] svg { color: var(--accent); }
   .lp-rows button.day-item { width: 100%; font: inherit; text-align: left; color: inherit; cursor: pointer; }   /* 연관 케미 행은 버튼(누르면 그 카드로) — <a> 행과 같은 모양 */
-  .lp-rows .chem-ref-self .day-item-title { color: var(--accent); font-weight: 700; }   /* 지금 보고 있는 케미 — 묶음의 일원으로 함께 두되 민트로 구별 */
-  .vod-pick-sec[data-kind="vod"] svg { color: var(--ev-start); }
+  /* 연관 케미 카드 묶음(2026-09-09): 케미 탭 카드 부품(.chem-card)을 그대로 — 폭 300px 격자, 지금 보고 있는 카드는 민트 테두리. 카드 안 이름의 링크 그림은 모달에선 뜻이 없어 감춘다 */
+  .chem-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 8px; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다 */
+  .chem-modal-card { cursor: pointer; }
+  .chem-modal-card .chem-card { margin: 0; height: auto; }
+  .chem-modal-card.self .chem-card { border-color: var(--accent); }
+  .chem-modal-card .chem-name-link, .chem-modal-card .chem-nicon { display: none; }
+  .vod-pick-sec[data-kind="vod"] svg, .vod-pick-sec[data-kind="clip"] svg { color: var(--ev-start); }   /* 클립·캐치(2026-09-09)도 숲 파랑 */
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
      scrollbar-gutter: stable(2026-09-06 Crenop 지적): 세로로 넘쳐 스크롤바가 서면 그 폭(약 17px)만큼 안쪽이 줄어 5열이 4열로 접히고 오른쪽이 비었다 —
@@ -3267,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-09d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-09f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3646,8 +3651,8 @@ const MEMBER_LINKS = {
     x: 'https://x.com/door_momo',
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' }],
     etc: [
+      { label: '팬사이트', url: 'https://moonmomo-archive.netlify.app/' },            // 2026-09-09 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(Crenop)
       { label: '노래책', url: 'https://streamsing.app/s/soop/doormomo/songbook' },   // 2026-08-03 변경(구 멜로밍)
-      { label: '팬사이트', url: 'https://moonmomo-archive.netlify.app/' },            // 2026-09-09 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림
     ],
     ogq: [
       { name: '모모티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6439ef4bd4035' },
@@ -6163,11 +6168,12 @@ function findLoadedVod(titleNo) {
 }
 function pickVodTiles(pick) {
   const monthData = pick.ym ? statsState.data[pick.ym] : null;
-  if (pick.ym && !monthData) return { html: '', pending: true, hrefs: [] };
+  if (pick.ym && !monthData) return { html: '', clipsHtml: '', pending: true, hrefs: [] };
   const [y, mo] = pick.ym ? pick.ym.split('-').map(Number) : [0, 0];
   const mi = id => { const k = MEMBERS.findIndex(x => x.id === id); return k < 0 ? 999 : k; };
   const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
   const items = [];   // { mi: 멤버 순서, k: 같은 멤버 안 순서, html }
+  const clips = [];   // 클립·캐치(2026-09-09) — 다시보기와 다른 구획
   const shown = new Set();   // 이미 그린 영상 번호 — 시트 포함이 자동 목록과 겹치면 한 번만
   let pending = false;
   const members = [...pick.members].sort((a, b) => mi(a) - mi(b));
@@ -6190,17 +6196,31 @@ function pickVodTiles(pick) {
   (pick.include || []).forEach((it, i) => {
     if (shown.has(String(it.no))) return;
     shown.add(String(it.no));
-    const hit = findLoadedVod(it.no);   // ① 불러온 목록 어디든
+    const hit = it.catch ? null : findLoadedVod(it.no);   // ① 불러온 목록 어디든(캐치는 목록에 없다)
     if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, href: vodPlayerUrl(hit.v), html: `<div class="cal-vod">${whoLine(hit.m)}${vodTileHtml(hit.v)}</div>` }); return; }
-    if (pick.ym && members.some(id => vodState.loading.has(vodKey(id, prevYmOf(pick.ym))))) pending = true;   // 전달 목록이 오는 중이면 기다린다
+    if (!it.catch && pick.ym && members.some(id => vodState.loading.has(vodKey(id, prevYmOf(pick.ym))))) { pending = true; }   // 전달 목록이 오는 중이면 기다린다
+    else {
+      // ①-2 번호 조회(2026-09-09): 목록·스냅샷에 없는 번호(클립·캐치·19금 등)는 워커 /vodinfo로 제목·썸네일·길이·종류를 받는다. 오는 중이면 pending(도착하면 다시 그린다)
+      const info = vodInfoState.data[String(it.no)];
+      if (info === undefined) { ensureVodInfo(it.no, it.catch); pending = true; }
+      else if (info) {
+        const v = vodInfoAsItem(it.no, info, it.url, it.title);
+        const owner = MEMBER_BY_ID[info.member_id];
+        const who = owner ? whoLine(owner) : '';
+        const tile = `<div class="cal-vod">${who}${vodTileHtml(v)}</div>`;
+        if (info.kind === 'REVIEW' || info.kind === 'NORMAL') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
+        else clips.push({ mi: owner ? mi(owner.id) : 999, k: clips.length, href: v.href || vodPlayerUrl(v), html: tile });   // CLIP·CATCH → 클립·캐치 구획
+        return;
+      }
+    }
     const words = String(it.title || '').trim().split(/\s+/);
     const named = MEMBERS.find(x => x.name === words[0]);   // ② 제목 첫 낱말 = 멤버 이름
     const label = named ? (words.slice(1).join(' ') || '다시보기') : (it.title || `다시보기 ${i + 1}`);
     // 목록 밖(19금·구독+ 등)은 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
     items.push({ mi: named ? mi(named.id) : 999, k: items.length, href: it.url, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
   });
-  items.sort((a, b) => a.mi - b.mi || a.k - b.k);
-  return { html: items.map(x => x.html).join(''), pending, hrefs: items.map(x => x.href) };   // hrefs: 카드가 '전부 하나뿐'을 판정할 때 쓴다(2026-09-08)
+  items.sort((a, b) => a.mi - b.mi || a.k - b.k); clips.sort((a, b) => a.mi - b.mi || a.k - b.k);
+  return { html: items.map(x => x.html).join(''), clipsHtml: clips.map(x => x.html).join(''), pending, hrefs: items.concat(clips).map(x => x.href) };
 }
 let linkPickToken = 0;   // 열 때마다 하나씩 — 도착 감시가 닫힌 모달이나 다른 내용의 모달을 건드리지 않게
 // 숲 게시글 주소(sooplive.com/station/아이디/post/번호) — 일정 행이 예고 글을 C열에 달아 두는 꼴(2026-09-06 Crenop). 번호만 돌려준다.
@@ -6218,7 +6238,7 @@ function findLoadedPost(postNo) {
 // 수동 링크는 종류별 구획(2026-09-06 Crenop: 게시글 링크가 '유튜브'로 묶이던 것): 유튜브(썸네일) · 게시글(숲 글 — 제목은 시트 > 불러온 글 목록 > '게시글') · 링크(그 밖).
 // 구획 그림·색 = 최근 활동의 종류 그림·색(유튜브 빨강 · 게시글 board 에메랄드 · 링크 사슬 무채).
 function manualLinkSectionsHtml(links) {
-  const groups = { youtube: [], post: [], link: [] };
+  const groups = { youtube: [], post: [], link: [], vod: [], clip: [] };   // vod·clip: 숲 플레이어 주소(2026-09-09)
   (links || []).forEach((it, i) => {
     const u = typeof it === 'string' ? it : it.url, manual = typeof it === 'string' ? '' : (it.title || '');
     const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
@@ -6226,27 +6246,41 @@ function manualLinkSectionsHtml(links) {
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
     const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
     const who = found ? `<span class="cal-vod-who"><img src="${found.m.img}" alt="">${escapeHtml(found.m.name)}</span>` : '';
+    const vodNo = (!id && !postNo) ? soopVodTitleNo(u) : '';
+    if (vodNo) {   // 숲 플레이어 주소(2026-09-09): 스냅샷·목록 → 없으면 번호 조회. 다시보기는 '다시보기' 구획, 클립·캐치는 '클립·캐치' 구획(모두 타일)
+      const hit = isSoopCatchUrl(u) ? null : findLoadedVod(vodNo);
+      if (hit) { groups.vod.push(`<div class="cal-vod"><span class="cal-vod-who"><img src="${hit.m.img}" alt="">${escapeHtml(hit.m.name)}</span>${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v)}</div>`); return; }
+      const info = vodInfoState.data[vodNo];
+      if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}"><a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || '불러오는 중')}</span></span></a></div>`); return; }
+      const v = info ? vodInfoAsItem(vodNo, info, u, manual) : { title_no: vodNo, title: manual || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
+      const owner = info ? MEMBER_BY_ID[info.member_id] : null;
+      const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;
+      groups[(info && (info.kind === 'CLIP' || info.kind === 'CATCH')) || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);
+      return;
+    }
     if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
     else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${found ? `<span class="day-item-time">${escapeHtml(found.m.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
   });
-  const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'] };
+  const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'], vod: ['soop', '다시보기'], clip: ['soop', '클립·캐치'] };
   // 게시글·링크는 영상이 아니라 썸네일 틀이 뜻이 없다(2026-09-08 Crenop) — 지난 활동의 글 행(.day-item: 종류 그림 + 제목, 행 전체가 링크)으로. 영상(유튜브·다시보기)만 타일
-  const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div>` + (k === 'youtube' ? `<div class="ds-vods">${groups[k].join('')}</div>` : `<div class="lp-rows">${groups[k].join('')}</div>`) : '';
-  return secHtml('youtube') + secHtml('post') + secHtml('link');
+  const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div>` + ((k === 'youtube' || k === 'vod' || k === 'clip') ? `<div class="ds-vods">${groups[k].join('')}</div>` : `<div class="lp-rows">${groups[k].join('')}</div>`) : '';
+  return secHtml('youtube') + secHtml('post') + secHtml('link') + secHtml('vod') + secHtml('clip');
 }
 // 케미 모달(2026-09-09 Crenop): D열의 주소들 + 연관 케미들을 한 자리에. 연관 케미 구획엔 지금 케미(자기 자신)를 맨 위에 민트로 함께 둔다 —
 // A를 눌렀을 때 B·C만 보이면 묶음이 아니라 목록으로 읽힌다(Crenop). 자기 행은 누르면 닫히기만, 다른 행은 모달을 닫고 그 카드로 점프
-function openChemModal(name, urls, refs, onJump) {
+function openChemModal(name, urls, refs, onJump, cardHtmlByName) {
   const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
   head.innerHTML = `<span>${escapeHtml(name)}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   const linkHtml = urls.length ? manualLinkSectionsHtml(urls) : '';
-  const refRow = (nm, self) => `<button class="day-item chem-ref${self ? ' chem-ref-self' : ''}" type="button" data-cname="${escapeHtml(nm)}"${self ? ' data-self="1"' : ''}><span class="day-kind-icon chem">${SVG_ICONS.chemistry}</span><span class="day-item-title">${escapeHtml(nm)}</span></button>`;
-  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="lp-rows">${refRow(name, true)}${refs.map(nm => refRow(nm, false)).join('')}</div>` : '';
+  // 연관 케미 = 케미 탭의 카드 그대로(이름 줄 + 구성원 + 채팅 수). 자기 카드가 맨 앞에 민트 테두리, 카드를 누르면 닫고 그 카드로 점프(자기 카드는 닫기만)
+  const cardWrap = (nm, self) => { const html = cardHtmlByName ? cardHtmlByName(nm) : ''; return html ? `<div class="chem-modal-card${self ? ' self' : ''}" data-cname="${escapeHtml(nm)}"${self ? ' data-self="1"' : ''}>${html}</div>` : ''; };
+  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
   body.innerHTML = (linkHtml + refHtml) || '<div class="vod-pick-empty">링크가 없습니다.</div>';
-  body.querySelectorAll('.chem-ref').forEach(b => b.addEventListener('click', () => { closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
+  body.querySelectorAll('.chem-modal-card').forEach(b => b.addEventListener('click', (ev) => { ev.preventDefault(); closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
+  modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (ov && !ov.hidden && head.textContent.startsWith(name)) openChemModal(name, urls, refs, onJump, cardHtmlByName); };   // 번호 조회 도착 시(2026-09-09)
   showModal();
 }
 function openLinkPickModal(links, title, pick) {
@@ -6263,9 +6297,11 @@ function openLinkPickModal(links, title, pick) {
     // 관련 다시보기가 없으면(시트가 뺐거나 애초에 없거나) 구획을 아예 안 그린다(2026-09-08 Crenop: '그날 다시보기가 없습니다'는 뜻이 어긋난다 — 그날 것이 있어도 관련 없는 건 시트로 뺀 것)
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
       : r.pending ? `<div class="vod-pick-empty">${gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중'}</div>` : '';
-    body.innerHTML = tiles + (vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '') || '<div class="vod-pick-empty">링크가 없습니다.</div>';
+    const clipBody = r.clipsHtml ? `<div class="vod-pick-sec" data-kind="clip">${SVG_ICONS.soop}<span>클립·캐치</span></div><div class="ds-vods">${r.clipsHtml}</div>` : '';   // 2026-09-09
+    body.innerHTML = tiles + (vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '') + clipBody || '<div class="vod-pick-empty">링크가 없습니다.</div>';
     return r.pending;
   };
+  modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (token === linkPickToken && ov && !ov.hidden) paint(false); };   // 번호 조회 도착 시 다시 그리기(2026-09-09)
   // 시트 포함 중 불러온 목록에 없는 번호가 있으면 참여자들의 전달 목록도 받는다(월경 밤 방송 — 컨텐츠 날짜와 방송 시작일의 달이 다르다)
   const unresolved = (pick.include || []).some(it => !findLoadedVod(it.no));
   if (paint(false) || (unresolved && pick.ym)) {
@@ -7726,6 +7762,23 @@ function vodFailed(key) {
   vodState.fails[key] = (vodState.fails[key] || 0) + 1;
   if (vodState.fails[key] === VOD_FAIL_LIMIT && currentPage === 'thumbs') queueCalRender();
 }
+// ── 숲 영상 번호 조회(2026-09-09 Crenop): 시트에 적힌 숲 주소가 다시보기 목록·스냅샷에 없을 때(클립·캐치·19금 등) 워커 /vodinfo로 제목·썸네일·길이·종류를 받는다.
+//    번호별 한 번(메모리), 도착하면 열려 있는 모달을 다시 그린다(modalRepaint — 컨텐츠·현수막·케미 모달이 자기 다시 그리기 함수를 등록).
+const vodInfoState = { data: {}, loading: new Set() };   // no → { ok, kind, title, thumb, dur, member_id, ... } | false(실패)
+let modalRepaint = null;
+function ensureVodInfo(no, isCatch) {
+  no = String(no);
+  if (vodInfoState.data[no] !== undefined || vodInfoState.loading.has(no)) return;
+  vodInfoState.loading.add(no);
+  fetch(`${WORKER_URL}/vodinfo?no=${encodeURIComponent(no)}${isCatch ? '&kind=catch' : ''}`).then(r => r.ok ? r.json() : null).then(j => {
+    vodInfoState.data[no] = (j && j.ok) ? j : false;
+  }).catch(() => { vodInfoState.data[no] = false; }).finally(() => { vodInfoState.loading.delete(no); if (modalRepaint) modalRepaint(); });
+}
+function isSoopCatchUrl(u) { return /vod\.sooplive\.(?:com|co\.kr)\/player\/\d+\/catch/i.test(String(u || '')); }
+// 조회 결과로 타일 재료 만들기 — 시트 제목이 있으면 그것, 없으면 조회 제목. 캐치는 주소를 그대로(플레이어 주소에 /catch)
+function vodInfoAsItem(no, info, url, sheetTitle) {
+  return { title_no: no, title: sheetTitle || info.title || '', thumb: info.thumb || '', duration_ms: info.dur || 0, grade: info.grade || 0, auth_no: info.auth ?? null, kind: info.kind || '', href: isSoopCatchUrl(url) ? url : undefined };
+}
 // 세션에 저장된 다시보기(워커 2026-09-07 '감지 때 저장' — session.vods: { no, part, title, thumb, dur, auth, grade, reg, manual?, gone? })를
 // 목록 항목 꼴(title_no·thumb·duration_ms·auth_no·grade)로. gone(목록에서 사라짐)은 뺀다. 없으면(개편 전 세션·포착 대기 중) null → 종전 /vods 폴백.
 function sessionVods(s) {
@@ -7753,8 +7806,8 @@ function vodBadges(v) {   // v12: 기존 모드 배지 문법 그대로(labelBad
 }
 function vodTileHtml(v) {
   // v4: 길이는 썸네일 오버레이가 아니라 제목 아래 줄 — 생방송·이벤트 탭의 clockTime 문법 준용(썸네일 가림 방지, Crenop 지정)
-  const dur = v.duration_ms ? `<span class="ds-vod-dur">${SVG_ICONS.clockTime}${formatDuration(v.duration_ms)}</span>` : '';   // v5: 무채색 — card-btime 부류(인라인 시간 배지)
-  return `<a class="ds-vod" href="${vodPlayerUrl(v)}" target="_blank" rel="noopener">` +
+  const dur = v.duration_ms ? `<span class="ds-vod-dur">${SVG_ICONS.clockTime}${v.duration_ms < 60000 ? `${Math.round(v.duration_ms / 1000)}초` : formatDuration(v.duration_ms)}</span>` : '';   // v5: 무채색 — card-btime 부류(인라인 시간 배지). 1분 미만(캐치)은 초로(2026-09-09)
+  return `<a class="ds-vod" href="${v.href ? escapeHtml(v.href) : vodPlayerUrl(v)}" target="_blank" rel="noopener">` +   // v.href: 캐치(/player/번호/catch) 같은 특수 주소(2026-09-09)
     `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}</span>` +
     `<span class="ds-vod-title">${vodBadges(v)}<span class="ds-vod-tt">${escapeHtml(v.title || '')}</span></span>${dur}</a>`;   // v13: 제목=flex 행(배지·글자 세로 중앙), 말줄임은 내부 스팬
 }
@@ -9661,7 +9714,7 @@ function contentCardHtml(c, withVods) {
   const all = (c.links || (c.link ? [c.link] : [])).map((u, i) => ({ url: u, title: (c.linkTitles || [])[i] || '' }));
   const manual = withVods ? all.filter(e => !soopVodTitleNo(e.url)) : all;
   const exclude = withVods ? all.filter(e => e.url.startsWith('-')).map(e => soopVodTitleNo(e.url)).filter(Boolean) : [];
-  const include = withVods ? all.filter(e => !e.url.startsWith('-') && soopVodTitleNo(e.url)).map(e => ({ no: soopVodTitleNo(e.url), url: e.url, title: e.title })) : [];
+  const include = withVods ? all.filter(e => !e.url.startsWith('-') && soopVodTitleNo(e.url)).map(e => ({ no: soopVodTitleNo(e.url), url: e.url, title: e.title, catch: isSoopCatchUrl(e.url) })) : [];   // catch: /player/번호/catch(2026-09-09)
   const pick = withVods ? (contentPickInfo(c) || (include.length ? { ymd: '', ym: '', members: [] } : null)) : null;   // 참여자·날짜가 없어도 수동 포함이 있으면 모달
   if (pick && exclude.length) pick.exclude = exclude;
   if (pick && include.length) pick.include = include;
@@ -10009,6 +10062,13 @@ function renderChemistry() {
     setTimeout(() => { tcard.classList.remove('chem-flash'); marks.forEach(x => x.classList.remove('hl')); }, 1400);
   };
   const entryByName = (nm) => { for (const arr of Object.values(CHEM_NAMES)) { const f = arr.find(x => x.name === nm); if (f) return f; } for (const g of CHEM_GROUPS) { const f = g.entries.find(x => x.name === nm); if (f) return f; } return null; };
+  // 케미명 → 그 케미가 사는 카드의 HTML(원본 카드 부품 그대로 — 2026-09-09 Crenop: 연관 케미는 이름만이 아니라 구성까지). 쌍은 pairCardHtml, 셋 이상은 groupCardHtml
+  const cardHtmlByName = (nm) => {
+    const p = pairs.find(x => (CHEM_NAMES[`${x.m1.id}:${x.m2.id}`] || []).some(e => e.name === nm));
+    if (p) return pairCardHtml(p);
+    const g = CHEM_GROUPS.find(x => x.entries.some(e => e.name === nm));
+    return g ? groupCardHtml(g) : '';
+  };
   if (grid) {
     grid.addEventListener('click', e => {
       const part = e.target.closest('.chem-name-part.has-link') || e.target.closest('.chem-nrow.has-link');
@@ -10016,7 +10076,7 @@ function renderChemistry() {
       const entry = entryByName(part.dataset.cname || '');
       if (!entry) return;
       const { urls, refs } = linkInfo(entry);
-      openChemModal(entry.name, urls, refs, (nm) => jumpToChem(nm, part));
+      openChemModal(entry.name, urls, refs, (nm) => jumpToChem(nm, part), cardHtmlByName);
     });
 
     // ── 카드 높이 고정(명전 방식 실측, 2026-08-09 개정) ──

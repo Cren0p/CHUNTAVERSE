@@ -1503,6 +1503,7 @@
   /* 연관 케미 카드 묶음(2026-09-10 개정): 모달 전용 간단 카드 — [이름 / 설명 한 줄] + 구성원 얼굴·이름, 채팅 수 없음. 폭 300px 격자(3열까지), 모든 카드 같은 높이
      (머리 2줄 고정 + 구성원 한 줄). 지금 보고 있는 카드는 민트 테두리. 벽의 카드 부품을 그대로 옮기던 09-09 판은 설명 자리·높이가 깨져 철회 */
   .chem-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 8px 0 0; width: min(936px, calc(100vw - 80px)); }   /* 936 = 카드 300×3 + 간격 12×2 — 패널(fit-content)이 이 폭만큼 넓어진다 */
+  .chem-name-part.chem-name-auto { color: var(--muted); font-weight: 600; }   /* 이름 없는 행(A열 빈칸 + D열 링크)의 폴백 표기 — 폴백 이름줄과 같은 흐린 글자(2026-09-10) */
   .chem-modal-card { cursor: pointer; }
   .chem-modal-card .chem-card { margin: 0; height: auto; }
   .chem-modal-card.self .chem-card { border-color: var(--accent); }
@@ -3264,7 +3265,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4264,8 +4265,10 @@ function applyChemNameRows(rows) {
   const memberIndex = {};
   MEMBERS.forEach((m, i) => { memberIndex[m.id] = i; });
   for (const r of (rows || [])) {
-    const name = (r[0] || '').trim().replace(/\s*,\s*/g, ' · ');  // 시트엔 쉼표로 적고 표시는 사이트 규약인 가운뎃점
-    if (!name || name === '케미명') continue;  // 빈 행·헤더 행 무시
+    let name = (r[0] || '').trim().replace(/\s*,\s*/g, ' · ');  // 시트엔 쉼표로 적고 표시는 사이트 규약인 가운뎃점
+    if (name === '케미명') continue;  // 헤더 행 무시
+    const hasD = !!(r[3] || '').trim();
+    if (!name && !hasD) continue;  // 빈 행 무시 — 이름은 없어도 D열(링크·연관 케미)이 있으면 살린다(2026-09-10 Crenop): 이름은 아래에서 카드 폴백 표기(A × B)로
     // B열 종류: | 구분 다중 허용, 유효값만 통과. 빈 칸·오타는 기타로 흘림(이름이 있는데 미분류일 수는 없음 — 미분류는 '행 없음'의 뜻)
     const types = (r[1] || '').split(/[|,/]/).map(t => t.trim()).filter(t => ['컨텐츠', '프로필', '기타'].includes(t));   // 구분자 |·쉼표·/ 겸용(2026-08-21 Crenop): 가운데줄은 입력이 번거로워 시트엔 쉼표·슬래시를 허용 — 이름 칸의 쉼표→가운뎃점과 같은 취지
     if (types.length === 0) types.push('기타');
@@ -4286,7 +4289,11 @@ function applyChemNameRows(rows) {
       .filter(Boolean);
     // 쌍 키는 renderChemistry의 케미 카드 조회 키(`m1.id:m2.id`, MEMBERS 순서라 i<j)와 맞아야 하므로 MEMBERS 인덱스 순으로 정렬
     ids.sort((a, b) => memberIndex[a] - memberIndex[b]);
-    const entry = { name, types, desc, clip, links, refs };
+    if (!name) {   // 이름 없는 행: 폴백 표기 그대로를 이름으로(카드에 '천양 × 마다옴'로 보이는 그것) — 누를 수 있게 되고 모달 제목도 이것
+      if (ids.length < 2) continue;
+      name = ids.map(id => (MEMBER_BY_ID[id] || {}).name || id).join(' × ');
+    }
+    const entry = { name, types, desc, clip, links, refs, autoName: !(r[0] || '').trim() };
     if (ids.length === 2) {
       const k = `${ids[0]}:${ids[1]}`;
       (names[k] = names[k] || []).push(entry);   // 같은 쌍 여러 행 → 배열에 순서대로(표시는 가운뎃점 나열)
@@ -9870,7 +9877,7 @@ function renderChemistry() {
     const active = e.types.some(t => chemFilterTypes.has(t));
     const { isUrl, link } = linkInfo(e);
     const linkIco = link ? `<span class="chem-name-link">${isUrl ? SVG_ICONS.externalLink : SVG_ICONS.link}</span>` : '';
-    return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };
+    return { active, html: `<span class="chem-name-part${active ? '' : ' dim'}${link ? ' has-link' : ''}${e.autoName ? ' chem-name-auto' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}">${escapeHtml(e.name)}${linkIco}</span>` };   // chem-name-auto: 이름 없는 행의 폴백 표기(2026-09-10)
   };
   const rowHtml = (e) => {   // ON 3열용 행 — 래퍼(display:contents)가 데이터·클릭·오버를 행 단위로 담당
     const active = e.types.some(t => chemFilterTypes.has(t));

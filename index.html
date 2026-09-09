@@ -1497,6 +1497,10 @@
   .vod-pick-sec[data-kind="post"] svg { color: var(--ev-post); }   /* 숲 게시글 — 최근 활동의 글 색 */
   .lp-rows { display: flex; flex-direction: column; gap: 6px; }   /* 게시글·링크 행 묶음(2026-09-08) — 행 부품은 지난 활동의 .day-item 그대로 */
   .lp-rows .day-kind-icon.link { color: var(--muted); }
+  .lp-rows .day-kind-icon.chem { color: var(--accent); background: rgba(97,255,236,0.15); }   /* 연관 케미 행(2026-09-09) — 케미 탭 그림·민트 */
+  .vod-pick-sec[data-kind="chem"] svg { color: var(--accent); }
+  .lp-rows button.day-item { width: 100%; font: inherit; text-align: left; color: inherit; cursor: pointer; }   /* 연관 케미 행은 버튼(누르면 그 카드로) — <a> 행과 같은 모양 */
+  .lp-rows .chem-ref-self .day-item-title { color: var(--accent); font-weight: 700; }   /* 지금 보고 있는 케미 — 묶음의 일원으로 함께 두되 민트로 구별 */
   .vod-pick-sec[data-kind="vod"] svg { color: var(--ev-start); }
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
   .vod-pick-panel .lr-body { padding: 12px; scrollbar-gutter: stable; }   /* 경계~영상 = 영상~영상(12px) 등간격 — 종전엔 lr-body 무패딩이라 썸네일이 경계에 붙었다.
@@ -3263,7 +3267,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-09a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-09d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3641,7 +3645,10 @@ const MEMBER_LINKS = {
     instagram: 'https://www.instagram.com/momoric__/',
     x: 'https://x.com/door_momo',
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' }],
-    etc: [{ label: '노래책', url: 'https://streamsing.app/s/soop/doormomo/songbook' }],   // 2026-08-03 변경(구 멜로밍)
+    etc: [
+      { label: '노래책', url: 'https://streamsing.app/s/soop/doormomo/songbook' },   // 2026-08-03 변경(구 멜로밍)
+      { label: '팬사이트', url: 'https://moonmomo-archive.netlify.app/' },            // 2026-09-09 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림
+    ],
     ogq: [
       { name: '모모티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6439ef4bd4035' },
       { name: '모모티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6439ef4bd4035' },
@@ -4245,7 +4252,7 @@ const saveChemFilters = () => {
 const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
 let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — 동일하면 재구축 스킵(lastTimelineSig와 동일 취지)
 
-// 케미명·종류·설명·클립은 구글 시트에서 로드 — 열: A케미명 B종류 C설명 D클립URL(또는 연관 케미명) E~멤버 이름 (2026-08-08 개편, 구형은 B~가 멤버)
+// 케미명·종류·설명·클립은 구글 시트에서 로드 — 열: A케미명 B종류 C설명 D링크·연관 케미(2026-09-09부터 여러 줄: 주소('주소 제목'·쉼표로 여럿)나 연관 케미명을 줄마다) E~멤버 이름 (2026-08-08 개편, 구형은 B~가 멤버)
 // 종류 값: 컨텐츠·프로필·기타(다중은 | 구분, 빈 칸·미상 값은 기타). '미분류'는 시트에 적지 않는다 — 행이 없는 쌍을 코드가 미분류로 판정.
 // ※ 배포 순서: 시트 먼저 → 코드 배포. 구코드는 멤버를 '이름 매칭'으로 찾아 새 열(종류·설명·URL)을 그냥 지나치므로 새 시트에서도 동작한다.
 //   반대로 신코드는 E열부터만 멤버로 읽으므로 구 시트에서는 케미명이 전부 사라진다.
@@ -4266,7 +4273,13 @@ function applyChemNameRows(rows) {
     const types = (r[1] || '').split(/[|,/]/).map(t => t.trim()).filter(t => ['컨텐츠', '프로필', '기타'].includes(t));   // 구분자 |·쉼표·/ 겸용(2026-08-21 Crenop): 가운데줄은 입력이 번거로워 시트엔 쉼표·슬래시를 허용 — 이름 칸의 쉼표→가운뎃점과 같은 취지
     if (types.length === 0) types.push('기타');
     const desc = (r[2] || '').trim();
-    const clip = (r[3] || '').trim();
+    const clip = (r[3] || '').trim();   // 원문(한 값일 때의 옛 소비처 호환)
+    // D열 여러 항목(2026-09-09 Crenop): 줄마다 하나 — 주소('주소 제목' 허용, 한 줄에 쉼표로 여럿도 됨)거나 연관 케미명(A열 표기 그대로, 쉼표는 이름의 일부라 줄로만 나눈다).
+    const links = [], refs = [];
+    for (const line of clip.split(/\n/).map(x => x.trim()).filter(Boolean)) {
+      if (/^https?:\/\//i.test(line)) parseLinkCell(line).forEach(e => links.push(e));
+      else refs.push(line.replace(/\s*,\s*/g, ' · '));
+    }
     // E열~ 멤버 칸: 칸에 적힌 이름으로 멤버 매칭(빈 칸·미상 이름은 스킵)
     const ids = r.slice(4)
       .map(c => (c || '').trim())
@@ -4275,7 +4288,7 @@ function applyChemNameRows(rows) {
       .filter(Boolean);
     // 쌍 키는 renderChemistry의 케미 카드 조회 키(`m1.id:m2.id`, MEMBERS 순서라 i<j)와 맞아야 하므로 MEMBERS 인덱스 순으로 정렬
     ids.sort((a, b) => memberIndex[a] - memberIndex[b]);
-    const entry = { name, types, desc, clip };
+    const entry = { name, types, desc, clip, links, refs };
     if (ids.length === 2) {
       const k = `${ids[0]}:${ids[1]}`;
       (names[k] = names[k] || []).push(entry);   // 같은 쌍 여러 행 → 배열에 순서대로(표시는 가운뎃점 나열)
@@ -6201,13 +6214,10 @@ function findLoadedPost(postNo) {
   }
   return null;
 }
-function openLinkPickModal(links, title, pick) {
-  const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
-  if (!head || !body) return;
-  modalPanel('vod-pick-panel');
-  head.innerHTML = `<span>영상 선택${title ? ` — ${escapeHtml(title)}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  // 수동 링크는 종류별 구획(2026-09-06 Crenop: 게시글 링크가 '유튜브'로 묶이던 것): 유튜브(썸네일) · 게시글(숲 글 — 제목은 시트 > 불러온 글 목록 > '게시글') · 링크(그 밖).
-  // 구획 그림·색 = 최근 활동의 종류 그림·색(유튜브 빨강 · 게시글 board 에메랄드 · 링크 사슬 무채).
+// 수동 링크 → 종류별 구획 HTML(2026-09-09 공용화: 컨텐츠·현수막 모달과 케미 모달이 같이 쓴다).
+// 수동 링크는 종류별 구획(2026-09-06 Crenop: 게시글 링크가 '유튜브'로 묶이던 것): 유튜브(썸네일) · 게시글(숲 글 — 제목은 시트 > 불러온 글 목록 > '게시글') · 링크(그 밖).
+// 구획 그림·색 = 최근 활동의 종류 그림·색(유튜브 빨강 · 게시글 board 에메랄드 · 링크 사슬 무채).
+function manualLinkSectionsHtml(links) {
   const groups = { youtube: [], post: [], link: [] };
   (links || []).forEach((it, i) => {
     const u = typeof it === 'string' ? it : it.url, manual = typeof it === 'string' ? '' : (it.title || '');
@@ -6223,7 +6233,28 @@ function openLinkPickModal(links, title, pick) {
   const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'] };
   // 게시글·링크는 영상이 아니라 썸네일 틀이 뜻이 없다(2026-09-08 Crenop) — 지난 활동의 글 행(.day-item: 종류 그림 + 제목, 행 전체가 링크)으로. 영상(유튜브·다시보기)만 타일
   const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div>` + (k === 'youtube' ? `<div class="ds-vods">${groups[k].join('')}</div>` : `<div class="lp-rows">${groups[k].join('')}</div>`) : '';
-  const tiles = secHtml('youtube') + secHtml('post') + secHtml('link');
+  return secHtml('youtube') + secHtml('post') + secHtml('link');
+}
+// 케미 모달(2026-09-09 Crenop): D열의 주소들 + 연관 케미들을 한 자리에. 연관 케미 구획엔 지금 케미(자기 자신)를 맨 위에 민트로 함께 둔다 —
+// A를 눌렀을 때 B·C만 보이면 묶음이 아니라 목록으로 읽힌다(Crenop). 자기 행은 누르면 닫히기만, 다른 행은 모달을 닫고 그 카드로 점프
+function openChemModal(name, urls, refs, onJump) {
+  const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
+  if (!head || !body) return;
+  modalPanel('vod-pick-panel');
+  head.innerHTML = `<span>${escapeHtml(name)}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  const linkHtml = urls.length ? manualLinkSectionsHtml(urls) : '';
+  const refRow = (nm, self) => `<button class="day-item chem-ref${self ? ' chem-ref-self' : ''}" type="button" data-cname="${escapeHtml(nm)}"${self ? ' data-self="1"' : ''}><span class="day-kind-icon chem">${SVG_ICONS.chemistry}</span><span class="day-item-title">${escapeHtml(nm)}</span></button>`;
+  const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="lp-rows">${refRow(name, true)}${refs.map(nm => refRow(nm, false)).join('')}</div>` : '';
+  body.innerHTML = (linkHtml + refHtml) || '<div class="vod-pick-empty">링크가 없습니다.</div>';
+  body.querySelectorAll('.chem-ref').forEach(b => b.addEventListener('click', () => { closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
+  showModal();
+}
+function openLinkPickModal(links, title, pick) {
+  const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
+  if (!head || !body) return;
+  modalPanel('vod-pick-panel');
+  head.innerHTML = `<span>영상 선택${title ? ` — ${escapeHtml(title)}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  const tiles = manualLinkSectionsHtml(links);
   if (!pick) { body.innerHTML = tiles || '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
   // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
   const token = ++linkPickToken;
@@ -9763,10 +9794,12 @@ function renderChemistry() {
   // 이름 영역(2026-08-09 개정): 설명은 상단 '설명 보기' 토글 소관 — OFF는 케미명 가로 나열·가운데 정렬(구분자 ·, 아이콘은 이름 뒤 인라인),
   // ON은 [이름(우측정렬)] [아이콘 칸] [설명(좌측정렬)] 3열 — 아이콘을 칸으로 빼 이름 끝선을 맞춘다. 행 전체(이름·아이콘·설명)가 클릭·오버 대상.
   // D열이 링크를 정한다 — http(s)면 외부 클립(externalLink)·실존 케미명이면 연관 케미(link), 오타는 링크 강등.
+  // 2026-09-09: D열이 여러 항목(주소들 + 연관 케미명들)이 되고 누르면 언제나 모달 — 주소는 유튜브 타일·게시글/링크 행, 연관 케미는 이름 행(누르면 그 카드로 점프).
+  // isUrl은 그림 분기(주소가 하나라도 있으면 externalLink, 참조뿐이면 link). 오타 참조는 걸러진다(allEntryNames).
   const linkInfo = (e) => {
-    const isUrl = /^https?:\/\//i.test(e.clip);
-    const isRef = !isUrl && !!e.clip && allEntryNames.has(e.clip);
-    return { isUrl, link: (isUrl || isRef) ? e.clip : '' };
+    const urls = e.links || [], refs = (e.refs || []).filter(n => allEntryNames.has(n) && n !== e.name);
+    const isUrl = urls.length > 0;
+    return { isUrl, link: (urls.length || refs.length) ? e.name : '', urls, refs };
   };
   const partSpan = (e) => {   // OFF 가로 나열용 조각(아이콘 인라인)
     const active = e.types.some(t => chemFilterTypes.has(t));
@@ -9957,30 +9990,33 @@ function renderChemistry() {
     descToggle.classList.toggle('on', chemShowDesc);
   });
 
-  // ── 케미명 클릭 = 링크 이동'만'(2026-08-08 확정) ──
+  // ── 케미명 클릭 = 모달(2026-09-09 Crenop — 구 2026-08-08 '링크 이동만'을 대체) ──
   // 설명 표시는 상단 '설명 보기' 토글이 전담한다(오버 공개·클릭 고정 전부 폐지, PC·모바일 동일 규칙).
   // 클릭 대상: OFF는 링크 있는 이름(.chem-name-part.has-link), ON은 행 전체(.chem-nrow.has-link — 이름·아이콘·설명 어디든).
-  // 외부 URL은 새 탭, 케미명 참조는 그 카드로 즉시 점프 + 민트 플래시 + 이름 강조.
+  // 모달 = D열의 주소들(유튜브 타일·게시글/링크 행) + 연관 케미들(이름 행 — 누르면 그 카드로 점프 + 민트 플래시 + 이름 강조). 하나뿐이어도 모달(컨텐츠·현수막과 같은 규칙).
   const grid = body.querySelector('.chem-grid');
+  const jumpToChem = (cname, from) => {
+    // 같은 케미명은 꺼짐 이름·켬 행 두 변형으로 존재 — 대상 카드를 찾은 뒤 그 카드 안 변형 전부에 강조를 걸어야
+    // 어느 토글 상태에서도 보이는 쪽이 강조된다(과거엔 첫 매치=꺼짐 변형에만 걸려 켬 상태에선 강조가 안 보였음)
+    const targets = [...grid.querySelectorAll('[data-cname]')].filter(x => x.dataset.cname === cname && x !== from);
+    if (!targets.length) return;   // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 행이 안 만들어짐)
+    const tcard = targets[0].closest('.chem-card');
+    if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일
+    tcard.classList.remove('chem-flash'); void tcard.offsetWidth;          // 연타 시 강조 재시작
+    tcard.classList.add('chem-flash');
+    const marks = targets.filter(x => tcard.contains(x));
+    marks.forEach(x => x.classList.add('hl'));   // 어느 이름으로 왔는지 표시 — 설명 강제 표시는 안 함(설명은 토글 소관)
+    setTimeout(() => { tcard.classList.remove('chem-flash'); marks.forEach(x => x.classList.remove('hl')); }, 1400);
+  };
+  const entryByName = (nm) => { for (const arr of Object.values(CHEM_NAMES)) { const f = arr.find(x => x.name === nm); if (f) return f; } for (const g of CHEM_GROUPS) { const f = g.entries.find(x => x.name === nm); if (f) return f; } return null; };
   if (grid) {
     grid.addEventListener('click', e => {
       const part = e.target.closest('.chem-name-part.has-link') || e.target.closest('.chem-nrow.has-link');
       if (!part) return;
-      const clip = part.dataset.clip || '';
-      if (/^https?:\/\//i.test(clip)) { window.open(clip, '_blank', 'noopener'); return; }
-      // 같은 케미명은 꺼짐 이름·켬 행 두 변형으로 존재 — 대상 카드를 찾은 뒤 그 카드 안 변형 전부에 강조를 걸어야
-      // 어느 토글 상태에서도 보이는 쪽이 강조된다(과거엔 첫 매치=꺼짐 변형에만 걸려 켬 상태에선 강조가 안 보였음)
-      const targets = [...grid.querySelectorAll('[data-cname]')].filter(x => x.dataset.cname === clip && x !== part);
-      if (targets.length) {
-        const tcard = targets[0].closest('.chem-card');
-        if (tcard.scrollIntoView) tcard.scrollIntoView({ block: 'center' });   // 즉시 점프 — 이벤트 탭 맨위/아래 버튼과 동일
-        tcard.classList.remove('chem-flash'); void tcard.offsetWidth;          // 연타 시 강조 재시작
-        tcard.classList.add('chem-flash');
-        const marks = targets.filter(x => tcard.contains(x));
-        marks.forEach(x => x.classList.add('hl'));   // 어느 이름으로 왔는지 표시 — 설명 강제 표시는 안 함(설명은 토글 소관)
-        setTimeout(() => { tcard.classList.remove('chem-flash'); marks.forEach(x => x.classList.remove('hl')); }, 1400);
-      }
-      // 대상이 필터로 숨어 있으면 조용히 무시(오타 참조는 애초에 링크로 안 만들어짐)
+      const entry = entryByName(part.dataset.cname || '');
+      if (!entry) return;
+      const { urls, refs } = linkInfo(entry);
+      openChemModal(entry.name, urls, refs, (nm) => jumpToChem(nm, part));
     });
 
     // ── 카드 높이 고정(명전 방식 실측, 2026-08-09 개정) ──

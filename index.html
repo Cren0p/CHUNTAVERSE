@@ -3272,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-09f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6204,8 +6204,9 @@ function pickVodTiles(pick) {
       const info = vodInfoState.data[String(it.no)];
       if (info === undefined) { ensureVodInfo(it.no, it.catch); pending = true; }
       else if (info) {
-        const v = vodInfoAsItem(it.no, info, it.url, it.title);
-        const owner = MEMBER_BY_ID[info.member_id];
+        const sp = splitMemberPrefix(it.title);   // 시트 제목 앞의 멤버 이름은 멤버로(제목에서 뗀다) — 조회의 주인 멤버가 있으면 그것이 우선
+        const v = vodInfoAsItem(it.no, info, it.url, sp.rest);
+        const owner = MEMBER_BY_ID[info.member_id] || sp.member;
         const who = owner ? whoLine(owner) : '';
         const tile = `<div class="cal-vod">${who}${vodTileHtml(v)}</div>`;
         if (info.kind === 'REVIEW' || info.kind === 'NORMAL') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
@@ -6213,9 +6214,8 @@ function pickVodTiles(pick) {
         return;
       }
     }
-    const words = String(it.title || '').trim().split(/\s+/);
-    const named = MEMBERS.find(x => x.name === words[0]);   // ② 제목 첫 낱말 = 멤버 이름
-    const label = named ? (words.slice(1).join(' ') || '다시보기') : (it.title || `다시보기 ${i + 1}`);
+    const sp = splitMemberPrefix(it.title); const named = sp.member;   // ② 제목 첫 낱말 = 멤버 이름
+    const label = named ? (sp.rest || '다시보기') : (it.title || `다시보기 ${i + 1}`);
     // 목록 밖(19금·구독+ 등)은 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
     items.push({ mi: named ? mi(named.id) : 999, k: items.length, href: it.url, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
   });
@@ -6252,8 +6252,9 @@ function manualLinkSectionsHtml(links) {
       if (hit) { groups.vod.push(`<div class="cal-vod"><span class="cal-vod-who"><img src="${hit.m.img}" alt="">${escapeHtml(hit.m.name)}</span>${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v)}</div>`); return; }
       const info = vodInfoState.data[vodNo];
       if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}"><a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || '불러오는 중')}</span></span></a></div>`); return; }
-      const v = info ? vodInfoAsItem(vodNo, info, u, manual) : { title_no: vodNo, title: manual || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
-      const owner = info ? MEMBER_BY_ID[info.member_id] : null;
+      const sp = splitMemberPrefix(manual);   // 시트 제목 앞의 멤버 이름(2026-09-10) — 컨텐츠 모달과 같은 규칙
+      const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
+      const owner = (info && MEMBER_BY_ID[info.member_id]) || sp.member;
       const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;
       groups[(info && (info.kind === 'CLIP' || info.kind === 'CATCH')) || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);
       return;
@@ -7775,6 +7776,12 @@ function ensureVodInfo(no, isCatch) {
   }).catch(() => { vodInfoState.data[no] = false; }).finally(() => { vodInfoState.loading.delete(no); if (modalRepaint) modalRepaint(); });
 }
 function isSoopCatchUrl(u) { return /vod\.sooplive\.(?:com|co\.kr)\/player\/\d+\/catch/i.test(String(u || '')); }
+// 시트 제목의 첫 낱말이 멤버 이름이면 그 멤버(2026-09-06 규칙 — 조회 성공·실패와 무관하게 먼저 적용, 2026-09-10 Crenop 지적으로 통일): { member, rest }
+function splitMemberPrefix(title) {
+  const words = String(title || '').trim().split(/\s+/);
+  const member = words[0] ? MEMBERS.find(x => x.name === words[0]) : null;
+  return { member: member || null, rest: member ? words.slice(1).join(' ') : String(title || '').trim() };
+}
 // 조회 결과로 타일 재료 만들기 — 시트 제목이 있으면 그것, 없으면 조회 제목. 캐치는 주소를 그대로(플레이어 주소에 /catch)
 function vodInfoAsItem(no, info, url, sheetTitle) {
   return { title_no: no, title: sheetTitle || info.title || '', thumb: info.thumb || '', duration_ms: info.dur || 0, grade: info.grade || 0, auth_no: info.auth ?? null, kind: info.kind || '', href: isSoopCatchUrl(url) ? url : undefined };

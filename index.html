@@ -2279,15 +2279,18 @@
      통계 기간 버튼과 다른 옷이었다. .stats-period-btn 문법에 맞춘다 — hover=글씨, 선택=테두리+글씨. */
   .hall-period-btn:hover { color: var(--accent); }
   .hall-period-btn.active { border-color: var(--accent); color: var(--accent); }
+  /* 열 폭 minmax(0, 1fr)(2026-09-10 Crenop 태블릿 실사고): 1fr만 쓰면 트랙의 최소 폭이 카드 내용(사진 104 + '3041시간 22분' 같은 값, 약 320px)이라
+     칸이 모자라면 트랙이 내용만큼 늘어나 격자가 본문 밖으로 삐져나갔다(3열에 카드 279px씩 → 셋째 카드가 잘림). 0으로 두어 격자는 절대 넘치지 않게 하고,
+     아래 문턱을 카드 최소 폭(약 320) 기준으로 잡아 내용이 칸을 넘는 일이 없게 한다: 4열 ≥ 1320 · 3열 ≥ 990 · 2열 ≥ 660 · 그 아래 1열 */
   .hall-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
   }
   /* 열 수는 2·3위 보기(수평형: 사진104px+순위행, 더 넓은 카드 필요) 켜진 상태 기준으로 통일 → 토글해도 열이 안 바뀜. 세로형은 같은 열수에서 카드만 더 여유 */
-  @container (max-width: 1200px) { .hall-grid { grid-template-columns: repeat(3, 1fr); } }
-  @container (max-width: 740px) { .hall-grid { grid-template-columns: repeat(2, 1fr); } }
-  @container (max-width: 550px) { .hall-grid { grid-template-columns: 1fr; } }
+  @container (max-width: 1320px) { .hall-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @container (max-width: 990px) { .hall-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @container (max-width: 660px) { .hall-grid { grid-template-columns: minmax(0, 1fr); } }
   .hall-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -3269,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10q';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10r';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

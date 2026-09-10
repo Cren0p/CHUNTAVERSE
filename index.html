@@ -3274,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10n';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5240,7 +5240,7 @@ function parseTags(cell) { return String(cell || '').split(/[,|/]/).map(t => t.t
 // 링크 칸(컨텐츠 시트 C열 · 현수막 시트 C열 공용, 2026-09-08): 항목 = 주소 또는 '주소 제목', 줄바꿈·쉼표로 나눔.
 // 숲 다시보기 주소는 수동 포함, 앞에 '-'를 붙이면 자동 목록에서 제외(2026-09-06). 그 밖의 주소(유튜브·게시글·카페)는 수동 링크.
 function parseLinkCell(cell) {
-  return String(cell || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^-?https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });
+  return String(cell || '').split(/[\n,|]+/).map(x => x.trim()).filter(x => /^-?https?:\/\//i.test(x)).map(x => { const sp = x.search(/\s/); return sp < 0 ? { url: x, title: '' } : { url: x.slice(0, sp), title: x.slice(sp + 1).trim() }; });   // 구분자 줄바꿈·쉼표·|(2026-09-10 전수조사: 종류 칸과 같은 셋 중 주소에 못 쓰는 /만 뺀다)
 }
 function parseScheduleRows(rows) {
   const out = [];
@@ -5304,7 +5304,7 @@ function contentAll() { return contentData.filter(contentPast); }
 function isCountedContent(c) { return (c.imgs || (c.url ? [c.url] : [])).some(u => String(u).toLowerCase().includes('/content/')); }
 // A열에서 '사진'으로 인식하는 것은 content 폴더의 주소뿐(2026-09-06 Crenop) — 현수막(banner) 사진 등 다른 폴더 주소는 안 적은 것으로 친다.
 // 컨텐츠 행 판정(loadContent)·사진 목록·파일 이름 날짜(pickWhen)·일정 파서의 사진 행 판정(fromImage)이 전부 이 하나를 본다.
-function contentPhotos(cell) { return String(cell || '').split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x) && x.toLowerCase().includes('/content/')); }
+function contentPhotos(cell) { return String(cell || '').split(/[\n,|]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x) && x.toLowerCase().includes('/content/')); }   // 구분자 줄바꿈·쉼표·|(2026-09-10 통일)
 
 // KST 기준 D-day 일수(오늘=0). 자정끼리의 차이라 시:분과 무관.
 function ddayNum(item) {
@@ -6301,12 +6301,15 @@ function findLoadedPost(postNo) {
 function manualLinkSectionsHtml(links) {
   const groups = { youtube: [], post: [], link: [], vod: [], clip: [] };   // vod·clip: 숲 플레이어 주소(2026-09-09)
   (links || []).forEach((it, i) => {
-    const u = typeof it === 'string' ? it : it.url, manual = typeof it === 'string' ? '' : (it.title || '');
+    const u = typeof it === 'string' ? it : it.url, rawTitle = typeof it === 'string' ? '' : (it.title || '');
+    // 시트 제목 앞의 멤버 이름 규칙(2026-09-10 Crenop: 유튜브에도 — 전 링크 종류 공통): '주소 천양 제목' → 이름줄 천양, 제목 '제목'. 숲 다시보기와 같은 규칙
+    const sp = splitMemberPrefix(rawTitle), manual = sp.rest;
     const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
-    const found = manual ? null : (id ? findLoadedYoutube(id) : (postNo ? findLoadedPost(postNo) : null));
+    const found = (id ? findLoadedYoutube(id) : (postNo ? findLoadedPost(postNo) : null));   // 불러온 목록에 있으면 제목·멤버를 거기서(시트 제목이 있으면 제목은 시트 것)
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
     const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
-    const who = found ? `<span class="cal-vod-who"><img src="${found.m.img}" alt="">${escapeHtml(found.m.name)}</span>` : '';
+    const whoM = (found && found.m) || sp.member;
+    const who = whoM ? `<span class="cal-vod-who"><img src="${whoM.img}" alt="">${escapeHtml(whoM.name)}</span>` : '';
     const vodNo = (!id && !postNo) ? soopVodTitleNo(u) : '';
     if (vodNo) {   // 숲 플레이어 주소(2026-09-09): 스냅샷·목록 → 없으면 번호 조회. 다시보기는 '다시보기' 구획, 클립·캐치는 '클립·캐치' 구획(모두 타일)
       const hit = isSoopCatchUrl(u) ? null : findLoadedVod(vodNo);
@@ -6322,7 +6325,7 @@ function manualLinkSectionsHtml(links) {
     }
     if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
-    else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${found ? `<span class="day-item-time">${escapeHtml(found.m.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
+    else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${whoM ? `<span class="day-item-time">${escapeHtml(whoM.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
   });
   const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'], vod: ['soop', '다시보기'], clip: ['soop', '클립'] };   // clip = 다시보기 아닌 숲 영상 전부(클립·캐치·업로드)
   // 게시글·링크는 영상이 아니라 썸네일 틀이 뜻이 없다(2026-09-08 Crenop) — 지난 활동의 글 행(.day-item: 종류 그림 + 제목, 행 전체가 링크)으로. 영상(유튜브·다시보기)만 타일

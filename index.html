@@ -3274,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6270,8 +6270,8 @@ function pickVodTiles(pick) {
         const owner = MEMBER_BY_ID[info.member_id] || sp.member;
         const who = owner ? whoLine(owner) : '';
         const tile = `<div class="cal-vod">${who}${vodTileHtml(v)}</div>`;
-        if (info.kind === 'REVIEW' || info.kind === 'NORMAL') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
-        else clips.push({ mi: owner ? mi(owner.id) : 999, k: clips.length, href: v.href || vodPlayerUrl(v), html: tile });   // CLIP·CATCH → 클립·캐치 구획
+        if (info.kind === 'REVIEW') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
+        else clips.push({ mi: owner ? mi(owner.id) : 999, k: clips.length, href: v.href || vodPlayerUrl(v), html: tile });   // 다시보기(REVIEW)가 아니면 전부 '클립' 구획(클립·캐치·업로드 VOD — 2026-09-10 Crenop)
         return;
       }
     }
@@ -6317,14 +6317,14 @@ function manualLinkSectionsHtml(links) {
       const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
       const owner = (info && MEMBER_BY_ID[info.member_id]) || sp.member;
       const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;
-      groups[(info && (info.kind === 'CLIP' || info.kind === 'CATCH')) || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);
+      groups[(info && info.kind !== 'REVIEW') || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);   // 다시보기(REVIEW)가 아니면 전부 '클립'(2026-09-10)
       return;
     }
     if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
     else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${found ? `<span class="day-item-time">${escapeHtml(found.m.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
   });
-  const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'], vod: ['soop', '다시보기'], clip: ['soop', '클립·캐치'] };
+  const SEC = { youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'], vod: ['soop', '다시보기'], clip: ['soop', '클립'] };   // clip = 다시보기 아닌 숲 영상 전부(클립·캐치·업로드)
   // 게시글·링크는 영상이 아니라 썸네일 틀이 뜻이 없다(2026-09-08 Crenop) — 지난 활동의 글 행(.day-item: 종류 그림 + 제목, 행 전체가 링크)으로. 영상(유튜브·다시보기)만 타일
   const secHtml = (k) => groups[k].length ? `<div class="vod-pick-sec" data-kind="${k}">${SVG_ICONS[SEC[k][0]]}<span>${SEC[k][1]}</span></div>` + ((k === 'youtube' || k === 'vod' || k === 'clip') ? `<div class="ds-vods">${groups[k].join('')}</div>` : `<div class="lp-rows">${groups[k].join('')}</div>`) : '';
   return secHtml('youtube') + secHtml('post') + secHtml('link') + secHtml('vod') + secHtml('clip');
@@ -6342,6 +6342,9 @@ function openChemModal(name, urls, refs, onJump, cardHtmlByName) {
   // 모달 안에서는 설명이 항상 보인다(2026-09-10 Crenop) — 모달 전용 간단 카드에 설명 줄이 고정으로 있다(cardHtmlByName)
   const refHtml = refs.length ? `<div class="vod-pick-sec" data-kind="chem">${SVG_ICONS.chemistry}<span>연관 케미</span></div><div class="chem-modal-grid">${cardWrap(name, true)}${refs.map(nm => cardWrap(nm, false)).join('')}</div>` : '';
   body.innerHTML = (linkHtml + refHtml) || '<div class="vod-pick-empty">링크가 없습니다.</div>';
+  // 격자 폭 = 카드 수만큼(최대 3열): 카드가 둘이면 두 장 폭 — 세 장 폭으로 비워 두지 않는다(2026-09-10 Crenop). max-width 100%가 좁은 화면을 막는다
+  const mg = body.querySelector('.chem-modal-grid');
+  if (mg) { const n = Math.max(1, Math.min(3, mg.children.length)); mg.style.width = `${n * 300 + (n - 1) * 12}px`; }
   body.querySelectorAll('.chem-modal-card').forEach(b => b.addEventListener('click', (ev) => { ev.preventDefault(); closeModal(); if (!b.dataset.self) onJump(b.dataset.cname); }));
   modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (ov && !ov.hidden && head.textContent.startsWith(name)) openChemModal(name, urls, refs, onJump, cardHtmlByName); };   // 번호 조회 도착 시(2026-09-09)
   showModal();
@@ -6360,7 +6363,7 @@ function openLinkPickModal(links, title, pick) {
     // 관련 다시보기가 없으면(시트가 뺐거나 애초에 없거나) 구획을 아예 안 그린다(2026-09-08 Crenop: '그날 다시보기가 없습니다'는 뜻이 어긋난다 — 그날 것이 있어도 관련 없는 건 시트로 뺀 것)
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
       : r.pending ? `<div class="vod-pick-empty">${gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중'}</div>` : '';
-    const clipBody = r.clipsHtml ? `<div class="vod-pick-sec" data-kind="clip">${SVG_ICONS.soop}<span>클립·캐치</span></div><div class="ds-vods">${r.clipsHtml}</div>` : '';   // 2026-09-09
+    const clipBody = r.clipsHtml ? `<div class="vod-pick-sec" data-kind="clip">${SVG_ICONS.soop}<span>클립</span></div><div class="ds-vods">${r.clipsHtml}</div>` : '';   // 2026-09-09(구획 이름 '클립·캐치' → '클립', 2026-09-10: 업로드 VOD까지 포함)
     body.innerHTML = tiles + (vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '') + clipBody || '<div class="vod-pick-empty">링크가 없습니다.</div>';
     return r.pending;
   };

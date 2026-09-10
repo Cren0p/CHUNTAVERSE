@@ -2031,12 +2031,12 @@
      구: 5인은 폭 따라 5 또는 4+1, 7인은 4+3 왼쪽 정렬 — 일관성 없음. */
   /* 트랙은 전부 같은 폭(사람 칸 60 = 트랙 30 × 2)이어야 오프셋이 정확히 가운데가 된다(auto 트랙은 걸친 항목 탓에 20px쯤 어긋났다 — 실측) */
   .chem-group-members { display: grid; justify-content: center; align-items: start; column-gap: 0; row-gap: 8px; }
-  .chem-group-members.cols2 { grid-template-columns: repeat(4, 30px); }
-  .chem-group-members.cols3 { grid-template-columns: repeat(6, 30px); }
-  .chem-group-members.cols4 { grid-template-columns: repeat(8, 30px); }
-  .chem-group-members .chem-member { grid-column: span 2; width: 60px; justify-self: center; }
+  .chem-group-members.cols2 { grid-template-columns: repeat(4, 25px); }
+  .chem-group-members.cols3 { grid-template-columns: repeat(6, 25px); }
+  .chem-group-members.cols4 { grid-template-columns: repeat(8, 25px); }
+  .chem-group-members .chem-member { grid-column: span 2; width: 50px; justify-self: center; }   /* 칸 50(그림 40 + 사이 10) — 60은 멀어 보였다(2026-09-10 Crenop) */
   /* 4인은 카드가 좁으면(2열 벽 등) 2+2 — 4 → 2×2트랙이면 첫 줄 오프셋이 없어 그대로 맞는다 */
-  @container (max-width: 215px) { .chem-group-members.cols4.n4 { grid-template-columns: repeat(4, 30px); } }
+  @container (max-width: 215px) { .chem-group-members.cols4.n4 { grid-template-columns: repeat(4, 25px); } }
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
 
   /* === 컨텐츠 탭 === */
@@ -3269,7 +3269,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10o';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10p';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6262,7 +6262,7 @@ function pickVodTiles(pick) {
       else if (info) {
         const sp = splitMemberPrefix(it.title);   // 시트 제목 앞의 멤버 이름은 멤버로(제목에서 뗀다) — 조회의 주인 멤버가 있으면 그것이 우선
         const v = vodInfoAsItem(it.no, info, it.url, sp.rest);
-        const owner = MEMBER_BY_ID[info.member_id] || sp.member;
+        const owner = sp.member || MEMBER_BY_ID[info.member_id];   // 시트에 적은 이름이 우선(2026-09-10 Crenop: 캐치 뒤 '김웰로'), 없으면 조회의 주인 멤버
         const who = owner ? whoLine(owner) : '';
         const tile = `<div class="cal-vod">${who}${vodTileHtml(v)}</div>`;
         if (info.kind === 'REVIEW') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
@@ -6313,7 +6313,7 @@ function manualLinkSectionsHtml(links) {
       if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}"><a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || '불러오는 중')}</span></span></a></div>`); return; }
       const sp = splitMemberPrefix(manual);   // 시트 제목 앞의 멤버 이름(2026-09-10) — 컨텐츠 모달과 같은 규칙
       const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
-      const owner = (info && MEMBER_BY_ID[info.member_id]) || sp.member;
+      const owner = sp.member || (info && MEMBER_BY_ID[info.member_id]);   // 시트 이름 우선(2026-09-10)
       const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;
       groups[(info && info.kind !== 'REVIEW') || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);   // 다시보기(REVIEW)가 아니면 전부 '클립'(2026-09-10)
       return;

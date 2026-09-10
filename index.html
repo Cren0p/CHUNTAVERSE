@@ -3269,7 +3269,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10p';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-10q';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6311,7 +6311,7 @@ function manualLinkSectionsHtml(links) {
       if (hit) { groups.vod.push(`<div class="cal-vod"><span class="cal-vod-who"><img src="${hit.m.img}" alt="">${escapeHtml(hit.m.name)}</span>${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v)}</div>`); return; }
       const info = vodInfoState.data[vodNo];
       if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}"><a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || '불러오는 중')}</span></span></a></div>`); return; }
-      const sp = splitMemberPrefix(manual);   // 시트 제목 앞의 멤버 이름(2026-09-10) — 컨텐츠 모달과 같은 규칙
+      // 멤버 이름은 위에서 한 번 뗀 sp(rawTitle 기준)를 쓴다 — 여기서 manual(이미 뗀 제목)에 다시 걸면 이름이 사라진다(2026-09-10 실사고: 캐치 뒤 '김웰로' 소실)
       const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
       const owner = sp.member || (info && MEMBER_BY_ID[info.member_id]);   // 시트 이름 우선(2026-09-10)
       const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;

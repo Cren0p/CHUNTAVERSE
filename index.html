@@ -3272,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-10r';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-11a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6304,9 +6304,11 @@ function manualLinkSectionsHtml(links) {
     const sp = splitMemberPrefix(rawTitle), manual = sp.rest;
     const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
     const found = (id ? findLoadedYoutube(id) : (postNo ? findLoadedPost(postNo) : null));   // 불러온 목록에 있으면 제목·멤버를 거기서(시트 제목이 있으면 제목은 시트 것)
+    let yt = null;   // 유튜브 조회(2026-09-11): 시트에도 목록에도 없을 때만 — 제목·채널(→ 멤버)
+    if (id && !found && !(manual && sp.member)) { yt = ytInfoState.data[id]; if (yt === undefined) { ensureYtInfo(id); yt = null; } }
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
-    const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
-    const whoM = (found && found.m) || sp.member;
+    const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (yt && yt.title) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
+    const whoM = sp.member || (found && found.m) || (yt && memberByYtAuthor(yt.author_url)) || null;
     const who = whoM ? `<span class="cal-vod-who"><img src="${whoM.img}" alt="">${escapeHtml(whoM.name)}</span>` : '';
     const vodNo = (!id && !postNo) ? soopVodTitleNo(u) : '';
     if (vodNo) {   // 숲 플레이어 주소(2026-09-09): 스냅샷·목록 → 없으면 번호 조회. 다시보기는 '다시보기' 구획, 클립·캐치는 '클립·캐치' 구획(모두 타일)
@@ -7842,6 +7844,24 @@ function ensureVodInfo(no, isCatch) {
   }).catch(() => { vodInfoState.data[no] = false; }).finally(() => { vodInfoState.loading.delete(no); if (modalRepaint) modalRepaint(); });
 }
 function isSoopCatchUrl(u) { return /vod\.sooplive\.(?:com|co\.kr)\/player\/\d+\/catch/i.test(String(u || '')); }
+// ── 유튜브 영상 조회(2026-09-11 Crenop): 시트에 제목·멤버가 없고 불러온 목록에도 없는 유튜브 링크는 워커 /ytinfo(oEmbed)로 제목·채널을 받는다.
+//    채널 → 멤버는 관련 링크 표(MEMBER_LINKS의 유튜브·유튜브2 핸들)와 대조. 도착하면 열린 모달을 다시 그린다(modalRepaint).
+const ytInfoState = { data: {}, loading: new Set() };   // id → { ok, title, author, author_url, thumb } | false
+function ensureYtInfo(id) {
+  if (!id || ytInfoState.data[id] !== undefined || ytInfoState.loading.has(id)) return;
+  ytInfoState.loading.add(id);
+  fetch(`${WORKER_URL}/ytinfo?id=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : null).then(j => { ytInfoState.data[id] = (j && j.ok) ? j : false; })
+    .catch(() => { ytInfoState.data[id] = false; }).finally(() => { ytInfoState.loading.delete(id); if (modalRepaint) modalRepaint(); });
+}
+function ytHandleOf(u) { const m = String(u || '').match(/youtube\.com\/@([^/?#]+)/i); if (!m) return ''; try { return decodeURIComponent(m[1]).toLowerCase(); } catch (e) { return m[1].toLowerCase(); } }
+function memberByYtAuthor(authorUrl) {
+  const h = ytHandleOf(authorUrl); if (!h) return null;
+  for (const m of MEMBERS) {
+    const L = (MEMBER_LINKS[m.id] || {}).common || {};
+    for (const v of [L['유튜브'], L['유튜브2'] && L['유튜브2'].url]) if (v && ytHandleOf(v) === h) return m;
+  }
+  return null;
+}
 // 시트 제목의 첫 낱말이 멤버 이름이면 그 멤버(2026-09-06 규칙 — 조회 성공·실패와 무관하게 먼저 적용, 2026-09-10 Crenop 지적으로 통일): { member, rest }
 function splitMemberPrefix(title) {
   const words = String(title || '').trim().split(/\s+/);

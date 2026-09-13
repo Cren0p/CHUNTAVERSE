@@ -345,7 +345,7 @@
     background: var(--surface2); border: 1px solid var(--border);
     color: var(--muted); cursor: pointer;
   }
-  .drawer-close svg { width: 18px; height: 18px; display: block; }
+  .drawer-close svg { width: 22px; height: 22px; display: block; }   /* ☰·체크박스와 같은 22px(2026-09-13 상자 안 아이콘 통일) */
   /* 우측 서랍 닫기 — 서랍이 열렸을 때만, 여는 버튼(깔때기)과 같은 자리에 겹쳐 띄운다.
      상단바 '밖'에 있어야 한다: 안에 두면 z-index가 상단바(5)로 묶여 서랍(40)에 가린다. */
   .drawer-close-r { position: fixed; top: 6px; right: 10px; z-index: 45; margin: 0; }
@@ -407,13 +407,13 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .drawer-btn:hover { border-color: var(--accent); }
-  .drawer-btn svg { width: 18px; height: 18px; display: block; }
-  /* 필터가 걸려 있으면(화면에 남은 항목 수 < 원래 수 — 전부 꺼져 0이어도 같다) 체크박스 안쪽 면만 절반 투명(2026-09-03 Crenop 확정).
-     비율만큼 옅어지던 방식(2026-09-02)은 폐지 — 본문이 걸러진 상태라는 것만 알리면 되고, 텅 비면 걸러졌음을 모를 수 없다.
-     색은 바꾸지 않는다(민트 없음). 점선 체크(.cb-check)는 2026-09-03 아이콘에서 제거(다른 곳에서 쓰면 점선 윤곽이 지저분하게 드러났다). */
-  .drawer-btn .funnel-fill { opacity: 1; }
-  .drawer-btn.filtered .funnel-fill { opacity: 0.5; }
-  #drawerBtnR svg { width: 22px; height: 22px; }   /* 체크박스는 상자 2~22 + 22px(66번 확정) — 18px에선 상자가 좁게 읽혔다 */
+  .drawer-btn svg { width: 22px; height: 22px; display: block; }   /* 셋 다 같은 상자 안 아이콘이라 22px 하나로(2026-09-13) — 종전 ☰·✕ 18px / 체크박스 22px(66번) 구분 폐지 */
+  /* 필터가 걸려 있으면(화면에 남은 항목 수 < 원래 수 — 전부 꺼져 0이어도 같다) 체크 대신 가로 막대(2026-09-13 Crenop — 체크박스 관례의 '일부 선택').
+     본문이 걸러진 상태라는 것만 알리면 되고(둘 중 하나), 색은 바꾸지 않는다(민트 없음 — 2026-09-03 규칙 유지).
+     종전 '안쪽 면 절반 투명'(.funnel-fill, 2026-09-03)은 파낸 체크 디자인과 함께 폐지. 빈 상자는 버튼 아이콘으로 놓으면 깨진 것처럼 읽혀 0개도 막대. */
+  .drawer-btn .cb-bar { display: none; }
+  .drawer-btn.filtered .cb-check { display: none; }
+  .drawer-btn.filtered .cb-bar { display: inline; }
   /* 드로어 뒤 가림막 — 누르면 닫힌다(우측 드로어의 유일한 닫기 경로이므로 값이 싸야 한다) */
   .drawer-scrim {
     position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -3272,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-11a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-13a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3845,13 +3845,14 @@ function modePlaceholder(mode) {
 function findMember(id) { return MEMBERS.find(m => m.id === id); }
 
 const SVG_ICONS = {
-  // 서랍 조작용(2026-08-31). 기존 아이콘과 같은 규격: viewBox 24, width/height 16, stroke 2·round.
-  // 종전엔 마크업에 직접 박아 넣었는데, 그러면 새 아이콘이 이 표에 없어 다음 사람이 못 찾는다.
-  menu: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>`,
-  close: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
-  // 서랍 우측 버튼 = 체크박스(2026-09-02, 66번 승인 개정 A — 깔때기 폐지). 상자 테두리는 늘 그대로, 안쪽 면(.funnel-fill)만
-  // 필터가 걸려 있을 때 절반 투명(2026-09-03 Crenop 확정 — 비율만큼 옅어지던 개정 B 폐지). 점선 윤곽(.cb-check) 경로는 제거.
-  checkbox: `<svg viewBox="0 0 24 24" width="16" height="16"><path class="funnel-fill" d="M2 2h20v20H2z M9.20 18.70 21.03 7.78 21.03 7.51 19.16 5.50 9.40 14.47 6.14 10.96 5.89 10.96 3.74 12.98 9.20 18.70z" fill="currentColor" fill-rule="evenodd"/><rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+  // 서랍 조작용(2026-08-31). 종전엔 마크업에 직접 박아 넣었는데, 그러면 새 아이콘이 이 표에 없어 다음 사람이 못 찾는다.
+  // 2026-09-13 Crenop: 세 개를 같은 상자(2~22, 선 2) 안에 선으로 — 메뉴 = 가로줄 3, 닫기 = X, 필터 = 체크(전부 표시) / 가로 막대(걸러짐, 체크박스 관례의 '일부 선택').
+  //   종전엔 ☰·✕가 맨 선(18px)이고 체크박스만 채운 면에서 체크를 파낸 22px이라 잉크가 두 배 차이(13.5×9 · 10.5×10.5 · 20.2×20.2px)로 읽혔다. 상자 안에 넣으면 셋 다 20.2px 정사각.
+  //   걸러짐은 .drawer-btn.filtered에서 체크(.cb-check)를 감추고 막대(.cb-bar)를 보인다(CSS) — 종전 '면 반투명'(.funnel-fill, 2026-09-03)은 파낸 체크와 함께 폐지. 색은 바꾸지 않는다(2026-09-03 규칙 유지).
+  //   상자 <rect>에 stroke-linejoin round를 주지 말 것 — 모서리가 둥글어진다(각진 모서리 규칙). 둥근 이음은 체크 경로에만.
+  menu: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20"/><path d="M7 8h10M7 12h10M7 16h10"/></svg>`,
+  close: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20"/><path d="M7.5 7.5l9 9M16.5 7.5l-9 9"/></svg>`,
+  checkbox: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20"/><path class="cb-check" d="M6.5 12.5l3.5 3.5 7.5-8" stroke-linejoin="round"/><path class="cb-bar" d="M7 12h10"/></svg>`,
   // 달력 항목 종류(2026-09-01). 같은 규격: viewBox 24 · 16×16 · stroke 2 · round.
   soccer: `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2.6999999999999993a9.3 9.3 0 1 1 -0.01 0z M9.62 11.23 10.53 14.02 13.47 14.02 14.38 11.23 12.00 9.50z M10.41 2.92 9.43 5.93 12.00 7.80 14.57 5.93 13.59 2.92z M2.87 10.70 5.44 12.57 8.01 10.70 7.02 7.68 3.85 7.68z M7.94 20.28 10.51 18.42 9.53 15.40 6.36 15.40 5.38 18.42z M18.62 18.42 17.64 15.40 14.47 15.40 13.49 18.42 16.06 20.28z M20.15 7.68 16.98 7.68 15.99 10.70 18.56 12.57 21.13 10.70z" fill="currentColor" fill-rule="evenodd"/></svg>`,   // 잔디(축구) — 채운 공에 오각형을 파냄(2026-09-02, 66번 승인. 64판 폐기)
   steam: `<svg viewBox="0 0 24 24" width="16" height="16"><g transform="translate(-0.73 -2.63) scale(1.2103)"><path d="M9.12 19.29 7.98 19.29 7.02 18.94 6.02 18.02 5.54 16.85 1.79 15.36 1.57 15.06 1.22 13.40 1.22 11.39 6.67 13.62 7.90 13.18 8.68 13.18 11.43 9.21 11.43 8.51 11.69 7.55 12.31 6.50 12.96 5.85 13.92 5.23 15.23 4.88 16.54 4.97 17.85 5.50 19.03 6.59 19.73 7.98 19.81 9.90 19.38 11.13 19.03 11.65 17.85 12.74 16.63 13.27 15.49 13.35 11.83 15.97 11.61 16.19 11.52 17.15 11.08 18.02 10.08 18.94 9.12 19.29z M16.15 11.91 17.06 11.61 17.98 10.78 18.42 9.82 18.50 8.94 18.07 7.63 17.33 6.81 16.45 6.37 15.23 6.28 14.10 6.72 13.27 7.55 12.83 8.60 12.83 9.64 13.09 10.43 13.83 11.35 14.79 11.87 16.15 11.91z M15.84 11.26 15.06 11.17 14.27 10.73 13.79 10.17 13.53 9.47 13.62 8.51 13.96 7.81 14.53 7.33 15.58 6.98 16.28 7.07 16.89 7.42 17.46 7.98 17.72 8.60 17.72 9.64 17.46 10.25 16.80 10.91 15.84 11.26z M9.16 18.55 9.90 18.24 10.56 17.59 10.91 16.80 10.91 15.67 10.30 14.53 9.64 14.05 8.60 13.79 7.90 13.88 7.81 14.05 9.47 14.75 9.86 15.14 10.21 15.84 10.12 16.80 9.38 17.72 8.77 17.98 7.90 17.89 6.50 17.28 6.46 17.41 7.20 18.24 7.72 18.50 9.16 18.55z" fill="currentColor" fill-rule="evenodd"/></g></svg>`,   // 스팀 로고 추적본 22.5(66번 승인. 64판 폐기)
@@ -6357,11 +6358,21 @@ function openLinkPickModal(links, title, pick) {
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
   head.innerHTML = `<span>영상 선택${title ? ` — ${escapeHtml(title)}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  const tiles = manualLinkSectionsHtml(links);
-  if (!pick) { body.innerHTML = tiles || '<div class="vod-pick-empty">링크가 없습니다.</div>'; showModal(); return; }
-  // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
+  // 수동 링크 타일은 그릴 때마다 다시 만든다(2026-09-13): 유튜브 제목·멤버(/ytinfo)와 숲 번호 조회(/vodinfo)는 열고 난 뒤에 도착하는데,
+  // 종전엔 열 때 한 번 만든 문자열을 재그리기가 그대로 다시 붙여 첫 클릭엔 '유튜브 N'(이름줄 없음)·'불러오는 중'으로 남았다 — 둘째 클릭부터 정상이었던 이유는
+  // 조회 결과가 이미 있어서. 도착한 정보는 재조회하지 않으므로(ytInfoState·vodInfoState) 요청이 늘지 않는다. 실사고 2026-09-13(컨텐츠·현수막 탭).
   const token = ++linkPickToken;
+  const tilesNow = () => manualLinkSectionsHtml(links);
+  const alive = () => { const ov = document.getElementById('lrOverlay'); return token === linkPickToken && !!ov && !ov.hidden; };
+  if (!pick) {
+    const paintTiles = () => { body.innerHTML = tilesNow() || '<div class="vod-pick-empty">링크가 없습니다.</div>'; };
+    paintTiles();
+    modalRepaint = () => { if (alive()) paintTiles(); };   // 조회 도착 시 다시 그리기 — 종전엔 이 분기에 배선이 없었다
+    showModal(); return;
+  }
+  // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
   const paint = (gaveUp) => {
+    const tiles = tilesNow();
     const r = pickVodTiles(pick);
     // 관련 다시보기가 없으면(시트가 뺐거나 애초에 없거나) 구획을 아예 안 그린다(2026-09-08 Crenop: '그날 다시보기가 없습니다'는 뜻이 어긋난다 — 그날 것이 있어도 관련 없는 건 시트로 뺀 것)
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
@@ -6370,7 +6381,7 @@ function openLinkPickModal(links, title, pick) {
     body.innerHTML = tiles + (vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '') + clipBody || '<div class="vod-pick-empty">링크가 없습니다.</div>';
     return r.pending;
   };
-  modalRepaint = () => { const ov = document.getElementById('lrOverlay'); if (token === linkPickToken && ov && !ov.hidden) paint(false); };   // 번호 조회 도착 시 다시 그리기(2026-09-09)
+  modalRepaint = () => { if (alive()) paint(false); };   // 번호·유튜브 조회 도착 시 다시 그리기(2026-09-09 · 수동 타일 포함 2026-09-13)
   // 시트 포함 중 불러온 목록에 없는 번호가 있으면 참여자들의 전달 목록도 받는다(월경 밤 방송 — 컨텐츠 날짜와 방송 시작일의 달이 다르다)
   const unresolved = (pick.include || []).some(it => !findLoadedVod(it.no));
   if (paint(false) || (unresolved && pick.ym)) {

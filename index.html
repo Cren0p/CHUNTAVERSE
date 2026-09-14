@@ -3272,7 +3272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-13a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-14a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5060,14 +5060,27 @@ function modalPanel(cls, vars) {
 // 본문을 다 채운 뒤 표시. onClose를 주면 그 모달만의 뒷정리를 닫을 때 실행한다(공통 정리는 closeModal 참고).
 function showModal(onClose) {
   modalOnClose = onClose || null;
+  modalBack = null;   // 새로 여는 모달은 1단계 — 2단계로 만드는 쪽(bindLinkPicks의 back)이 이 뒤에 채운다
   const ov = document.getElementById('lrOverlay');
   if (ov) ov.hidden = false;
   syncBodyScrollLock();
 }
 let modalOnClose = null;
+// 2단계 모달(모아보기에서 연 영상 선택)이 닫힐 때 돌아갈 1단계를 다시 여는 함수(2026-09-14 Crenop 확정 (b): 닫기 = 지금 보는 층만).
+// 가림막·패널이 하나뿐이라 2단계는 1단계 내용을 덮어쓰므로, 되돌아가기 = 1단계를 같은 인자로 다시 그리기. 컨텐츠·현수막 탭에서 연 영상 선택은 아래층이 페이지라 없음(null).
+let modalBack = null;
 function closeModal() {
   const ov = document.getElementById('lrOverlay');
   if (!ov || ov.hidden) return;
+  if (modalBack) {
+    // 2단계 뒷정리(onClose)는 여기서도 실행한다 — 영상 선택의 0.4초 감시 루프·재그리기는 '가림막이 내려갔는가'만 보므로,
+    // 토큰을 끊지 않으면 목록으로 돌아간 본문을 도로 덮어쓴다. 공통 뒷정리·스크롤 잠금은 가림막이 그대로라 건드리지 않는다.
+    const back = modalBack, fn = modalOnClose;
+    modalBack = null; modalOnClose = null;
+    if (fn) { try { fn(); } catch (e) {} }
+    back();
+    return;
+  }
   ov.hidden = true;
   const fn = modalOnClose; modalOnClose = null;
   if (fn) { try { fn(); } catch (e) {} }
@@ -6364,11 +6377,12 @@ function openLinkPickModal(links, title, pick) {
   const token = ++linkPickToken;
   const tilesNow = () => manualLinkSectionsHtml(links);
   const alive = () => { const ov = document.getElementById('lrOverlay'); return token === linkPickToken && !!ov && !ov.hidden; };
+  const linkPickCleanup = () => { linkPickToken++; };   // 닫힐 때(1단계 복귀 포함) 감시 루프·재그리기를 끊는다 — 가림막이 안 내려가는 복귀에선 이것만이 멈춤 신호(2026-09-14)
   if (!pick) {
     const paintTiles = () => { body.innerHTML = tilesNow() || '<div class="vod-pick-empty">링크가 없습니다.</div>'; };
     paintTiles();
     modalRepaint = () => { if (alive()) paintTiles(); };   // 조회 도착 시 다시 그리기 — 종전엔 이 분기에 배선이 없었다
-    showModal(); return;
+    showModal(linkPickCleanup); return;
   }
   // 수동 링크(유튜브 편집본 등) 위, 그날 다시보기 아래. 다시보기 재료는 지금 요청하고 도착하는 대로 그 칸만 다시 그린다(0.4초마다 최대 15초).
   const paint = (gaveUp) => {
@@ -6396,15 +6410,17 @@ function openLinkPickModal(links, title, pick) {
       else if (n >= 37) clearInterval(iv);
     }, 400);
   }
-  showModal();
+  showModal(linkPickCleanup);
 }
 // 카드(data-links)를 누르면 고르기 모달 — 컨텐츠 탭·현수막 탭·컨텐츠 모아보기 모달 공용 배선(그린 뒤 한 번 부른다)
-function bindLinkPicks(root) {
+// back(2026-09-14) = 이 카드들이 모달 안에 있을 때 그 모달을 다시 여는 함수. 주면 고르기 모달이 2단계가 되어 닫을 때 그리로 돌아간다(closeModal 참고).
+function bindLinkPicks(root, back) {
   if (!root) return;
   root.querySelectorAll('[data-links]').forEach(el => el.addEventListener('click', () => {
     let links = [], pick = null; try { links = JSON.parse(el.dataset.links); } catch (e) {}
     try { pick = el.dataset.pick ? JSON.parse(el.dataset.pick) : null; } catch (e) {}
     openLinkPickModal(links, el.dataset.ltitle || '', pick);
+    if (back) modalBack = back;   // showModal이 지운 뒤에 채워야 한다(openLinkPickModal 안에서 showModal이 돈다)
   }));
 }
 
@@ -7508,7 +7524,11 @@ function initStatsTabs() {
   });
   // 활성 표시는 현재 상태(주소로 지정된 하위탭일 수 있음)를 따른다 — 마크업에 active를 박아두면 #stats:dalta로
   // 들어왔을 때 [통합]이 활성으로 보이는 불일치가 난다.
-  syncSubTabActive('.stats-tab', statsState.selectedTab || defaultSubTab('stats'));   // 첫 선택 = 최애(없으면 첫 멤버)
+  // 기본 하위탭은 상태에도 채운다(2026-09-14): 종전엔 활성 표시·본문만 기본값으로 그리고 selectedTab은 null로 남겨,
+  // 최애 없는 첫 방문자가 탭을 눌러 들어와 다시보기 없는 방송 줄을 누르면 클릭 처리기(폴백 없음)가 station/null/vod를 만들었다.
+  // 주소는 그대로 — hashFor는 '기본 멤버 + 최애 없음'을 접미사 없는 #stats로 만든다(null일 때와 같은 주소). 부팅·뒤로가기(applyHash)와 최애 진입은 뒤이어 selectStatsTab이 덮는다.
+  if (!statsState.selectedTab) statsState.selectedTab = defaultSubTab('stats');
+  syncSubTabActive('.stats-tab', statsState.selectedTab);   // 첫 선택 = 최애(없으면 첫 멤버)
   if (statsState.data) renderStatsBody();
 }
 
@@ -9863,7 +9883,7 @@ function openContentCollect(key) {
   body.innerHTML = items.length
     ? `<div class="cc-collect-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
     : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없습니다${contentData.length === 0 ? ' — 컨텐츠 데이터를 불러오는 중이거나 불러오지 못했습니다' : ''}</div>`;
-  bindLinkPicks(body);   // 링크 둘 이상인 카드 → 고르기 모달(컨텐츠 탭과 같은 배선)
+  bindLinkPicks(body, () => openContentCollect(key));   // 링크 둘 이상인 카드 → 고르기 모달(컨텐츠 탭과 같은 배선) — 닫으면 이 목록으로 복귀(2026-09-14)
   showModal();
 }
 

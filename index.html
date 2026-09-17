@@ -499,6 +499,7 @@
     max-height: 80vh;
     display: flex; flex-direction: column;
   }
+  .lr-panel:focus-visible { outline: none; }   /* 열 때 패널로 옮긴 포커스에 테두리가 뜨지 않게 — 표시는 Tab으로 들어간 조작부(✕ 등)가 맡는다 */
   .lr-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
@@ -3273,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-17a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-17b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5065,10 +5066,17 @@ function showModal(onClose) {
   modalOnClose = onClose || null;
   modalBack = null;   // 새로 여는 모달은 1단계 — 2단계로 만드는 쪽(bindLinkPicks의 back)이 이 뒤에 채운다
   const ov = document.getElementById('lrOverlay');
-  if (ov) ov.hidden = false;
+  if (ov) {
+    if (ov.hidden) modalReturnFocus = document.activeElement;   // 가림막이 이미 떠 있으면(2단계·되돌아가기) 1단계 때 기억한 자리를 유지
+    ov.hidden = false;
+    const panel = ov.querySelector('.lr-panel');
+    if (panel && panel.focus) panel.focus({ preventScroll: true });   // 포커스를 모달 안으로 — 다음 Tab이 패널 안 첫 조작부로 간다
+  }
   syncBodyScrollLock();
 }
 let modalOnClose = null;
+// 모달을 연 순간 포커스가 있던 요소(2026-09-17 외부 평가·9/14 점검). 닫을 때 그 자리로 되돌린다 — 키보드 사용자가 열었던 버튼으로 복귀.
+let modalReturnFocus = null;
 // 2단계 모달(모아보기에서 연 영상 선택)이 닫힐 때 돌아갈 1단계를 다시 여는 함수(2026-09-14 Crenop 확정 (b): 닫기 = 지금 보는 층만).
 // 가림막·패널이 하나뿐이라 2단계는 1단계 내용을 덮어쓰므로, 되돌아가기 = 1단계를 같은 인자로 다시 그리기. 컨텐츠·현수막 탭에서 연 영상 선택은 아래층이 페이지라 없음(null).
 let modalBack = null;
@@ -5092,6 +5100,8 @@ function closeModal() {
   likeHidePreload = null;  // 선로딩분은 모달 1회용 — 다음 열기는 그 시점 최신으로
   schedulePreload = null;
   syncBodyScrollLock();
+  const ret = modalReturnFocus; modalReturnFocus = null;
+  if (ret && ret.focus && document.body.contains(ret)) ret.focus({ preventScroll: true });   // 열기 전 자리로 복귀(그 요소가 사라졌으면 그대로)
 }
 // 배경 스크롤 잠금 — 모달이 떠 있으면 body 스크롤 차단, 닫히면 복원
 function syncBodyScrollLock() {
@@ -5229,7 +5239,24 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();   // 모달이 하나뿐이라 닫는 곳도 하나
+  if (e.key === 'Tab') trapModalTab(e);
 });
+// Tab 가두기(2026-09-17 외부 평가·9/14 점검: 모달이 떠 있어도 뒤쪽 페이지 요소 51개가 Tab 대상으로 남았음).
+// 모달이 떠 있으면 Tab·Shift+Tab이 패널 안의 조작부 사이에서만 돈다. 포커스를 안으로 넣는 것(열 때)과 되돌리는 것(닫을 때)은 showModal·closeModal이 맡는다.
+function trapModalTab(e) {
+  const ov = document.getElementById('lrOverlay');
+  if (!ov || ov.hidden) return;
+  const panel = ov.querySelector('.lr-panel');
+  if (!panel) return;
+  const items = Array.from(panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+    .filter(el => el.offsetParent !== null);   // 숨은(display:none) 조작부 제외
+  const cur = document.activeElement;
+  if (items.length === 0) { e.preventDefault(); panel.focus({ preventScroll: true }); return; }
+  const first = items[0], last = items[items.length - 1];
+  if (!panel.contains(cur)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); return; }   // 포커스가 밖으로 새어 있으면 안으로
+  if (e.shiftKey && (cur === first || cur === panel)) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+}
 // 요청 행 체크박스(확인/좋아요 완료 표시) — 위임. 링크(.lrq-link)의 형제라 클릭이 링크로 새지 않음.
 document.addEventListener('click', (e) => {
   const c = e.target.closest && e.target.closest('.lrq-check');
@@ -5536,7 +5563,7 @@ const sheetPulled = { banner: false, content: false };
 const sheetLoadedAt = { content: 0, schedule: 0 };   // 컨텐츠·일정 시트 마지막 요청 시각(각 로더가 fetch 직전에 찍는다) — 부팅 호출(loadSchedule)보다 앞에 선언
 const LS_BANNER_CACHE = 'chuntaverse_banner_cache';
 let bannerData = [];
-let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(length|최신날짜). 같으면 탭 재진입 시 재구축 생략
+let _bannerRenderSig = null;   // 더티 플래그: 직전 렌더 데이터 시그니처(내용 JSON — 2026-09-17). 같으면 탭 재진입 시 재구축 생략
 
 const CONTENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2043421724';
 const LS_CONTENT_CACHE = 'chuntaverse_content_cache_v4';   // v4: A=사진 여러 장(imgs) + B열 날짜 우선(2026-09-04) — 구 캐시엔 imgs가 없고 날짜가 파일 이름으로 굳어 있다. v3: C=링크 여러 개(links, 세션 70). v2: F=종류 신설(2026-09-02)
@@ -6699,7 +6726,10 @@ function pageFromHash(name, hasSub) { const k = (name || '').toLowerCase(); if (
 // 하위탭의 '기본값' = 최애가 있으면 최애, 없으면 주소 문법의 기준값. 접미사 없는 주소(#stats·#members)와 첫 진입이 이걸 쓴다.
 function defaultSubTab(page) { const fav = favMemberId(); return (fav && SUBTAB_PAGES[page]) ? fav : (SUBTAB_PAGES[page] || null); }
 function parseHash(hash) {
-  const raw = decodeURIComponent((hash || '').replace('#', ''));
+  // 깨진 %인코딩(#%·#%E0%A4%A)은 빈 주소(기본 화면)로. 감싸지 않으면 URIError가 스크립트 한 덩어리를 그 자리에서 멈춰
+  // 맨 끝의 첫 화면 열기(applyHash)까지 안 돈다(2026-09-17 외부 평가). 선례: ytHandleOf도 같은 방식으로 감쌈.
+  let raw = '';
+  try { raw = decodeURIComponent((hash || '').replace('#', '')); } catch (e) { raw = ''; }
   const i = raw.indexOf(':');
   const page = pageFromHash(i === -1 ? raw : raw.slice(0, i), i !== -1 && raw.slice(i + 1).trim() !== '') || 'live';   // 옛 주소 이름만 새 이름으로(2026-09-17)
   if (i === -1 || !SUBTAB_PAGES[page]) return { page, subTab: defaultSubTab(page), legacy: false, explicit: false };
@@ -9709,8 +9739,9 @@ function renderBanners() {
   }
 
   // 데이터가 직전 렌더와 동일하고 이미 그려져 있으면 재구축 생략(탭 전환은 CSS show/hide라 DOM이 유지됨 → 매 진입 재구축은 낭비).
-  // 항목은 추가만 되고 삭제는 거의 없으므로 length + 최신 항목 정렬키로 변경을 충분히 감지.
-  const sig = 'v2|' + bannerData.length + '|' + (bannerData[0]?.date?.sort || '');   // v2 = 제목 필드 도입 표식(캐시 재렌더 1회 강제)
+  // 비교는 내용 전체(JSON). 종전의 개수+최신 날짜 비교는 개수·날짜가 그대로인 채 제목·링크만 고친 시트 수정을 못 알아봐
+  // 열어 둔 화면에 옛 카드가 남았다(2026-09-17 외부 평가). 47장 분량 문자열 비교라 비용은 무시할 수준.
+  const sig = JSON.stringify(bannerData);
   if (sig === _bannerRenderSig && body.querySelector('.content-grid')) return;
   _bannerRenderSig = sig;
 
@@ -11021,7 +11052,8 @@ syncHash(false);     // 옛 아이디 형식·대문자·알 수 없는 값으�
        여는 곳이 없다. body 직속이어야 z-index 1000이 사이드바(z-index 2) 위로 올라간다.
        닫는 방법 3종(✕ · ESC · 배경 클릭)은 전부 closeModal() 하나를 거친다. -->
   <div class="lr-overlay" id="lrOverlay" hidden>
-    <div class="lr-panel">
+    <!-- role/aria-modal/aria-labelledby: 보조기기에 "대화상자·제목"으로 읽힘. tabindex=-1: 열 때 showModal이 포커스를 여기로 옮길 수 있게(2026-09-17) -->
+    <div class="lr-panel" role="dialog" aria-modal="true" aria-labelledby="lrHead" tabindex="-1">
       <div class="lr-head" id="lrHead"></div>
       <div class="lr-body" id="lrBody"></div>
     </div>

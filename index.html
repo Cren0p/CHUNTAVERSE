@@ -1283,8 +1283,8 @@
   .stats-top-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 16px; align-items: stretch; }
   @container (max-width: 860px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
   .stats-num-box, .stats-heat-box { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
-  .stats-num-box { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: 14px 16px; }   /* 8항목 2/3/3(방송 | 시청자 | 게시) — 항목 위·값 아래(우측과 같은 부품). 상자 높이는 격자 stretch로 우측과 같고, 안은 보통 간격으로 세로 가운데(2026-09-18 6차: 퍼뜨리기는 간격만 벌렸다) */
-  .stats-kv-gap { display: block; }   /* 첫 줄 셋째 칸(빈칸) */
+  .stats-num-box { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; align-content: center; gap: 8px 20px; }   /* 8항목 2/3/3(방송 | 시청자 | 게시): 시간 통계 줄과 같은 간격으로 가운데 모음(2026-09-18 7차 — 격자는 좁은 화면에서 칸 폭만큼 벌어졌다). 상자 높이는 격자 stretch로 우측과 같음 */
+  .kv-brk-on { display: block; flex-basis: 100%; height: 0; }   /* 항상 끊는 자리(2/3/3) */
   /* 시간 통계 줄바꿈(2026-09-18 6차): 기본은 한 줄. 그린 뒤 실제로 접혔는지 재서(fitTimeRow) 접혔을 때만 3/2, 그래도 접히면 3/1/1 — 폭 추정 임계는 실제와 어긋나 폐지 */
   .stats-time-row { flex-wrap: nowrap; }
   .stats-time-row.rows-2, .stats-time-row.rows-3 { flex-wrap: wrap; }
@@ -1292,6 +1292,9 @@
   .stats-time-row.rows-2 .kv-brk-2, .stats-time-row.rows-3 .kv-brk-2, .stats-time-row.rows-3 .kv-brk-3 { display: block; flex-basis: 100%; height: 0; }
   .stats-heat-box { justify-content: center; gap: 12px; }
   .stats-heat-box .stats-heat-cell { background: transparent; border: 0; padding: 0; margin: 0; }
+  .toh-year { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 12px 40px; }   /* 연간: 월별 격자 · 요일별 격자 나란히(좁으면 위아래) */
+  .toh-year-one { min-width: 0; }
+  .toh-cap { font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; margin-bottom: 4px; }
   .stats-time-row { display: flex; justify-content: center; align-items: center; gap: 8px 20px; }
   /* 항목/값 부품(좌 지표 8 · 우 시간 통계 5 공용, 2026-09-18 4차): 항목 위·값 아래, 클릭 = 추이 모달, hover 민트 테두리 */
   .stats-kv { display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
@@ -3148,7 +3151,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18l';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9945,8 +9948,8 @@ function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
     avgViewer: sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-',
     post: `${mv('postCount')}${sum.postCount}개`, cafe: `${mv('cafeCount')}${sum.cafeCount}개`, youtube: `${mv('youtubeCount')}${sum.youtubeCount}개`,
   };
-  // 배치 2/3/3(2026-09-18 Crenop): 방송 2 | 시청자 3 | 게시 3 — 3열 격자에서 첫 줄 셋째 칸을 비운다
-  return GRAPH_METRICS.map((g, i) => statsKvHtml(g.key, g.label, g.key === 'fan' ? FAN_ICON : SVG_ICONS[g.ic], g.icColor, values[g.key], `data-metric="${g.key}"`) + (i === 1 ? '<span class="stats-kv-gap" aria-hidden="true"></span>' : '')).join('');
+  // 배치 2/3/3(2026-09-18 Crenop): 방송 2 | 시청자 3 | 게시 3 — 항목을 가운데로 모으고(시간 통계 줄과 같은 간격) 둘째·다섯째 뒤에서 줄을 끊는다
+  return GRAPH_METRICS.map((g, i) => statsKvHtml(g.key, g.label, g.key === 'fan' ? FAN_ICON : SVG_ICONS[g.ic], g.icColor, values[g.key], `data-metric="${g.key}"`) + (i === 1 || i === 4 ? '<span class="kv-brk kv-brk-on" aria-hidden="true"></span>' : '')).join('');
 }
 // 시간 통계 줄(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — computeMonthTimeStats의 숫자 필드로 요약 줄과 같은 부품. 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 // 시간 통계 다섯 값(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — 그래프 상자 위에 한 줄(관련 숫자를 그래프 옆에 묶는다). 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
@@ -10014,7 +10017,9 @@ function renderStats() {
     const annualSums = computeAnnualSums(year);
     const medals = computeMedals(annualSums, ANNUAL_MEDAL_KEYS);
     numRows = statsNumRowsHtml(memberId, annualSums[m.id], medals[m.id], 'year', year, 0);
-    heatHtml = '<div class="lr-msg">시간대 분포는 월 단위에서 보입니다.</div>';   // 시간 통계 줄도 월 단위라 이 한 줄이 둘을 대신한다
+    const yt = computeYearTime(memberId, year, maxMonth);   // 연간 시간대(2026-09-18 Crenop): 달들을 합쳐 월별·요일별 격자 + 다섯 값
+    timeRow = yt.stats ? timeStatsRowHtml(yt.stats) : '';
+    heatHtml = `<div class="stats-heat-cell" data-member="${m.id}">${renderYearHeatmaps(yt)}</div>`;
     const startMo = year === STATS_START_YEAR ? STATS_START_MONTH : 1;
     for (let mo = startMo; mo <= maxMonth; mo++) {
       const ym = `${year}-${String(mo).padStart(2, '0')}`;
@@ -10073,6 +10078,62 @@ function renderStats() {
     const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
     openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);
   }));
+}
+// ── 연간 시간대(2026-09-18 Crenop): 그 해 달들을 합친다 ──
+// 격자 두 개 — 세로는 월 화면과 같은 3시간 띠(8줄), 가로는 달(1~12월)과 요일(일~토). 칸의 진하기 = 그 시간대를 하루 평균 몇 분 썼는가(월 화면과 같은 눈금, 180분 = 최대).
+// 다섯 값은 월 화면과 같은 정의를 그 해 전체에 적용(평균 시작·종료 = 시각의 원형 평균, 시간대 구성 = 띠별 합, 주중/주말 = 하루 평균).
+function computeYearTime(memberId, year, maxMonth) {
+  const nowMs = Date.now();
+  const kstMin = ms => { const k = new Date(ms + 9 * 3600 * 1000); return k.getUTCHours() * 60 + k.getUTCMinutes(); };
+  const starts = [], ends = []; let durMs = 0, n = 0;
+  const bands = [0, 0, 0, 0]; let wd = 0, we = 0, wdDays = 0, weDays = 0;
+  const monthAvg = Array.from({ length: 8 }, () => Array(12).fill(0));   // [띠][달-1] 하루 평균 분
+  const dowSum = Array.from({ length: 8 }, () => Array(7).fill(0)), dowDays = Array(7).fill(0);
+  const minMo = year === STATS_START_YEAR ? STATS_START_MONTH : 1;
+  for (let mo = minMo; mo <= maxMonth; mo++) {
+    const ym = `${year}-${String(mo).padStart(2, '0')}`;
+    const sum = computeMonthSummary(((statsState.data[ym] || {})[memberId]) || null, year, mo);
+    const isCur = isCurrentMonth(ym);
+    for (const arr of Object.values(sum.sessionsByDate || {})) for (const s of arr) {   // 월 통계(computeMonthTimeStats)와 같은 셈법
+      if (s.start_cut) continue;
+      const st = new Date(s.start).getTime(); if (isNaN(st)) continue;
+      let en = s.end ? new Date(s.end).getTime() : (isCur ? nowMs : NaN);
+      if (isNaN(en) || en <= st) continue;
+      n++; durMs += en - st; starts.push(kstMin(st)); if (s.end) ends.push(kstMin(en));
+    }
+    const grid = computeTimeOfDayMinutes(sum.sessionsByDate, year, mo, isCur);
+    const lastDom = isCur ? Math.min(grid.length, new Date(nowMs + 9 * 3600 * 1000).getUTCDate()) : grid.length;   // 이번 달은 오늘까지의 날수
+    grid.forEach((row, i) => {
+      const dow = new Date(Date.UTC(year, mo - 1, i + 1)).getUTCDay();
+      const dayMin = row.reduce((a, b) => a + b, 0);
+      const weekend = dow === 0 || dow === 6;
+      row.forEach((mins, b) => { bands[Math.floor(b / 2)] += mins; monthAvg[b][mo - 1] += mins; if (i < lastDom) dowSum[b][dow] += mins; });
+      if (weekend) we += dayMin; else wd += dayMin;
+      if (i < lastDom) { if (weekend) weDays++; else wdDays++; dowDays[dow]++; }
+    });
+    for (let b = 0; b < 8; b++) monthAvg[b][mo - 1] = lastDom ? monthAvg[b][mo - 1] / lastDom : 0;
+  }
+  const dowAvg = dowSum.map(row => row.map((v, d) => dowDays[d] ? v / dowDays[d] : 0));
+  const stats = n ? { startMin: circularMeanMinutes(starts), endMin: circularMeanMinutes(ends), avgMin: Math.round(durMs / n / 60000), bands: pctRound(bands), wdwe: pctRound([wdDays ? wd / wdDays : 0, weDays ? we / weDays : 0]), n } : null;
+  return { stats, monthAvg, dowAvg, minMo, maxMonth };
+}
+// 연간 격자 그리기 — 월 화면 격자(renderTimeOfDayHeatmap)와 같은 부품(.toh-*)·같은 색 눈금. 칸 폭만 넓다(달 24px·요일 28px).
+function renderYearHeatmaps(yt) {
+  const R = 15, H = R * 8;
+  const ylab = ['00', '03', '06', '09', '12', '15', '18', '21', '24'];
+  const yAxis = () => { let yc = `<div class="toh-yaxis" style="height:${H}px;">`; for (let i = 0; i < 9; i++) yc += `<span class="toh-ylabel" style="top:${i * R - 6}px;">${ylab[i]}</span>`; return yc + '</div>'; };
+  const cell = (avg) => { const v = Math.min(avg / 180, 1); return `<div style="background:${v <= 0 ? '#101a2c' : `rgba(97,255,236,${(0.14 + 0.68 * v).toFixed(3)})`};"></div>`; };
+  const one = (cap, cols, colW, avgOf, labelOf) => {
+    let cells = `<div class="toh-grid" style="grid-template-columns:repeat(${cols},minmax(0,${colW}px));grid-auto-rows:${R}px;">`;
+    for (let b = 0; b < 8; b++) for (let c = 0; c < cols; c++) cells += cell(avgOf(b, c));
+    cells += '</div>';
+    let xa = `<div class="toh-xaxis" style="grid-template-columns:repeat(${cols},minmax(0,${colW}px));">`;
+    for (let c = 0; c < cols; c++) { const [txt, color] = labelOf(c); xa += `<div class="toh-xlabel" style="color:${color};">${txt}</div>`; }
+    xa += '</div>';
+    return `<div class="toh-year-one"><div class="toh-cap">${cap}</div><div class="toh-body">${yAxis()}<div class="toh-right">${cells}${xa}</div></div></div>`;
+  };
+  const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  return `<div class="toh-year">${one('월별', 12, 24, (b, c) => yt.monthAvg[b][c], c => [String(c + 1), 'var(--muted)'])}${one('요일별', 7, 28, (b, c) => yt.dowAvg[b][c], c => [DOW[c], c === 0 ? '#f87171' : c === 6 ? '#60a5fa' : 'var(--muted)'])}</div>`;
 }
 // 시간 통계 줄 접기(2026-09-18 6차 Crenop): 한 줄에 다 들어가면 한 줄. 넘치면 3/2(시작·종료·시간 | 분포·주중/주말), 그래도 넘치면 3/1/1.
 // 접힘은 폭 추정이 아니라 그린 뒤 실측(항목들의 세로 위치가 갈리는가)으로 판단하고, 창 크기가 바뀌면 다시 잰다.

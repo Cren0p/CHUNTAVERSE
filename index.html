@@ -2375,8 +2375,9 @@
   .profile-crew-intro p {
     font-size: 14px; color: var(--muted);
     line-height: 1.8;
-    margin: 0 auto; word-break: keep-all;
+    margin: 0; word-break: keep-all;   /* auto 여백 폐지(2026-09-19 Crenop): auto면 남는 폭이 글 양옆으로만 가서 로고 쪽 여백(왼쪽)보다 글 오른쪽 여백이 컸다. 이제 로고+글 묶음을 상자가 통째로 가운데 둔다 */
   }
+  .profile-crew-intro p.wrap-both .ci-b { display: block; }   /* 셋째 줄이 접혀야 하는 폭이면 첫째 줄도 같은 자리에서 접는다(fitCrewIntro) */
   /* 글 묶음은 가운데(2026-09-01, Crenop 지정) — 본문이 왼쪽으로 쏠려 보이던 인상의 한 축.
      각 줄 안의 글자는 좌측정렬 그대로 두고, 줄들이 이루는 덩어리만 가운데 세운다. */
   .profile-crew-activities {
@@ -3155,7 +3156,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19h';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9921,6 +9922,23 @@ function renderYearHeatmaps(yt) {
   const DOW = ['일', '월', '화', '수', '목', '금', '토'];
   return `<div class="toh-year">${one('월별', 12, 24, (b, c) => yt.monthAvg[b][c], c => [String(c + 1), 'var(--muted)'])}${one('요일별', 7, 28, (b, c) => yt.dowAvg[b][c], c => [DOW[c], c === 0 ? '#f87171' : c === 6 ? '#60a5fa' : 'var(--muted)'])}</div>`;
 }
+// 크루 소개글 접기(2026-09-19 Crenop): 셋째 줄(가장 긴 줄)이 한 줄에 안 들어가면 첫째·셋째 줄을 같은 자리에서 함께 접는다(.wrap-both). 폭 추정이 아니라 실측.
+function fitCrewIntro() {
+  const p = document.querySelector('#profileBody .profile-crew-intro p');
+  if (!p) return;
+  p.classList.remove('wrap-both');
+  const segs = p.querySelectorAll('.ci-a, .ci-b');
+  if (segs.length < 4) return;
+  const probe = document.createElement('span');   // 셋째 줄 전체를 한 줄로 재는 자
+  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;';
+  probe.innerHTML = segs[2].innerHTML + ' ' + segs[3].innerHTML;
+  p.appendChild(probe);
+  const need = probe.offsetWidth, have = p.clientWidth;
+  probe.remove();
+  if (need > have + 1) p.classList.add('wrap-both');
+}
+let fitCrewIntroTimer = 0;
+window.addEventListener('resize', () => { if (currentPage !== 'profile') return; clearTimeout(fitCrewIntroTimer); fitCrewIntroTimer = setTimeout(fitCrewIntro, 120); });
 // 시간 통계 줄 접기(2026-09-18 6차 Crenop): 한 줄에 다 들어가면 한 줄. 넘치면 3/2(시작·종료·시간 | 분포·주중/주말), 그래도 넘치면 3/1/1.
 // 접힘은 폭 추정이 아니라 그린 뒤 실측(항목들의 세로 위치가 갈리는가)으로 판단하고, 창 크기가 바뀌면 다시 잰다.
 function fitTimeRow() {
@@ -10303,7 +10321,9 @@ function renderProfileCrew(body) {
         <img class="profile-crew-intro-img" src="CHUNTAVERSE.webp" alt="CHUNTAVERSE">
         <!-- 줄바꿈 자리 지정(2026-09-01 Crenop): 줄이 바뀔 곳에만 보통 공백을 두고 나머지 어절은 붙여(&nbsp;) 둔다.
              → '참가하기 위해 / 결성한', '합방과 / 다채로운', '뽐내는 / 버추얼'에서만 갈린다. -->
-        <p>천타버스는&nbsp;원래&nbsp;천양님이&nbsp;크루&nbsp;콘텐츠에&nbsp;참가하기&nbsp;위해 결성한&nbsp;'위장&nbsp;크루'로&nbsp;시작했으나<br><br>지속적인&nbsp;합방과 다채로운&nbsp;자체&nbsp;콘텐츠를&nbsp;통해<br><br>이제는&nbsp;그&nbsp;누구도&nbsp;대체할&nbsp;수&nbsp;없는&nbsp;독보적인&nbsp;매력을&nbsp;뽐내는 버추얼&nbsp;크루로&nbsp;당당히&nbsp;성장해&nbsp;나가는&nbsp;중입니다.</p>
+        <!-- 첫째·셋째 줄은 같이 접힌다(2026-09-19 Crenop): 셋째 줄(가장 긴 줄)이 한 줄에 안 들어가면 fitCrewIntro가 .wrap-both를 붙여 두 줄 다 지정 자리에서 갈라진다.
+             셋째만 갈리고 첫째는 한 줄인 상태(따로 줄바꿈)를 막는다. 뒤 토막(.ci-b)이 block이 되는 방식. -->
+        <p><span class="ci-a">천타버스는&nbsp;원래&nbsp;천양님이&nbsp;크루&nbsp;콘텐츠에&nbsp;참가하기&nbsp;위해</span> <span class="ci-b">결성한&nbsp;'위장&nbsp;크루'로&nbsp;시작했으나</span><br><br>지속적인&nbsp;합방과 다채로운&nbsp;자체&nbsp;콘텐츠를&nbsp;통해<br><br><span class="ci-a">이제는&nbsp;그&nbsp;누구도&nbsp;대체할&nbsp;수&nbsp;없는&nbsp;독보적인&nbsp;매력을&nbsp;뽐내는</span> <span class="ci-b">버추얼&nbsp;크루로&nbsp;당당히&nbsp;성장해&nbsp;나가는&nbsp;중입니다.</span></p>
       </div>
       <div class="profile-crew-activities">
         <div class="crew-act-body">${actsGrid}</div>
@@ -10311,6 +10331,7 @@ function renderProfileCrew(body) {
     </div>
     ${videoStripsHtml(crewClips, 'Favicon.webp', 1300)}
   `;
+  fitCrewIntro();   // 소개글 첫째·셋째 줄 같이 접기(2026-09-19)
   bindVideoStrips(body);   // 크루 핫클립 줄의 좌우 화살표(2026-09-04 복구 — 폭 1300은 옛 크루 스트립과 같은 값, 위 블록과 좌우를 맞춘다)
   body.querySelectorAll('.crew-act-link').forEach(btn => btn.addEventListener('click', () => openContentCollect(btn.dataset.key)));
 }

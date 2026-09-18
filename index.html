@@ -1283,19 +1283,19 @@
   .stats-top-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 16px; align-items: stretch; }
   @container (max-width: 860px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
   .stats-num-box, .stats-heat-box { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
-  .stats-num-box { justify-content: space-between; gap: 2px; }   /* 행을 상자 높이에 고르게 — 오른쪽 그래프 상자와 높이가 같아진다 */
-  .stats-num-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; padding: 4px 6px; margin: 0 -6px; border: 1px solid transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-  .stats-num-row:hover { background: var(--surface2); border-color: var(--accent); }
-  .stats-num-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-  .stats-num-value { color: var(--text); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats-num-box { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: space-between; gap: 10px 16px; }   /* 8항목 2열 4행 — 항목 위·값 아래(우측과 같은 부품), 행을 상자 높이에 고르게 퍼뜨려 오른쪽과 높이가 같다 */
   .stats-heat-box { justify-content: center; gap: 12px; }
   .stats-heat-box .stats-heat-cell { background: transparent; border: 0; padding: 0; margin: 0; }
   .stats-time-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; }
-  .stats-time-item { display: flex; flex-direction: column; gap: 2px; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
-  .stats-time-item:hover { background: var(--surface2); border-color: var(--accent); }
-  .stats-time-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-  .stats-time-value { font-size: 13px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .stats-time-value .hl { color: #ffffff; }   /* 시간대·주중주말 구성에서 가장 큰 항목 */
+  /* 항목/값 부품(좌 지표 8 · 우 시간 통계 5 공용, 2026-09-18 4차): 항목 위·값 아래, 클릭 = 추이 모달, hover 민트 테두리 */
+  .stats-kv { display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .stats-kv:hover { background: var(--surface2); border-color: var(--accent); }
+  .stats-kv-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .stats-kv-value { font-size: 13px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats-kv-value .hl { color: #ffffff; }   /* 시간대·주중주말 구성에서 가장 큰 항목 */
+  /* 목록 상단바(최근 활동 부품): 여기선 .timeline 상자 밖이라 양옆 선을 직접 긋고, 첫 방송과의 간격은 방송 사이 간격(8px)과 같게 */
+  .stats-sessions .timeline-header { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .stats-sessions .day-detail-list { margin-top: 8px; }
   .stats-row-icon { display: inline-flex; align-items: center; flex-shrink: 0; vertical-align: middle; }
   .stats-row-icon svg { width: 11px; height: 11px; display: block; vertical-align: middle; }
   .medal-ico svg { width: 13px; height: 13px; vertical-align: -2px; }   /* 지표값 옆 순위 트로피(구 🥇🥈🥉 이모지) — 금·은·동은 명전 순위색 */
@@ -2123,7 +2123,8 @@
   /* 다섯 값(평균 시작·종료·시간·시간대 구성·주중주말)은 그래프 상자 위 한 줄(.stats-time-row) — 띠는 그래프만(2026-09-18) */
   .stats-sessions { margin-top: 16px; }
   .stats-sess-head { font-size: 12px; font-weight: 600; color: var(--muted); }   /* 목록 상단바 왼쪽 자리(최근 활동의 '모두 읽음' 자리) */
-  .sort-toggle.active { color: var(--accent); border-color: var(--accent); }   /* 통계 목록 정렬 5종 중 고른 것(2026-09-18) */
+  .sort-toggle.active { color: var(--accent); border-color: var(--accent); }   /* 정렬 버튼 나열형(2026-09-18): 고른 것 — 최근 활동(최신순·과거순)·통계(5종) 공용 */
+  .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
   .day-session-date { font-size: 12px; font-weight: 600; color: var(--text); margin-right: 8px; white-space: nowrap; }   /* 방송별 목록 행의 날짜(한 달·한 해를 늘어놓으므로) */
   .stats-main { min-width: 0; }
   .stats-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -3139,7 +3140,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7438,11 +7439,10 @@ function applyFilter() {
     return memberMatch;
   });
   filterCounts.events = { shown: filtered.length, total: allEvents.length };   // 서랍 버튼 채움용(2026-09-02)
-  const sortLabel = eventSortAsc ? '과거순' : '최신순';   // 두 라벨 3자 등장(2026-08-09) — 토글해도 버튼 폭·아이콘-글자 간격이 그대로, 옆 버튼들과 위화감 없음
-  const arrowSvg = eventSortAsc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp;   // SVG_ICONS로 통합(2026-08-08)
+  // 정렬(2026-09-18 Crenop): 토글 하나(현재 상태의 라벨)에서 나열형 두 버튼으로 — 통계 탭 상단바(정렬 5종 나열)와 같은 문법, 고른 쪽이 active
   const scrollDownSvg = SVG_ICONS.chevronsDown;
   const scrollUpSvg = SVG_ICONS.chevronsUp;
-  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync">${arrowSvg}<span>${sortLabel}</span></button>`;
+  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync${eventSortAsc ? '' : ' active'}" data-sort="newest" type="button">${SVG_ICONS.arrowLineUp}<span>최신순</span></button><button class="sort-toggle sort-toggle-sync${eventSortAsc ? ' active' : ''}" data-sort="oldest" type="button">${SVG_ICONS.arrowLineDown}<span>과거순</span></button>`;
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
   // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
@@ -7461,7 +7461,7 @@ function applyFilter() {
     tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('');
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
-    btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });
+    btn.addEventListener('click', () => { const asc = btn.dataset.sort === 'oldest'; if (asc === eventSortAsc) return; eventSortAsc = asc; applyFilter(); });
   });
   tl.querySelectorAll('.mark-read-btn').forEach(btn => {
     btn.addEventListener('click', () => { setLastSeenToNow(); refreshUnreadIndicator(); });
@@ -7530,8 +7530,8 @@ const GRAPH_METRICS = [
   { key: 'peakViewer',    label: '최고 시청자', unit: '명', ic: 'arrowUp',   icColor: '#FF8C00',           get: s => s.viewerPeak },
   { key: 'avgViewer',     label: '평균 시청자', unit: '명', ic: 'barChart',  icColor: '#FF8C00',           get: s => s.viewerCount > 0 ? Math.round(s.viewerSum / s.viewerCount) : 0 },
   { key: 'post',          label: '숲 게시글',   unit: '개', ic: 'board',     icColor: 'var(--ev-post)',    get: s => s.postCount },
-  { key: 'cafe',          label: '카페',        unit: '개', ic: 'coffee',    icColor: '#03C75A',           get: s => s.cafeCount },
-  { key: 'youtube',       label: '유튜브',      unit: '개', ic: 'youtube',   icColor: 'var(--ev-youtube)', get: s => s.youtubeCount },
+  { key: 'cafe',          label: '카페 게시글', unit: '개', ic: 'coffee',    icColor: '#03C75A',           get: s => s.cafeCount },   // 2026-09-18: 통계 상자와 같은 글(단일 출처)
+  { key: 'youtube',       label: '유튜브 업로드', unit: '개', ic: 'youtube', icColor: 'var(--ev-youtube)', get: s => s.youtubeCount },
 ];
 const FAN_ICON = SVG_ICONS.fan;   // 실물은 SVG_ICONS.fan으로 통합(산포 정리) — 별칭 유지로 호출부 무변경
 // 시간대 통계 그래프(2026-09-07 Crenop): 통계 탭 시간대 카드의 다섯 값 → 월별 추이 모달. 같은 모달 틀(openStatGraphModal)에 그리기 함수만 다르다.
@@ -7543,11 +7543,12 @@ const FAN_ICON = SVG_ICONS.fan;   // 실물은 SVG_ICONS.fan으로 통합(산포
 //    색은 멤버색의 진하기 단계(시간 순으로 옅→진, 주말이 주중보다 진함) — 히트맵이 민트 진하기로 양을 말하는 것과 같은 태도라 새 팔레트를 만들지 않았다.
 //  · 회차가 적은 달의 평균은 튈 수 있다 — 회차 수 표기는 하지 않는다(Crenop).
 const TIME_GRAPHS = [
-  { key: 'tStart', label: '평균 시작', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.startMin },
-  { key: 'tEnd',   label: '평균 종료', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'clock', get: ts => ts.endMin },
-  { key: 'tAvg',   label: '평균 시간', ic: 'hourglass', icColor: 'var(--ev-start)', kind: 'line',  get: ts => ts.avgMin / 60, fmt: v => formatDuration(v * 3600000) },
-  { key: 'tBands', label: '시간대 분포', ic: 'sun',      icColor: 'var(--ev-yellow)', kind: 'stack', series: ['새벽', '오전', '오후', '야간'], alphas: [0.3, 0.5, 0.72, 1], get: ts => ts.bands },
-  { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar', icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [0.5, 1], get: ts => ts.wdwe },
+  // 아이콘·색(2026-09-18 Crenop 지정 — 통계 상자와 모달이 같은 표를 쓴다): 시작 = 해(노랑) · 종료 = 달(노랑) · 시간 = 모래시계(주황) · 분포 = 시계(파랑) · 주중/주말 = 달력(파랑)
+  { key: 'tStart', label: '평균 시작', ic: 'sun',       icColor: 'var(--ev-yellow)', kind: 'clock', get: ts => ts.startMin },
+  { key: 'tEnd',   label: '평균 종료', ic: 'moon',      icColor: 'var(--ev-yellow)', kind: 'clock', get: ts => ts.endMin },
+  { key: 'tAvg',   label: '평균 시간', ic: 'hourglass', icColor: '#FF8C00',          kind: 'line',  get: ts => ts.avgMin / 60, fmt: v => formatDuration(v * 3600000) },
+  { key: 'tBands', label: '시간대 분포', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'stack', series: ['새벽', '오전', '오후', '야간'], alphas: [0.3, 0.5, 0.72, 1], get: ts => ts.bands },
+  { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar',  icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [0.5, 1], get: ts => ts.wdwe },
 ];
 function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
 function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
@@ -9921,32 +9922,35 @@ function selectStatsMember(id, opts) {
 // 지표 카드 — 옛 크루 카드표의 카드 한 장(항목·메달·행 클릭 = 월별 추이 그래프 모달 그대로). mode 'month'|'year'.
 // 지표 요약 줄(2026-09-18 — 옛 지난 활동의 요약 줄 형식): 8항목, 항목 클릭 = 그 지표의 월별 추이 그래프. mode 'month'|'year'.
 // 지표 8행(2026-09-18 3차 — 사진·이름 없음, 행 클릭 = 그 지표의 월별 추이 그래프). mode 'month'|'year'.
+// 지표 8항목(2026-09-18 4차 — 항목 위·값 아래, 우측 시간 통계와 같은 부품 .stats-kv · 글·아이콘·색은 모달 표 GRAPH_METRICS에서). 항목 클릭 = 월별 추이 그래프. mode 'month'|'year'.
+function statsKvHtml(key, label, icon, color, value, attr) {
+  return `<div class="stats-kv" ${attr}><span class="stats-kv-label"><span class="stats-row-icon" style="color:${color}">${icon}</span>${label}</span><span class="stats-kv-value">${value}</span></div>`;
+}
 function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
   const mv = (k) => (md && md[k]) ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
-  const days = mode === 'year' ? `${mv('sessions')}${sum.sessions}일` : `${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일`;
-  const fan = mode === 'year' ? fanCellYear(memberId, year) : fanCellMonth(memberId, year, month);
-  const row = (metric, color, icon, label, value) => `<div class="stats-num-row" data-metric="${metric}"><span class="stats-num-label"><span class="stats-row-icon" style="color:${color}">${icon}</span>${label}</span><span class="stats-num-value">${value}</span></div>`;
-  return row('broadcastDays', 'var(--ev-start)', SVG_ICONS.calendar, '방송 일수', days)
-    + row('broadcastTime', 'var(--ev-start)', SVG_ICONS.clockTime, '방송 시간', `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`)
-    + row('fan', '#FFC94D', FAN_ICON, '애청자', fan)
-    + row('peakViewer', '#FF8C00', SVG_ICONS.arrowUp, '최고 시청자', sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-')
-    + row('avgViewer', '#FF8C00', SVG_ICONS.barChart, '평균 시청자', sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-')
-    + row('post', 'var(--ev-post)', SVG_ICONS.board, '숲 게시글', `${mv('postCount')}${sum.postCount}개`)
-    + row('cafe', '#03C75A', SVG_ICONS.coffee, '카페 게시글', `${mv('cafeCount')}${sum.cafeCount}개`)
-    + row('youtube', 'var(--ev-youtube)', SVG_ICONS.youtube, '유튜브 업로드', `${mv('youtubeCount')}${sum.youtubeCount}개`);
+  const values = {
+    broadcastDays: mode === 'year' ? `${mv('sessions')}${sum.sessions}일` : `${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일`,
+    broadcastTime: `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`,
+    fan: mode === 'year' ? fanCellYear(memberId, year) : fanCellMonth(memberId, year, month),
+    peakViewer: sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-',
+    avgViewer: sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-',
+    post: `${mv('postCount')}${sum.postCount}개`, cafe: `${mv('cafeCount')}${sum.cafeCount}개`, youtube: `${mv('youtubeCount')}${sum.youtubeCount}개`,
+  };
+  return GRAPH_METRICS.map(g => statsKvHtml(g.key, g.label, g.key === 'fan' ? FAN_ICON : SVG_ICONS[g.ic], g.icColor, values[g.key], `data-metric="${g.key}"`)).join('');
 }
 // 시간 통계 줄(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — computeMonthTimeStats의 숫자 필드로 요약 줄과 같은 부품. 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 // 시간 통계 다섯 값(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — 그래프 상자 위에 한 줄(관련 숫자를 그래프 옆에 묶는다). 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
+// 시간 통계 다섯 값(2026-09-18): 글·아이콘·색은 모달 표 TIME_GRAPHS에서(단일 출처). 그래프 상자 위 한 줄, 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 function timeStatsRowHtml(ts) {
   const hm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
   const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
-  const item = (tkey, icon, label, value) => `<div class="stats-time-item" data-tkey="${tkey}"><span class="stats-time-label"><span class="stats-row-icon" style="color:var(--ev-start)">${icon}</span>${label}</span><span class="stats-time-value">${value}</span></div>`;
-  return `<div class="stats-time-row">${item('tStart', SVG_ICONS.clockTime, '평균 시작', hm(ts.startMin))}${item('tEnd', SVG_ICONS.clockTime, '평균 종료', hm(ts.endMin))}${item('tAvg', SVG_ICONS.clockTime, '평균 시간', `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`)}${item('tBands', SVG_ICONS.clockTime, '시간대 구성', hl(['새벽', '오전', '오후', '야간'], ts.bands))}${item('tWdWe', SVG_ICONS.calendar, '주중 / 주말', hl(['주중', '주말'], ts.wdwe))}</div>`;
+  const values = { tStart: hm(ts.startMin), tEnd: hm(ts.endMin), tAvg: `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`, tBands: hl(['새벽', '오전', '오후', '야간'], ts.bands), tWdWe: hl(['주중', '주말'], ts.wdwe) };
+  return `<div class="stats-time-row">${TIME_GRAPHS.map(g => statsKvHtml(g.key, g.label, SVG_ICONS[g.ic], g.icColor, values[g.key], `data-tkey="${g.key}"`)).join('')}</div>`;
 }
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
-const STATS_SORTS = [
-  { key: 'newest', label: '최신순' }, { key: 'oldest', label: '과거순' }, { key: 'duration', label: '방송 시간' },
-  { key: 'peak', label: '최고 시청자' }, { key: 'avg', label: '평균 시청자' },
+const STATS_SORTS = [   // 아이콘(2026-09-18 Crenop): 최신·과거는 최근 활동 정렬과 같은 화살표, 나머지는 그 지표의 아이콘
+  { key: 'newest', label: '최신순', ic: 'arrowLineUp' }, { key: 'oldest', label: '과거순', ic: 'arrowLineDown' }, { key: 'duration', label: '방송 시간', ic: 'clockTime' },
+  { key: 'peak', label: '최고 시청자', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자', ic: 'barChart' },
 ];
 function sessionSortValue(s, key) {
   if (key === 'duration') return s.end ? new Date(s.end).getTime() - new Date(s.start).getTime() : -1;
@@ -10033,15 +10037,15 @@ function renderStats() {
   }
   top.innerHTML = `<div class="stats-top-grid"><div class="stats-num-box">${numRows}</div><div class="stats-heat-box">${timeRow}${heatHtml}</div></div>`;   // 좌 지표 8행 | 우 시간 통계 + 그래프, 같은 높이(2026-09-18 3차)
   // 목록 상단바(2026-09-18 3차, 최근 활동 문법 그대로 — sticky): 왼쪽 '방송 N회', 오른쪽 정렬 5종 + 맨 위로·맨 아래로
-  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button"><span>${o.label}</span></button>`).join('');
-  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right">${sortBtns}<button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div>`;
+  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span></button>`).join('');
+  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button>${sortBtns}</div></div>`;   // 순서 = 최근 활동 상단바(맨 위로·맨 아래로 → 정렬)
   list.innerHTML = rows.length ? bar + `<div class="day-detail-list">${rows.join('')}</div>` : '';
   list.querySelectorAll('.sort-toggle[data-sort]').forEach(b => b.addEventListener('click', () => { if (b.dataset.sort === statsState.sortKey) return; statsState.sortKey = b.dataset.sort; renderStats(); }));
   const stTop = document.getElementById('statsScrollTop'), stBottom = document.getElementById('statsScrollBottom');
   if (stTop) stTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   if (stBottom) stBottom.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
-  top.querySelectorAll('.stats-num-row[data-metric]').forEach(r => r.addEventListener('click', () => openStatGraphModal(memberId, r.dataset.metric)));   // 행 → 그 지표의 월별 추이 그래프
-  top.querySelectorAll('.stats-time-item[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
+  top.querySelectorAll('.stats-kv[data-metric]').forEach(r => r.addEventListener('click', () => openStatGraphModal(memberId, r.dataset.metric)));   // 항목 → 그 지표의 월별 추이 그래프
+  top.querySelectorAll('.stats-kv[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
   list.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
     const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
     openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);

@@ -1163,7 +1163,7 @@
     gap: 8px;
     padding: 8px;
     border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;   /* 좁은 폰: 맨 위로 추가로 4버튼이 한 줄 ~410px 필요 — 안 들어가면 우측 묶음이 다음 줄로 */
+    flex-wrap: nowrap;   /* 2026-09-19 Crenop: 라벨(왼쪽)과 첫 버튼 줄은 한 줄에 공존 — 오른쪽 묶음이 통째로 내려가지 않고, 라벨 옆 남은 폭 안에서 묶음·짝 단위로만 접힌다(.timeline-bar-right가 남은 폭을 받는다) */
     /* sticky(2026-08-09): 이벤트가 최대 1000건이라 중간에서도 조작 가능해야 함 — 모두 읽음·맨 위/아래·정렬이
        스크롤 내내 붙는다. 하단바는 이걸로 완전 중복이 되어 제거(맨 위로 버튼은 이리로 이사).
        top:20px = 필터 패널과 동일 이격. 위 20px 틈으로 카드가 비치는 건 ::before 백드롭(페이지 배경색)이 차단 —
@@ -1180,7 +1180,8 @@
   .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 8px; }
   /* 좁은 화면(2026-09-19 Crenop): 버튼 글씨는 한 줄. 오른쪽 묶음은 줄이 바뀌어도 오른쪽 끝에 붙는다(margin-left:auto). 접힘 순서 — 한 줄 → [맨 위/아래] / [정렬 4] → [맨 위/아래] / [정렬 2] / [정렬 2]:
      맨 위/아래와 정렬이 각각 한 묶음(.tl-group)이고, 정렬 묶음 안은 두 개씩 짝(.tl-pair, 안 끊김)이라 묶음이 통째로 내려간 뒤에야 짝 단위로 갈린다. */
-  .timeline-bar-right { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+  .timeline-bar-left { flex: none; }
+  .timeline-bar-right { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
   .tl-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
   .tl-pair { display: flex; align-items: center; gap: 8px; flex: none; }
   .timeline-scroll-btn, .sort-toggle { white-space: nowrap; }
@@ -3158,7 +3159,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3419,7 +3420,7 @@ const MEMBER_BIRTHDAYS = {
 // ══ 멤버 추가/탈퇴 체크리스트 — 한 명 변동 시 아래 전부 확인 (체비·플리 추가 때 전면 작업이었던 지점들) ══
 // [index.html]
 //  ① MEMBERS: id · name · img(members/NN.webp) · color(캐릭터 아트 실측, 대비보다 아트 충실도 우선)
-//  ② MEMBER_LINKS: 방송국·유튜브(들)·팬카페·나무위키·인스타·X·팬심/디코·기타·OGQ
+//  ② 시트 '관련 링크' 탭에 행 추가(2026-09-19 이관 — 코드 아님): 멤버·줄·라벨·주소·순서(·OGQ 플랫폼)
 //  ③ 시트 '멤버정보' 탭에 행 추가: 이름·engName·fanName·age·height·mbti·group·firstStream(H: 실제 첫 방송일)·soopDate(I: 숲 기준 — 따로 있는 멤버만)·vote(J)·election2026(K: 2026 반장선거)·title(L: 직함 — 반장/부반장 명찰) (코드 아님 — 2026-07 시트 이관, 2026-08-10 I열 삽입, 2026-08-24 L열 추가)
 //  ④ MEMBER_BIRTHDAYS: month·day·display·file(birthday/NAME.webp) — 단일 소스(로고 교체·프로필·기념일 공용)
 //  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
@@ -3459,261 +3460,32 @@ MEMBERS.forEach(m => { MEMBER_BY_EN[m.en] = m; });
 // 2026-07 시트 이관: '휴방' 탭이 소스(loadCrewSheets), until 경과 행은 자동 무시라 시트에서 안 지워도 됨.
 let VACATION = {};
 
-const MEMBER_LINKS = {
-  '243000': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/243000',
-      유튜브: 'https://www.youtube.com/@CY_youtube',
-      유튜브2: { label: '풀영상', url: 'https://www.youtube.com/@%EC%B2%9C%EC%96%91%EC%9D%98%EB%B3%B8%EC%B1%84%EB%84%90%EB%84%98%EA%B8%B0' },
-      팬카페: 'https://cafe.naver.com/cyhistory',
-      나무위키: 'https://namu.wiki/w/%EC%B2%9C%EC%96%91',
-    },
-    instagram: 'https://www.instagram.com/chunyang_94/',
-    x: 'https://x.com/chunyangkr',
-    discordOrFancim: [{ label: '디스코드', url: 'https://discord.com/invite/rH2j9sh' }],
-    etc: [{ label: '캘린더', url: 'https://docs.google.com/spreadsheets/d/18_LACDzXtEHQrOPrXiYVUThbTfzmyx7gLj1SGSuN8Hw/edit?usp=drivesdk' }],
-    ogq: [
-      { name: '처니티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61de7e80d0979' },
-      { name: '처니티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/61de7e80d0979' },
-    ],
-  },
-  'madaomm': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/madaomm',
-      유튜브: 'https://www.youtube.com/@MADAOMM',
-      유튜브2: { label: '풀영상', url: 'https://www.youtube.com/@MADAOMM_full' },
-      팬카페: 'https://cafe.naver.com/madaomm',
-      나무위키: 'https://namu.wiki/w/%EB%A7%88%EB%8B%A4%EC%98%B4',
-    },
-    instagram: 'https://www.instagram.com/madaom_m',
-    x: 'https://x.com/DAOMM_MA',
-    discordOrFancim: [{ label: '디스코드', url: 'https://discord.com/invite/4h9ZHm5fBZ' }],
-    etc: [{ label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1mJiPbZrF29wUAA5lS4R-IZ-4Ehs6UbagssUFPe8j1X4/edit?gid=653664162#gid=653664162' }],
-    ogq: [
-      { name: '마다옴왔다옴!~', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=61b680bcd4122' },
-      { name: '마다옴왔다옴!~', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/61b680bcd4122' },
-    ],
-  },
-  'nanamoon777': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/nanamoon777',
-      유튜브: 'https://www.youtube.com/@nanamoon777',
-      유튜브2: { label: '아카이브', url: 'https://www.youtube.com/@AkaivStudioOfficial' },
-      팬카페: 'https://cafe.naver.com/nanamoonswicked',
-      나무위키: 'https://namu.wiki/w/%EB%82%98%EB%82%98%EB%AC%B8',
-    },
-    instagram: 'https://www.instagram.com/nanamoon_7/',
-    x: 'https://x.com/nanamoon_7',
-    discordOrFancim: [
-      { label: '디스코드', url: 'https://discord.com/invite/Ye3QYKMPaQ' },   // 2026-09-18 추가(Crenop 지정). 표기는 천양·마다옴과 같은 invite/ 형식 — discord.com/<코드> 형식은 404로 확인(2026-09-18)
-      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' },
-    ],
-    etc: [{ label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1HxfVoM68iVZ1JfSlCq4G7Z7M34GkDnZnfwY2raRBBM8/edit?gid=1823038152#gid=1823038152' }],   // 2026-09-18 추가(Crenop 지정) — 구글 시트
-    ogq: [],
-  },
-  'imha22': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/imha22',
-      유튜브: { label: '노래 유튜브', url: 'https://www.youtube.com/@imha_' },
-      유튜브2: { label: '게임 유튜브', url: 'https://www.youtube.com/@imha_LIVE' },
-      팬카페: 'https://cafe.naver.com/imhaming',
-      나무위키: 'https://namu.wiki/w/%EC%9E%84%ED%95%98%EB%B0%8D',
-    },
-    instagram: null,
-    x: null,
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=787086' }],
-    etc: [{ label: '팬사이트', url: 'https://imhaming-3e1aa792.base44.app/' }],
-    ogq: [
-      { name: '고구밍티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=658d2fd1ec21c' },
-      { name: '고구밍티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/658d2fd1ec21c' },
-    ],
-  },
-  'doormomo': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/doormomo',
-      유튜브: 'https://www.youtube.com/@momo_vlyz',
-      유튜브2: { label: '블리즈', url: 'https://www.youtube.com/@Vlyz_official' },
-      팬카페: 'https://cafe.naver.com/vlyz',
-      나무위키: 'https://namu.wiki/w/%EB%AC%B8%EB%AA%A8%EB%AA%A8',
-    },
-    instagram: 'https://www.instagram.com/momoric__/',
-    x: 'https://x.com/door_momo',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=qcZ6GSSfO/UsZf7ptxA3mw==' }],
-    etc: [
-      { label: '팬사이트', url: 'https://moonmomo-archive.netlify.app/' },            // 2026-09-09 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(Crenop)
-      { label: '노래책', url: 'https://streamsing.app/s/soop/doormomo/songbook' },   // 2026-08-03 변경(구 멜로밍)
-    ],
-    ogq: [
-      { name: '모모티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6439ef4bd4035' },
-      { name: '모모티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6439ef4bd4035' },
-      { name: '곰탕이는 음흉해', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=620f7334d5a21' },
-      { name: '곰탕이는 음흉해', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/620f7334d5a21' },
-    ],
-  },
-  'kappuchan': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/kappuchan',
-      유튜브: 'https://www.youtube.com/@kappuchannel',
-      유튜브2: { label: '다시보기', url: 'https://www.youtube.com/@%EC%B9%B4%ED%91%B8%EB%8B%A4%EC%8B%9C%EB%B3%B4%EA%B8%B0' },
-      팬카페: 'https://cafe.naver.com/kappuchan',
-      나무위키: 'https://namu.wiki/w/%EC%B9%B4%ED%91%B8(%EC%9D%B8%ED%84%B0%EB%84%B7%20%EB%B0%A9%EC%86%A1%EC%9D%B8)',
-    },
-    instagram: null,
-    x: 'https://x.com/kappuchannel',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kappuchannel' }],
-    etc: [
-      { label: '팬사이트', url: 'https://www.kappuchan.com/' },
-      { label: '노래책', url: 'https://www.songstudio.live/songbook/platform/@%EC%B9%B4%ED%91%B8kappu' },
-    ],
-    ogq: [
-      { name: '카푸가 와써요라', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=629565bef3c8a' },
-      { name: '카푸가 와써요라', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/629565bef3c8a' },
-      { name: '귀여운 늑대 울푸의 하루', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=615472aa15096' },
-      { name: '귀여운 늑대 울푸의 하루', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/615472aa15096' },
-      { name: '귀여운 늑대 울푸의 하루 2', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63260c9f8aa7f' },
-      { name: '귀여운 늑대 울푸의 하루 2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63260c9f8aa7f' },
-    ],
-  },
-  'kyaang123': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/kyaang123',
-      유튜브: 'https://www.youtube.com/@kyaang',
-      유튜브2: { label: '다시보기', url: 'https://www.youtube.com/@%EC%BA%AC%EC%95%99%EB%8B%A4%EC%8B%9C%EB%B3%B4%EA%B8%B0' },
-      팬카페: 'https://cafe.naver.com/dopaminefancafe',
-      나무위키: 'https://namu.wiki/w/%EC%BA%AC%EC%95%99',
-    },
-    instagram: 'https://www.instagram.com/kya_ang/',
-    x: 'https://x.com/kyaang4',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=kyaang' }],
-    etc: [{ label: '팬사이트', url: 'https://kyaang.com/' }],
-    ogq: [
-      { name: '캬앙의 일상', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=62b3038b83eed' },
-      { name: '캬앙의 일상', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62b3038b83eed' },
-      { name: '마늘단의 일상', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=65589af1ad3d6' },
-      { name: '마늘단의 일상', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/65589af1ad3d6' },
-    ],
-  },
-  'wellro314': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/wellro314',
-      유튜브: 'https://www.youtube.com/@WELLRO_',
-      유튜브2: null,
-      팬카페: 'https://cafe.naver.com/gurondan',
-      나무위키: 'https://namu.wiki/w/%EA%B9%80%EC%9B%B0%EB%A1%9C',
-    },
-    instagram: null,
-    x: null,
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=679293' }],
-    etc: [
-      { label: '팬사이트', url: 'https://wellropage.vercel.app/home' },
-      { label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1hmv2ysB90amDXvS5E9D6N7YpmDJExAl4Poi8qPhaor0/edit?gid=78569265#gid=78569265' },
-    ],
-    ogq: [
-      { name: '웰로티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62f3e9f462bb2' },
-      { name: '웰로티콘2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6545ce6f4e142' },
-    ],
-  },
-  'mocamu2': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/mocamu2',
-      유튜브: 'https://www.youtube.com/@mocamu2',
-      유튜브2: { label: 'UR:L', url: 'https://www.youtube.com/@URL-%EC%9C%A0%EC%95%84%EB%A0%90' },
-      팬카페: 'https://cafe.naver.com/sandboxidol',
-      나무위키: 'https://namu.wiki/w/%EB%AA%A8%EC%B9%B4:b',
-    },
-    instagram: null,
-    x: 'https://x.com/moca_good',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' }],
-    etc: [
-      { label: '팬사이트', url: 'https://soop-moca.vercel.app/' },   // 2026-09-18 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(문모모 선례)
-      { label: '노래책', url: 'https://mocasong.com/' },   // 2026-09-18 변경(Crenop 지정): 숲 게시글 → 팬이 만든 노래책 사이트. 이전: 2026-08-03 숲 게시글(구 멜로밍)
-    ],
-    ogq: [
-      { name: '유아렐콘1', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee102355552' },
-      { name: '유아렐콘1', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee102355552' },
-      { name: '유아렐콘2', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee117dcc29f' },
-      { name: '유아렐콘2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee117dcc29f' },
-      { name: '유아렐콘3', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6550dfef4b2ad' },
-      { name: '유아렐콘3', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6550dfef4b2ad' },
-      { name: '유아렐콘4', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=658d279c0befd' },
-      { name: '유아렐콘4', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/658d279c0befd' },
-    ],
-  },
-  'dalta20': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/dalta20',
-      유튜브: 'https://www.youtube.com/@Dalta20',
-      유튜브2: { label: '시그널', url: 'https://www.youtube.com/@SIGNAL_SOOP' },
-      팬카페: 'https://cafe.naver.com/restormy',
-      나무위키: 'https://namu.wiki/w/%EB%8B%AC%ED%83%80',
-    },
-    instagram: 'https://www.instagram.com/dalta20_/',
-    x: 'https://x.com/Dalta20_',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=dalta20_' }],
-    etc: [{ label: '팬사이트', url: 'https://signalcalendar.vercel.app/#dalta' }],   // 2026-09-18 표기 변경(Crenop 지정): 일정표 → 팬사이트(주소 그대로 — 다른 멤버의 팬사이트 항목과 같은 그림)
-    ogq: [
-      { name: '달달하이! 난 꿀즙이', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=644df30193953' },
-      { name: '달달하이! 난 꿀즙이', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/644df30193953' },
-    ],
-  },
-  'chebi2': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/chebi2',
-      유튜브: 'https://www.youtube.com/@chebi444',
-      유튜브2: { label: '서브채널', url: 'https://www.youtube.com/@chebi333' },  // @chebi333 (UCYK-lGzolq2rmHTRak7FkbA) 표시 + 감지 포함(worker yt[1])
-      팬카페: 'https://cafe.naver.com/chebichebi',
-    },
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=chebi' }],
-    etc: [
-      { label: '팬사이트', url: 'https://chebi-archive.netlify.app/' },   // 2026-09-18 추가(Crenop 지정) — 문모모·캬앙·임하밍의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(문모모 선례)
-      { label: '노래책', url: 'https://meloming.com/channel/chebi' },
-    ],
-    ogq: [
-      { name: '체비티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=645a129bde1f6' },
-      { name: '체비티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/645a129bde1f6' },
-    ],
-  },
-  'plincess': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/plincess',
-      유튜브: 'https://www.youtube.com/channel/UCTTHWvk6M928M7U2RHht49Q',
-      유튜브2: { label: '러비타', url: 'https://www.youtube.com/@%EB%9F%AC%EB%B9%84%ED%83%80LUVITA' },
-      팬카페: 'https://cafe.naver.com/plinetarium',
-      나무위키: 'https://namu.wiki/w/%ED%94%8C%EB%A6%AC(LUVITA)',
-    },
-    instagram: 'https://www.instagram.com/plincess_____/',
-    x: 'https://x.com/pli_ncess',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=plincess' }],
-    etc: [
-      { label: '팬사이트', url: 'https://playlist-673991d4.base44.app/' },
-    ],
-    ogq: [
-      { name: '플리티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63db56b5a787d' },
-      { name: '플리티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63db56b5a787d' },
-      { name: '별님티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63c8b6fd22050' },
-      { name: '별님티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63c8b6fd22050' },
-    ],
-  },
-  'tleod1818': {
-    common: {
-      방송국: 'https://www.sooplive.com/station/tleod1818',
-      유튜브: 'https://www.youtube.com/@qldald_2',
-      팬카페: 'https://cafe.naver.com/vmvmvmu',
-      나무위키: 'https://namu.wiki/w/%EB%B9%99%EB%B0%8D',
-    },
-    instagram: 'https://www.instagram.com/ving.______.ming/',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=voddldiadia' }],
-    etc: [{ label: '일정표', url: 'https://docs.google.com/spreadsheets/d/1DsRW3dQMLa83vA9pYvjjocigME9-ovw_8dh5AA7yaUU/edit' }],
-    ogq: [
-      { name: '봉밥티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=62920b9c198e4' },
-      { name: '봉밥티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/62920b9c198e4' },
-      { name: '봉밥티콘 2', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=6390c0c93dace' },
-      { name: '봉밥티콘 2', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/6390c0c93dace' },
-      { name: '나야, 봉밥이!', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=655e8d561095e' },
-      { name: '나야, 봉밥이!', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/655e8d561095e' },
-    ],
-  },
-};
+// 관련 링크(2026-09-19 Crenop 지정 — 시트 이관): 자료는 시트 '관련 링크' 탭(gid 2005614219). 한 행 = 링크 하나 —
+//   A 멤버(영문명·이름·id 아무거나) · B 줄(방송국·유튜브·팬카페·나무위키·인스타그램·X·디코/팬심·기타·OGQ) · C 라벨 · D 주소 · E 순서(같은 줄 안 순서, 비면 시트 순) · F 플랫폼(OGQ만: 네이버/숲)
+// 파서(parseLinkRows)가 종전 코드 표와 같은 모양(common·instagram·x·discordOrFancim·etc·ogq)으로 만든다 — 표 렌더·프로필 빠른 링크·유튜브 채널 대조가 그대로 읽는다.
+// 캐시 먼저(loadCrewSheets) → 시트 도착 시 다시 그림. 시트가 비어 있으면 표 대신 안내 문구.
+let MEMBER_LINKS = {};
+const LINK_ROW_ALIAS = { '방송국': '방송국', '유튜브': '유튜브', '팬카페': '팬카페', '카페': '팬카페', '나무위키': '나무위키', '인스타그램': '인스타그램', '인스타': '인스타그램', 'X': 'X', '트위터': 'X',
+  '디코/팬심': '디코팬심', '디코·팬심': '디코팬심', '디스코드/팬심': '디코팬심', '디코': '디코팬심', '팬심': '디코팬심', '디스코드': '디코팬심', '기타': '기타', 'OGQ': 'OGQ', 'ogq': 'OGQ' };
+function parseLinkRows(rows) {
+  const out = {};
+  const items = rows.map((r, i) => ({ who: (r[0] || '').trim(), row: LINK_ROW_ALIAS[(r[1] || '').trim().replace(/\s+/g, '')] || '', label: (r[2] || '').trim(), url: (r[3] || '').trim(), order: parseInt(r[4], 10), platform: (r[5] || '').trim(), i }))
+    .filter(it => it.who && it.row && it.url && it.who !== '멤버');   // 헤더·빈 행·모르는 줄 이름은 무시
+  items.sort((a, b) => (isNaN(a.order) ? 1e9 : a.order) - (isNaN(b.order) ? 1e9 : b.order) || a.i - b.i);
+  for (const it of items) {
+    const m = MEMBER_BY_EN[it.who.toLowerCase()] || MEMBERS.find(x => x.name === it.who || x.id === it.who);
+    if (!m) continue;
+    const L = out[m.id] || (out[m.id] = { common: {}, instagram: '', x: '', discordOrFancim: [], etc: [], ogq: [] });
+    if (it.row === '유튜브') { const key = L.common['유튜브'] ? (L.common['유튜브2'] ? null : '유튜브2') : '유튜브'; if (key) L.common[key] = { label: it.label || '유튜브', url: it.url }; }   // 셋째부터는 표에 자리가 없어 무시
+    else if (it.row === '방송국' || it.row === '팬카페' || it.row === '나무위키') L.common[it.row] = it.url;
+    else if (it.row === '인스타그램') L.instagram = it.url;
+    else if (it.row === 'X') L.x = it.url;
+    else if (it.row === '디코팬심') L.discordOrFancim.push({ label: it.label || '팬심', url: it.url });
+    else if (it.row === '기타') L.etc.push({ label: it.label, url: it.url });
+    else if (it.row === 'OGQ') L.ogq.push({ name: it.label, platform: it.platform, url: it.url });
+  }
+  return out;
+}
 
 const MODE_LABEL = {
   normal: '일반', adult: '19+',
@@ -4281,6 +4053,7 @@ const profileState = {
 const CREW_ACT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1295776995';
 const MEMBER_INFO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=446600674';
 const VACATION_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=964295196';
+const LINKS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=2005614219';   // 관련 링크(2026-09-19 이관)
 const PROFILE_VIDEO_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1122643231';
 const LS_PROFVIDEO_CACHE = 'chuntaverse_profvideo_cache_v1';
 // 크루 핫클립(2026-09-04 세션 70, Crenop): 프로필 → 천타버스 탭 맨 아래에 유튜브 영상 줄을 되살린다(64번에 음악 탭으로 옮긴 프로필 하단 스트립의 크루분 복구).
@@ -4291,6 +4064,7 @@ let crewClips = [];   // [{section, title, url, img}]
 const LS_CREWACT_CACHE = 'chuntaverse_crewact_cache_v1';
 const LS_MEMBERINFO_CACHE = 'chuntaverse_memberinfo_cache_v2';   // v2: I열(숲 기준) 삽입으로 열 배치가 바뀜 — 옛 캐시를 새 파서로 읽으면 득표가 한 칸 밀려 보이므로 키를 올려 무효화
 const LS_VACATION_CACHE = 'chuntaverse_vacation_cache_v1';
+const LS_LINKS_CACHE = 'chuntaverse_links_cache_v1';
 let crewActs = [];       // [{section, date, text, tag, key}] — 시트 행 순서 = 표시 순서. key(E열)는 컨텐츠 모아보기 검색어
 // 프로필 하단 영상 스트립. 시트 행 순서 = 표시 순서(정렬 안 함), 연속된 같은 목록제목이 한 덩어리.
 // 목록 개수를 2개로 고정하지 않는 이유: 제목이 시트에 있으므로 3개든 1개든 시트가 정한다.
@@ -4347,6 +4121,7 @@ async function loadCrewSheets() {
   try { const c = JSON.parse(lsGet(LS_CREWACT_CACHE, 'null')); if (c) crewActs = parseCrewActRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_MEMBERINFO_CACHE, 'null')); if (c) MEMBER_INFO = parseMemberInfoRows(c); } catch (e) {}
   try { const c = JSON.parse(lsGet(LS_VACATION_CACHE, 'null')); if (c) VACATION = parseVacationRows(c); } catch (e) {}
+  try { const c = JSON.parse(lsGet(LS_LINKS_CACHE, 'null')); if (c) { MEMBER_LINKS = parseLinkRows(c); renderLinks(); } } catch (e) {}   // 관련 링크(2026-09-19): 캐시본으로 표를 먼저
   // 음악 탭도 같은 시트(영상 목록)를 쓴다 — 빠져 있어서 #disco로 새로고침하면 시트가 와도 다시 안 그려
   // '등록된 곡이 없습니다'에 머물렀다(2026-09-02 헤드리스 대조로 확인). 프로필과 같은 자리에서 같이 처리한다.
   if (currentPage === 'profile') renderProfileBody();
@@ -4361,8 +4136,10 @@ async function loadCrewSheets() {
     pull(CREW_ACT_SHEET_URL, LS_CREWACT_CACHE, rows => { crewActs = parseCrewActRows(rows); }),
     pull(MEMBER_INFO_SHEET_URL, LS_MEMBERINFO_CACHE, rows => { MEMBER_INFO = parseMemberInfoRows(rows); }),
     pull(VACATION_SHEET_URL, LS_VACATION_CACHE, rows => { VACATION = parseVacationRows(rows); }),   // 카드 반영은 다음 loadFeed 폴링(≤10초)
+    pull(LINKS_SHEET_URL, LS_LINKS_CACHE, rows => { MEMBER_LINKS = parseLinkRows(rows); renderLinks(); }),   // 관련 링크 표 — 도착하면 다시 그림(탭이 안 보여도 싸다)
   ]);
   crewSheetsDone = true;
+  if (!Object.keys(MEMBER_LINKS).length) renderLinks();   // 시트가 안 왔으면 '불러올 수 없습니다'로 바꿔 그린다
   if (currentPage === 'profile') renderProfileBody();
   else if (currentPage === 'music') renderMusic();
   updatePageTitle();   // 상단바 축하 박스(N번째 생일·방송 N주년)가 MEMBER_INFO를 읽음 — 시트 도착 후 재구성
@@ -8747,6 +8524,10 @@ function applyBlackout() {
 function renderLinks() {
   const body = document.getElementById('linksBody');
   if (!body) return;
+  if (!Object.keys(MEMBER_LINKS).length) {   // 시트 도착 전(첫 방문) 또는 실패 — 캐시가 있으면 여기 안 온다
+    body.innerHTML = `<div class="loading">${crewSheetsDone ? '' : '<div class="spinner"></div>'}<div>${crewSheetsDone ? '관련 링크를 불러올 수 없습니다' : '관련 링크 불러오는 중...'}</div></div>`;
+    return;
+  }
   const memberHeader = MEMBERS.map(m => `
     <th data-member="${m.id}">
       <img class="links-th-avatar" src="${m.img}" alt="${escapeHtml(m.name)}">
@@ -9970,9 +9751,9 @@ function timeStatsRowHtml(ts) {
 }
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
 // 정렬 버튼(2026-09-18 Crenop 5차): 키마다 버튼 하나 — 왼쪽 아이콘 + 글씨 + 오른쪽 방향 화살표(↑ = 최신·큰 값 먼저, ↓ = 역순). 고른 버튼을 다시 누르면 역정렬.
-// 최근 활동의 '시간순'(모래시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'. 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
+// 최근 활동의 '시간순'(모래시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'(달력 그림). 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
 const STATS_SORTS = [
-  { key: 'date', label: '날짜순', ic: 'hourglass' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },
+  { key: 'date', label: '날짜순', ic: 'calendar' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },   // 날짜순은 달력 그림(2026-09-19 Crenop) — 최근 활동의 '시간순'은 모래시계 그대로
   { key: 'peak', label: '최고 시청자순', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자순', ic: 'barChart' },
 ];
 function sortDirSvg(asc) { return `<span class="sort-dir" aria-hidden="true">${asc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp}</span>`; }

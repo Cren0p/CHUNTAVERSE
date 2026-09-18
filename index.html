@@ -1283,15 +1283,16 @@
   .stats-top-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 16px; align-items: stretch; }
   @container (max-width: 860px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
   .stats-num-box, .stats-heat-box { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
-  .stats-num-box { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: space-between; gap: 10px 16px; }   /* 8항목 2/3/3(방송 | 시청자 | 게시) — 항목 위·값 아래(우측과 같은 부품), 행을 상자 높이에 고르게 퍼뜨려 오른쪽과 높이가 같다 */
+  .stats-num-box { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: 14px 16px; }   /* 8항목 2/3/3(방송 | 시청자 | 게시) — 항목 위·값 아래(우측과 같은 부품). 상자 높이는 격자 stretch로 우측과 같고, 안은 보통 간격으로 세로 가운데(2026-09-18 6차: 퍼뜨리기는 간격만 벌렸다) */
   .stats-kv-gap { display: block; }   /* 첫 줄 셋째 칸(빈칸) */
-  .stats-heat-box { container-type: inline-size; }   /* 시간 통계 줄바꿈 규칙의 기준 폭 = 이 상자 */
+  /* 시간 통계 줄바꿈(2026-09-18 6차): 기본은 한 줄. 그린 뒤 실제로 접혔는지 재서(fitTimeRow) 접혔을 때만 3/2, 그래도 접히면 3/1/1 — 폭 추정 임계는 실제와 어긋나 폐지 */
+  .stats-time-row { flex-wrap: nowrap; }
+  .stats-time-row.rows-2, .stats-time-row.rows-3 { flex-wrap: wrap; }
   .kv-brk { display: none; }
-  @container (max-width: 720px) { .kv-brk-2 { display: block; flex-basis: 100%; height: 0; } }   /* 2행: 3/2 */
-  @container (max-width: 430px) { .kv-brk-3 { display: block; flex-basis: 100%; height: 0; } }   /* 3행: 3/1/1 */
+  .stats-time-row.rows-2 .kv-brk-2, .stats-time-row.rows-3 .kv-brk-2, .stats-time-row.rows-3 .kv-brk-3 { display: block; flex-basis: 100%; height: 0; }
   .stats-heat-box { justify-content: center; gap: 12px; }
   .stats-heat-box .stats-heat-cell { background: transparent; border: 0; padding: 0; margin: 0; }
-  .stats-time-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; }
+  .stats-time-row { display: flex; justify-content: center; align-items: center; gap: 8px 20px; }
   /* 항목/값 부품(좌 지표 8 · 우 시간 통계 5 공용, 2026-09-18 4차): 항목 위·값 아래, 클릭 = 추이 모달, hover 민트 테두리 */
   .stats-kv { display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
   .stats-kv:hover { background: var(--surface2); border-color: var(--accent); }
@@ -2320,15 +2321,13 @@
     object-fit: contain;
   }
 
+  /* 2026-09-18 Crenop: 좌 소개 | 우 활동(좁은 기둥) 2단을 폐지 — 위 소개(로고 왼쪽·글 오른쪽 가로 배치) / 아래 활동 4구획 2열 격자(연혁·정기 | 비정기·대전). 구획마다 폭이 두 배가 되어 긴 줄이 안 접힌다. */
   .profile-crew {
-    display: flex; gap: 16px;
+    display: flex; flex-direction: column; gap: 16px;
     align-items: stretch;
   }
   /* 우측 활동/연혁 패널이 좁아져 가독성 무너지기 전에 세로 스택 — 콘텐츠 900px 밑(활동 패널 ~340px 밑)에서 전환(뷰포트 아닌 실제 폭 기준) */
-  @container (max-width: 900px) {
-    .profile-crew { flex-direction: column; }
-    .profile-crew-intro, .profile-crew-activities { flex: none; }
-  }
+
   /* 비율 1.6:1 (2026-08-07, 구 2.4:1) — 근거는 우측이 필요한 폭이다.
      연혁의 현재 최장 줄이 327px인데 구 비율에선 안쪽 폭이 330px으로 여유가 3px뿐이었고,
      반대로 좌측은 소개문 최장 줄 604px에 842px을 쓰고 있었다(238px을 못 씀).
@@ -2336,12 +2335,12 @@
      ※ 구 max-width:720px(소개문)은 제거했다 — 소개문은 세 줄이 <br>로 고정돼 최장 604px이라
        720이든 800이든 접히지 않았다. 실효 상한은 604px이고 문구는 이 파일에서만 바뀐다. */
   .profile-crew-intro {
-    flex: 2.2; min-width: 0;   /* 소개글 마지막 줄이 한 줄에 들어가도록 폭을 더 준다(2026-09-01) */
+    min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 28px 32px;
+    padding: 24px 32px;
     text-align: center;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 32px;   /* 로고 왼쪽 · 소개글 오른쪽(2026-09-18) */
   }
   /* 로고가 남는 세로 공간을 먹는다(2026-08-07).
      [배경] 두 패널은 stretch라 높이가 같은데, 우측 연혁은 계속 늘고 좌측은 고정이다.
@@ -2351,11 +2350,10 @@
      [지금 크기] 좌우 자연 높이가 거의 같은 현재는 남는 높이 ≈ 기존 로고 높이라 보이는 크기가 사실상 그대로다.
      [상한] 560px — 연혁이 아주 길어져도 로고가 무한정 커지지 않게 하는 천장. */
   .profile-crew-intro-img {
-    flex: 1 1 0; min-height: 0;
+    flex: none;
     object-fit: contain;
-    max-width: 560px;
-    width: 100%;
-    margin: 0 auto 32px;
+    width: 260px; max-width: 40%;
+    margin: 0;
     display: block;
   }
   /* 세로 스택 구간의 로고 복구(2026-08-10) — 반드시 위 base 규칙 '뒤'에 와야 한다(둘 다 클래스 1개라 뒤에 온 쪽이 이김).
@@ -2363,8 +2361,9 @@
      [원인] 세로 스택에선 높이를 맞출 상대 패널이 없어 좌측 높이가 내용 기준으로 정해진다 → 위 flex:1 1 0(기본 높이 0,
        남는 높이만 받기)이 받을 여유가 구조적으로 0 → 로고 높이 0(min-height:0이 최소 크기 보호까지 해제).
      [수정] 이 구간만 basis를 auto로 되돌려 원본 비율대로 표시. 폭 규칙(width:100%·max-width:560px)은 그대로 상속. */
-  @container (max-width: 900px) {
-    .profile-crew-intro-img { flex: none; }
+  @container (max-width: 700px) {   /* 좁으면 로고 위·글 아래 */
+    .profile-crew-intro { flex-direction: column; gap: 20px; }
+    .profile-crew-intro-img { width: 60%; max-width: 320px; }
   }
   .profile-crew-intro p {
     font-size: 14px; color: var(--muted);
@@ -2374,12 +2373,15 @@
   /* 글 묶음은 가운데(2026-09-01, Crenop 지정) — 본문이 왼쪽으로 쏠려 보이던 인상의 한 축.
      각 줄 안의 글자는 좌측정렬 그대로 두고, 줄들이 이루는 덩어리만 가운데 세운다. */
   .profile-crew-activities {
-    flex: 1; min-width: 0; align-items: center;
+    min-width: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 22px 24px;
-    display: flex; flex-direction: column;
   }
+  .crew-act-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 40px; }   /* 4구획 2열(2026-09-18) */
+  @container (max-width: 700px) { .crew-act-body { grid-template-columns: minmax(0, 1fr); } }
+  .crew-act-sec { min-width: 0; }
+  .crew-act-sec .crew-act-sub { margin-top: 0; }
   /* 소제목(크루 연혁 구획 + 영상 목록 제목 공용). 2026-08-10 개편: 구 12px/700/자간1.5는 제목이 자기 본문(연혁 14px·설명 15px)보다
      작아 위계가 뒤집혀 있었고, 그 존재감을 굵기·넓은 자간으로 메우다 보니 작은 한글이 뭉쳐 보였다.
      크기를 본문에 맞추고 굵기·자간을 낮춰 구분은 색(accent)과 600이 담당. 자간 1.5는 영문 대문자 라벨용 값이라 한글엔 과했다. */
@@ -2477,7 +2479,6 @@
   /* 700px 이하에서 .profile-wrap 패딩이 16px로 줄어 22px 버튼을 못 받는다. 그 폭은 터치가 주라
      스와이프로 넘기면 되므로 화살표를 아예 숨긴다(컨테이너 900 ≈ 뷰포트 948 — 패딩 24px 구간 안). */
   @container (max-width: 900px) { .vs-arrow { display: none; } }
-  .crew-act-body { width: 100%; max-width: 760px; }   /* 글줄 길이 상한 — 넓은 화면에서 한 줄이 지나치게 길어지지 않게 */
   .crew-act-li {
     display: flex; gap: 9px;
     font-size: 14px; color: var(--text3);
@@ -3147,7 +3148,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18l';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8013,7 +8014,8 @@ function computeAnnualSums(year, nowMs = Date.now()) {
 // 연간 통계에 필요한 월(1~현재월) 중 미적재분 목록
 function annualMonthsToLoad(year, maxMonth) {
   const out = [];
-  for (let mo = 1; mo <= maxMonth; mo++) {
+  const minMo = year === STATS_START_YEAR ? STATS_START_MONTH : 1;   // 첫 해(2025)는 12월 하나 — 없는 달을 받으러 가지 않는다(2026-09-18: '25년 전체'가 안 열리던 원인)
+  for (let mo = minMo; mo <= maxMonth; mo++) {
     const ym = `${year}-${String(mo).padStart(2,'0')}`;
     if (!statsState.data[ym] && !statsState.loadingMonths.has(ym)) out.push(ym);
   }
@@ -10052,6 +10054,7 @@ function renderStats() {
     rows.push(sessionRowHtml(s, memberId, ym, calDateLabel(isoToKstDateKey(s.start))));
   }
   top.innerHTML = `<div class="stats-top-grid"><div class="stats-num-box">${numRows}</div><div class="stats-heat-box">${timeRow}${heatHtml}</div></div>`;   // 좌 지표 8행 | 우 시간 통계 + 그래프, 같은 높이(2026-09-18 3차)
+  fitTimeRow();
   // 목록 상단바(2026-09-18 3차, 최근 활동 문법 그대로 — sticky): 왼쪽 '방송 N회', 오른쪽 정렬 5종 + 맨 위로·맨 아래로
   const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === statsState.sortKey && statsState.sortAsc)}</button>`).join('');   // 고르지 않은 버튼의 화살표는 기본 방향(↑, 흐리게) — 폭이 안 흔들린다
   const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button>${sortBtns}</div></div>`;   // 순서 = 최근 활동 상단바(맨 위로·맨 아래로 → 정렬)
@@ -10071,6 +10074,24 @@ function renderStats() {
     openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);
   }));
 }
+// 시간 통계 줄 접기(2026-09-18 6차 Crenop): 한 줄에 다 들어가면 한 줄. 넘치면 3/2(시작·종료·시간 | 분포·주중/주말), 그래도 넘치면 3/1/1.
+// 접힘은 폭 추정이 아니라 그린 뒤 실측(항목들의 세로 위치가 갈리는가)으로 판단하고, 창 크기가 바뀌면 다시 잰다.
+function fitTimeRow() {
+  const row = document.querySelector('#statsTopBox .stats-time-row');
+  if (!row) return;
+  const items = [...row.querySelectorAll('.stats-kv')];
+  if (items.length < 5) return;
+  const tops = () => items.map(el => el.offsetTop);
+  row.classList.remove('rows-2', 'rows-3');
+  const oneLine = row.scrollWidth <= row.clientWidth + 1;   // nowrap 상태에서 넘치면 접는다
+  if (oneLine) return;
+  row.classList.add('rows-2');
+  const t = tops();
+  const rowsOk = t[0] === t[1] && t[1] === t[2] && t[3] === t[4];   // [3][2]가 각각 한 줄인가
+  if (!rowsOk) { row.classList.remove('rows-2'); row.classList.add('rows-3'); }
+}
+let fitTimeRowTimer = 0;
+window.addEventListener('resize', () => { if (currentPage !== 'stats') return; clearTimeout(fitTimeRowTimer); fitTimeRowTimer = setTimeout(fitTimeRow, 120); });
 // ── 명전 탭(2026-09-18 독립) — 기둥: 2·3위 토글 + 기간(통산·상/하반기). 본문은 renderHall이 그린다. ──
 function renderHallTab() {
   const side = document.getElementById('hallPeriodSide');
@@ -10413,19 +10434,21 @@ function bindVideoStrips(root) {
 function renderProfileCrew(body) {
   // 데이터 없음 = 아직 로드 전('불러오는 중') 또는 실패('불러올 수 없습니다'). 재시도 발화는 switchPage(탭 진입)에서만 —
   // 여기서 발화하면 로더 완료→재렌더→재발화의 무한 fetch 루프(시트 장애 지속 시).
-  let actsHtml = '';
+  // 구획(연혁·정기·비정기·대전)마다 상자 하나 — 2열 격자(2026-09-18 Crenop: 우측 좁은 기둥 폐지, 폭이 아니라 배치를 바꿈)
+  let actsGrid = '';
   if (crewActs.length === 0) {
-    actsHtml = `<div class="crew-act-li"><span>${crewSheetsDone ? '크루 활동을 불러올 수 없습니다' : '크루 활동 불러오는 중...'}</span></div>`;
+    actsGrid = `<div class="crew-act-sec"><div class="crew-act-li"><span>${crewSheetsDone ? '크루 활동을 불러올 수 없습니다' : '크루 활동 불러오는 중...'}</span></div></div>`;
   } else {
-    let lastSec = '';
+    const secs = [];   // [{ title, items: [html] }] — 시트 순서 유지
     crewActs.forEach(a => {
-      if (a.section !== lastSec) { actsHtml += `<div class="crew-act-sub">${escapeHtml(a.section)}</div>`; lastSec = a.section; }
+      if (!secs.length || secs[secs.length - 1].title !== a.section) secs.push({ title: a.section, items: [] });
       const inner = `${a.date ? `<span class="d">${escapeHtml(a.date)}</span> — ` : ''}${escapeHtml(a.text)}${crewTagHtml(a.tag)}`;
       // key(E열) 있는 행 = 컨텐츠 모아보기 링크(2026-08-24 Crenop 확정: 민트 박스 + link SVG — 사이트 내 링크 표지)
-      actsHtml += a.key
+      secs[secs.length - 1].items.push(a.key
         ? `<div class="crew-act-li"><span class="dot">•</span><button class="crew-act-link" type="button" data-key="${escapeHtml(a.key)}">${inner}${SVG_ICONS.link}</button></div>`
-        : `<div class="crew-act-li"><span class="dot">•</span><span>${inner}</span></div>`;
+        : `<div class="crew-act-li"><span class="dot">•</span><span>${inner}</span></div>`);
     });
+    actsGrid = secs.map(sec => `<div class="crew-act-sec"><div class="crew-act-sub">${escapeHtml(sec.title)}</div>${sec.items.join('')}</div>`).join('');
   }
   body.innerHTML = `
     <div class="profile-crew">
@@ -10436,7 +10459,7 @@ function renderProfileCrew(body) {
         <p>천타버스는&nbsp;원래&nbsp;천양님이&nbsp;크루&nbsp;콘텐츠에&nbsp;참가하기&nbsp;위해 결성한&nbsp;'위장&nbsp;크루'로&nbsp;시작했으나<br><br>지속적인&nbsp;합방과 다채로운&nbsp;자체&nbsp;콘텐츠를&nbsp;통해<br><br>이제는&nbsp;그&nbsp;누구도&nbsp;대체할&nbsp;수&nbsp;없는&nbsp;독보적인&nbsp;매력을&nbsp;뽐내는 버추얼&nbsp;크루로&nbsp;당당히&nbsp;성장해&nbsp;나가는&nbsp;중입니다.</p>
       </div>
       <div class="profile-crew-activities">
-        <div class="crew-act-body">${actsHtml}</div>
+        <div class="crew-act-body">${actsGrid}</div>
       </div>
     </div>
     ${videoStripsHtml(crewClips, 'Favicon.webp', 1300)}

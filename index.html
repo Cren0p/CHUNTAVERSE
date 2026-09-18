@@ -22,6 +22,7 @@
 <link rel="canonical" href="https://chuntaverse.com">
 <link rel="icon" type="image/webp" href="Favicon.webp">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">   <!-- 홈 화면 설치용(2026-09-18) — 아이콘은 Favicon.webp(388) 그대로, 별도 PNG 없음 -->
 <meta name="theme-color" content="#070a14">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Pretendard Variable: 다이내믹 서브셋(화면에 쓰인 글자의 woff2만 로드) — 기기별 시스템 한글폰트 메트릭 차이(배지 세로정렬 등) 제거 목적. CDN 장애 시 아래 스택의 시스템 폰트로 폴백(font-display: swap). -->
@@ -790,7 +791,7 @@
   .page.active { display: flex; }
 
   /* 컨테이너 쿼리 기준점: 각 탭 콘텐츠 영역(뷰포트가 아닌 실제 폭) 기준으로 열 수/전환 판단 → 좌측 사이드바·패딩 자동 반영 + 멤버 증가 대응 */
-  #app, #pastBody, #linksBody, #profileBody, .stats-main, .cal-main { container-type: inline-size; }   /* .stats-main: 기둥을 뺀 본문 폭 기준(2026-09-01) — .hall-wrap이면 기둥 폭까지 세어 카드가 기둥 위로 넘쳤다 */
+  #app, #linksBody, #profileBody, .stats-main, .cal-main { container-type: inline-size; }   /* .stats-main: 기둥을 뺀 본문 폭 기준(2026-09-01) — .hall-wrap이면 기둥 폭까지 세어 카드가 기둥 위로 넘쳤다 */
 
   .grid {
     display: grid;
@@ -1218,7 +1219,7 @@
 
 
 
-  .past-tabs-wrap {
+  .member-strip {   /* 멤버 스트립(2026-09-18 개명, 구 .past-tabs-wrap — 음악·달력·통계 탭 공용) */
     display: grid;
     grid-template-columns: repeat(3, 1fr);   /* 우측 기둥 규격 — 이벤트 필터(3열)와 같은 칸.
        종전 14열 가로 스트립은 본문 위에 눕혀 있을 때의 배치였다(2026-08-31 기둥 이전). */
@@ -1253,13 +1254,7 @@
   .stats-period-btn:hover { color: var(--accent); }
   .stats-period-btn.active { border-color: var(--accent); color: var(--accent); }
   .stats-period-btn:disabled { color: var(--border); cursor: not-allowed; }
-  .past-tabs-side {
-    display: contents;
-  }
-  .past-tabs-members {
-    display: contents;
-  }
-  .past-tab, .cal-tab {   /* .cal-tab = 달력 탭 멤버 스트립(2026-09-02). 같은 클래스를 쓰면 selectStatsTab이 문서 전체 .stats-tab의 활성을 갈아 끼운다 */
+  .cal-tab {   /* .cal-tab = 달력 탭 멤버 스트립(2026-09-02). 같은 클래스를 쓰면 selectStatsTab이 문서 전체 .stats-tab의 활성을 갈아 끼운다 */
     position: relative;
     aspect-ratio: 1;
     background: var(--surface2);
@@ -1271,18 +1266,17 @@
     font-family: inherit;
     box-sizing: border-box;
   }
-  .past-tab img, .cal-tab img {
+  .cal-tab img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
     transition: opacity 0.15s, filter 0.15s;
   }
-  .past-tab:not(.active) img, .cal-tab:not(.active) img { opacity: 0.25; filter: grayscale(1); }
-  .past-tab:not(.active), .cal-tab:not(.active) { border-color: transparent; }
-  .past-tab.active, .cal-tab.active { border-color: var(--accent); }
-  .past-tab:hover, .cal-tab:hover { border-color: var(--accent); }
-  /* .past-tab-all 폐지(2026-08-31): 통합 칸이 통계 탭으로 옮겨가 지난 활동 스트립에서 사라졌다 */
+  .cal-tab:not(.active) img { opacity: 0.25; filter: grayscale(1); }
+  .cal-tab:not(.active) { border-color: transparent; }
+  .cal-tab.active { border-color: var(--accent); }
+  .cal-tab:hover { border-color: var(--accent); }
 
   .metrics-grid {
     display: grid;
@@ -1323,16 +1317,6 @@
   .medal-ico svg { width: 13px; height: 13px; vertical-align: -2px; }   /* 지표값 옆 순위 트로피(구 🥇🥈🥉 이모지) — 금·은·동은 명전 순위색 */
   .metrics-card-value { color: var(--text); font-weight: 700; flex-shrink: 0; }
 
-  .past-detail-month {
-    display: flex; align-items: center; gap: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 0 8px;
-    box-sizing: border-box;
-    height: 100%;
-    min-height: 32px;   /* <1100px 세로 배치에선 height:100%가 auto(콘텐츠 30px)로 무력화 — 월 버튼(min-height:32)과 높이 통일 */
-    justify-content: center;
-  }
   .stats-month-btn {
     background: none;
     border: none;
@@ -1347,64 +1331,23 @@
   .stats-month-btn svg { display: block; }
   .stats-month-btn:hover { color: var(--accent); }
   .stats-month-btn:disabled { color: var(--muted); opacity: 0.35; cursor: not-allowed; }   /* 종전 --border는 배경에 묻혀 '버튼이 없는' 것처럼 보였다 */
-  .past-detail-summary {
-    display: flex; flex: 1; flex-wrap: wrap; gap: 10px 16px;   /* v5: 행간 10px = 상하 패딩과 동일 — 2행일 때 경계~1행~2행~경계 간격 통일(Crenop 지정) */
-    justify-content: center;   /* v2(2026-08-29): 항목 무리는 가운데, 각 항목 내부 텍스트는 좌측정렬 유지 — Crenop 지정 */
-    padding: 10px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    align-items: center;
-    box-sizing: border-box;
-  }
-  .past-summary-item { display: flex; flex-direction: column; gap: 2px; }
-  .ss-row { display: contents; }   /* v8: 넓을 땐 두 행 묶음이 한 줄로 흐른다 */
   /* v11: 5|3 고정을 '전' 구간 복원(자유랩 티어는 무단 변경이었음 — 삭제). 전환 임계 724 = Crenop 스크린샷
      두 장의 창폭↔임계 비율 정합에서 역산한 "8항목이 실제로 안 들어가는 폭"(환산계수 1.515, 배율 무가정).
      520 이하는 폭 지시대로 간격 축소로 버틴다 — 구조는 끝까지 5|3. */
-  @container (max-width: 724px) {
-    .past-detail-summary { flex-direction: column; align-items: center; }
-    .ss-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 16px; }
-  }
   /* v12(2026-09-03 Crenop): 5|3이 3행이 돼야 하는 폭에선 2|3|3으로 — 첫 묶음 안의 .ss-brk가 줄을 끊는다(방송 2 | 시청자 3 | 게시 3).
      임계 560 = 5칸 실측 폭 합 449 + 간격 16×4 + 패딩 32 = 545(그 아래선 5칸이 4|1로 흩어졌다)에 여유 15. 그 위에선 .ss-brk는 없는 요소. */
-  .ss-brk { display: none; }
-  @container (max-width: 560px) {
-    .ss-brk { display: block; flex-basis: 100%; height: 0; }
-  }
-  @container (max-width: 520px) {
-    .ss-row { gap: 8px 10px; }
-    .past-detail-summary { padding: 10px 8px; }
-  }
-  .past-summary-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
-  .past-summary-value { font-size: 14px; font-weight: 700; }
   /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
-  .past-summary-item[data-metric] { cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
-  .past-summary-item[data-metric]:hover { background: var(--surface2); border-color: var(--accent); }
   /* 일별 요약 세션의 시청자(최고·평균) — 시간 우측 인라인, 글씨는 시간과 동일 톤(아이콘만 색).
      inline-flex 중앙정렬 = 카드 라벨(metrics-card-label)과 동일 패턴 — 아이콘이 텍스트 흐름의 vertical-align:middle(x-height 의존)로 앉으면 폰트 따라 틀어짐 */
   .day-session-viewer { display: inline-flex; align-items: center; font-size: 12px; color: var(--text); font-weight: 600; white-space: nowrap; }
   .day-session-viewer .stats-row-icon { margin-right: 3px; }
 
-  .past-member-header {
-    display: flex; flex-direction: column;   /* v2(2026-08-29): 선택기 줄 → 요약 줄 세로 적층 — 단일 컬럼 개편 */
-    gap: 12px;
-    margin-bottom: 16px;
-  }
 
   /* [요약 | 종류 필터] 한 행(.ss-filter-row)은 2026-08-31 폐지 — 필터가 없어져 요약만 남으므로 래퍼가 필요 없다. */
 
-  .past-detail-body {
-    display: flex; flex-direction: column; gap: 16px;
-    /* v2(2026-08-29): 우측 상세 열 폐지 — 일별 요약은 달력의 해당 주 아래 확장(일정 모달 문법)으로 이동.
-       단일 컬럼이라 PC·모바일 구조가 동일하고, 차이는 셀 썸네일 유무(달력 블록의 1360 분기)뿐. */
-  }
 
   .calendar { background: var(--surface); border: 1px solid var(--border); padding: 12px; }
   .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }   /* minmax(0,·): 칸이 내용 폭으로 벌어지지 않게(2026-08-31) */
-  .cal-weekdays { margin-bottom: 4px; }
-  .cal-weekrow + .cal-weekrow { margin-top: 4px; }   /* 주 행 간격 = 셀 gap(4px)과 동일 — 연속된 그리드처럼 보이게 */
-  .cal-week-detail { border: 1px solid var(--border); background: var(--bg); padding: 16px; margin-top: 4px; }   /* 주간 확장 슬롯 — 일정 모달 .sch-detail과 동일 문법 */
-  .cal-week-detail:empty { display: none; }
   .calendar-weekday {
     text-align: center; font-size: 12px;
     color: var(--text); font-weight: 700; padding: 6px 0;   /* v11: 평일 라벨도 날짜 숫자와 같은 기본색(muted → text) — 통계·일정 공용 */
@@ -1427,12 +1370,10 @@
   .calendar-day.outside:hover { border-color: transparent; }
   /* (방송날 민트 배경·글자색은 v5에서 제거 — 정보는 칩·썸네일이 담당, 날짜색은 요일 규칙(Crenop 지정 2026-08-29).
      선택 테두리(.selected)와 오늘 표시(.today)는 유지) */
-  .calendar-day.selected { border-color: var(--accent); }
   .calendar-day.today { box-shadow: inset 0 0 0 1.5px var(--time); }
   .calendar-daynum { font-weight: 700; font-size: 13px; }
   /* (구 "N회"·활동 점 표기 CSS는 v4에서 제거 — 컴팩트도 아이콘+숫자 칩으로 통일, 2026-08-29 Crenop 지정) */
-  /* ── 썸네일 달력 v3(2026-08-29): 베이스=원형 컴팩트(공용 .calendar-day를 절대 오염시키지 않는다 — 일정 모달 회귀 교훈).
-     PC 썸네일 폼은 통계 전용 스코프(.past-detail-body) + min-width 1361 컨테이너에서만 켠다. ── */
+  /* ── 달력 칸 공용 규칙(구 지난 활동 v3 2026-08-29의 베이스): 공용 .calendar-day를 오염시키지 않는다 — 일정 모달 회귀 교훈. 지난 활동 전용 폼은 2026-09-18 탭 폐지로 제거. ── */
   .cd-top { display: contents; }                 /* 컴팩트: 날짜 숫자를 셀 중앙 흐름에 그대로 */
   /* v4 컴팩트 칩: 2열 고정 슬롯 그리드(1행 숲|VOD · 2행 숲글|카페 · 3행 유튜브 — Crenop 지정).
      슬롯(grid-area) 고정이라 0으로 빠진 항목이 있어도 남은 칩의 자리가 안 흔들린다. */
@@ -1448,22 +1389,12 @@
   .cd-chip.youtube { color: var(--ev-youtube); }
   .cd-chip.cafe { color: #03C75A; }
   /* v6: 요일 날짜색을 전역 규칙으로 — 통계·일정 달력 공용(색만 얹는 무해 규칙, 리셋을 앞에 둬 주말색이 이긴다) */
-  .past-detail-body .calendar-daynum { color: var(--text); }
   .calendar-daynum.sun { color: #f87171; }
   .calendar-daynum.sat { color: #60a5fa; }
   /* v9: 컴팩트 셀 — Crenop 지정 슬롯. 2026-09-06 재배치(다시보기 칩 폐지 뒤): 1행 [숲 방송|유튜브] · 2행 [숲 게시글|카페].
      (구: 1행 [빈칸|유튜브] · 2행 [숲방송|숲게시글] · 3행 [다시보기|카페] — 1행1열 빈칸은 좌상단 날짜와의 충돌 회피였다.)
      빈칸이 없어졌으므로 날짜 줄 높이만큼 위를 비워(padding-top) 묶음이 날짜 아래 영역의 가운데에 앉게 한다. 0개 항목은 비표시하되 슬롯 고정. */
   /* 폭 조건 없음(2026-08-31): 썸네일 폼이 사라져 폭으로 셀 모양을 가를 이유가 없다 — 어느 폭에서나 컴팩트 */
-  .past-detail-body .calendar-day { position: relative; padding: 16px 3px 3px; justify-content: center; align-items: center; gap: 0; }   /* 위 16 = 날짜 줄(3 + 13) — 칩 묶음은 그 아래 가운데 */
-  .past-detail-body .calendar-day .calendar-daynum { position: absolute; top: 3px; left: 5px; line-height: 13px; }
-  .past-detail-body .cd-chips { display: grid; grid-template-columns: auto auto; gap: 2px 6px; justify-items: start; }
-  .past-detail-body .cd-s-soop { grid-area: 1 / 1; }
-  .past-detail-body .cd-s-yt   { grid-area: 1 / 2; }
-  .past-detail-body .cd-s-post { grid-area: 2 / 1; }
-  .past-detail-body .cd-s-cafe { grid-area: 2 / 2; }
-  .past-detail-body .calendar-day .cd-chip .cd-full { display: none; }   /* v13: '달력 셀'만 아이콘 단독(숫자 제거) — 일별 요약 헤더 숫자까지 사라지던 과대 스코프 교정(Crenop 적발) */
-  .past-detail-body .calendar-day .cd-chip .cd-ic { display: inline-flex; }
   /* 다시보기 타일 묶음 — 다시보기 고르기 모달·링크 고르기 모달(2026-09-06부터는 여기서만 — 일별 요약의 슬롯은 폐지). 타일은 200px 문법 */
   .ds-vods { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
   .ds-vod { width: 200px; text-decoration: none; color: inherit; display: block; }
@@ -1484,9 +1415,6 @@
   .day-session-change .event-elapsed { font-size: 11px; margin-left: 2px; }
   .day-session-change .event-elapsed svg { width: 10px; height: 10px; vertical-align: -1px; }
   /* v5: 일별 요약 헤더 — 날짜는 요일색, 개수는 달력과 동일한 칩 문법(약간 키움) */
-  .ddt-date { color: var(--text); }
-  .ddt-chips { display: inline-flex; align-items: center; gap: 8px; }   /* v7: 배치는 부모 flex가 담당 — 구 margin/vertical-align 보정 제거 */
-  .day-detail-title .cd-chip .cd-full { height: 13px; }   /* v12: 헤더 스케일 — 배치는 칩 내부 좌표가 담당 */
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
   .vod-pick-panel { width: 440px; max-width: calc(100vw - 32px); }   /* 좁은 폭(≤700, 휴대폰): 아래 2열 규칙 */
   /* 태블릿 이상(2026-09-06 Crenop: 폭이 넉넉하면 넓어도 된다 — 지표 그래프 모달처럼 가변): 타일은 일별 요약 규격 200px 고정으로 돌아가고
@@ -1536,25 +1464,9 @@
   .vod-pick-empty a { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
   .vod-pick-empty a svg { width: 12px; height: 12px; display: block; }
   /* 우측 일별 요약 패널 — 기본 숨김(≤800 모바일·PC는 주간 확장이 담당), 중간 폭 밴드에서만 표시 */
-  .day-detail {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px;
-    flex-direction: column;
-  }
   /* 썸네일 폼 폐지(2026-08-31): 셀에 16:9 그림을 넣으려면 달력만 1450px가 필요해, 그 폭을 못 만드는
      화면에서는 아예 못 보는 기능이었다. 썸네일 모아보기는 달력 탭이 맡고, 여기는 통계 본분(컴팩트 셀)으로 돌아간다.
      남은 폼은 둘 — 넓으면 [달력 | 일별 요약] 좌우, 좁으면 위아래. */
-  @container (min-width: 801px) {   /* 중간 폭 — 컴팩트 달력 + 우측 일별 요약(구형 2열 복원, Crenop 지정) */
-    .past-detail-body { display: grid; grid-template-columns: minmax(0, 500px) minmax(300px, 1fr); grid-template-areas: "cal detail" "heat detail"; grid-template-rows: auto 1fr; gap: 16px; align-items: start; }   /* rows auto·1fr(2026-08-29): 우측 요약이 두 행에 걸치는데 행 규칙이 없으면 요약의 남는 높이가 1행에도 배분돼 히트맵이 달력에서 밀려 내려갔다 — 1행은 달력 높이만, 나머지는 전부 2행이 흡수해 히트맵이 달력 바로 아래 고정 */
-    .past-detail-body .calendar { grid-area: cal; }
-    .past-detail-body .toh-wrap { grid-area: heat; margin: 0; }
-    .past-detail-body .day-detail { grid-area: detail; display: flex; }
-    .past-detail-body .cal-week-detail { display: none; }   /* 이 밴드에선 주간 확장 대신 우측 패널 */
-  }
-  /* (활동일 옅은 민트 음영도 v5에서 제거 — 음영 폐지, 칩이 활동 정보를 담당) */
-
   /* 시간대별 방송 분포 히트맵 (멤버 개별 화면) — v3(2026-08-29): 셀을 15×15 정사각으로 고정(열 폭=행 높이).
      래퍼는 내용 폭(31일≈490px)에 맞추고 중앙 배치 — 전폭에 늘리지 않는다(Crenop 지정). 좁은 화면은 내부 가로 스크롤. */
   .toh-wrap { margin: 16px auto 0; width: fit-content; max-width: 100%; }
@@ -1629,20 +1541,6 @@
   }
 
   /* (.day-detail 컨테이너 CSS는 v2에서 제거 — 패널이 사라지고 내용물은 .cal-week-detail 확장 슬롯 안에서 렌더) */
-  .day-detail-title {
-    font-size: 14px; font-weight: 700;
-    color: var(--accent);
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;   /* v7: 날짜·칩을 flex 세로 중앙으로 — vertical-align 보정 폐기 */
-    margin-bottom: 12px; padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .day-detail-empty {
-    flex: 1;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--muted); font-size: 13px;
-    text-align: center; line-height: 1.6;
-  }
   .day-session {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -2094,6 +1992,13 @@
   .cal-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cal-thumb:empty { background: transparent; }   /* 빈 상자는 높이만 잡고 음영 없이(옛 폼 v5 Crenop 지정) */
   .cal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* 달력 4종(2026-09-18): 고르지 않은 종류의 존재 칩은 아이콘만 흐리게 · 글 종류 상자 = 그날 글 제목 최대 3줄 · 종류 격자 빈칸(채팅 자리) */
+  .cal-main .cd-chip.cd-mark .cd-full { display: none; }
+  .cal-main .cd-chip.cd-mark .cd-ic { display: inline-flex; opacity: 0.45; }
+  .cal-txt { display: flex; flex-direction: column; gap: 1px; width: 100%; height: 100%; padding: 4px 5px; box-sizing: border-box; background: var(--surface2); font-size: 11px; line-height: 14px; color: var(--text); text-align: left; }
+  .cal-txt-line { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-txt-more { color: var(--muted); }
+  .cal-kind-spacer { visibility: hidden; pointer-events: none; }
   .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
   .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop) */
   /* 태그별 고유색(2026-09-02 Crenop 지정) — 달력 칸·목록·상세·일정 모달 어디서나 같은 색. 브랜드 색 출처는 응답 기록(69번).
@@ -2124,7 +2029,9 @@
   /* 기둥의 종류 버튼 아이콘 색 = 그 아이콘의 사이트 배정색(2026-09-02 Crenop 지정): 숲 ∞ 파랑(--ev-start)·유튜브 빨강.
      칸의 칩도 같은 그림이라 같은 색 — 지난 활동의 .cd-chip.broadcast(숲=파랑)와 한 문법이 된다.
      글자는 통계 탭 종류 버튼과 같이 흐림→켜지면 민트(.stats-kind-btn). */
-  #calKindBox .stats-kind-btn[data-kind="vod"] svg { color: var(--ev-start); }
+  #calKindBox .stats-kind-btn[data-kind="live"] svg { color: var(--ev-start); }   /* 2026-09-18: vod → live(방송 단위) */
+  #calKindBox .stats-kind-btn[data-kind="post"] svg { color: var(--ev-post); }
+  #calKindBox .stats-kind-btn[data-kind="cafe"] svg { color: #03C75A; }
   #calKindBox .stats-kind-btn[data-kind="youtube"] svg { color: var(--ev-youtube); }
   .cal-main .cd-chip.vod { color: var(--ev-start); }   /* 썸네일 탭의 다시보기 칩은 숲 ∞ 마크라 파랑 */
   @media (max-width: 1150px) { .cal-wrap { grid-template-columns: 1fr; } }
@@ -2229,19 +2136,20 @@
   /* 통계 탭 상단 — 크루 숫자 격자(통계 카드 재사용) + 멤버별 시간대 분포 */
   .stats-metrics { margin-bottom: 24px; }
   .stats-heat { margin-bottom: 28px; }
-  .stats-heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }   /* 520이면 본문 폭(약 1052)에서 간격 때문에 한 열로 떨어졌다 — 두 열이 서도록 낮춘다(정사각은 고집하지 않음) */
   .stats-heat-cell { background: var(--surface); border: 1px solid var(--border); padding: 12px; min-width: 0; }
-  .stats-heat-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; row-gap: 4px; min-height: 33px; }   /* 14px·사진 28px(구 12·22 — 2026-09-02 Crenop: 작다). 통계 두 줄이 안 들어가는 좁은 카드에선 아랫줄로 내려간다.
-     min-height 33 = 통계 두 줄 높이 — 통계가 없는 달·꺼진 상태에서도 줄 높이가 같다(카드 크기는 큰 쪽 기준으로 고정, 2·3위 보기와 같은 원칙 — 2026-09-02 Crenop) */
-  .stats-heat-name img { width: 28px; height: 28px; flex: none; }   /* 사진+이름 — 케미·순위 화면과 같은 문법 */
   /* 격자 묶음(y축+일자 열)을 카드 가운데에 — 달마다 열 수가 달라 왼쪽 정렬이면 2월은 오른쪽이 비어 보였다(2026-09-02 Crenop).
      카드 안 히트맵은 .toh-wrap 없이 .toh-head/.toh-body만 있으므로(구 .toh-wrap 규칙은 닿는 곳이 없었다) 몸통에서 가운데 맞춤. */
   .stats-heat-cell .toh-body { justify-content: center; }
   .stats-heat-cell .toh-right { flex: 0 1 auto; }
-  /* 이름 오른쪽 빈 폭에 그 달의 통계 두 줄(2026-09-02 Crenop 지정): 평균 시작·종료·시간 / 시간대·주중주말 분포 */
-  .stats-heat-stats { margin-left: auto; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; gap: 6px; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; visibility: hidden; }   /* 12px(구 11). '통계 보기' 토글이 켜졌을 때만 보이되 자리는 늘 차지한다(display가 아니라 visibility — 켜고 끌 때 카드 크기가 안 바뀐다, 2026-09-02 Crenop) */   /* gap 6(2026-09-07 Crenop): 두 줄이 붙어 보였고 값 버튼의 호버 상자(세로 3px 삐져나옴)가 옆 줄에 닿았다 */
-  .stats-heat-grid.show-stats .stats-heat-stats { visibility: visible; }
-  /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 요약 항목(.past-summary-item[data-metric])과 같은 규칙·같은 값
+  /* 띠 아래 그 달의 시간 통계 두 줄(2026-09-02 Crenop 지정 → 2026-09-18 상시 표시): 평균 시작·종료·시간 / 시간대·주중주말 구성. 토글 폐지 — 멤버 한 명의 띠뿐이라 늘 보인다. */
+  .stats-heat-stats { margin-top: 10px; text-align: left; align-items: flex-start; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; display: flex; flex-direction: column; gap: 6px; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* 통계 재편(2026-09-18): 위 = 지표 카드 | 시간대 띠 — 넓으면 좌우, 좁으면 위아래(.stats-main 컨테이너 기준). 아래 = 방송별 지표 목록. */
+  .stats-top-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @container (max-width: 760px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
+  .stats-sessions { margin-top: 16px; }
+  .stats-sess-head { font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 8px; }
+  .day-session-date { font-size: 12px; font-weight: 600; color: var(--text); margin-right: 8px; white-space: nowrap; }   /* 방송별 목록 행의 날짜(한 달·한 해를 늘어놓으므로) */
+  /* 다섯 값은 버튼(2026-09-07): 평소엔 글자 그대로, 마우스를 올리면 바탕색 + 민트 테두리 상자 — 지표 카드 행(.metrics-card-row-link)과 같은 규칙·같은 값
      (패딩 2px 6px에 같은 크기의 음수 여백으로 글자 자리는 그대로, 테두리는 평소 투명). 점선 밑줄(선례 없는 제 발명)은 철회. */
   .stats-heat-stats .hts-btn { all: unset; cursor: pointer; padding: 2px 3px; margin: -3px 0; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }   /* 좌우는 음수 여백 없이 상자 폭 3px이 글자 사이를 벌린다(2026-09-07 Crenop: 상자로 안 되면 글자 쪽을 조절) — 그래서 상자가 ' · '를 덮을 수 없다. 세로는 지표 요약 항목과 같다 */
   .stats-heat-stats .hts-btn:hover { background: var(--surface2); border-color: var(--accent); }
@@ -2357,7 +2265,7 @@
      [왜 뒤집었나] 종전에는 묶음이 화면 폭을 다 쓰고 본문만 그 안에서 가운데였다. 그러면 기둥 안쪽의
      좌우 44px 빈 슬롯이 화면 오른쪽 여백에 그대로 얹혀 오른쪽 68px : 왼쪽 24px이 되고,
      본문이 왼쪽으로 쏠려 보인다(프로필 탭에서 특히 반복 지적됨). */
-  .profile-wrap, .past-wrap {
+  .profile-wrap {
     padding: 20px 24px;
     max-width: 1444px; width: 100%; margin: 0 auto;
     flex: 1;
@@ -2374,14 +2282,14 @@
   /* 본문은 남은 폭 안에서 가운데 — 기둥이 오른쪽에 붙어도 본문이 치우쳐 보이지 않게 */
   /* 본문 왼쪽에 기둥의 빈 슬롯과 같은 44px을 둔다(2026-09-01, Crenop 지정).
      기둥 오른쪽 44px이 사실상 여백이므로, 왼쪽에 같은 값을 넣어야 덩어리 전체가 좌우 대칭으로 선다. */
-  .profile-wrap > #profileBody, .past-wrap > #pastBody, .stats-main, .cal-main, .music-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
+  .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
   /* 묶음 사이 = 여백 하나(20px)(2026-09-02 Crenop 지정). 구 '여백 20 + 구분선 1 + 여백 20'은 높이가 모자란 화면에서 기둥이 넘쳤다. */
   .side-pick > * + *, .side-pick .side-stack > * + * { margin-top: 20px; }
   /* .side-stack: 한 자리에서 내용을 갈아끼우는 묶음(#statsPeriodSide)도 안쪽 칸을 같은 간격으로 나눈다.
      종전엔 직계 자식만 걸려 2·3위 토글과 기간 버튼이 간격 0으로 붙어 있었다(반복 지적된 자리). */
   .side-pick .stats-bar { justify-content: flex-start; gap: 10px; margin-left: 44px; }   /* 위아래 버튼 묶음과 같은 왼쪽 기준 */
   .side-pick .filter-title { margin-left: 44px; }
-  .profile-tabs-wrap, .past-tabs-wrap, .stats-kind, #statsPeriodSide .stats-range { margin: 0 44px; }
+  .profile-tabs-wrap, .member-strip, .stats-kind, #statsPeriodSide .stats-range { margin: 0 44px; }
   .stats-kind, #statsPeriodSide .stats-range { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   /* 지난 활동 기둥의 기간 버튼과 같은 값(2026-09-02 Crenop 지적) — 칸이 60×60으로 똑같은데 여기만 10~11px이라
      한 사이트에서 같은 역할의 버튼이 작아 보였다. 둘 다 12px로 맞춘다. */
@@ -2831,10 +2739,10 @@
     .nav-item[data-page="profile"]   { grid-row: 3; grid-column: 1; }
     .nav-item[data-page="live"]      { grid-row: 3; grid-column: 2; }
     .nav-item[data-page="recent"]    { grid-row: 3; grid-column: 3; }
-    .nav-item[data-page="past"]     { grid-row: 4; grid-column: 1; }
+    .nav-item[data-page="calendar"] { grid-row: 4; grid-column: 1; }   /* 2026-09-18: 달력(구 썸네일)이 옛 지난 활동 자리로 */
     .nav-item[data-page="chemistry"] { grid-row: 4; grid-column: 2; }
     .nav-item[data-page="stats"]      { grid-row: 4; grid-column: 3; }
-    .nav-item[data-page="thumbs"]    { grid-row: 5; grid-column: 1; }
+    .nav-item[data-page="hall"]      { grid-row: 5; grid-column: 1; }   /* 2026-09-18: 명전(통계에서 독립)이 옛 썸네일 자리로 */
     .nav-item[data-page="content"]   { grid-row: 5; grid-column: 2; }
     .nav-item[data-page="banner"]    { grid-row: 5; grid-column: 3; }
     .nav-item[data-page="music"]     { grid-row: 6; grid-column: 1; }
@@ -2887,8 +2795,8 @@
     body.drawer-r .side-pick, body.drawer-r .filter-panel, body.drawer-r .chem-filter-panel { transform: none; }
     /* 필터·기둥이 서랍으로 빠지는 폭이므로 격자의 280px 칸도 여기서 함께 없앤다 — 탭마다 다른 값을 쓰면
        그 사이 폭에서 그 탭만 본문이 좁아진다(2026-09-02: 최근 활동·케미가 1100px으로 따로 놀던 것을 합침) */
-    .profile-wrap, .past-wrap, .stats-wrap, .cal-wrap, .recent-wrap, .chem-wrap { grid-template-columns: 1fr; }
-    .profile-wrap > #profileBody, .past-wrap > #pastBody, .stats-main, .cal-main, .music-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
+    .profile-wrap, .stats-wrap, .cal-wrap, .recent-wrap, .chem-wrap { grid-template-columns: 1fr; }
+    .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
     .recent-wrap > .timeline, .chem-wrap > .chem-content { margin-left: 0; }
     .drawer-btn#drawerBtnR { display: inline-flex; }   /* 고르는 기둥이 서랍이므로 태블릿에서도 필요하다 */
   }
@@ -2977,10 +2885,12 @@
   <div class="topbar-logo"><img id="siteLogoImg" src="Title.webp" alt="CHUNTAVERSE"></div>
 <nav class="sidebar" id="sidebar">
   <button class="drawer-close" id="drawerClose" type="button" aria-label="메뉴 닫기"></button>
-  <!-- 탭 순서(2026-08-31, 2026-09-06 12탭): [프로필 · 생방송 · 최근 활동] 매일 보는 것 → [지난 활동 · 케미 · 통계]
-       쌓인 것을 보는 것 → [썸네일 · 컨텐츠 · 현수막] 모아 보는 것 → [음악 · 좋아요] → [관련 링크] 도구.
+  <!-- 탭 순서(2026-08-31 → 2026-09-18 12탭): [프로필 · 생방송 · 최근 활동] 매일 보는 것 → [달력 · 케미 · 통계]
+       쌓인 것을 보는 것 → [명전 · 컨텐츠 · 현수막] 모아 보는 것 → [음악 · 좋아요] → [관련 링크] 도구.
        2026-09-06 재편(Crenop): 달력 탭이 컨텐츠·일정까지 담아 지난 활동과 역할이 겹쳤다 → 달력은 썸네일(다시보기·유튜브 그림)로 압축,
-       컨텐츠 탭을 현수막과 같은 카드 격자로 되살리고(썸네일과 현수막 사이), 일정은 보조바 버튼의 목록만 남긴다. -->
+       컨텐츠 탭을 현수막과 같은 카드 격자로 되살리고, 일정은 보조바 버튼의 목록만 남긴다.
+       2026-09-18 재편(Crenop): 지난 활동(옛 통계 탭, 05-06 신설)은 폐지 — 숫자 요약은 통계 탭으로, 달력·날짜 상세는 달력 탭(구 썸네일)으로 흩어 넣었다.
+       명전(06-12 신설)은 통계 탭에서 독립해 옛 썸네일 자리로. 탭마다 형태 하나: 최근 활동=흐름 · 달력=날짜 · 통계=한 멤버의 숫자 · 명전=크루 순위. -->
   <div class="nav-list">
     <button class="nav-item" data-page="profile">
       <span class="nav-icon" id="navProfileIcon"></span>
@@ -2997,9 +2907,9 @@
         <span class="nav-badge" id="navBadge" role="img" style="display:none"></span>
       </span>
     </button>
-    <button class="nav-item" data-page="past">
-      <span class="nav-icon" id="navPastIcon"></span>
-      <span>지난 활동</span>
+    <button class="nav-item" data-page="calendar">
+      <span class="nav-icon" id="navCalendarIcon"></span>
+      <span>달력</span>
     </button>
     <button class="nav-item" data-page="chemistry">
       <span class="nav-icon" id="navChemistryIcon"></span>
@@ -3009,9 +2919,9 @@
       <span class="nav-icon" id="navStatsIcon"></span>
       <span>통계</span>
     </button>
-    <button class="nav-item" data-page="thumbs">
-      <span class="nav-icon" id="navThumbsIcon"></span>
-      <span>썸네일</span>
+    <button class="nav-item" data-page="hall">
+      <span class="nav-icon" id="navHallIcon"></span>
+      <span>명전</span>
     </button>
     <button class="nav-item" data-page="content">
       <span class="nav-icon" id="navContentIcon"></span>
@@ -3066,10 +2976,10 @@
       <div class="tab-aux" data-for="events" id="auxEvents">
         <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="최근 활동 알림"></span>
       </div>
-      <div class="tab-aux" data-for="stats"></div>
+      <div class="tab-aux" data-for="calendar"></div>
       <div class="tab-aux" data-for="chemistry"></div>
+      <div class="tab-aux" data-for="stats"></div>
       <div class="tab-aux" data-for="hall"></div>
-      <div class="tab-aux" data-for="thumbs"></div>
       <div class="tab-aux" data-for="content"></div><!-- 일정 줄은 2026-09-06부터 왼쪽 묶음(subbarLead) 맨 앞 — 이 칸은 열 맞춤용 빈 자리 -->
       <div class="tab-aux" data-for="banner"></div>
       <div class="tab-aux" data-for="disco"></div>
@@ -3132,6 +3042,10 @@
               <button class="filter-type" data-type="soop">
                 <span class="filter-icon soop"></span><span class="filter-lbl">생방송</span>
               </button>
+              <button class="filter-type" data-type="youtube">
+                <span class="filter-icon youtube"></span><span class="filter-lbl">유튜브</span>
+              </button>
+              <!-- 2026-09-18 Crenop 확정 배치: 1행 [채팅·생방송·유튜브] 2행 [빈칸·게시글·카페] — 달력 탭 종류 격자와 같은 자리(채팅 칸만 다름) -->
               <span class="filter-type evt-type-spacer" style="visibility:hidden;pointer-events:none"></span>
               <button class="filter-type" data-type="post">
                 <span class="filter-icon post"></span><span class="filter-lbl">게시글</span>
@@ -3139,35 +3053,11 @@
               <button class="filter-type" data-type="cafe">
                 <span class="filter-icon cafe"></span><span class="filter-lbl">카페</span>
               </button>
-              <button class="filter-type" data-type="youtube">
-                <span class="filter-icon youtube"></span><span class="filter-lbl">유튜브</span>
-              </button>
             </div>
           </div>
         </div>
         <div class="filter-summary" id="filterSummary"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="page" id="page-past">
-    <div class="past-wrap">
-      <div id="pastBody">
-        <div class="loading">
-          <div class="spinner"></div>
-          <div>통계 불러오는 중...</div>
-        </div>
-      </div>
-      <aside class="side-pick">
-        <div><div class="filter-title">멤버</div>
-          <div class="past-tabs-wrap">
-            <div class="past-tabs-side" id="pastTabsSide"></div>
-            <div class="past-tabs-members" id="pastTabsMembers"></div>
-          </div>
-        </div>
-        <!-- 연/월 선택기 자리. 멤버 스트립과 같은 기둥에 두 번째 '고르는 줄'로 선다 -->
-        <div><div class="filter-title">기간</div><div id="pastPeriodSide"></div></div>
-      </aside>
     </div>
   </div>
 
@@ -3180,15 +3070,17 @@
     </div>
   </div>
 
-  <div class="page" id="page-thumbs">
+  <!-- 달력 탭(2026-09-18, 구 썸네일 — 지난 활동 탭을 흡수): 한 멤버의 한 달을 날짜로. 종류(생방송·유튜브·게시글·카페) 하나를 골라 칸을 채우고,
+       칸 상단 칩은 그날 있는 종류 전부(고른 종류만 개수). 날짜를 누르면 고른 종류의 그날 항목만(1개 직행·2개 이상 모달). -->
+  <div class="page" id="page-calendar">
     <div class="cal-wrap">
-      <div class="cal-main" id="thumbsBody">
-        <div class="loading"><div class="spinner"></div><div>썸네일 불러오는 중...</div></div>
+      <div class="cal-main" id="calendarBody">
+        <div class="loading"><div class="spinner"></div><div>달력 불러오는 중...</div></div>
       </div>
-      <!-- 기둥(2026-09-02, 2026-09-06 압축): 멤버 스트립(13 — 크루 칸 폐지) · 종류 버튼(다시보기·유튜브 중 하나) · 연/월.
-           스트립은 지난 활동 탭 문법(.past-tabs-wrap 3열), 종류는 통계 탭 종류 버튼 문법(.stats-kind 3열 정사각). 내용은 renderCalSide()가 채운다. -->
+      <!-- 기둥: 멤버 스트립(13 — 크루 칸 폐지) · 종류 버튼(4종 중 하나 — 최근 활동 종류 격자와 같은 자리, 채팅 칸만 빈칸) · 연/월.
+           스트립은 .member-strip 3열, 종류는 통계 탭 종류 버튼 문법(.stats-kind 3열 정사각). 내용은 renderCalSide()가 채운다. -->
       <aside class="side-pick">
-        <div><div class="filter-title">멤버</div><div class="past-tabs-wrap" id="calMembersSide"></div></div>
+        <div><div class="filter-title">멤버</div><div class="member-strip" id="calMembersSide"></div></div>
         <div><div class="filter-title">종류</div><div class="stats-kind" id="calKindBox"></div></div>
         <div><div class="filter-title">기간</div><div id="calPeriodSide"></div></div>
       </aside>
@@ -3233,7 +3125,7 @@
   </div>
 
   <div class="page" id="page-music">
-    <!-- 우측 기둥(2026-09-06 Crenop): 멤버 고르기 — 크루 + 곡이 있는 멤버(시트에 행이 있는 사람만, 사이트 멤버 순서). 스트립은 썸네일 탭 문법(.past-tabs-wrap·.cal-tab). -->
+    <!-- 우측 기둥(2026-09-06 Crenop): 멤버 고르기 — 크루 + 곡이 있는 멤버(시트에 행이 있는 사람만, 사이트 멤버 순서). 스트립은 달력 탭 문법(.member-strip·.cal-tab). -->
     <div class="music-wrap">
       <div class="music-main" id="musicBody">
         <div class="loading">
@@ -3242,20 +3134,30 @@
         </div>
       </div>
       <aside class="side-pick">
-        <div><div class="filter-title">멤버</div><div class="past-tabs-wrap" id="musicMembersSide"></div></div>
+        <div><div class="filter-title">멤버</div><div class="member-strip" id="musicMembersSide"></div></div>
       </aside>
     </div>
   </div>
 
-  <!-- 통계 탭(2026-08-31): '멤버를 가로질러 비교하는' 것을 한곳에 모았다 —
-       크루 전체 숫자 · 멤버별 시간대 분포 · 명예의 전당. 한 멤버를 파고드는 것은 지난 활동 탭이 맡는다.
-       시간대 분포가 여기로 온 이유: 개별 화면에선 '이 사람은 밤형'까지만 알 수 있지만
-       나란히 놓으면 '누가 밤형인가'를 알 수 있다 — 그게 이 지표의 본래 값어치다. -->
+  <!-- 통계 탭(2026-09-18 재편): 멤버 한 명의 기간 수치. 위 = 지표 카드(메달 유지) | 시간대 띠(+시간 통계 다섯 값 상시), 아래 = 방송별 지표 목록(행 클릭 = 그 방송 다시보기).
+       크루 뷰(13명 카드표·13명 시간대 격자)는 폐지 — 멤버 간 직접 비교는 사이트 안에서 권장하지 않는다(Crenop 방침). 비교의 여지는 명전과 메달뿐. -->
   <div class="page" id="page-stats">
     <div class="stats-wrap">
       <div class="stats-main">
-        <div class="stats-metrics" id="statsMetricsBox"></div>
-        <div class="stats-heat" id="statsHeatBox"></div>
+        <div class="stats-top" id="statsTopBox"></div>
+        <div class="stats-sessions" id="statsSessionsBox"></div>
+      </div>
+      <aside class="side-pick">
+        <div><div class="filter-title">멤버</div><div class="member-strip" id="statsMembersSide"></div></div>
+        <div class="side-stack" id="statsPeriodSide"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 명전 탭(2026-09-18 독립 — 06-12 신설 당시처럼 제 탭으로): 본문 순위, 기둥은 2·3위 토글 + 기간(통산·상반기·하반기). renderHallTab()이 채운다. -->
+  <div class="page" id="page-hall">
+    <div class="stats-wrap">
+      <div class="stats-main">
         <div id="hallBody">
           <div class="loading">
             <div class="spinner"></div>
@@ -3263,18 +3165,15 @@
           </div>
         </div>
       </div>
-      <!-- 종류(명예의 전당 / 통계 / 시간대) + 그 종류에 딸린 기간 버튼. 기간은 종류마다 다르다 —
-           명전은 통산·상/하반기, 나머지 둘은 연/월. 그래서 한 자리에서 갈아끼운다. -->
       <aside class="side-pick">
-        <div><div class="filter-title">종류</div><div class="stats-kind" id="statsKindBox"></div></div>
-        <div class="side-stack" id="statsPeriodSide"></div>
+        <div class="side-stack" id="hallPeriodSide"></div>
       </aside>
     </div>
   </div>
 </main>
 
 <script>
-const BUILD = '2026-09-18e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3540,7 +3439,7 @@ const MEMBER_BIRTHDAYS = {
 //  ④ MEMBER_BIRTHDAYS: month·day·display·file(birthday/NAME.webp) — 단일 소스(로고 교체·프로필·기념일 공용)
 //  ⑤ 이미지 3종 레포 업로드: members/NN.webp(아바타) · profile/NN.webp(전신) · birthday/NAME.webp(생일 로고)
 //  ⑥ 문서 상단 meta description 멤버 명단
-//  ⑦ CSS 열수: .past-tabs-wrap repeat(13 = 통합+멤버수) · .profile-tabs-wrap repeat(13 = 크루+멤버수)
+//  ⑦ CSS 열수: .member-strip repeat(3열) · .profile-tabs-wrap repeat(13 = 크루+멤버수)
 //     + 1100px 미디어쿼리의 repeat(7) 배치 확인 · .links-table min-width(멤버수×60px)와 링크탭 모바일 전환 임계(@container = min-width+20) — 13인 기준 780/800
 //  ⑧ (해당 시) 시트 '휴방' 탭에 행 추가: 이름·이미지 링크·until (코드 아님 — 2026-07 시트 이관)
 // [worker.js] MEMBERS(id·name·nick·yt 채널ID 배열) · CAFES(공용 카페 2곳 닉 매핑 + 개인 팬카페 블록)
@@ -3742,7 +3641,7 @@ const MEMBER_LINKS = {
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' }],
     etc: [
       { label: '팬사이트', url: 'https://soop-moca.vercel.app/' },   // 2026-09-18 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(문모모 선례)
-      { label: '노래책', url: 'https://www.sooplive.com/station/mocamu2/post/203111303' },   // 2026-08-03 변경(구 멜로밍)
+      { label: '노래책', url: 'https://mocasong.com/' },   // 2026-09-18 변경(Crenop 지정): 숲 게시글 → 팬이 만든 노래책 사이트. 이전: 2026-08-03 숲 게시글(구 멜로밍)
     ],
     ogq: [
       { name: '유아렐콘1', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee102355552' },
@@ -4140,7 +4039,7 @@ function openTitleImageModal(name, url) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .tb-t-pc';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .cal-txt-line, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .tb-t-pc';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -4153,7 +4052,7 @@ document.addEventListener('mouseover', (e) => {
 // 진행 표시만 예외로 '~ 불러오는 중...' 명사형을 쓴다. 대화 회차가 길어 문체가 갈리던 것을 여기서 못박는다.
 // 탭 키 목록. 구 PAGE_TITLES는 이름 문자열까지 들고 있었으나 상단바가 제목 글자를 안 쓰게 되면서
 // 값이 화면 어디에도 안 나가고 키 목록만 쓰였다 — 죽은 값이라 배열로 정리(2026-08-31).
-const VALID_PAGES = ['profile', 'live', 'recent', 'past', 'chemistry', 'thumbs', 'content', 'links', 'banner', 'stats', 'music', 'like'];
+const VALID_PAGES = ['profile', 'live', 'recent', 'calendar', 'chemistry', 'stats', 'hall', 'content', 'links', 'banner', 'music', 'like'];   // 2026-09-18: past 제거, thumbs→calendar, hall 독립
 
 let lastLiveUpdate = null;
 // 정전 타이머 상태 — 실물 로직은 아래 applyBlackout 블록. 선언만 여기 올린 이유는 TDZ다:
@@ -4271,19 +4170,8 @@ const vodState = { data: {}, at: {}, loading: new Set(), fails: {} };   // at: �
 const VOD_FAIL_LIMIT = 3;   // 목록 받기가 이만큼 연달아 실패하면 '불러오는 중…' 대신 '불러오지 못함' — 재시도는 계속한다(다음 렌더·1분 틱)
 const LS_VOD_PREFIX = 'chuntaverse_vods_v1_';
 
-// 통계 탭(2026-08-31): 한 화면에 셋을 겹쳐 두지 않고 종류로 갈아끼운다 —
-// 명예의 전당(기본) · 통계(크루 숫자) · 시간대(멤버별 분포). 셋 다 '멤버를 가로질러 보는' 것이라 한 탭이지만
-// 한 번에 하나만 본다. 기간 버튼도 종류를 따라간다(명전=통산·반기 / 나머지=연·월).
-// 선언만 여기 — vodState와 같은 이유다. #hall로 새로고침하면 applyHash → renderHallStats가 아래 선언부보다 먼저
-// 실행돼 'STATS_KINDS 초기화 전 접근'으로 부팅이 통째로 죽고 화면이 영영 로딩 표시에 머물렀다(2026-09-02 헤드리스 실측).
-let statsKind = 'hall';
-// '통계' 탭 안의 '통계'는 이름이 겹쳐 '지표'로(2026-09-01). 셋 다 아이콘을 얹어 칸만으로 구분되게 한다.
-const STATS_KINDS = [
-  { key: 'hall', label: '명전', icon: 'trophy' },   // 60px 칸에서 혼자 두 줄이 되던 것을 약칭으로(2026-09-02 Crenop)
-  { key: 'metrics', label: '지표', icon: 'barChart' },   // 종류 키 stats→metrics(2026-09-17: 통계 탭 이름과 겹치지 않게)
-  { key: 'heat', label: '시간대', icon: 'clockTime' },
-];
-
+// 통계 탭(2026-09-18 재편): 멤버 한 명의 기간 수치 — 지표 카드(메달 유지) | 시간대 띠(+시간 통계 다섯 값 상시), 아래 방송별 지표 목록.
+// 종류 갈아끼우기(명전·지표·시간대, 2026-08-31~09-18)는 폐지 — 명전은 제 탭(#hall)으로 독립, 지표·시간대는 한 화면.
 const statsState = {
   tabsInited: false,
   data: {},
@@ -4291,7 +4179,6 @@ const statsState = {
   selectedTab: null,         // 멤버 id (2026-08-31: 통합 'all'은 통계 탭으로 이관 — 여기는 멤버 전용)
   periodAll: false,          // 통합탭에서 [전체](연간 뷰) 선택 여부. false면 viewMonth의 월간 뷰
   viewMonth: null,
-  selectedDate: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
 let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
@@ -5424,7 +5311,7 @@ function scheduleBtnHTML() {
 // 자리 = data-member(통계 지표 카드·시간대 칸·음악 이름·생방송 카드·관련 링크 세로 상자). 케미 탭은 대상이 아니다(강조 '문법'만 빌려 왔다 — 2026-09-04 Crenop 정정).
 // 실행 시점: 탭 전환은 마지막에 맨 위로 올리므로(switchPage 끝의 scrollTo) 그 뒤로 미뤄서(setTimeout 0) 내려간다 — 종전엔 내려간 뒤 맨 위로 되돌려져 '안 움직이는' 것처럼 보였다(실사고).
 // 사용자가 그 사이 직접 움직였으면(휠·터치·키) 잡아채지 않는다. 배치는 그대로(자리만 알려 준다).
-const FAV_SCROLL_PAGES = ['stats', 'live', 'links'];   // 음악은 2026-09-06 기둥 신설로 뺐다(고르기 탭 — 최애는 첫 선택으로)
+const FAV_SCROLL_PAGES = ['live', 'links'];   // 통계는 2026-09-18 재편으로 멤버 한 명 화면이 되어 뺐다(최애는 첫 선택으로)   // 음악은 2026-09-06 기둥 신설로 뺐다(고르기 탭 — 최애는 첫 선택으로)
 let favScrollPending = '', favUserMoved = false;
 ['wheel', 'touchmove', 'keydown'].forEach(ev => window.addEventListener(ev, () => { favUserMoved = true; }, { passive: true }));
 function favArm(page) { favScrollPending = page; favUserMoved = false; }
@@ -5487,9 +5374,9 @@ function openFavPicker() {
     setFavMember(id);
     closeModal();
     // 지금 보고 있는 화면에 바로 반영 — 다음 방문까지 기다리게 하지 않는다
-    if (currentPage === 'past' && id) selectPastTab(id);
+    if (currentPage === 'stats' && id) selectStatsMember(id);
     else if (currentPage === 'profile') selectProfileTab(id || 'crew');
-    else if (currentPage === 'thumbs' && id) { calState.member = id; queueCalRender(); }   // 최애 해제면 보던 멤버 그대로(크루 칸이 없다)
+    else if (currentPage === 'calendar' && id) { calState.member = id; queueCalRender(); }   // 최애 해제면 보던 멤버 그대로(크루 칸이 없다)
     else if (currentPage === 'music' && id) { musicState.member = id; renderMusic(); }   // 곡이 없는 멤버면 renderDisco가 크루로 되돌린다
   }));
   showModal();
@@ -5880,9 +5767,9 @@ if (notifyBellEl) {
     navProfileIcon: SVG_ICONS.people,
     navLiveIcon: SVG_ICONS.broadcast,
     navRecentIcon: SVG_ICONS.eventList,
-    navPastIcon: SVG_ICONS.pencil,   // 기록 탭(2026-08-31) — barChart는 좋아요 순위가 쓴다. 방제 변경 아이콘과 같은 그림인 건 Crenop 확인 후 수용
+    navCalendarIcon: SVG_ICONS.calendar,   // 달력 탭(2026-09-18, 구 썸네일) — 달 격자 그림 그대로   // 기록 탭(2026-08-31) — barChart는 좋아요 순위가 쓴다. 방제 변경 아이콘과 같은 그림인 건 Crenop 확인 후 수용
     navChemistryIcon: SVG_ICONS.chemistry,
-    navThumbsIcon: SVG_ICONS.calendar,   // 썸네일 탭(2026-09-06, 구 달력) — 달 격자 모양은 그대로라 달력 그림을 잇는다(새 그림은 승인 없이 넣지 않는다)
+    navHallIcon: SVG_ICONS.trophy,   // 명전 탭(2026-09-18 독립) — 명예의 전당 시절 그림으로 복귀   // 썸네일 탭(2026-09-06, 구 달력) — 달 격자 모양은 그대로라 달력 그림을 잇는다(새 그림은 승인 없이 넣지 않는다)
     navContentIcon: SVG_ICONS.film,      // 컨텐츠 탭(2026-09-06 부활) — 컨텐츠였을 때의 그림 그대로
     navLinksIcon: SVG_ICONS.link,
     navBannerIcon: SVG_ICONS.flag,
@@ -5910,11 +5797,11 @@ function updateHeaderCenter() {
     topLine = lastLiveUpdate ? '10초마다 자동 갱신 · ' + lastLiveUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'recent') {
     topLine = lastEventsUpdate ? '10초마다 자동 확인 · ' + lastEventsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
-  } else if (currentPage === 'past') {
+  } else if (currentPage === 'stats') {
     topLine = lastStatsUpdate ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'chemistry') {
     topLine = lastChemistryUpdate ? '1분마다 자동 갱신 · ' + lastChemistryUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
-  } else if (currentPage === 'thumbs') {
+  } else if (currentPage === 'calendar') {
     topLine = lastStatsUpdate ? '1분마다 자동 갱신 · ' + lastStatsUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';   // 당월 통계·다시보기 목록은 지난 활동과 같은 1분 폴러가 맡는다
   } else if (currentPage === 'content') {
     topLine = lastContentUpdate ? '열람 시 자동 갱신 · ' + lastContentUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
@@ -5928,7 +5815,7 @@ function updateHeaderCenter() {
   // 감지 지연 경고: 심장박동(last_detect_at)이 임계 이상 늙으면 감지가 시간 단위로 도는 4탭의 주기 문구를 교체.
   // 시각도 클라이언트 fetch 시각 대신 서버 마지막 감지 시각으로(감지가 죽어도 fetch는 성공해 시각이 계속 새것처럼 보이는 문제 방지).
   const detectWarn = !!lastServerDetect && (Date.now() - lastServerDetect.getTime() > DETECT_STALE_MS)
-    && ['live', 'recent', 'past', 'chemistry'].includes(currentPage);
+    && ['live', 'recent', 'stats', 'chemistry'].includes(currentPage);
   if (detectWarn) {
     topLine = '감지 지연 중 · ' + lastServerDetect.toLocaleTimeString('ko-KR') + ' 기준';
   }
@@ -6007,12 +5894,19 @@ function renderMusicSide(targets) {
 // 재료는 지난 활동 탭 것: 월 통계(/stats?month= — 유튜브 업로드 목록 포함) · 다시보기 목록(/vods, 멤버·월별 — 지난달은 브라우저 저장) ·
 //   타일(vodTileHtml) · 유튜브 썸네일 주소(ytVideoId).
 // 두 폼(7열 달력 / 타일 흐름)을 다 그려 두고 CSS가 폭에 따라 하나만 보인다. 칸·타일은 같은 부품이고 누르는 규칙도 같다(1개 직행 · 2개 이상 모달).
-// 종류 = 단일 선택 버튼(2026-09-02 69번, Crenop 지정). 통계 탭 종류 버튼(STATS_KINDS·.stats-kind-btn)과 같은 모양·같은 자리 문법.
+// 종류 = 단일 선택 버튼(2026-09-02 69번, Crenop 지정). 옛 통계 탭 종류 버튼(.stats-kind-btn, 2026-09-18 폐지)과 같은 모양·같은 자리 문법.
 // 멤버 스트립과 같은 '고르기'라 서랍 체크 버튼의 채움에는 세지 않는다(통계 탭과 동일).
+// 4종(2026-09-18 재편 — 지난 활동 탭을 흡수): 생방송(방송 단위 — 다시보기 그림)·유튜브·게시글·카페. 한 번에 한 종류가 칸을 채운다.
+// 격자 자리는 최근 활동 종류 필터와 같은 칸(1행 [채팅·생방송·유튜브] 2행 [빈칸·게시글·카페])에서 채팅 칸만 빈칸 — 탭을 오가도 버튼 위치가 같다(Crenop 확정).
 const CAL_KINDS = [
-  { key: 'vod', label: '다시보기', icon: 'soop' },
-  { key: 'youtube', label: '유튜브', icon: 'youtube' },
+  null,
+  { key: 'live', label: '생방송', icon: 'soop', chip: 'vod' },
+  { key: 'youtube', label: '유튜브', icon: 'youtube', chip: 'youtube' },
+  null,
+  { key: 'post', label: '게시글', icon: 'board', chip: 'post' },
+  { key: 'cafe', label: '카페', icon: 'coffee', chip: 'cafe' },
 ];
+const CAL_KIND_BY_KEY = Object.fromEntries(CAL_KINDS.filter(Boolean).map(k => [k.key, k]));
 // 종류 태그(F열) 표기 → 아이콘 키 별칭표(2026-09-02). 시트에 자유롭게 적고, 여기 있는 표기만 그림이 된다. 대소문자 무시.
 // 표에 없는 태그는 그림 없이 무시(2026-09-02 Crenop 지정 — 구 '모르는 태그=이름표' 폐지). 이름표는 '기타'라고 적었을 때만.
 // 행성(planet)은 배정 보류 — 모캡 스튜디오 마크라 모캡 대체 후보였다(Crenop).
@@ -6040,8 +5934,8 @@ function tagIconsHtml(tags) {
     return `<span class="cal-tag" data-tag="${key}" title="${escapeHtml(t)}">${SVG_ICONS[key]}</span>`;
   }).join('');
 }
-const CAL_TYPE_ICON = { vod: 'soop', youtube: 'youtube' };   // 칩·종류 버튼 공용(2026-09-02 Crenop 지정): 다시보기=숲 ∞ 마크 · 유튜브
-const calState = { year: 0, month: 0, member: '', type: 'vod' };   // selected(고른 날)는 2026-09-06 폐지 — 칸은 직행/모달
+const CAL_TYPE_ICON = { live: 'soop', youtube: 'youtube', post: 'board', cafe: 'coffee' };   // 칩·종류 버튼 공용(2026-09-02 Crenop 지정 + 2026-09-18 글 2종): 생방송=숲 ∞ 마크 · 유튜브 · 게시글 · 카페
+const calState = { year: 0, month: 0, member: '', type: 'live' };   // selected(고른 날)는 2026-09-06 폐지 — 칸은 직행/모달
 calState.member = favMemberId() || MEMBERS[0].id;   // 첫 선택 = 최애(세션 70), 없으면 첫 멤버(지난 활동과 같은 기본값). 화면에서 바꾸면 그 값이 남는다(저장 안 함)
 (function () { const n = kstNow(); calState.year = n.getUTCFullYear(); calState.month = n.getUTCMonth() + 1; })();
 function calYm() { return `${calState.year}-${String(calState.month).padStart(2, '0')}`; }
@@ -6057,7 +5951,7 @@ function ensureCalMonth() {
   if (!statsState.data[ym] && !statsState.loadingMonths.has(ym) && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {
     loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) { calStatsFailAt[ym] = Date.now(); calLoadingSettle(); return; } queueCalRender(); });
   }
-  if (calState.type === 'vod' && monthNeedsVodList(calMember().id, ym)) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
+  if (calState.type === 'live' && monthNeedsVodList(calMember().id, ym)) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
 }
 // 자료 도착에 따른 재렌더를 한 프레임에 한 번으로 합친다(2026-09-02) — 통계와 다시보기 목록이 잇따라 도착해도 한 번만 그린다
 // (깜빡임 + 그 사이 클릭 유실 방지). 썸네일 탭이 아니면 그리지 않는다(다음 진입 때 그린다).
@@ -6066,19 +5960,19 @@ let lastCalStatsSig = '';   // 1분 폴러가 썸네일 탭을 다시 그릴지 
 function queueCalRender() {
   if (calRenderQueued) return;
   calRenderQueued = true;
-  requestAnimationFrame(() => { calRenderQueued = false; if (currentPage === 'thumbs') renderCalendarTab(); });
+  requestAnimationFrame(() => { calRenderQueued = false; if (currentPage === 'calendar') renderCalendarTab(); });
 }
 // 이 달 자료가 아직 오는 중인가(통계 또는 그 멤버의 다시보기 목록) — 요일 머리줄의 '불러오는 중…' 표시용
 function calMonthLoading() {
   const ym = calYm();
   if (statsState.loadingMonths.has(ym)) return true;
-  return calState.type === 'vod' && vodState.loading.has(vodKey(calMember().id, ym));
+  return calState.type === 'live' && vodState.loading.has(vodKey(calMember().id, ym));
 }
 // 요청이 실패로 끝났을 때 — 더 오는 것이 없으면 표시만 떼어낸다. 다시 그리지 않는 이유: 그리면 ensureCalMonth가 실패한 목록을
 // 곧바로 다시 요청해 '실패 → 그림 → 재요청 → 실패'가 맴돈다(도착 성공 때만 다시 그린다는 종전 규칙 유지).
 function calLoadingSettle() {
   if (calMonthLoading()) return;
-  document.querySelectorAll('#thumbsBody .cal-loading').forEach(el => el.remove());   // 격자 폼·목록 폼에 하나씩 있다
+  document.querySelectorAll('#calendarBody .cal-loading').forEach(el => el.remove());   // 격자 폼·목록 폼에 하나씩 있다
 }
 
 // 날짜 → { vods:[{v,at}], youtube:[{y,at}], vodPending, vodFail, count }. 고른 종류만 담는다(칩·대표 그림·상세 모두 그 종류만).
@@ -6086,17 +5980,24 @@ function calLoadingSettle() {
 function calItemsByDate() {
   const ym = calYm(), { year, month } = calState;
   const map = {};
-  const day = d => (map[d] = map[d] || { vods: [], youtube: [], vodPending: false, vodFail: false, count: 0 });
+  // 날마다 4종을 모두 센다(칸 상단 칩 — 고른 종류만 개수, 나머지는 있음 표시). 그림·상세는 고른 종류만 채운다.
+  const day = d => (map[d] = map[d] || { live: [], vods: [], youtube: [], posts: [], cafes: [], n: { live: 0, youtube: 0, post: 0, cafe: 0 }, vodPending: false, vodFail: false, count: 0 });
   const monthData = statsState.data[ym];
   const m = calMember();
   if (monthData) {
     const sum = computeMonthSummary(monthData[m.id], year, month);   // 첫 달(2025-12)은 결성일 11/30 세션·유튜브도 포함(kstMonthStartMs)
-    if (calState.type === 'vod') {
+    for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) day(dk).n.live = sessions.length;
+    for (const [dk, ys] of Object.entries(sum.youtubeByDate)) day(dk).n.youtube = ys.length;
+    for (const [dk, ps] of Object.entries(sum.postsByDate)) day(dk).n.post = ps.length;
+    for (const [dk, cs] of Object.entries(sum.cafeByDate)) day(dk).n.cafe = cs.length;
+    if (calState.type === 'live') {
       const seenVod = {};   // 날짜별 이미 센 다시보기 — 두 방송이 같은 다시보기를 가리켜도 한 번만
       for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
         const seen = seenVod[dk] || (seenVod[dk] = new Set());
         for (const s of sessions) {
-          const parts = sessionVods(s) ?? vodsForBroad(m.id, ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07) · null = 목록 미도착 → 칩·그림 보류, 도착 시 재렌더로 채움
+          const at = new Date(s.start).getTime();   // 정렬 기준(시각 → 파트)
+          const parts = sessionVods(s) ?? vodsForBroad(m.id, ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07) · null = 목록 미도착 → 그림 보류, 도착 시 재렌더로 채움
+          day(dk).live.push({ s, at, parts });
           if (parts === null) {
             if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(세션 70)
               day(dk).vodPending = true;
@@ -6104,7 +6005,6 @@ function calItemsByDate() {
             }
             continue;
           }
-          const at = new Date(s.start).getTime();   // 정렬 기준(시각 → 파트)
           for (const v of parts) {
             if (seen.has(v.title_no)) continue;
             seen.add(v.title_no);
@@ -6112,16 +6012,23 @@ function calItemsByDate() {
           }
         }
       }
-    } else {
+    } else if (calState.type === 'youtube') {
       for (const [dk, ys] of Object.entries(sum.youtubeByDate)) {
         for (const y of ys) day(dk).youtube.push({ y, at: new Date(y.time).getTime() });
       }
+    } else if (calState.type === 'post') {
+      for (const [dk, ps] of Object.entries(sum.postsByDate)) for (const p of ps) day(dk).posts.push({ p, at: new Date(p.time).getTime() });
+    } else if (calState.type === 'cafe') {
+      for (const [dk, cs] of Object.entries(sum.cafeByDate)) for (const c of cs) day(dk).cafes.push({ c, at: new Date(c.time).getTime() });
     }
   }
   for (const d of Object.values(map)) {
+    d.live.sort((a, b) => a.at - b.at);
     d.vods.sort((a, b) => a.at - b.at || (a.v.part || 0) - (b.v.part || 0));   // 시각 → 파트(2026-09-02 Crenop 지정 순서에서 멤버 축만 뺀 것)
     d.youtube.sort((a, b) => a.at - b.at);
-    d.count = d.vods.length + d.youtube.length;
+    d.posts.sort((a, b) => a.at - b.at);
+    d.cafes.sort((a, b) => a.at - b.at);
+    d.count = calState.type === 'live' ? d.live.length : calState.type === 'youtube' ? d.youtube.length : calState.type === 'post' ? d.posts.length : d.cafes.length;   // 고른 종류의 그날 개수(생방송은 방송 단위)
   }
   return map;
 }
@@ -6130,21 +6037,36 @@ function calItemsByDate() {
 // 유튜브는 첫 업로드: 길이(롱폼/숏츠)로 고르고 싶었으나 워커의 유튜브 감지(RSS)에는 길이가 없고 주소도 전부 watch?v= 꼴이라 가를 수 없다.
 // 다시보기·유튜브 썸네일은 밖에서 오는 그림이라 그대로 쓴다.
 function calRepImg(d) {
-  if (d.vods.length) {
+  if (calState.type === 'live' && d.vods.length) {
     const longest = d.vods.reduce((a, b) => ((b.v.duration_ms || 0) > (a.v.duration_ms || 0) ? b : a));   // 같은 길이면 앞 것(시각·파트 순)
     if (longest.v.thumb) return escapeHtml(longest.v.thumb);
   }
-  if (d.youtube.length) { const id = ytVideoId(d.youtube[0].y.url); if (id) return `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; }
+  if (calState.type === 'youtube' && d.youtube.length) { const id = ytVideoId(d.youtube[0].y.url); if (id) return `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; }
   return '';
 }
 function calRepImgTag(d) {
+  if (calState.type === 'post' || calState.type === 'cafe') return calTextBoxHtml(d);
   const img = calRepImg(d);
   return img ? `<img src="${img}" alt="" loading="lazy">` : '';
 }
-function calChips(d) {   // 고른 종류의 개수 칩 하나
-  if (d.vods.length) return chipHtml('vod', CAL_TYPE_ICON.vod, d.vods.length);
-  if (d.youtube.length) return chipHtml('youtube', CAL_TYPE_ICON.youtube, d.youtube.length);
-  return '';
+// 글 종류의 상자(2026-09-18): 그날 글 제목을 한 줄씩 최대 3줄(각 줄 말줄임), 넘치면 마지막 줄을 '+n'. 넓은 상자를 그날의 글 목록 자리로 쓴다.
+function calTextBoxHtml(d) {
+  const items = calState.type === 'post' ? d.posts.map(x => x.p) : d.cafes.map(x => x.c);
+  if (!items.length) return '';
+  const max = 3;
+  const lines = items.slice(0, items.length > max ? max - 1 : max).map(it => `<span class="cal-txt-line">${escapeHtml(it.title || '(제목 없음)')}</span>`);
+  if (items.length > max) lines.push(`<span class="cal-txt-line cal-txt-more">+${items.length - (max - 1)}</span>`);
+  return `<span class="cal-txt">${lines.join('')}</span>`;
+}
+function calChips(d) {   // 칸 상단 칩(2026-09-18): 그날 있는 종류 전부 — 고른 종류는 아이콘+개수, 나머지는 아이콘만 흐리게. 순서 고정(생방송·유튜브·게시글·카페)
+  const order = ['live', 'youtube', 'post', 'cafe'];
+  return order.map(k => {
+    const n = d.n[k] || 0;
+    if (!n) return '';
+    const cls = CAL_KIND_BY_KEY[k].chip;
+    if (k === calState.type) return chipHtml(cls, CAL_TYPE_ICON[k], d.count);
+    return `<span class="cd-chip cd-mark ${cls}" title="${CAL_KIND_BY_KEY[k].label} ${n}"><span class="cd-ic" aria-hidden="true">${SVG_ICONS[CAL_TYPE_ICON[k]]}</span></span>`;
+  }).join('');
 }
 
 // 달 버튼 잠김 규칙 — 첫 해는 첫 달(12월) 아래를 막고(2025년은 12월 하나, 결성일 11/30 포함), 오지 않은 달은 막는다.
@@ -6179,27 +6101,52 @@ function openDayPickModal(key, d) {
   const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
-  head.innerHTML = `<span>영상 선택 — ${escapeHtml(calDateLabel(key))}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  const tiles = calState.type === 'vod' ? d.vods.map(({ v }) => `<div class="cal-vod">${vodTileHtml(v)}</div>`) : d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y)}</div>`);
-  body.innerHTML = `<div class="ds-vods">${tiles.join('')}</div>`;
+  head.innerHTML = `<span>${CAL_KIND_BY_KEY[calState.type].label} — ${escapeHtml(calDateLabel(key))}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  const memberId = calMember().id, ym = calYm();
+  if (calState.type === 'live') {
+    // 방송 단위: 방송마다 글자 행(시각·길이·시청자 — 통계 탭의 방송별 목록과 같은 부품) + 그 방송의 다시보기 타일. 다시보기 없는 방송은 행만.
+    body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, parts }) => sessionRowHtml(s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v)}</div>`).join('')}</div>` : '')).join('')}</div>`;
+    body.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
+      const sess = d.live.find(({ s }) => String(s.broad_no) === b.dataset.vodpick);
+      openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`);
+    }));
+  } else if (calState.type === 'youtube') {
+    body.innerHTML = `<div class="ds-vods">${d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y)}</div>`).join('')}</div>`;
+  } else if (calState.type === 'post') {
+    body.innerHTML = `<div class="day-detail-list">${d.posts.map(({ p }) => dayItemRowHtml('post', p)).join('')}</div>`;
+  } else {
+    body.innerHTML = `<div class="day-detail-list">${d.cafes.map(({ c }) => dayItemRowHtml('cafe', c)).join('')}</div>`;
+  }
   showModal();
 }
 const CAL_WD = ['일', '월', '화', '수', '목', '금', '토'];
 function calDateLabel(key) { const dow = new Date(key + 'T00:00:00Z').getUTCDay(); return `${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일 (${CAL_WD[dow]})`; }
 // 칸 하나(달력 칸·흐름 타일 공용): 1개 = 그 영상으로 직행하는 링크(제목·길이는 title 툴팁) / 2개 이상 = 모달 버튼(툴팁 'n개') / 없음 = 상자.
+// 그날 항목이 하나일 때의 직행 대상(2026-09-18): 생방송 = 다시보기 파트가 하나일 때 그 플레이어(파트 여럿·없음은 모달), 유튜브·글 = 그 주소.
+function calSingleTarget(d) {
+  if (calState.type === 'live') {
+    const it = d.live[0];
+    if (it && it.parts && it.parts.length === 1) return { href: vodPlayerUrl(it.parts[0]), tip: `${it.parts[0].title || ''}${it.parts[0].duration_ms ? ` · ${formatDuration(it.parts[0].duration_ms)}` : ''}` };
+    return null;
+  }
+  if (calState.type === 'youtube') return d.youtube[0] ? { href: d.youtube[0].y.url, tip: d.youtube[0].y.title || '' } : null;
+  if (calState.type === 'post') return (d.posts[0] && d.posts[0].p.url) ? { href: withTextFragment(d.posts[0].p.url, d.posts[0].p.title), tip: d.posts[0].p.title || '' } : null;
+  if (calState.type === 'cafe') return (d.cafes[0] && d.cafes[0].c.url) ? { href: d.cafes[0].c.url, tip: d.cafes[0].c.title || '' } : null;
+  return null;
+}
 function calCellHtml(key, label, dow, d, extraCls) {
   const cls = ['calendar-day', 'cal-cell', d && d.count ? 'has' : '', extraCls || ''].filter(Boolean).join(' ');
   const inner = `<span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${d ? calRepImgTag(d) : ''}</span>`;
   if (!d || !d.count) return `<div class="${cls}">${inner}</div>`;
   if (d.count === 1) {
-    const one = d.vods[0] ? { href: vodPlayerUrl(d.vods[0].v), tip: `${d.vods[0].v.title || ''}${d.vods[0].v.duration_ms ? ` · ${formatDuration(d.vods[0].v.duration_ms)}` : ''}` } : { href: d.youtube[0].y.url, tip: d.youtube[0].y.title || '' };
-    return `<a class="${cls}" href="${escapeHtml(one.href)}" target="_blank" rel="noopener" title="${escapeHtml(one.tip)}">${inner}</a>`;
+    const one = calSingleTarget(d);   // 종류별 직행 대상 — 없으면(다시보기 없는 방송 등) 모달
+    if (one) return `<a class="${cls}" href="${escapeHtml(one.href)}" target="_blank" rel="noopener" title="${escapeHtml(one.tip)}">${inner}</a>`;
   }
   return `<button class="${cls}" type="button" data-caldate="${key}" title="${d.count}개">${inner}</button>`;
 }
 
 function renderCalendarTab() {
-  const body = document.getElementById('thumbsBody');
+  const body = document.getElementById('calendarBody');
   if (!body) return;
   ensureCalMonth();
   const items = calItemsByDate();
@@ -6229,7 +6176,7 @@ function renderCalendarTab() {
     const wk = weekOf[key] ?? -1; const first = wk !== prevWeek; const sep = first && prevWeek !== -1 ? '<div class="cal-wk-sep"></div>' : ''; prevWeek = wk;
     return sep + calCellHtml(key, calDateLabel(key), dow, items[key], (first ? 'wk-first ' : '') + (key === todayKey ? 'today' : ''));
   }).join('');
-  const listForm = `<div class="cal-list-form">${loadingTag}${tiles ? `<div class="cal-flow">${tiles}</div>` : `<div class="cal-di-none">${calState.type === 'vod' ? '이 달에는 다시보기가 없습니다.' : '이 달에는 유튜브 업로드가 없습니다.'}</div>`}</div>`;
+  const listForm = `<div class="cal-list-form">${loadingTag}${tiles ? `<div class="cal-flow">${tiles}</div>` : `<div class="cal-di-none">${({ live: '이 달에는 방송 기록이 없습니다.', youtube: '이 달에는 유튜브 업로드가 없습니다.', post: '이 달에는 숲 게시글이 없습니다.', cafe: '이 달에는 카페 게시글이 없습니다.' })[calState.type]}</div>`}</div>`;
 
   body.innerHTML = gridForm + listForm;
   body.querySelectorAll('button[data-caldate]').forEach(btn => btn.addEventListener('click', () => openDayPickModal(btn.dataset.caldate, items[btn.dataset.caldate])));
@@ -6492,9 +6439,9 @@ function renderCalSide() {
   const kBox = document.getElementById('calKindBox');
   if (kBox && !kBox.dataset.inited) {
     kBox.dataset.inited = '1';
-    kBox.innerHTML = CAL_KINDS.map(k => `<button class="stats-kind-btn" data-kind="${k.key}" type="button">${SVG_ICONS[k.icon]}<span>${k.label}</span></button>`).join('');
+    kBox.innerHTML = CAL_KINDS.map(k => k ? `<button class="stats-kind-btn" data-kind="${k.key}" type="button">${SVG_ICONS[k.icon]}<span>${k.label}</span></button>` : '<span class="stats-kind-btn cal-kind-spacer" aria-hidden="true"></span>').join('');   // null = 빈칸(최근 활동 격자의 채팅 자리)
     kBox.querySelectorAll('.stats-kind-btn').forEach(b => b.addEventListener('click', () => {
-      if (b.dataset.kind === calState.type) return;
+      if (!b.dataset.kind || b.dataset.kind === calState.type) return;   // 빈칸(스페이서)은 무시
       calState.type = b.dataset.kind;
       renderCalendarTab();
     }));
@@ -6630,22 +6577,20 @@ function switchPage(page, opts) {
   const favNow = favMemberId(), keepPick = !!(opts && opts.fromHash && opts.explicit);
   if (favNow && !keepPick) {
     if (page === 'profile') profileState.selectedTab = favNow;
-    if (page === 'past' && statsState.selectedTab !== favNow) selectPastTab(favNow, { fromHash: true });   // 그 멤버의 최근 활동 달·날짜도 같이 잡는다
-    if (page === 'thumbs' && calState.member !== favNow) calState.member = favNow;
+    if (page === 'stats' && statsState.selectedTab !== favNow) selectStatsMember(favNow, { fromHash: true });   // 통계는 최애 멤버부터(2026-09-18)
+    if (page === 'calendar' && calState.member !== favNow) calState.member = favNow;
     if (page === 'music') musicState.member = favNow;   // 곡이 없는 최애면 renderDisco가 크루로 되돌린다(2026-09-06)
   }
   // 최애 강조·자동 스크롤(2단계): 멤버별 구획이 늘어서는 탭은 그려진 뒤 최애 자리로 한 번 내려간다(favScrollPending)
   if (favNow && FAV_SCROLL_PAGES.includes(page)) favArm(page); else favScrollPending = '';
-  if (page === 'past' && !statsState.tabsInited) {
-    initPastTabs();
+  if (page === 'stats' && !statsState.tabsInited) {
+    initStatsMembers();
     statsState.tabsInited = true;
   }
-  // 지난 활동은 들어올 때마다 다시 그린다(2026-09-03): 보는 달(statsState.viewMonth)을 통계 탭과 나눠 쓰므로 거기서 달을 바꾸면
-  // 여기 화면(달력·기둥)은 옛 달인 채 남아 있었다. 고른 날짜·멤버는 그대로 유지된다.
-  if (page === 'past' && statsState.tabsInited && statsState.data) renderPastBody();
   if (page === 'music') renderMusic();   // 시트는 부팅에서 받아 두므로 진입 시 그리기만 하면 된다
-  if (page === 'thumbs') renderCalendarTab();
-  if (page === 'stats') renderStats();   // 크루 숫자·시간대 분포는 명예의 전당과 같은 화면
+  if (page === 'calendar') renderCalendarTab();
+  if (page === 'stats') renderStats();   // 멤버 한 명의 지표·시간대·방송별 목록(2026-09-18 재편)
+  if (page === 'hall') renderHallTab();
   // 좋아요: 탭을 떠나면 순위 갱신을 멈추고(안 보는 화면 때문에 숲을 긁지 않는다), 돌아오면 켜 두었던 순위를 즉시 다시 받고
   // 시트 간격(I열)으로 갱신을 재개한다(2026-09-03 — 종전엔 멈추기만 하고 재개가 없어 낡은 순위가 남았다).
   if (page === 'like') { renderLike(); if (likeRankPost) selectLikeRank(likeRankPost); } else stopLikePoll();
@@ -6682,7 +6627,7 @@ function switchPage(page, opts) {
       ensureBannerSheet();
     } else { renderBanners(); ensureBannerSheet(); }
   }
-  if (page === 'stats') {
+  if (page === 'hall') {
     // 명예의 전당 순위는 현수막 수·컨텐츠 수를 집계에 쓴다 — 부팅에서 안 받으므로 여기서 이번 세션 1회 최신화.
     // 캐시본으로 먼저 그려지고, 도착하면 각 로더가 renderHall을 다시 부른다(사이트 공통 '캐시 먼저' 패턴).
     ensureBannerSheet();
@@ -6710,24 +6655,25 @@ document.querySelectorAll('.nav-item').forEach(btn => {
   });
 });
 
-// 주소 형식: #<탭>  또는  #profile:<영문명> / #past:<영문명>  (예: #profile:dalta, #past:chunyang) — 탭 id가 곧 주소(2026-09-17 개명)
-// 하위탭 없음/전체는 접미사 없이 #profile · #past. 대소문자는 무시하고 읽는다.
+// 주소 형식: #<탭>  또는  #profile:<영문명> / #stats:<영문명> / #calendar:<영문명>  (예: #profile:dalta, #stats:chunyang) — 탭 id가 곧 주소(2026-09-17 개명)
+// 하위탭 없음/전체는 접미사 없이 #profile · #stats · #calendar. 대소문자는 무시하고 읽는다.
 // 옛 형식(#members:dalta20 — 숲 아이디)도 계속 해석한다: 기념일 박스가 2026-08-31 이전까지 그 형식을 링크로
 // 뿌려왔기 때문. 다만 legacy=true로 표시해 두고, 화면을 띄운 직후 주소를 영문명 형식으로 바꿔 쓴다
 // (syncHash) — 주소창에 아이디가 남지 않고, 앞으로 복사되는 주소는 전부 영문명 형식이 된다.
 // 지난 활동의 기본값이 'all'이던 것을 첫 멤버로 바로잡음(2026-09-02): '통합' 하위탭은 2026-08-31에 통계 탭으로 옮기며
 // 없어졌는데 이 표만 남아, #stats로 새로고침하면 selectPastTab('all') → 있지도 않은 멤버 'all'을 그리려다
 // 본문이 통째로 비었다(탭을 눌러 들어가면 selectedTab이 비어 있어 첫 멤버로 그려져 멀쩡했다 — 헤드리스 대조로 확인).
-const SUBTAB_PAGES = { profile: 'crew', past: MEMBERS[0].id };   // 하위탭을 가진 탭 → 그 탭의 '접미사 없음' 기본값(주소 문법의 기준)
+const SUBTAB_PAGES = { profile: 'crew', stats: MEMBERS[0].id, calendar: MEMBERS[0].id };   // 하위탭을 가진 탭 → 그 탭의 '접미사 없음' 기본값(주소 문법의 기준). 2026-09-18: past 제거, 통계·달력이 멤버 접미사를 가짐
 // 탭 이름 개명(2026-09-17 Crenop '근본 수정'): 주소 = 내부 탭 id = 요소·함수·클래스 접두어, 이름 하나로 통일.
 //   프로필 profile(구 members) · 최근 활동 recent(구 events) · 지난 활동 past(구 stats) · 통계 stats(구 hall) · 음악 music(구 disco) · 좋아요 like(구 apply).
 //   나머지(live·chemistry·thumbs·content·banner·links)는 원래 이름. 자료 이름은 탭 이름이 아니라 그대로: 월 통계 자료(statsState·loadStatsMonth·LS_STATS_PREFIX·
 //   lastStatsUpdate), 이벤트 목록(allEvents·loadEvents), 명전 자체(hall of fame — renderHall·hallTopRanks·hallBody·.hall-card), 통계 탭의 '지표' 종류는
 //   탭 이름과 겹치지 않게 metrics(구 stats)로. 저장 키(localStorage)는 바깥과의 약속이라 안 바꿨다.
-//   옛 주소 호환은 읽기만: #members·#events·#hall·#disco·#apply는 계속 열리고 주소창은 새 이름으로 교체된다(부팅 syncHash). #stats는 뜻이 바뀌었으므로
-//   (지난 활동 → 통계) 접미사 붙은 옛 링크(#stats:chebi)만 지난 활동으로 — 통계엔 하위탭이 없어 그것만이 옛 링크다.
-const OLD_HASH_PAGE = { members: 'profile', events: 'recent', hall: 'stats', disco: 'music', apply: 'like' };
-function pageFromHash(name, hasSub) { const k = (name || '').toLowerCase(); if (k === 'stats' && hasSub) return 'past'; return OLD_HASH_PAGE[k] || name; }
+//   옛 주소 호환은 읽기만: #members·#events·#disco·#apply는 계속 열리고 주소창은 새 이름으로 교체된다(부팅 syncHash).
+//   2026-09-18 재편: 지난 활동(past) 탭 폐지 — #past·#past:멤버·#thumbs는 달력(calendar)으로 읽고, #stats:멤버는 통계의 그 멤버(통계가 멤버 고르기 화면이 되어 옛 링크와 뜻이 같아짐), #hall은 다시 명전 탭.
+// 2026-09-18 재편: thumbs·past → calendar(달력이 지난 활동 자리·달력을 이어받음), hall은 다시 제 탭. 옛 #stats:멤버는 새 통계의 그 멤버(뜻이 같아짐).
+const OLD_HASH_PAGE = { members: 'profile', events: 'recent', disco: 'music', apply: 'like', thumbs: 'calendar', past: 'calendar' };
+function pageFromHash(name, hasSub) { const k = (name || '').toLowerCase(); return OLD_HASH_PAGE[k] || name; }
 // ── 최애 멤버(2026-09-03 세션 70 1단계) ── 크루 팬이 아니라 한 멤버의 팬을 위한 선택 사항. 이 브라우저에만 저장(서버에 안 보냄).
 // 효과(1단계): 한 명을 고르는 화면의 첫 선택이 최애가 된다 — 지난 활동(구 첫 멤버 고정)·프로필(구 크루)·달력(구 전체).
 // 주소로 들어온 지정(공유 링크 #stats:chebi 등)은 최애보다 우선. 최애가 크루에서 빠지면 없는 것으로 본다.
@@ -6764,7 +6710,8 @@ function hashFor(page, subTab) {
 // 같은 주소면 아무것도 하지 않는다 — 같은 탭을 다시 눌러 뒤로가기가 헛도는 것 방지.
 function syncHash(push) {
   const want = hashFor(currentPage, currentPage === 'profile' ? profileState.selectedTab
-    : currentPage === 'past' ? statsState.selectedTab : null);
+    : currentPage === 'stats' ? statsState.selectedTab
+    : currentPage === 'calendar' ? calState.member : null);
   if (location.hash === want) return;
   if (push) history.pushState(null, '', want);
   else history.replaceState(null, '', want);
@@ -6779,9 +6726,13 @@ function applyHash(h) {
     profileState.selectedTab = sub;            // 상태를 먼저 — switchPage의 초기화·렌더가 이 값을 읽는다
     switchPage(h.page, { fromHash: true, explicit: !!h.explicit });
     syncSubTabActive('.profile-tab', sub);     // 남은 건 버튼 활성 표시뿐(다시 그리지 않음)
-  } else if (h.page === 'past') {
+  } else if (h.page === 'stats') {
+    statsState.selectedTab = sub;              // 통계의 멤버(2026-09-18) — switchPage가 그리기 전에 값을 잡는다
     switchPage(h.page, { fromHash: true, explicit: !!h.explicit });
-    selectPastTab(sub, { fromHash: true });   // 멤버별 최근 활동월·날짜를 잡아주는 로직이 여기 있어 그대로 태운다
+    selectStatsMember(sub, { fromHash: true });
+  } else if (h.page === 'calendar') {
+    if (MEMBER_BY_ID[sub]) calState.member = sub;   // #calendar:멤버·옛 #past:멤버·#thumbs
+    switchPage(h.page, { fromHash: true, explicit: !!h.explicit });
   } else {
     switchPage(h.page, { fromHash: true });
   }
@@ -7572,79 +7523,8 @@ function applyFilter() {
   refreshUnreadIndicator();
 }
 
-function initPastTabs() {
-  const memberBox = document.getElementById('pastTabsMembers');
-  const sideBox = document.getElementById('pastTabsSide');
-  if (!memberBox || !sideBox) return;
-  memberBox.innerHTML = MEMBERS.map(m => `
-    <button class="past-tab" data-tab="${m.id}" title="${m.name}">
-      <img src="${m.img}" alt="${m.name}">
-    </button>
-  `).join('');
-  // 통합('all') 칸은 2026-08-31 폐지 — 크루 전체 숫자는 통계 탭으로 옮겼다. 여기는 멤버 개별 전용.
-  sideBox.innerHTML = '';
-  const allTabs = [...memberBox.querySelectorAll('.past-tab'), ...sideBox.querySelectorAll('.past-tab')];
-  allTabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectPastTab(btn.dataset.tab);
-    });
-  });
-  // 활성 표시는 현재 상태(주소로 지정된 하위탭일 수 있음)를 따른다 — 마크업에 active를 박아두면 #stats:dalta로
-  // 들어왔을 때 [통합]이 활성으로 보이는 불일치가 난다.
-  // 기본 하위탭은 상태에도 채운다(2026-09-14): 종전엔 활성 표시·본문만 기본값으로 그리고 selectedTab은 null로 남겨,
-  // 최애 없는 첫 방문자가 탭을 눌러 들어와 다시보기 없는 방송 줄을 누르면 클릭 처리기(폴백 없음)가 station/null/vod를 만들었다.
-  // 주소는 그대로 — hashFor는 '기본 멤버 + 최애 없음'을 접미사 없는 #stats로 만든다(null일 때와 같은 주소). 부팅·뒤로가기(applyHash)와 최애 진입은 뒤이어 selectStatsTab이 덮는다.
-  if (!statsState.selectedTab) statsState.selectedTab = defaultSubTab('past');
-  syncSubTabActive('.past-tab', statsState.selectedTab);   // 첫 선택 = 최애(없으면 첫 멤버)
-  if (statsState.data) renderPastBody();
-}
 
-function selectPastTab(tabId, opts) {
-  statsState.selectedTab = tabId;
-  document.querySelectorAll('.past-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tabId);
-  });
-  if (tabId !== 'all') {
-    const latestDate = findLatestActivityDate(tabId);
-    if (latestDate) {
-      const d = new Date(latestDate);
-      const k = new Date(d.getTime() + 9 * 3600 * 1000);
-      statsState.viewMonth = { year: k.getUTCFullYear(), month: k.getUTCMonth() + 1 };
-      statsState.selectedDate = isoToKstDateKey(latestDate);
-    } else {
-      const now = kstNow();
-      statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
-      statsState.selectedDate = null;
-    }
-  }
-  renderPastBody();
-  if (!(opts && opts.fromHash)) syncHash(true);   // 상동 — 직접 고른 경우만 주소를 쌓는다
-}
 
-function findLatestActivityDate(memberId) {
-  const ms = getMemberStatsForView(memberId);
-  if (!ms) return null;
-  let latestBroadcast = null;
-  for (const s of (ms.sessions || [])) {
-    if (!s.start) continue;
-    const t = new Date(s.start).getTime();
-    if (isNaN(t)) continue;
-    if (latestBroadcast === null || t > new Date(latestBroadcast).getTime()) latestBroadcast = s.start;
-  }
-  if (latestBroadcast) return latestBroadcast;
-  let latest = null;
-  const candidates = [
-    ...(ms.posts || []).map(p => p.time),
-    ...(ms.youtube || []).map(y => y.time),
-    ...(ms.cafe || []).map(c => c.time),
-  ];
-  for (const t of candidates) {
-    const ms2 = new Date(t).getTime();
-    if (isNaN(ms2)) continue;
-    if (latest === null || ms2 > new Date(latest).getTime()) latest = t;
-  }
-  return latest;
-}
 
 // 애청자(즐겨찾기) 일별 누적을 /fancnt에서 1회 로드. 카드 표시·그래프 공용.
 let fancntLoadedDate = null;   // 로드 시점의 KST 날짜 — 자정 넘겨 열어둔 탭에서 팬 수가 하루 낡는 것 방지(날짜 바뀌면 1회 재조회)
@@ -7856,10 +7736,8 @@ function periodSelectorHtml(includeAll) {
 // 종전엔 항상 renderPastBody()라, 통계 탭에 붙은 선택기를 눌러도 지난 활동 탭만 다시 그려져
 // 화면이 그대로였다 — 종류를 바꿔 renderHallStats가 돌 때서야 반영됐다(실사고).
 function bindPeriodSelector(body, includeAll, onChange) {
-  const afterChange = () => {
-    statsState.medals = null;   // 기준 기간이 바뀌었으니 메달 재계산(멤버탭 medalsYm 가드와 동일 취지)
-    if (statsState.selectedTab !== 'all') statsState.selectedDate = null;
-    (onChange || renderPastBody)();
+  const afterChange = () => {   // (메달 캐시 폐지 2026-09-18 — renderStats가 그릴 때마다 13명 자료로 계산)
+    (onChange || renderStats)();
   };
   body.querySelectorAll('.stats-month-btn[data-ydir]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -7918,16 +7796,16 @@ function ensureVodMonth(memberId, ym) {
         delete vodState.fails[key];
         vodState.data[key] = j.vods; vodState.at[key] = Date.now();
         if (!cur) lsSet(LS_VOD_PREFIX + key, JSON.stringify(j.vods));
-        if (currentPage === 'past') renderPastBody();   // 종료 방송 행의 링크 목적지(목록 → 직행/모달)를 도착분으로 다시 정한다
-        else if (currentPage === 'thumbs') queueCalRender();   // 썸네일 탭(2026-09-02): 도착마다 그리지 않고 한 프레임에 합친다
+        if (currentPage === 'stats') renderStats();   // 방송별 목록 행의 링크 목적지(목록 → 직행/모달)를 도착분으로 다시 정한다
+        else if (currentPage === 'calendar') queueCalRender();   // 썸네일 탭(2026-09-02): 도착마다 그리지 않고 한 프레임에 합친다
       } else vodFailed(key);
     })
-    .catch(() => { vodState.loading.delete(key); vodFailed(key); if (currentPage === 'thumbs') calLoadingSettle(); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도). 다시 그리면 곧바로 재요청이 돌아 실패 루프가 되므로 표시만 내린다
+    .catch(() => { vodState.loading.delete(key); vodFailed(key); if (currentPage === 'calendar') calLoadingSettle(); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도). 다시 그리면 곧바로 재요청이 돌아 실패 루프가 되므로 표시만 내린다
 }
 // 목록 받기 실패(세션 70): 연속 실패 수를 세고, 썸네일 탭이면 다시 그려 칸 문구를 '불러오지 못함'으로 바꾼다(한계 넘었을 때만 그림).
 function vodFailed(key) {
   vodState.fails[key] = (vodState.fails[key] || 0) + 1;
-  if (vodState.fails[key] === VOD_FAIL_LIMIT && currentPage === 'thumbs') queueCalRender();
+  if (vodState.fails[key] === VOD_FAIL_LIMIT && currentPage === 'calendar') queueCalRender();
 }
 // ── 숲 영상 번호 조회(2026-09-09 Crenop): 시트에 적힌 숲 주소가 다시보기 목록·스냅샷에 없을 때(클립·캐치·19금 등) 워커 /vodinfo로 제목·썸네일·길이·종류를 받는다.
 //    번호별 한 번(메모리), 도착하면 열려 있는 모달을 다시 그린다(modalRepaint — 컨텐츠·현수막·케미 모달이 자기 다시 그리기 함수를 등록).
@@ -8113,39 +7991,6 @@ function openVodPickModal(parts, listUrl) {
 }
 
 // 종료 방송 행(버튼)의 다시보기 선택 모달 — 일별 요약은 세 자리(첫 그림·주 아래·오른쪽 패널)에 그려지므로 본문에 위임 리스너 하나(2026-09-06)
-document.getElementById('pastBody')?.addEventListener('click', (e) => {
-  const b = e.target.closest('button.day-session[data-vodpick]');
-  if (!b) return;
-  const memberId = statsState.selectedTab;
-  const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(s => String(s.broad_no) === b.dataset.vodpick);
-  openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);   // 세션 스냅샷 우선(2026-09-07)
-});
-function renderPastBody() {
-  const body = document.getElementById('pastBody');
-  if (!body) return;
-
-  if (!statsState.viewMonth) {
-    const now = kstNow();
-    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
-  }
-
-  // 전체(연간) 뷰는 renderStatsAnnual이 해당 연도 월들을 자체 로딩하므로 단일월 가드 생략. 월간/멤버만 현재 보는 월을 선로딩.
-  if (!(statsState.selectedTab === 'all' && statsState.periodAll)) {
-    const ym = currentViewYm();
-    if (ym && !statsState.data[ym] && !statsState.loadingMonths.has(ym)) {
-      body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-      loadStatsMonth(ym).then(() => { if (currentPage === 'past') renderPastBody(); });
-      return;
-    }
-    if (statsState.loadingMonths.has(ym)) {
-      body.innerHTML = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-      return;
-    }
-  }
-
-  // 통합 뷰는 통계 탭으로 이관(2026-08-31) — 여기는 멤버 개별만
-  renderPastMember(body, statsState.selectedTab || defaultSubTab('past'));
-}
 
 // 해당 연도의 모든 월 stats 합산 — 통계 연간 탭과 명예의 전당이 공용 (수치·메달 일관성 보장)
 function computeAnnualSums(year, nowMs = Date.now()) {
@@ -8202,274 +8047,8 @@ function annualMonthsToLoad(year, maxMonth) {
   return out;
 }
 
-function renderMetricsAnnual(body) {
-  const now = kstNow();
-  const year = statsState.viewMonth.year;
-  const isCurrentYear = (year === now.getUTCFullYear());
 
-  // 해당 연도 모든 월이 로드됐는지 확인, 없으면 로드 후 재렌더
-  const maxMonth = isCurrentYear ? now.getUTCMonth() + 1 : 12;
-  const monthsToLoad = annualMonthsToLoad(year, maxMonth);
-  if (monthsToLoad.length > 0) {
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>연간 통계 불러오는 중...</div></div>';
-    Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
-      if (currentPage === 'past') renderPastBody();
-    });
-    return;
-  }
 
-  const annualSums = computeAnnualSums(year);
-
-  // 순위 계산 (공통 computeMedals — 연간 키 목록)
-  const medals = computeMedals(annualSums, ANNUAL_MEDAL_KEYS);
-
-  const cards = MEMBERS.map(m => {
-    const sum = annualSums[m.id];
-    const md = medals[m.id];
-    const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
-    return `
-      <div class="metrics-card" data-member="${m.id}">
-        <div class="metrics-card-header">
-          <img class="metrics-card-avatar" src="${m.img}" alt="${m.name}">
-          <div class="metrics-card-name" style="color: ${m.color}">${m.name}</div>
-        </div>
-        <div class="metrics-card-rows">
-          <div class="metrics-card-row metrics-card-row-link" data-metric="broadcastDays">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-            <span class="metrics-card-value">${mv('sessions')}${sum.sessions}일</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="broadcastTime">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
-            <span class="metrics-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="fan">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
-            <span class="metrics-card-value">${fanCellYear(m.id, year)}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="peakViewer">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
-            <span class="metrics-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="avgViewer">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
-            <span class="metrics-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="post">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-            <span class="metrics-card-value">${mv('postCount')}${sum.postCount}개</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="cafe">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-            <span class="metrics-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="youtube">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-            <span class="metrics-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  body.innerHTML = `
-    <div class="metrics-grid">${cards}</div>
-  `;
-  // (기둥의 연/월은 통계 탭(renderStats)이 자기 기둥에 그린다 — 종전엔 여기서 지난 활동 탭의 기둥(#pastPeriodSide)에까지
-  //  '전체' 포함 선택기를 써 넣어, 통계→지표에서 '전체'를 고른 뒤 지난 활동으로 가면 없어야 할 '전체' 버튼이 켜진 채 남았다. 2026-09-03 제거)
-  // 지표 행 클릭 → 그 멤버 × 그 지표의 월별 추이 그래프 모달 (헤더 클릭→멤버 이동은 폐지)
-  body.querySelectorAll('.metrics-card-row-link[data-metric]').forEach(row => {
-    row.addEventListener('click', () => {
-      const card = row.closest('.metrics-card');
-      if (card) openStatGraphModal(card.dataset.member, row.dataset.metric);
-    });
-  });
-}
-
-function renderMetricsAll(body) {
-  if (!statsState.viewMonth) {
-    const now = kstNow();
-    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
-  }
-  const { year, month } = statsState.viewMonth;
-  const allSums = {};
-  MEMBERS.forEach(m => {
-    const ms = getMemberStatsForView(m.id);
-    allSums[m.id] = computeMonthSummary(ms, year, month);
-  });
-
-  // 항목별 순위 계산 (공통 computeMedals — 공동 허용, 0이면 메달 없음)
-  const medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
-  // 전역 공유 (개별탭에서 사용) — medalsYm=계산 기준월. 멤버탭이 다른 월로 열리면 이 값 불일치로 재계산됨
-  statsState.medals = medals;
-  statsState.medalsYm = `${year}-${String(month).padStart(2, '0')}`;
-
-  const cards = MEMBERS.map(m => {
-    const sum = allSums[m.id];
-    const md = medals[m.id];
-    const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
-    return `
-      <div class="metrics-card" data-member="${m.id}">
-        <div class="metrics-card-header">
-          <img class="metrics-card-avatar" src="${m.img}" alt="${m.name}">
-          <div class="metrics-card-name" style="color: ${m.color}">${m.name}</div>
-        </div>
-        <div class="metrics-card-rows">
-          <div class="metrics-card-row metrics-card-row-link" data-metric="broadcastDays">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-            <span class="metrics-card-value">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="broadcastTime">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
-            <span class="metrics-card-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="fan">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
-            <span class="metrics-card-value">${fanCellMonth(m.id, year, month)}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="peakViewer">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
-            <span class="metrics-card-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="avgViewer">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
-            <span class="metrics-card-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="post">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-            <span class="metrics-card-value">${mv('postCount')}${sum.postCount}개</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="cafe">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-            <span class="metrics-card-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-          </div>
-          <div class="metrics-card-row metrics-card-row-link" data-metric="youtube">
-            <span class="metrics-card-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-            <span class="metrics-card-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-  body.innerHTML = `
-    <div class="metrics-grid">${cards}</div>
-  `;
-  // (기둥의 연/월은 통계 탭이 자기 기둥에 그린다 — 위 renderStatsAnnual과 같은 사유로 #pastPeriodSide 쓰기 제거, 2026-09-03)
-  body.querySelectorAll('.metrics-card-row-link[data-metric]').forEach(row => {
-    row.addEventListener('click', () => {
-      const card = row.closest('.metrics-card');
-      if (card) openStatGraphModal(card.dataset.member, row.dataset.metric);
-    });
-  });
-}
-
-function renderPastMember(body, memberId) {
-  const m = MEMBER_BY_ID[memberId];
-  if (!m) { body.innerHTML = ''; return; }
-  if (!statsState.viewMonth) {
-    const now = kstNow();
-    statsState.viewMonth = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
-  }
-  const { year, month } = statsState.viewMonth;
-  const ms = getMemberStatsForView(memberId);
-  const sum = computeMonthSummary(ms, year, month);
-  if (monthNeedsVodList(memberId, `${year}-${String(month).padStart(2, '0')}`)) ensureVodMonth(memberId, `${year}-${String(month).padStart(2, '0')}`);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07) — 종료 방송 행의 링크 목적지용, 도착하면 재렌더
-  const now = kstNow();
-  const isCurrentMonth = (year === now.getUTCFullYear() && month === now.getUTCMonth() + 1);
-  // 시간대 분포는 통계 탭으로 이관(2026-08-31) — 여기선 안 그린다
-
-  // medals가 없거나 계산 기준월이 지금 보는 월과 다르면 재계산.
-  // (구 가드 "이 멤버 메달이 비어있으면"은 computeMedals가 값 0 멤버에도 ''를 채워 medals 존재 시 절대 발화하지 않았음 →
-  //  월간 전체탭에서 M월을 보다가 그 달 활동 없는 멤버를 클릭해 뷰가 현재월로 점프하면 M월 메달이 그대로 표시되던 버그)
-  if (!statsState.medals || statsState.medalsYm !== currentViewYm()) {
-    const allSums = {};
-    MEMBERS.forEach(m => {
-      const mms = (() => { const ym2 = currentViewYm(); return ym2 && statsState.data[ym2] ? statsState.data[ym2][m.id] : null; })();
-      allSums[m.id] = computeMonthSummary(mms, year, month);
-    });
-    statsState.medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
-    statsState.medalsYm = currentViewYm();
-  }
-  body.innerHTML = `
-    <div class="past-member-header">
-      <div class="past-detail-summary">
-        ${(() => {
-          const md = (statsState.medals && statsState.medals[memberId]) || {};
-          const mv = (k) => md[k] ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
-          return `
-        <div class="ss-row">
-        <div class="past-summary-item" data-metric="broadcastDays">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.calendar}</span>방송 일수</span>
-          <span class="past-summary-value">${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일</span>
-        </div>
-        <div class="past-summary-item" data-metric="broadcastTime">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>방송 시간</span>
-          <span class="past-summary-value">${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}</span>
-        </div>
-        <span class="ss-brk"></span><!-- 3행이 필요한 폭에선 여기서 줄을 바꿔 2|3|3 (방송 2 | 시청자 3 | 게시 3) — 2026-09-03 Crenop -->
-        <div class="past-summary-item" data-metric="fan">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:#FFC94D">${FAN_ICON}</span>애청자</span>
-          <span class="past-summary-value">${fanCellMonth(memberId, year, month)}</span>
-        </div>
-        <div class="past-summary-item" data-metric="peakViewer">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>최고 시청자</span>
-          <span class="past-summary-value">${sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-'}</span>
-        </div>
-        <div class="past-summary-item" data-metric="avgViewer">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>평균 시청자</span>
-          <span class="past-summary-value">${sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-'}</span>
-        </div>
-        </div><div class="ss-row"><!-- v8: 고정 2행 구조 — 시청자 5 | 게시 3. 개행 스팬 방식 폐기(flex 줄 높이에 대한 음수마진은 브라우저 재량이라 행간 보장 불가) -->
-        <div class="past-summary-item" data-metric="post">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:var(--ev-post)">${SVG_ICONS.board}</span>숲 게시글</span>
-          <span class="past-summary-value">${mv('postCount')}${sum.postCount}개</span>
-        </div>
-        <div class="past-summary-item" data-metric="cafe">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:#03C75A">${SVG_ICONS.coffee}</span>카페 게시글</span>
-          <span class="past-summary-value">${mv('cafeCount')}${sum.cafeCount}개</span>
-        </div>
-        <div class="past-summary-item" data-metric="youtube">
-          <span class="past-summary-label"><span class="stats-row-icon" style="color:var(--ev-youtube)">${SVG_ICONS.youtube}</span>유튜브 업로드</span>
-          <span class="past-summary-value">${mv('youtubeCount')}${sum.youtubeCount}개</span>
-        </div>
-        </div>`;
-        })()}
-      </div>
-      </div>
-    </div>
-    <div class="past-detail-body">
-      ${renderCalendar(year, month, sum, memberId)}
-      <div class="day-detail" id="dayDetail">${renderDayDetail(year, month, sum, memberId) || '<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>'}</div>
-    </div>
-  `;
-  // 연/월은 본문이 아니라 우측 기둥에 그린다(2026-08-31) — 배선 대상도 그 칸이다
-  const periodSide = document.getElementById('pastPeriodSide');
-  if (periodSide) { periodSide.innerHTML = periodSelectorHtml(false); bindPeriodSelector(periodSide, false); }
-  // 요약 항목 클릭 → 그 지표의 월별 추이 그래프 모달(카드 지표행과 동일 문법)
-  body.querySelectorAll('.past-summary-item[data-metric]').forEach(item => {
-    item.addEventListener('click', () => openStatGraphModal(memberId, item.dataset.metric));
-  });
-  body.querySelectorAll('.calendar-day').forEach(btn => {
-    if (btn.classList.contains('outside')) return;
-    btn.addEventListener('click', () => {
-      const date = btn.dataset.date;
-      statsState.selectedDate = (statsState.selectedDate === date) ? null : date;
-      body.querySelectorAll('.calendar-day').forEach(d => {
-        d.classList.toggle('selected', d.dataset.date === statsState.selectedDate);
-      });
-      // v2: 해당 주 아래 확장(일정 모달 문법) — 모든 슬롯 비우고 선택된 날의 주 슬롯만 채운다
-      body.querySelectorAll('.cal-week-detail').forEach(el => { el.innerHTML = ''; });
-      const detailHtml = statsState.selectedDate ? renderDayDetail(year, month, sum, memberId) : '';
-      if (statsState.selectedDate) {
-        const row = btn.closest('.cal-weekrow');
-        const slot = row && row.querySelector('.cal-week-detail');
-        if (slot) slot.innerHTML = detailHtml;
-      }
-      // v3: 중간 폭 밴드의 우측 패널도 동시 갱신(어느 쪽이 보이는지는 CSS 밴드가 결정)
-      const dd = document.getElementById('dayDetail');
-      if (dd) dd.innerHTML = detailHtml || '<div class="day-detail-empty">달력에서 날짜를 선택하면<br>해당 일의 활동 기록을 볼 수 있습니다</div>';
-    });
-  });
-}
 
 // ── 그래프 표시 범위 산정 (순수 함수 — verify_graph_range 스위트가 검증) ──
 function ymShift(ym, k) {   // 'yyyy-mm'을 k개월 이동(음수 가능)
@@ -8711,170 +8290,7 @@ function niceNum(v) {
   const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
   return nice * base;
 }
-function renderCalendar(year, month1, sum, memberId) {
-  const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={}, broadcastDateSet } = sum;
-  const todayKey = isoToKstDateKey(new Date().toISOString());
-  const ym = `${year}-${String(month1).padStart(2, '0')}`;
-  const weekdays = ['일','월','화','수','목','금','토'];
-  let html = `<div class="calendar"><div class="calendar-grid cal-weekdays">`;
-  weekdays.forEach((w, i) => {
-    html += `<div class="calendar-weekday ${i===0?'sun':i===6?'sat':''}">${w}</div>`;
-  });
-  html += `</div>`;
-  // v2(2026-08-29): 주 단위 행 + 각 주 아래 확장 슬롯 — 일정 모달(.sch-week/.sch-detail) 문법 이식.
-  // 선택된 날이 속한 주의 슬롯만 렌더 시점에 채운다(빈 슬롯은 CSS로 숨김). 클릭 갱신은 바인딩이 같은 규칙 수행.
-  // 칸 배열(앞 빈칸·날짜·첫 달의 결성일)은 monthGridCells가 준다(2026-09-02) — 달력 탭과 같은 배열.
-  const cellHtml = (cell) => {
-    const dateKey = cell.key;
-    const dow = cell.dow;   // v3: 날짜 숫자 요일색(일 적·토 청)용 — 달력 헤더와 동일 규칙
-    const sessions = sessionsByDate[dateKey] || [];
-    const posts = postsByDate[dateKey] || [];
-    const youtubes = youtubeByDate[dateKey] || [];
-    const cafes = cafeByDate[dateKey] || [];
-    const hasBroadcast = (broadcastDateSet ? broadcastDateSet.has(dateKey) : sessions.length > 0);   // 걸친 날도 채움
-    const hasPost = posts.length > 0;
-    const hasYoutube = youtubes.length > 0;
-    const hasCafe = cafes.length > 0;
-    const hasActivity = hasBroadcast || hasPost || hasYoutube || hasCafe;
-    const classes = ['calendar-day'];
-    if (hasBroadcast) classes.push('has-broadcast');
-    if (hasActivity) classes.push('has-activity');
-    if (dateKey === todayKey) classes.push('today');
-    if (statsState.selectedDate === dateKey) classes.push('selected');
-    // v4: 컴팩트도 동일한 아이콘+숫자 칩 문법으로 통일(구 "N회"/점 표기 폐지 — Crenop 지정).
-    // 슬롯 클래스(cd-s-*)로 컴팩트 2열 그리드의 자리를 고정(CSS grid-area) — 항목이 0이라 빠져도 남은 칩의 자리가 안 흔들린다. PC는 flex 한 줄(우측 정렬)이라 슬롯 무시.
-    // 다시보기 칩(film N) 폐지(2026-09-06 Crenop): 이 탭은 글자 기록만 — 그림·다시보기는 썸네일 탭 몫(셀 썸네일은 2026-08-31에 먼저 뺐다).
-    const chips = [];
-    if (sessions.length > 0) chips.push(chipHtml('broadcast cd-s-soop', 'soop', sessions.length));
-    if (hasPost) chips.push(chipHtml('post cd-s-post', 'board', posts.length));
-    if (hasCafe) chips.push(chipHtml('cafe cd-s-cafe', 'coffee', cafes.length));
-    if (hasYoutube) chips.push(chipHtml('youtube cd-s-yt', 'youtube', youtubes.length));
-    return { selected: statsState.selectedDate === dateKey,
-      html: `<button class="${classes.join(' ')}" data-date="${dateKey}"><span class="cd-top"><span class="calendar-daynum${dow===0?' sun':dow===6?' sat':''}">${cell.label}</span><span class="cd-chips">${chips.join('')}</span></span></button>` };
-  };
-  const cells = monthGridCells(year, month1);
-  while (cells.length % 7 !== 0) cells.push(null);
-  for (let w = 0; w < cells.length / 7; w++) {
-    let weekHtml = '';
-    let weekHasSelected = false;
-    for (let c = 0; c < 7; c++) {
-      const day = cells[w * 7 + c];
-      if (day === null) { weekHtml += `<div class="calendar-day outside"></div>`; continue; }
-      const cell = cellHtml(day);
-      if (cell.selected) weekHasSelected = true;
-      weekHtml += cell.html;
-    }
-    html += `<div class="cal-weekrow"><div class="calendar-grid">${weekHtml}</div><div class="cal-week-detail">${weekHasSelected ? renderDayDetail(year, month1, sum, memberId) : ''}</div></div>`;
-  }
-  html += `</div>`;
-  return html;
-}
 
-function renderDayDetail(year, month1, sum, memberId) {
-  const { sessionsByDate={}, postsByDate={}, youtubeByDate={}, cafeByDate={} } = sum;
-  const date = statsState.selectedDate;
-  if (!date) return '';   // v2: 선택 없음 = 확장 슬롯 자체가 안 열림(구 우측 패널의 자리표시 문구 폐지)
-  const sessions = sessionsByDate[date] || [];
-  const posts = postsByDate[date] || [];
-  const youtubes = youtubeByDate[date] || [];
-  const cafes = cafeByDate[date] || [];
-  const totalActivities = sessions.length + posts.length + youtubes.length + cafes.length;
-  // v5: 헤더를 달력 칩 문법으로 통일 — 날짜는 요일색, 개수는 아이콘+숫자(Crenop 지정 2026-08-29)
-  const ddDow = new Date(date + 'T00:00:00Z').getUTCDay();   // 'YYYY-MM-DD'는 UTC 자정 파싱 — 그 달력 날짜의 요일이 그대로 나온다
-  // v6(2026-08-29): '2026-08-22 (토)' 형식 — 일정 모달 목록과 동일 문법(날짜는 기본색, 요일 글자에만 주말색).
-  const ddDowChar = ['일','월','화','수','목','금','토'][ddDow];
-  const ddDowColor = ddDow === 0 ? '#f87171' : (ddDow === 6 ? '#60a5fa' : '');
-  const ddDateHtml = `<span class="ddt-date">${date} (${ddDowColor ? `<span style="color:${ddDowColor}">${ddDowChar}</span>` : ddDowChar})</span>`;
-  if (totalActivities === 0) return `<div class="day-detail-title">${ddDateHtml}</div><div class="day-detail-empty">이 날은 활동 기록이 없습니다</div>`;
-  // 글자 기록만(2026-09-06 Crenop): 다시보기 타일·다시보기 칩·유튜브 썸네일 타일을 뺐다 — 최근 활동 탭이 보여주던 방식 그대로를
-  // 멤버별·날짜별로 정리해 두는 곳. 그림으로 훑는 것은 썸네일 탭. 방송 행은 시각·길이·시청자·모드·제목/카테고리 변경 기록만이고,
-  // 행을 누르면 그 방송의 다시보기로(최근 활동과 같은 직결 규칙 — 아래 방송 행 주석).
-  const headChips = [];
-  if (sessions.length > 0) headChips.push(chipHtml('broadcast', 'soop', sessions.length));
-  if (posts.length > 0) headChips.push(chipHtml('post', 'board', posts.length));
-  if (cafes.length > 0) headChips.push(chipHtml('cafe', 'coffee', cafes.length));
-  if (youtubes.length > 0) headChips.push(chipHtml('youtube', 'youtube', youtubes.length));
-  let html = `<div class="day-detail-title">${ddDateHtml}<span class="ddt-chips">${headChips.join('')}</span></div>`;
-  const items = [];
-  for (const s of sessions) {
-    const t = new Date(s.start).getTime();
-    if (!isNaN(t)) items.push({ kind: 'session', time: t, data: s });
-  }
-  for (const p of posts) {
-    const t = new Date(p.time).getTime();
-    if (!isNaN(t)) items.push({ kind: 'post', time: t, data: p });
-  }
-  for (const y of youtubes) {
-    const t = new Date(y.time).getTime();
-    if (!isNaN(t)) items.push({ kind: 'youtube', time: t, data: y });
-  }
-  for (const c of cafes) {
-    const t = new Date(c.time).getTime();
-    if (!isNaN(t)) items.push({ kind: 'cafe', time: t, data: c });
-  }
-  items.sort((a, b) => a.time - b.time);
-  for (const item of items) {
-    if (item.kind === 'session') {
-      const s = item.data;
-      const startStr = s.start_cut ? '-' : formatHHMM(s.start);   // start_cut(세션 70): 잘린 다시보기 소급 기록 — 시작 시각을 모른다('-' = 값 없음 문법, 종료·길이는 기록대로)
-      const endStr = s.end ? formatHHMM(s.end) : '진행 중';
-      let durSpan = '';
-      if (s.end) {
-        const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
-        // v8: 길이를 시청자 스팬과 같은 문법의 형제 요소로 — 행 gap(8px)이 시간·길이·최고·평균을 등간격으로 배치
-        durSpan = `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}</span>`;
-      }
-      const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
-      // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
-      const vp = s.viewer_peak > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>${s.viewer_peak.toLocaleString()}명</span>` : '';
-      const va = s.viewer_count > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>${Math.round(s.viewer_sum / s.viewer_count).toLocaleString()}명</span>` : '';
-      let changesHtml = '';
-      if (s.changes && s.changes.length > 0) {
-        changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
-          let icon, label, valHtml;
-          if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
-          else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
-          else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → <span class="chg-after">${modeLabel(c.after)}</span>`; }
-          else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
-          // v4: 절대시각 옆에 방송 시작 기준 경과를 병기 — 최근 이벤트 탭의 event-elapsed 문법 그대로(Crenop 지정)
-          const chElMs = new Date(c.time).getTime() - new Date(s.start).getTime();
-          const chElHtml = (!isNaN(chElMs) && chElMs >= 0) ? `<span class="event-elapsed">${SVG_ICONS.clockTime} ${formatDuration(chElMs)}</span>` : '';
-          return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span>${chElHtml}<span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
-        }).join('')}</div>`;
-      }
-      // 종료 방송 행(2026-09-06 Crenop): 다시보기 슬롯(타일·'없습니다' 줄, 2026-08-29~09-05)을 빼고 행 자체를 최근 활동 탭의 다시보기 직결과
-      // 같은 링크로 — 1개면 플레이어 직행, 2개 이상·없음 확정이면 다시보기 선택 모달(같은 모달), 목록 미도착·방송번호 없음이면 VOD 목록(폴백).
-      // 그림 없이 글자 행 그대로. 진행 중 방송은 종전대로 행 전체가 생방 링크.
-      const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span><span class="day-session-time">${startStr} ~ ${endStr}</span>${durSpan}${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${changesHtml}`;
-      if (memberId && !s.end) {
-        html += `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`;
-      } else if (memberId) {
-        const listUrl = `https://www.sooplive.com/station/${memberId}/vod`;
-        const parts = sessionVods(s) ?? vodsForBroad(memberId, `${year}-${String(month1).padStart(2, '0')}`, s.broad_no);   // 세션 스냅샷 우선(2026-09-07)
-        if (parts && parts.length === 1) html += `<a class="day-session" href="${vodPlayerUrl(parts[0])}" target="_blank" rel="noopener">${sessionInner}</a>`;
-        else if (parts) html += `<button class="day-session" type="button" data-vodpick="${escapeHtml(String(s.broad_no))}" data-vodym="${year}-${String(month1).padStart(2, '0')}">${sessionInner}</button>`;   // 2개↑·0개 → 모달(눌렀을 때 목록으로 다시 푼다)
-        else html += `<a class="day-session" href="${listUrl}" target="_blank" rel="noopener">${sessionInner}</a>`;
-      } else {
-        html += `<div class="day-session">${sessionInner}</div>`;
-      }
-    } else if (item.kind === 'post') {
-      const p = item.data;
-      const inner = `<span class="day-kind-icon post">${SVG_ICONS.board}</span><span class="day-item-time">${formatHHMM(p.time)}</span><span class="day-item-title">${escapeHtml(p.title||'(제목 없음)')}</span>`;
-      html += p.url ? `<a class="day-item" href="${escapeHtml(withTextFragment(p.url, p.title))}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
-    } else if (item.kind === 'youtube') {
-      const y = item.data;
-      const inner = `<span class="day-kind-icon youtube">${SVG_ICONS.youtube}</span><span class="day-item-time">${formatHHMM(y.time)}</span><span class="day-item-title">${escapeHtml(y.title||'(제목 없음)')}</span>`;
-      // 유튜브 썸네일 타일(2026-08-29~09-05) 폐지(2026-09-06 Crenop) — 글·카페와 같은 글자 행, 행 전체가 영상 링크(최근 활동 탭과 같은 표시)
-      html += y.url ? `<a class="day-item" href="${escapeHtml(y.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
-    } else if (item.kind === 'cafe') {
-      const c = item.data;
-      const cafeNameEsc = escapeHtml(c.cafe_name || '');
-      const inner = `<span class="day-kind-icon cafe">${SVG_ICONS.coffee}</span><span class="day-item-time">${formatHHMM(c.time)}</span><span class="day-item-title">${cafeNameEsc ? `[${cafeNameEsc}] ` : ''}${escapeHtml(c.title||'(제목 없음)')}</span>`;
-      html += c.url ? `<a class="day-item" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
-    }
-  }
-  return html;
-}
 
 // 시간대별 방송 분포: 세션 [start,end]를 KST 기준 일·3시간밴드 경계로 쪼개 분 단위 누적.
 // 자정 넘는 방송은 양일에 나눠 들어가고, 표시 월 밖으로 넘어가는 구간은 잘라낸다(클립). 진행 중 세션은 현재 월에서만 now까지 집계.
@@ -9187,9 +8603,9 @@ function syncDataVersion(ver, freshYm) {
     for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith(LS_STATS_PREFIX)) localStorage.removeItem(k); }
   } catch (e) {}
   for (const ym of Object.keys(statsState.data)) if (!isCurrentMonth(ym) && ym !== freshYm) delete statsState.data[ym];
-  if (currentPage === 'past') renderPastBody();
-  else if (currentPage === 'stats') renderHall();
-  else if (currentPage === 'thumbs') { ensureCalMonth(); queueCalRender(); }   // 빠진 달은 ensureCalMonth가 다시 받고 도착하면 다시 그린다
+  if (currentPage === 'stats') renderStats();
+  else if (currentPage === 'hall') renderHall();
+  else if (currentPage === 'calendar') { ensureCalMonth(); queueCalRender(); }   // 빠진 달은 ensureCalMonth가 다시 받고 도착하면 다시 그린다
 }
 async function loadStatsMonth(yyyymm) {
   if (!yyyymm) return;
@@ -9232,22 +8648,22 @@ async function loadStats() {
     // 탭 밖에서의 변화를 재진입 후 첫 틱이 감지해 렌더(switchPage는 stats 재진입 시 렌더하지 않고 DOM 유지에 의존).
     // 썸네일 탭이 당월을 보고 있으면 같은 1분 틱에 다시 그린다(2026-09-02 Crenop 지정 — 지난 활동과 같은 주기). 무변화면 생략.
     // 당월 다시보기 목록도 이 틱에 신선도(5분)를 본다 — 워커의 당월 목록 캐시가 5분이라 그보다 자주 물어도 새 것이 없다.
-    if (currentPage === 'thumbs' && calYm() === cur) {
+    if (currentPage === 'calendar' && calYm() === cur) {
       const csig = JSON.stringify(statsState.data[cur] || null);
       if (csig !== lastCalStatsSig) { lastCalStatsSig = csig; queueCalRender(); }
       ensureCalMonth();
     }
-    if (currentPage === 'past') {
+    if (currentPage === 'stats') {
       const hasOpen = Object.values(statsState.data[cur] || {}).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
       const sig = JSON.stringify(statsState.data[cur] || null) + '|' + fancntLoadedDate + (hasOpen ? '|' + Math.floor(Date.now() / 60000) : '');   // fancntLoadedDate: 자정 fancnt 재조회가 sig를 1회 바꿔 애청자 셀·그래프에 반영되게(월 데이터만 보면 fancnt 갱신이 화면에 안 실림)
-      if (sig !== lastStatsSig) renderPastBody();
+      if (sig !== lastStatsSig) renderStats();
       lastStatsSig = sig;
     }
     lastStatsUpdate = new Date();
     updateHeaderCenter();
   } catch (e) {
-    if (currentPage === 'past') {
-      const body = document.getElementById('pastBody');
+    if (currentPage === 'stats') {
+      const body = document.getElementById('statsTopBox');
       if (body) body.innerHTML = '<div class="loading"><div>통계 데이터를 불러올 수 없습니다</div></div>';
     }
   }
@@ -10365,7 +9781,7 @@ function longestStreak(dateSet) {
 
 // 명전 토글 상태(세로↔수평). 세션 내 유지, localStorage 저장 안 함(새로고침 시 끔=세로로 복귀)
 let hallShowRanks = false;
-let heatShowStats = false;   // 시간대 카드 이름 옆 통계 두 줄 '통계 보기' 토글(2026-09-02) — 2·3위·설명 보기와 같이 비저장
+// (heatShowStats 토글 폐지 2026-09-18 — 멤버 한 명의 띠뿐이라 다섯 값을 늘 보인다) 카드 이름 옆 통계 두 줄 '통계 보기' 토글(2026-09-02) — 2·3위·설명 보기와 같이 비저장
 // 값 내림차순 dense 순위로 상위 3개 그룹 추출(값 같으면 동순위, 0은 제외). [{rank,value,members}] 최대 3개.
 function hallTopRanks(getVal) {
   const distinct = [...new Set(MEMBERS.map(m => getVal(m.id)))].filter(v => v > 0).sort((a, b) => b - a);
@@ -10467,85 +9883,207 @@ function hallSumMonths(monthList, nowMs = Date.now()) {
   return sums;
 }
 
-// (statsKind·STATS_KINDS 선언은 statsState 옆으로 — 2026-09-02, 위쪽 TDZ 주석 참조)
 
-function renderStats() {
-  const kindBox = document.getElementById('statsKindBox');
-  if (kindBox) {
-    kindBox.innerHTML = STATS_KINDS.map(k => `<button class="stats-kind-btn${k.key === statsKind ? ' active' : ''}" data-kind="${k.key}" type="button">${SVG_ICONS[k.icon] || ''}<span>${k.label}</span></button>`).join('');
-    kindBox.querySelectorAll('.stats-kind-btn').forEach(b => b.addEventListener('click', () => {
-      if (b.dataset.kind === statsKind) return;
-      statsKind = b.dataset.kind;
-      if (favMemberId()) { favArm('stats'); window.scrollTo(0, 0); }   // 종류를 바꾸면 그 종류의 최애 자리로 다시 한 번(지표·시간대 — 명전엔 자리가 없다)
-      renderStats();
-      if (statsKind === 'hall') renderHall();
-    }));
+
+// ── 방송 행·글 행(2026-09-18 재편 — 옛 지난 활동 일별 상세에서 추출) ──
+// 방송 행: 시각·길이·최고/평균 시청자·모드·제목/카테고리 변경 기록. 행 자체가 다시보기 링크(1개 직행·2개 이상/없음 확정은 선택 모달·목록 미도착은 VOD 목록).
+// 진행 중 방송은 행 전체가 생방 링크. dateLabel을 주면 시각 앞에 날짜(통계 탭의 방송별 목록 — 한 달·한 해를 늘어놓아 행마다 날짜가 필요).
+function sessionRowHtml(s, memberId, ym, dateLabel) {
+  let out = '';
+  const dateSpan = dateLabel ? `<span class="day-session-date">${escapeHtml(dateLabel)}</span>` : '';
+    const startStr = s.start_cut ? '-' : formatHHMM(s.start);   // start_cut(세션 70): 잘린 다시보기 소급 기록 — 시작 시각을 모른다('-' = 값 없음 문법, 종료·길이는 기록대로)
+  const endStr = s.end ? formatHHMM(s.end) : '진행 중';
+  let durSpan = '';
+  if (s.end) {
+    const ms = new Date(s.end).getTime() - new Date(s.start).getTime();
+    // v8: 길이를 시청자 스팬과 같은 문법의 형제 요소로 — 행 gap(8px)이 시간·길이·최고·평균을 등간격으로 배치
+    durSpan = `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ev-start)">${SVG_ICONS.clockTime}</span>${formatDuration(ms)}</span>`;
   }
-  const metricsBox = document.getElementById('statsMetricsBox');
-  const heat = document.getElementById('statsHeatBox');
-  const hallBody = document.getElementById('hallBody');
-  if (metricsBox) metricsBox.style.display = statsKind === 'metrics' ? '' : 'none';
-  if (heat) heat.style.display = statsKind === 'heat' ? '' : 'none';
-  if (hallBody) hallBody.style.display = statsKind === 'hall' ? '' : 'none';
+  const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
+  // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
+  const vp = s.viewer_peak > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.arrowUp}</span>${s.viewer_peak.toLocaleString()}명</span>` : '';
+  const va = s.viewer_count > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:#FF8C00">${SVG_ICONS.barChart}</span>${Math.round(s.viewer_sum / s.viewer_count).toLocaleString()}명</span>` : '';
+  let changesHtml = '';
+  if (s.changes && s.changes.length > 0) {
+    changesHtml = `<div class="day-session-changes">${s.changes.map(c => {
+      let icon, label, valHtml;
+      if (c.type === 'title') { icon = SVG_ICONS.pencil; label = '방송 제목'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
+      else if (c.type === 'category') { icon = SVG_ICONS.tag; label = '카테고리'; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
+      else if (c.type === 'mode_change') { icon = SVG_ICONS.rotate; label = '방송 모드'; valHtml = `${modeLabel(c.before)} → <span class="chg-after">${modeLabel(c.after)}</span>`; }
+      else { icon = '•'; label = c.type; valHtml = `${escapeHtml(c.before||'')} → <span class="chg-after">${escapeHtml(c.after||'')}</span>`; }
+      // v4: 절대시각 옆에 방송 시작 기준 경과를 병기 — 최근 이벤트 탭의 event-elapsed 문법 그대로(Crenop 지정)
+      const chElMs = new Date(c.time).getTime() - new Date(s.start).getTime();
+      const chElHtml = (!isNaN(chElMs) && chElMs >= 0) ? `<span class="event-elapsed">${SVG_ICONS.clockTime} ${formatDuration(chElMs)}</span>` : '';
+      return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span>${chElHtml}<span class="day-session-change-icon">${icon}</span><span><b>${label}</b> ${valHtml}</span></div>`;
+    }).join('')}</div>`;
+  }
+  // 종료 방송 행(2026-09-06 Crenop): 다시보기 슬롯(타일·'없습니다' 줄, 2026-08-29~09-05)을 빼고 행 자체를 최근 활동 탭의 다시보기 직결과
+  // 같은 링크로 — 1개면 플레이어 직행, 2개 이상·없음 확정이면 다시보기 선택 모달(같은 모달), 목록 미도착·방송번호 없음이면 VOD 목록(폴백).
+  // 그림 없이 글자 행 그대로. 진행 중 방송은 종전대로 행 전체가 생방 링크.
+  const sessionInner = `<div class="day-session-row-head"><span class="day-kind-icon broadcast">${SVG_ICONS.soop}</span>${dateSpan}<span class="day-session-time">${startStr} ~ ${endStr}</span>${durSpan}${vp}${va}</div><div class="day-session-title">${modeBadge}${escapeHtml(s.title||'')}</div>${changesHtml}`;
+  if (memberId && !s.end) {
+    out += `<a class="day-session" href="https://play.sooplive.co.kr/${memberId}" target="_blank" rel="noopener">${sessionInner}</a>`;
+  } else if (memberId) {
+    const listUrl = `https://www.sooplive.com/station/${memberId}/vod`;
+    const parts = sessionVods(s) ?? vodsForBroad(memberId, ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07)
+    if (parts && parts.length === 1) out += `<a class="day-session" href="${vodPlayerUrl(parts[0])}" target="_blank" rel="noopener">${sessionInner}</a>`;
+    else if (parts) out += `<button class="day-session" type="button" data-vodpick="${escapeHtml(String(s.broad_no))}" data-vodym="${ym}">${sessionInner}</button>`;   // 2개↑·0개 → 모달(눌렀을 때 목록으로 다시 푼다)
+    else out += `<a class="day-session" href="${listUrl}" target="_blank" rel="noopener">${sessionInner}</a>`;
+  } else {
+    out += `<div class="day-session">${sessionInner}</div>`;
+  }
+  return out;
+}
+// 글 한 줄(게시글·유튜브·카페) — 시각 + 제목, 행 전체가 링크. 달력 탭의 날짜 모달이 쓴다.
+function dayItemRowHtml(kind, data) {
+  const icon = kind === 'post' ? SVG_ICONS.board : kind === 'youtube' ? SVG_ICONS.youtube : SVG_ICONS.coffee;
+  const cafeName = kind === 'cafe' ? escapeHtml(data.cafe_name || '') : '';
+  const inner = `<span class="day-kind-icon ${kind}">${icon}</span><span class="day-item-time">${formatHHMM(data.time)}</span><span class="day-item-title">${cafeName ? `[${cafeName}] ` : ''}${escapeHtml(data.title || '(제목 없음)')}</span>`;
+  const href = data.url ? (kind === 'post' ? withTextFragment(data.url, data.title) : data.url) : '';
+  return href ? `<a class="day-item" href="${escapeHtml(href)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
+}
 
-  const side = document.getElementById('statsPeriodSide');
+// ── 통계 탭(2026-09-18 재편) ──
+// 멤버 스트립(13명, 크루 없음 — 멤버 간 직접 비교를 사이트 안에서 권장하지 않는다는 방침) + 기간(연/월).
+// 위: 지표 카드 | 시간대 띠(폭이 넓으면 좌우, 좁으면 위아래 — CSS .stats-top-grid). 아래: 방송별 지표 목록(최신순, 행 클릭 = 다시보기).
+// 기간 '연'은 지표 카드·목록만 연간 — 시간대 띠는 한 달의 날짜×시간 격자라 연 단위로 합칠 수 없어 안내 한 줄.
+function initStatsMembers() {
+  const box = document.getElementById('statsMembersSide');
+  if (!box) return;
+  box.innerHTML = MEMBERS.map(m => `<button class="cal-tab" data-member="${m.id}" title="${escapeHtml(m.name)}"><img src="${m.img}" alt="${escapeHtml(m.name)}"></button>`).join('');
+  box.querySelectorAll('.cal-tab').forEach(b => b.addEventListener('click', () => { if (b.dataset.member !== statsState.selectedTab) selectStatsMember(b.dataset.member); }));
+  if (!statsState.selectedTab) statsState.selectedTab = defaultSubTab('stats');   // 첫 선택 = 최애(없으면 첫 멤버)
+}
+function selectStatsMember(id, opts) {
+  statsState.selectedTab = MEMBER_BY_ID[id] ? id : defaultSubTab('stats');
+  renderStats();
+  if (!(opts && opts.fromHash)) syncHash(true);   // 직접 고른 경우만 주소를 쌓는다(프로필과 같은 규칙)
+}
+// 지표 카드 — 옛 크루 카드표의 카드 한 장(항목·메달·행 클릭 = 월별 추이 그래프 모달 그대로). mode 'month'|'year'.
+function metricsCardHtml(m, sum, md, mode, year, month) {
+  const mv = (k) => (md && md[k]) ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
+  const days = mode === 'year' ? `${mv('sessions')}${sum.sessions}일` : `${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일`;
+  const fan = mode === 'year' ? fanCellYear(m.id, year) : fanCellMonth(m.id, year, month);
+  const row = (metric, color, icon, label, value) => `<div class="metrics-card-row metrics-card-row-link" data-metric="${metric}"><span class="metrics-card-label"><span class="stats-row-icon" style="color:${color}">${icon}</span>${label}</span><span class="metrics-card-value">${value}</span></div>`;
+  return `<div class="metrics-card" data-member="${m.id}">
+    <div class="metrics-card-header"><img class="metrics-card-avatar" src="${m.img}" alt="${escapeHtml(m.name)}"><div class="metrics-card-name" style="color: ${m.color}">${escapeHtml(m.name)}</div></div>
+    <div class="metrics-card-rows">
+      ${row('broadcastDays', 'var(--ev-start)', SVG_ICONS.calendar, '방송 일수', days)}
+      ${row('broadcastTime', 'var(--ev-start)', SVG_ICONS.clockTime, '방송 시간', `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`)}
+      ${row('fan', '#FFC94D', FAN_ICON, '애청자', fan)}
+      ${row('peakViewer', '#FF8C00', SVG_ICONS.arrowUp, '최고 시청자', sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-')}
+      ${row('avgViewer', '#FF8C00', SVG_ICONS.barChart, '평균 시청자', sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-')}
+      ${row('post', 'var(--ev-post)', SVG_ICONS.board, '숲 게시글', `${mv('postCount')}${sum.postCount}개`)}
+      ${row('cafe', '#03C75A', SVG_ICONS.coffee, '카페 게시글', `${mv('cafeCount')}${sum.cafeCount}개`)}
+      ${row('youtube', 'var(--ev-youtube)', SVG_ICONS.youtube, '유튜브 업로드', `${mv('youtubeCount')}${sum.youtubeCount}개`)}
+    </div></div>`;
+}
+const STATS_LOADING = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
+const STATS_FAILED = '<div class="loading"><div>통계 데이터를 불러올 수 없습니다</div></div>';
+const statsFailAt = {};   // 실패한 달은 30초 동안 다시 묻지 않는다 — 달력 탭(calStatsFailAt)과 같은 태도. 종전 지난 활동은 실패 → 다시 그림 → 즉시 재요청이 맴돌았다(헤드리스 실측 2026-09-18)
+function renderStats() {
+  const top = document.getElementById('statsTopBox'), list = document.getElementById('statsSessionsBox'), side = document.getElementById('statsPeriodSide');
+  if (!top || !list) return;
+  if (!statsState.tabsInited) { initStatsMembers(); statsState.tabsInited = true; }
+  const memberId = MEMBER_BY_ID[statsState.selectedTab] ? statsState.selectedTab : defaultSubTab('stats');
+  statsState.selectedTab = memberId;
+  document.querySelectorAll('#statsMembersSide .cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === memberId));
+  if (!statsState.viewMonth) { const n = kstNow(); statsState.viewMonth = { year: n.getUTCFullYear(), month: n.getUTCMonth() + 1 }; }   // 기간 선택기보다 먼저(첫 진입에 viewMonth가 없다 — 헤드리스 실측 2026-09-18)
+  if (side) { side.innerHTML = `<div><div class="filter-title">기간</div>${periodSelectorHtml(true)}</div>`; bindPeriodSelector(side, true, renderStats); }
+  const { year, month } = statsState.viewMonth;
+  const m = MEMBER_BY_ID[memberId];
+  let card = '', heatHtml = '', sessions = [];   // sessions: [{ s, ym, dk }]
+  if (statsState.periodAll) {
+    const now = kstNow();
+    const maxMonth = year === now.getUTCFullYear() ? now.getUTCMonth() + 1 : 12;
+    const toLoad = annualMonthsToLoad(year, maxMonth);
+    if (toLoad.length > 0) {
+      const failKey = `${year}-all`;
+      if (Date.now() - (statsFailAt[failKey] || 0) > 30000) {
+        top.innerHTML = STATS_LOADING; list.innerHTML = '';
+        Promise.all(toLoad.map(ym => loadStatsMonth(ym))).then(() => {
+          if (currentPage !== 'stats') return;
+          if (annualMonthsToLoad(year, maxMonth).length > 0) { statsFailAt[failKey] = Date.now(); top.innerHTML = STATS_FAILED; list.innerHTML = ''; return; }   // 못 받은 달이 남으면 멈춘다
+          renderStats();
+        });
+      } else { top.innerHTML = STATS_FAILED; list.innerHTML = ''; }
+      return;
+    }
+    const annualSums = computeAnnualSums(year);
+    const medals = computeMedals(annualSums, ANNUAL_MEDAL_KEYS);
+    card = metricsCardHtml(m, annualSums[m.id], medals[m.id], 'year', year, 0);
+    heatHtml = '<div class="lr-msg">시간대 분포는 월 단위에서 보입니다.</div>';
+    const startMo = year === STATS_START_YEAR ? STATS_START_MONTH : 1;
+    for (let mo = startMo; mo <= maxMonth; mo++) {
+      const ym = `${year}-${String(mo).padStart(2, '0')}`;
+      const sum = computeMonthSummary(((statsState.data[ym] || {})[memberId]) || null, year, mo);
+      for (const [dk, arr] of Object.entries(sum.sessionsByDate)) for (const s of arr) sessions.push({ s, ym, dk });
+    }
+  } else {
+    const ym = currentViewYm();
+    if (!statsState.data[ym]) {
+      if (statsState.loadingMonths.has(ym) || Date.now() - (statsFailAt[ym] || 0) > 30000) {
+        if (!statsState.loadingMonths.has(ym)) loadStatsMonth(ym).then(() => {
+          if (currentPage !== 'stats') return;
+          if (!statsState.data[ym]) { statsFailAt[ym] = Date.now(); top.innerHTML = STATS_FAILED; list.innerHTML = ''; return; }
+          renderStats();
+        });
+        top.innerHTML = STATS_LOADING; list.innerHTML = '';
+      } else { top.innerHTML = STATS_FAILED; list.innerHTML = ''; }
+      return;
+    }
+    const allSums = {};
+    MEMBERS.forEach(mm => { allSums[mm.id] = computeMonthSummary(statsState.data[ym][mm.id], year, month); });   // 메달은 13명 자료로 계산(비교는 메달까지만)
+    const medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
+    const sum = allSums[memberId];
+    card = metricsCardHtml(m, sum, medals[memberId], 'month', year, month);
+    const isCur = isCurrentMonth(ym);
+    const h = renderTimeOfDayHeatmap(year, month, sum, isCur);
+    const ts = h ? computeMonthTimeStats(sum, computeTimeOfDayMinutes(sum.sessionsByDate, year, month, isCur), year, month, isCur) : null;
+    heatHtml = h ? `<div class="stats-heat-cell" data-member="${m.id}">${h}${ts ? `<div class="stats-heat-stats"><span>${ts.line1}</span><span>${ts.line2}</span></div>` : ''}</div>`
+      : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
+    for (const [dk, arr] of Object.entries(sum.sessionsByDate)) for (const s of arr) sessions.push({ s, ym, dk });
+  }
+  // 방송별 목록 — 걸친 방송은 여러 날짜에 들어 있으므로 방송 하나로 모으고(시작 시각 기준), 최신순
+  const seen = new Set(); const rows = [];
+  sessions.sort((a, b) => new Date(b.s.start).getTime() - new Date(a.s.start).getTime());
+  for (const { s, ym } of sessions) {
+    const key = `${s.broad_no || ''}|${s.start}`;
+    if (seen.has(key)) continue; seen.add(key);
+    rows.push(sessionRowHtml(s, memberId, ym, calDateLabel(isoToKstDateKey(s.start))));
+  }
+  top.innerHTML = `<div class="stats-top-grid"><div class="stats-top-card">${card}</div><div class="stats-top-heat">${heatHtml}</div></div>`;
+  list.innerHTML = rows.length ? `<div class="stats-sess-head">방송 ${rows.length}회</div><div class="day-detail-list">${rows.join('')}</div>` : '';
+  top.querySelectorAll('.metrics-card-row-link[data-metric]').forEach(r => r.addEventListener('click', () => openStatGraphModal(memberId, r.dataset.metric)));   // 행 → 그 지표의 월별 추이 그래프
+  top.querySelectorAll('.hts-btn[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
+  list.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
+    const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
+    openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);
+  }));
+}
+// ── 명전 탭(2026-09-18 독립) — 기둥: 2·3위 토글 + 기간(통산·상/하반기). 본문은 renderHall이 그린다. ──
+function renderHallTab() {
+  const side = document.getElementById('hallPeriodSide');
   if (side) {
-    if (statsKind === 'hall') {
-      // 명전 기간(통산·상/하반기)과 2·3위 토글은 본문 바에서 이 기둥으로 옮겨왔다. 순서: 종류 → 토글 → 기간.
-      // 순서: 종류 → 2·3위 토글 → 기간. 각 묶음은 .side-pick 규칙이 구분선으로 나눈다.
-      side.innerHTML = `
+    side.innerHTML = `
         <div class="stats-bar"><span class="stats-bar-label">2 · 3위 보기</span>
           <button class="notify-switch ${hallShowRanks ? 'on' : ''}" id="hallRankToggle" type="button" aria-label="2 · 3위 보기"></button></div>
         <div><div class="filter-title">기간</div>
           <div class="stats-range">${STATS_PERIODS.map(p => `<button class="stats-range-btn ${p.key === statsPeriod ? 'active' : ''}" data-period="${p.key}" type="button">${p.label}</button>`).join('')}</div></div>`;
-      const rt = document.getElementById('hallRankToggle');
-      if (rt) rt.addEventListener('click', () => {
-        hallShowRanks = !hallShowRanks;
-        const hb = document.getElementById('hallBody');
-        if (hb) hb.classList.toggle('show-ranks', hallShowRanks);
-        rt.classList.toggle('on', hallShowRanks);
-      });
-      side.querySelectorAll('.stats-range-btn').forEach(btn => btn.addEventListener('click', () => {
-        if (btn.dataset.period === statsPeriod) return;
-        statsPeriod = btn.dataset.period;
-        renderHall();
-        renderStats();
-      }));
-    } else {
-      // 시간대는 '통계 보기' 토글(이름 옆 두 줄 — 2026-09-02 Crenop: 늘 보이면 난잡)이 기간 위에 선다. 명전 2·3위 토글과 같은 문법·같은 자리.
-      const metricsToggle = statsKind === 'heat' ? `<div class="stats-bar"><span class="stats-bar-label">통계 보기</span>
-          <button class="notify-switch ${heatShowStats ? 'on' : ''}" id="heatStatsToggle" type="button" aria-label="통계 보기"></button></div>` : '';
-      side.innerHTML = `${metricsToggle}<div><div class="filter-title">기간</div>${periodSelectorHtml(statsKind === 'metrics')}</div>`;   // 라벨+버튼은 한 칸. 시간대는 월 단위라 '전체'를 두지 않는다
-      bindPeriodSelector(side, statsKind === 'metrics', renderStats);
-      const ht = document.getElementById('heatStatsToggle');
-      if (ht) ht.addEventListener('click', () => {
-        heatShowStats = !heatShowStats;
-        const g = document.querySelector('#statsHeatBox .stats-heat-grid');
-        if (g) g.classList.toggle('show-stats', heatShowStats);
-        ht.classList.toggle('on', heatShowStats);
-      });
-    }
-  }
-  if (!statsState.viewMonth) { const n = kstNow(); statsState.viewMonth = { year: n.getUTCFullYear(), month: n.getUTCMonth() + 1 }; }
-  const { year, month } = statsState.viewMonth;
-  // renderStatsAll은 넘겨준 상자에 그리고 그 안에서만 배선하므로, 상자만 바꿔 그대로 재사용한다
-  // '전체'는 연간 렌더러가 맡는다. 종전엔 이 갈래가 없어 버튼만 눌리고 화면은 그대로였다(renderMetricsAnnual 미호출).
-  if (statsKind === 'metrics' && metricsBox) { if (statsState.periodAll) renderMetricsAnnual(metricsBox); else renderMetricsAll(metricsBox); }
-  if (statsKind === 'heat' && heat) {
-    const isCur = isCurrentMonth(`${year}-${String(month).padStart(2, '0')}`);
-    const cells = MEMBERS.map(m => {
-      const sum = computeMonthSummary(getMemberStatsForView(m.id), year, month);
-      const h = renderTimeOfDayHeatmap(year, month, sum, isCur);
-      const ts = computeMonthTimeStats(sum, computeTimeOfDayMinutes(sum.sessionsByDate, year, month, isCur), year, month, isCur);
-      const stats = ts ? `<span class="stats-heat-stats"><span>${ts.line1}</span><span>${ts.line2}</span></span>` : '';   // 툴팁 없음(사이트 규칙: 마우스 오버 글상자는 말줄임된 글의 전문일 때만 — 2026-09-03 Crenop)
-      return h ? `<div class="stats-heat-cell" data-member="${m.id}"><div class="stats-heat-name"><img src="${m.img}" alt="${escapeHtml(m.name)}"><span style="color:${m.color}">${escapeHtml(m.name)}</span>${stats}</div>${h}</div>` : '';
-    }).filter(Boolean).join('');
-    heat.innerHTML = cells ? `<div class="stats-heat-grid${heatShowStats ? ' show-stats' : ''}">${cells}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';
-    heat.querySelectorAll('.hts-btn[data-tkey]').forEach(b => b.addEventListener('click', () => {   // 다섯 값 → 월별 추이 모달(2026-09-07)
-      const cell = b.closest('.stats-heat-cell'); if (cell) openStatGraphModal(cell.dataset.member, b.dataset.tkey);
+    const rt = document.getElementById('hallRankToggle');
+    if (rt) rt.addEventListener('click', () => {
+      hallShowRanks = !hallShowRanks;
+      const hb = document.getElementById('hallBody');
+      if (hb) hb.classList.toggle('show-ranks', hallShowRanks);
+      rt.classList.toggle('on', hallShowRanks);
+    });
+    side.querySelectorAll('.stats-range-btn').forEach(btn => btn.addEventListener('click', () => {
+      if (btn.dataset.period === statsPeriod) return;
+      statsPeriod = btn.dataset.period;
+      renderHallTab();
+      renderHall();
     }));
   }
-  applyFavMark(document.getElementById('page-stats'));   // 지표 카드(data-member)·시간대 칸 — 최애 자리 표시 + 첫 진입 스크롤
 }
 
 function renderHall() {
@@ -11048,7 +10586,7 @@ function renderProfileMember(body, memberId) {
 // ── 첫 화면 열기 — 반드시 스크립트의 맨 끝 ──
 // 여기가 끝인 이유(2026-09-02): 이 아래가 아니라 위쪽에도 아직 만들어지지 않은 값이 스물몇 개 남아 있었고,
 // 화면을 먼저 열면 그 탭의 그리기가 '아직 안 만들어진 값'에 손을 대 부팅이 통째로 멈춘다 —
-// #hall(통계)로 새로고침하면 STATS_KINDS·hallShowRanks에서 실제로 그랬고, 화면은 영영 '불러오는 중'에 머물렀다.
+// #hall로 새로고침하면 옛 종류 상수·hallShowRanks에서 실제로 그랬고, 화면은 영영 '불러오는 중'에 머물렀다.
 // 값을 하나씩 위로 옮기는 대신 '전부 만들어진 다음에 연다'로 뒤집었다. 새 탭을 붙여도 같은 사고가 안 난다.
 // (여는 시점만 늦춘 것이고 같은 동기 블록 안이라 화면이 두 번 그려지거나 깜빡이지 않는다 — 헤드리스 11탭 실측)
 applyHash(initHash);

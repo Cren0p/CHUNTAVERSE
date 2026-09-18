@@ -1,0 +1,11 @@
+{
+  "name": "천타버스",
+  "short_name": "천타버스",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070a14",
+  "theme_color": "#070a14",
+  "icons": [
+    { "src": "/Favicon.webp", "sizes": "388x388", "type": "image/webp", "purpose": "any" }
+  ]
+}

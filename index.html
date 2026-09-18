@@ -3274,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3620,8 +3620,11 @@ const MEMBER_LINKS = {
     },
     instagram: 'https://www.instagram.com/nanamoon_7/',
     x: 'https://x.com/nanamoon_7',
-    discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' }],
-    etc: [],
+    discordOrFancim: [
+      { label: '디스코드', url: 'https://discord.com/invite/Ye3QYKMPaQ' },   // 2026-09-18 추가(Crenop 지정). 표기는 천양·마다옴과 같은 invite/ 형식 — discord.com/<코드> 형식은 404로 확인(2026-09-18)
+      { label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=DKGV08waTgBsb7KjzrPnvA==' },
+    ],
+    etc: [{ label: '노래책', url: 'https://docs.google.com/spreadsheets/d/1HxfVoM68iVZ1JfSlCq4G7Z7M34GkDnZnfwY2raRBBM8/edit?gid=1823038152#gid=1823038152' }],   // 2026-09-18 추가(Crenop 지정) — 구글 시트
     ogq: [],
   },
   'imha22': {
@@ -3737,7 +3740,10 @@ const MEMBER_LINKS = {
     instagram: null,
     x: 'https://x.com/moca_good',
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?url=805408' }],
-    etc: [{ label: '노래책', url: 'https://www.sooplive.com/station/mocamu2/post/203111303' }],   // 2026-08-03 변경(구 멜로밍)
+    etc: [
+      { label: '팬사이트', url: 'https://soop-moca.vercel.app/' },   // 2026-09-18 추가(Crenop 지정) — 다른 멤버의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(문모모 선례)
+      { label: '노래책', url: 'https://www.sooplive.com/station/mocamu2/post/203111303' },   // 2026-08-03 변경(구 멜로밍)
+    ],
     ogq: [
       { name: '유아렐콘1', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=63ee102355552' },
       { name: '유아렐콘1', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/63ee102355552' },

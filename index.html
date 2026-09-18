@@ -1283,7 +1283,12 @@
   .stats-top-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 16px; align-items: stretch; }
   @container (max-width: 860px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
   .stats-num-box, .stats-heat-box { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
-  .stats-num-box { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: space-between; gap: 10px 16px; }   /* 8항목 2열 4행 — 항목 위·값 아래(우측과 같은 부품), 행을 상자 높이에 고르게 퍼뜨려 오른쪽과 높이가 같다 */
+  .stats-num-box { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: space-between; gap: 10px 16px; }   /* 8항목 2/3/3(방송 | 시청자 | 게시) — 항목 위·값 아래(우측과 같은 부품), 행을 상자 높이에 고르게 퍼뜨려 오른쪽과 높이가 같다 */
+  .stats-kv-gap { display: block; }   /* 첫 줄 셋째 칸(빈칸) */
+  .stats-heat-box { container-type: inline-size; }   /* 시간 통계 줄바꿈 규칙의 기준 폭 = 이 상자 */
+  .kv-brk { display: none; }
+  @container (max-width: 720px) { .kv-brk-2 { display: block; flex-basis: 100%; height: 0; } }   /* 2행: 3/2 */
+  @container (max-width: 430px) { .kv-brk-3 { display: block; flex-basis: 100%; height: 0; } }   /* 3행: 3/1/1 */
   .stats-heat-box { justify-content: center; gap: 12px; }
   .stats-heat-box .stats-heat-cell { background: transparent; border: 0; padding: 0; margin: 0; }
   .stats-time-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; }
@@ -2123,8 +2128,10 @@
   /* 다섯 값(평균 시작·종료·시간·시간대 구성·주중주말)은 그래프 상자 위 한 줄(.stats-time-row) — 띠는 그래프만(2026-09-18) */
   .stats-sessions { margin-top: 16px; }
   .stats-sess-head { font-size: 12px; font-weight: 600; color: var(--muted); }   /* 목록 상단바 왼쪽 자리(최근 활동의 '모두 읽음' 자리) */
-  .sort-toggle.active { color: var(--accent); border-color: var(--accent); }   /* 정렬 버튼 나열형(2026-09-18): 고른 것 — 최근 활동(최신순·과거순)·통계(5종) 공용 */
+  .sort-toggle.active { color: var(--accent); border-color: var(--accent); }   /* 정렬 버튼(2026-09-18): 통계에서 고른 키. 최근 활동은 키가 하나라 강조 없음 */
   .sort-toggle svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
+  .sort-toggle .sort-dir { display: inline-flex; }   /* 글씨 오른쪽 방향 화살표(↑ 최신·큰 값 먼저 / ↓ 역순) */
+  .sort-toggle:not(.active) .sort-dir { opacity: 0.45; }   /* 고르지 않은 버튼은 기본 방향을 흐리게(폭 유지) */
   .day-session-date { font-size: 12px; font-weight: 600; color: var(--text); margin-right: 8px; white-space: nowrap; }   /* 방송별 목록 행의 날짜(한 달·한 해를 늘어놓으므로) */
   .stats-main { min-width: 0; }
   .stats-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -3140,7 +3147,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4145,7 +4152,7 @@ const statsState = {
   loadingMonths: new Set(),
   selectedTab: null,         // 멤버 id (2026-08-31: 통합 'all'은 통계 탭으로 이관 — 여기는 멤버 전용)
   periodAll: false,          // 통합탭에서 [전체](연간 뷰) 선택 여부. false면 viewMonth의 월간 뷰
-  sortKey: 'newest',         // 방송별 목록 정렬(2026-09-18): newest·oldest·duration·peak·avg
+  sortKey: 'date', sortAsc: false,   // 방송별 목록 정렬(2026-09-18): date·duration·peak·avg, asc=역정렬(다시 누르면)
   viewMonth: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
 };
@@ -7439,10 +7446,10 @@ function applyFilter() {
     return memberMatch;
   });
   filterCounts.events = { shown: filtered.length, total: allEvents.length };   // 서랍 버튼 채움용(2026-09-02)
-  // 정렬(2026-09-18 Crenop): 토글 하나(현재 상태의 라벨)에서 나열형 두 버튼으로 — 통계 탭 상단바(정렬 5종 나열)와 같은 문법, 고른 쪽이 active
+  // 정렬(2026-09-18 Crenop 5차): '시간순' 버튼 하나 — 모래시계 + 글씨 + 오른쪽 방향 화살표(↑ 최신 먼저 / ↓ 과거 먼저), 누를 때마다 역정렬. 통계 탭 상단바의 정렬 버튼과 같은 문법
   const scrollDownSvg = SVG_ICONS.chevronsDown;
   const scrollUpSvg = SVG_ICONS.chevronsUp;
-  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync${eventSortAsc ? '' : ' active'}" data-sort="newest" type="button">${SVG_ICONS.arrowLineUp}<span>최신순</span></button><button class="sort-toggle sort-toggle-sync${eventSortAsc ? ' active' : ''}" data-sort="oldest" type="button">${SVG_ICONS.arrowLineDown}<span>과거순</span></button>`;
+  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync" data-sort="time" type="button">${SVG_ICONS.hourglass}<span>시간순</span>${sortDirSvg(eventSortAsc)}</button>`;
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
   // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
@@ -7461,7 +7468,7 @@ function applyFilter() {
     tl.innerHTML = headerHtml + items.map(it => it.bundle ? renderChatBundle(it.bundle, sorted) : it.battle ? renderBattleItem(it.battle) : renderEvent(it.ev, sorted)).join('');
   }
   tl.querySelectorAll('.sort-toggle-sync').forEach(btn => {
-    btn.addEventListener('click', () => { const asc = btn.dataset.sort === 'oldest'; if (asc === eventSortAsc) return; eventSortAsc = asc; applyFilter(); });
+    btn.addEventListener('click', () => { eventSortAsc = !eventSortAsc; applyFilter(); });   // 다시 누르면 역정렬
   });
   tl.querySelectorAll('.mark-read-btn').forEach(btn => {
     btn.addEventListener('click', () => { setLastSeenToNow(); refreshUnreadIndicator(); });
@@ -9936,7 +9943,8 @@ function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
     avgViewer: sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-',
     post: `${mv('postCount')}${sum.postCount}개`, cafe: `${mv('cafeCount')}${sum.cafeCount}개`, youtube: `${mv('youtubeCount')}${sum.youtubeCount}개`,
   };
-  return GRAPH_METRICS.map(g => statsKvHtml(g.key, g.label, g.key === 'fan' ? FAN_ICON : SVG_ICONS[g.ic], g.icColor, values[g.key], `data-metric="${g.key}"`)).join('');
+  // 배치 2/3/3(2026-09-18 Crenop): 방송 2 | 시청자 3 | 게시 3 — 3열 격자에서 첫 줄 셋째 칸을 비운다
+  return GRAPH_METRICS.map((g, i) => statsKvHtml(g.key, g.label, g.key === 'fan' ? FAN_ICON : SVG_ICONS[g.ic], g.icColor, values[g.key], `data-metric="${g.key}"`) + (i === 1 ? '<span class="stats-kv-gap" aria-hidden="true"></span>' : '')).join('');
 }
 // 시간 통계 줄(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — computeMonthTimeStats의 숫자 필드로 요약 줄과 같은 부품. 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 // 시간 통계 다섯 값(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — 그래프 상자 위에 한 줄(관련 숫자를 그래프 옆에 묶는다). 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
@@ -9945,22 +9953,30 @@ function timeStatsRowHtml(ts) {
   const hm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
   const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
   const values = { tStart: hm(ts.startMin), tEnd: hm(ts.endMin), tAvg: `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`, tBands: hl(['새벽', '오전', '오후', '야간'], ts.bands), tWdWe: hl(['주중', '주말'], ts.wdwe) };
-  return `<div class="stats-time-row">${TIME_GRAPHS.map(g => statsKvHtml(g.key, g.label, SVG_ICONS[g.ic], g.icColor, values[g.key], `data-tkey="${g.key}"`)).join('')}</div>`;
+  // 줄바꿈(2026-09-18 Crenop): 한 줄이 안 되면 3/2(시작·종료·시간 | 분포·주중/주말), 더 좁으면 3/1/1 — 상자 폭 기준 컨테이너 규칙(.kv-brk)
+  return `<div class="stats-time-row">${TIME_GRAPHS.map((g, i) => statsKvHtml(g.key, g.label, SVG_ICONS[g.ic], g.icColor, values[g.key], `data-tkey="${g.key}"`) + (i === 2 ? '<span class="kv-brk kv-brk-2" aria-hidden="true"></span>' : i === 3 ? '<span class="kv-brk kv-brk-3" aria-hidden="true"></span>' : '')).join('')}</div>`;
 }
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
-const STATS_SORTS = [   // 아이콘(2026-09-18 Crenop): 최신·과거는 최근 활동 정렬과 같은 화살표, 나머지는 그 지표의 아이콘
-  { key: 'newest', label: '최신순', ic: 'arrowLineUp' }, { key: 'oldest', label: '과거순', ic: 'arrowLineDown' }, { key: 'duration', label: '방송 시간', ic: 'clockTime' },
-  { key: 'peak', label: '최고 시청자', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자', ic: 'barChart' },
+// 정렬 버튼(2026-09-18 Crenop 5차): 키마다 버튼 하나 — 왼쪽 아이콘 + 글씨 + 오른쪽 방향 화살표(↑ = 최신·큰 값 먼저, ↓ = 역순). 고른 버튼을 다시 누르면 역정렬.
+// 최근 활동의 '시간순'(모래시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'. 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
+const STATS_SORTS = [
+  { key: 'date', label: '날짜순', ic: 'hourglass' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },
+  { key: 'peak', label: '최고 시청자순', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자순', ic: 'barChart' },
 ];
-function sessionSortValue(s, key) {
+function sortDirSvg(asc) { return `<span class="sort-dir" aria-hidden="true">${asc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp}</span>`; }
+function sessionSortValue(s, key) {   // 값 없음 = -1
   if (key === 'duration') return s.end ? new Date(s.end).getTime() - new Date(s.start).getTime() : -1;
   if (key === 'peak') return s.viewer_peak > 0 ? s.viewer_peak : -1;
   if (key === 'avg') return s.viewer_count > 0 ? s.viewer_sum / s.viewer_count : -1;
   return new Date(s.start).getTime();
 }
-function sortSessions(list, key) {   // list = [{ s, ym, dk }]
-  const dir = key === 'oldest' ? 1 : -1;
-  return list.slice().sort((a, b) => (sessionSortValue(a.s, key) - sessionSortValue(b.s, key)) * dir || (new Date(b.s.start).getTime() - new Date(a.s.start).getTime()));   // 같은 값은 최신순
+function sortSessions(list, key, asc) {   // list = [{ s, ym, dk }] · asc=false면 최신·큰 값 먼저
+  const dir = asc ? 1 : -1;
+  return list.slice().sort((a, b) => {
+    const va = sessionSortValue(a.s, key), vb = sessionSortValue(b.s, key);
+    if ((va < 0) !== (vb < 0)) return va < 0 ? 1 : -1;   // 값 없는 방송은 방향과 무관하게 뒤로
+    return (va - vb) * dir || (new Date(b.s.start).getTime() - new Date(a.s.start).getTime());   // 같은 값은 최신순
+  });
 }
 const STATS_LOADING = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
 const STATS_FAILED = '<div class="loading"><div>통계 데이터를 불러올 수 없습니다</div></div>';
@@ -10030,17 +10046,21 @@ function renderStats() {
   }
   // 방송별 목록 — 걸친 방송은 여러 날짜에 들어 있으므로 방송 하나로 모으고(시작 시각 기준), 기둥의 정렬대로(기본 최신순)
   const seen = new Set(); const rows = [];
-  for (const { s, ym } of sortSessions(sessions, statsState.sortKey)) {
+  for (const { s, ym } of sortSessions(sessions, statsState.sortKey, statsState.sortAsc)) {
     const key = `${s.broad_no || ''}|${s.start}`;
     if (seen.has(key)) continue; seen.add(key);
     rows.push(sessionRowHtml(s, memberId, ym, calDateLabel(isoToKstDateKey(s.start))));
   }
   top.innerHTML = `<div class="stats-top-grid"><div class="stats-num-box">${numRows}</div><div class="stats-heat-box">${timeRow}${heatHtml}</div></div>`;   // 좌 지표 8행 | 우 시간 통계 + 그래프, 같은 높이(2026-09-18 3차)
   // 목록 상단바(2026-09-18 3차, 최근 활동 문법 그대로 — sticky): 왼쪽 '방송 N회', 오른쪽 정렬 5종 + 맨 위로·맨 아래로
-  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span></button>`).join('');
+  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === statsState.sortKey && statsState.sortAsc)}</button>`).join('');   // 고르지 않은 버튼의 화살표는 기본 방향(↑, 흐리게) — 폭이 안 흔들린다
   const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right"><button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button>${sortBtns}</div></div>`;   // 순서 = 최근 활동 상단바(맨 위로·맨 아래로 → 정렬)
   list.innerHTML = rows.length ? bar + `<div class="day-detail-list">${rows.join('')}</div>` : '';
-  list.querySelectorAll('.sort-toggle[data-sort]').forEach(b => b.addEventListener('click', () => { if (b.dataset.sort === statsState.sortKey) return; statsState.sortKey = b.dataset.sort; renderStats(); }));
+  list.querySelectorAll('.sort-toggle[data-sort]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.sort === statsState.sortKey) statsState.sortAsc = !statsState.sortAsc;   // 같은 버튼 = 역정렬
+    else { statsState.sortKey = b.dataset.sort; statsState.sortAsc = false; }
+    renderStats();
+  }));
   const stTop = document.getElementById('statsScrollTop'), stBottom = document.getElementById('statsScrollBottom');
   if (stTop) stTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   if (stBottom) stBottom.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));

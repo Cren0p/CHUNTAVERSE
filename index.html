@@ -3274,7 +3274,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-17b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3774,7 +3774,10 @@ const MEMBER_LINKS = {
       팬카페: 'https://cafe.naver.com/chebichebi',
     },
     discordOrFancim: [{ label: '팬심', url: 'https://fancim.me/celeb/profile.aspx?cu_id=chebi' }],
-    etc: [{ label: '노래책', url: 'https://meloming.com/channel/chebi' }],
+    etc: [
+      { label: '팬사이트', url: 'https://chebi-archive.netlify.app/' },   // 2026-09-18 추가(Crenop 지정) — 문모모·캬앙·임하밍의 팬사이트 항목과 같은 표기·그림. 순서: 팬사이트 위·노래책 아래(문모모 선례)
+      { label: '노래책', url: 'https://meloming.com/channel/chebi' },
+    ],
     ogq: [
       { name: '체비티콘', platform: '네이버', url: 'https://ogqmarket.naver.com/artworks/sticker/detail?artworkId=645a129bde1f6' },
       { name: '체비티콘', platform: '숲', url: 'https://ogqmarket.sooplive.com/emoticon/645a129bde1f6' },

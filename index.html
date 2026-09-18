@@ -1278,38 +1278,24 @@
   .cal-tab.active { border-color: var(--accent); }
   .cal-tab:hover { border-color: var(--accent); }
 
-  /* 통계 요약 줄(2026-09-18 — 옛 지난 활동 요약 줄 형식 복원, 이름만 .stats-summary): 8항목 한 줄, 좁으면 5|3(724 이하) → 2|3|3(560 이하, .ss-brk가 첫 묶음 안에서 줄을 끊는다).
-     시간 통계 줄(다섯 값)도 같은 부품. 사진·이름 없음 — 멤버는 기둥 스트립이 말한다. */
-  .stats-summary {
-    display: flex; flex: 1; flex-wrap: wrap; gap: 10px 16px;   /* 행간 10px = 상하 패딩과 동일 — 2행일 때 경계~1행~2행~경계 간격 통일(Crenop 지정) */
-    justify-content: center;   /* 항목 무리는 가운데, 각 항목 내부 텍스트는 좌측정렬 유지 — Crenop 지정 */
-    padding: 10px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    align-items: center;
-    box-sizing: border-box;
-  }
-  .stats-summary + .stats-summary, .stats-summary + .stats-heat-cell, .stats-summary + .lr-msg { margin-top: 12px; }
-  .stats-summary-item { display: flex; flex-direction: column; gap: 2px; }
-  .ss-row { display: contents; }   /* 넓을 땐 두 행 묶음이 한 줄로 흐른다 */
-  @container (max-width: 724px) {
-    .stats-summary { flex-direction: column; align-items: center; }
-    .ss-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 16px; }
-  }
-  .ss-brk { display: none; }
-  @container (max-width: 560px) {
-    .ss-brk { display: block; flex-basis: 100%; height: 0; }
-  }
-  @container (max-width: 520px) {
-    .ss-row { gap: 8px 10px; }
-    .stats-summary { padding: 10px 8px; }
-  }
-  .stats-summary-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
-  .stats-summary-value { font-size: 14px; font-weight: 700; }
-  .stats-summary-value .hl { color: #ffffff; }   /* 시간대·주중주말 구성에서 가장 큰 항목 */
-  /* 요약 항목 = 클릭 → 그 값의 월별 추이 그래프(지표 8종·시간 통계 5종), hover 민트 테두리 */
-  .stats-summary-item[data-metric], .stats-summary-item[data-tkey] { cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
-  .stats-summary-item[data-metric]:hover, .stats-summary-item[data-tkey]:hover { background: var(--surface2); border-color: var(--accent); }
+  /* 통계 상단(2026-09-18 3차, Crenop 피드백): 좌 = 지표 8행 목록(사진·이름 없음) · 우 = 시간 통계 다섯 값 + 시간대 그래프. 두 상자는 같은 행에서 높이를 맞춘다(stretch).
+     좁으면(≤860) 위아래. 시간 관련 숫자는 그래프 옆에 두어 묶음이 보이게 한다. */
+  .stats-top-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 16px; align-items: stretch; }
+  @container (max-width: 860px) { .stats-top-grid { grid-template-columns: minmax(0, 1fr); } }
+  .stats-num-box, .stats-heat-box { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
+  .stats-num-box { justify-content: space-between; gap: 2px; }   /* 행을 상자 높이에 고르게 — 오른쪽 그래프 상자와 높이가 같아진다 */
+  .stats-num-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; padding: 4px 6px; margin: 0 -6px; border: 1px solid transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+  .stats-num-row:hover { background: var(--surface2); border-color: var(--accent); }
+  .stats-num-label { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .stats-num-value { color: var(--text); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats-heat-box { justify-content: center; gap: 12px; }
+  .stats-heat-box .stats-heat-cell { background: transparent; border: 0; padding: 0; margin: 0; }
+  .stats-time-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; }
+  .stats-time-item { display: flex; flex-direction: column; gap: 2px; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+  .stats-time-item:hover { background: var(--surface2); border-color: var(--accent); }
+  .stats-time-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .stats-time-value { font-size: 13px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats-time-value .hl { color: #ffffff; }   /* 시간대·주중주말 구성에서 가장 큰 항목 */
   .stats-row-icon { display: inline-flex; align-items: center; flex-shrink: 0; vertical-align: middle; }
   .stats-row-icon svg { width: 11px; height: 11px; display: block; vertical-align: middle; }
   .medal-ico svg { width: 13px; height: 13px; vertical-align: -2px; }   /* 지표값 옆 순위 트로피(구 🥇🥈🥉 이모지) — 금·은·동은 명전 순위색 */
@@ -1328,12 +1314,6 @@
   .stats-month-btn svg { display: block; }
   .stats-month-btn:hover { color: var(--accent); }
   .stats-month-btn:disabled { color: var(--muted); opacity: 0.35; cursor: not-allowed; }   /* 종전 --border는 배경에 묻혀 '버튼이 없는' 것처럼 보였다 */
-  /* v11: 5|3 고정을 '전' 구간 복원(자유랩 티어는 무단 변경이었음 — 삭제). 전환 임계 724 = Crenop 스크린샷
-     두 장의 창폭↔임계 비율 정합에서 역산한 "8항목이 실제로 안 들어가는 폭"(환산계수 1.515, 배율 무가정).
-     520 이하는 폭 지시대로 간격 축소로 버틴다 — 구조는 끝까지 5|3. */
-  /* v12(2026-09-03 Crenop): 5|3이 3행이 돼야 하는 폭에선 2|3|3으로 — 첫 묶음 안의 .ss-brk가 줄을 끊는다(방송 2 | 시청자 3 | 게시 3).
-     임계 560 = 5칸 실측 폭 합 449 + 간격 16×4 + 패딩 32 = 545(그 아래선 5칸이 4|1로 흩어졌다)에 여유 15. 그 위에선 .ss-brk는 없는 요소. */
-  /* 요약 항목 = 카드 지표행과 동일 문법(아이콘·색·클릭→그래프·hover 민트 테두리) */
   /* 일별 요약 세션의 시청자(최고·평균) — 시간 우측 인라인, 글씨는 시간과 동일 톤(아이콘만 색).
      inline-flex 중앙정렬 = 옛 카드 라벨과 같은 패턴 — 아이콘이 텍스트 흐름의 vertical-align:middle(x-height 의존)로 앉으면 폰트 따라 틀어짐 */
   .day-session-viewer { display: inline-flex; align-items: center; font-size: 12px; color: var(--text); font-weight: 600; white-space: nowrap; }
@@ -1993,7 +1973,10 @@
   .cal-main .cd-chip.cd-mark .cd-full { display: none; }
   .cal-main .cd-chip.cd-mark .cd-ic { display: inline-flex; opacity: 0.45; }
   .cal-txt { display: flex; flex-direction: column; gap: 2px; width: 100%; height: 100%; padding: 0; box-sizing: border-box; font-size: 12px; line-height: 16px; color: var(--text); text-align: left; }
-  .cal-txt-line { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--surface2); padding: 2px 6px; flex: none; }   /* 글 하나 = 상자 하나(2026-09-18 Crenop) */
+  .cal-thumb:has(.cal-txt) { background: transparent; }   /* 글 종류는 상자 바탕을 비운다 — 글 줄에만 배경(2026-09-18 Crenop: 빈 자리가 칠해진 것처럼 보이던 것) */
+  .cal-txt-line { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 6px; flex: none; }   /* 글 하나 = 상자 하나 */
+  .cal-txt.post .cal-txt-line { background: rgba(52, 211, 153, 0.12); }   /* 숲 게시글 초록(--ev-post)의 옅은 판 — .day-kind-icon.post와 같은 색 계열 */
+  .cal-txt.cafe .cal-txt-line { background: rgba(3, 199, 90, 0.12); }    /* 카페 초록 */
   .cal-kind-spacer { visibility: hidden; pointer-events: none; }
   .cal-tag { display: inline-block; margin-right: 3px; color: var(--text2); }
   .cal-tag svg { width: 14px; height: 14px; vertical-align: -3px; }   /* 14px(구 12): 종류 그림 가독성(2026-09-02 Crenop) */
@@ -2137,10 +2120,10 @@
      카드 안 히트맵은 .toh-wrap 없이 .toh-head/.toh-body만 있으므로(구 .toh-wrap 규칙은 닿는 곳이 없었다) 몸통에서 가운데 맞춤. */
   .stats-heat-cell .toh-body { justify-content: center; }
   .stats-heat-cell .toh-right { flex: 0 1 auto; }
-  /* 다섯 값(평균 시작·종료·시간·시간대 구성·주중주말)은 2026-09-18 요약 줄(.stats-summary[data-tkey])로 옮김 — 띠는 그래프만 */
-  .stats-heat-cell { margin-top: 12px; }
+  /* 다섯 값(평균 시작·종료·시간·시간대 구성·주중주말)은 그래프 상자 위 한 줄(.stats-time-row) — 띠는 그래프만(2026-09-18) */
   .stats-sessions { margin-top: 16px; }
-  .stats-sess-head { font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 8px; }
+  .stats-sess-head { font-size: 12px; font-weight: 600; color: var(--muted); }   /* 목록 상단바 왼쪽 자리(최근 활동의 '모두 읽음' 자리) */
+  .sort-toggle.active { color: var(--accent); border-color: var(--accent); }   /* 통계 목록 정렬 5종 중 고른 것(2026-09-18) */
   .day-session-date { font-size: 12px; font-weight: 600; color: var(--text); margin-right: 8px; white-space: nowrap; }   /* 방송별 목록 행의 날짜(한 달·한 해를 늘어놓으므로) */
   .stats-main { min-width: 0; }
   .stats-kind { display: grid; gap: 6px; margin-bottom: 12px; }
@@ -2154,6 +2137,7 @@
   .stats-kind-btn.active { border-color: var(--accent); color: var(--accent); }
   /* 명전 기간(통산·상/하반기)은 이 기둥으로 옮겨왔다 — 본문 sticky 바에 있던 시절의 규칙은 그 자리에서 죽었다 */
 
+  #page-hall .stats-wrap { max-width: 1842px; }   /* 명전은 카드가 짝(2개씩) 개념이라 4열이 들어가는 옛 폭(2026-09-18 Crenop) */
   .stats-wrap {
     padding: 20px 24px;
     max-width: 1444px; width: 100%; margin: 0 auto;   /* 1444(프로필과 같은 값, 2026-09-18): 13명 카드표·격자가 없어져 1842가 필요 없다. (구: 1842 — 본문 1450에서 명전 4열·지표 5열(5+5+3)·시간대 3열. 1444에선 명전 3열·지표 4열(13인이 4+4+4+1)이었다.
@@ -2290,7 +2274,6 @@
   /* 아래 2px 보정: 한글은 라인박스 아래 여백을 안 써서 가운데정렬만으론 글자가 위로 뜬다(.page-title-link의 6/4와 같은 사유·같은 처방).
      글자만 있는 버튼에만 준다 — 아이콘이 위를 채우는 종류 버튼에 같이 주면 되레 아래로 처진다(2026-09-02 픽셀 실측으로 확인). */
   #statsPeriodSide .stats-range-btn, #hallPeriodSide .stats-range-btn { gap: 1px; line-height: 1.15; padding: 3px 2px 1px; }
-  .stats-range-spacer { visibility: hidden; pointer-events: none; }   /* 정렬 격자의 빈 칸(2026-09-18) */
   .stats-kind-btn { gap: 6px; line-height: 1.2; }   /* 그림-글자 간격 6 · 그림 20px — 최근 활동·케미의 종류 필터(.filter-type)와 같은 규격(2026-09-08) */
   .stats-kind-btn svg { width: 20px; height: 20px; display: block; }
   .profile-tabs-wrap {
@@ -3156,7 +3139,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-18h';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-18i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6038,7 +6021,7 @@ function calTextBoxHtml(d) {
   const items = calState.type === 'post' ? d.posts.map(x => x.p) : d.cafes.map(x => x.c);
   if (!items.length) return '';
   // 글마다 옅은 상자 한 줄(2026-09-18 Crenop: 여러 글인지 여러 줄인지 구분). 상자에 들어가는 만큼 보이고 넘치면 상자가 자른다 — 총 개수는 위 칩이 말한다.
-  return `<span class="cal-txt">${items.slice(0, 8).map(it => `<span class="cal-txt-line">${escapeHtml(it.title || '(제목 없음)')}</span>`).join('')}</span>`;
+  return `<span class="cal-txt ${calState.type}">${items.slice(0, 8).map(it => `<span class="cal-txt-line">${escapeHtml(it.title || '(제목 없음)')}</span>`).join('')}</span>`;   // 종류 클래스(post·cafe) = 줄 배경색
 }
 function calChips(d) {   // 칸 상단 칩(2026-09-18): 그날 있는 종류 전부 — 고른 종류는 아이콘+개수, 나머지는 아이콘만 흐리게. 순서 고정(생방송·유튜브·게시글·카페)
   const order = ['live', 'youtube', 'post', 'cafe'];
@@ -9921,7 +9904,7 @@ function dayItemRowHtml(kind, data) {
 
 // ── 통계 탭(2026-09-18 재편) ──
 // 멤버 스트립(13명, 크루 없음 — 멤버 간 직접 비교를 사이트 안에서 권장하지 않는다는 방침) + 기간(연/월).
-// 위: 지표 요약 줄 · 시간 통계 줄 · 시간대 그래프(세로 3줄, 2026-09-18 Crenop 피드백으로 카드|띠 2단 폐지). 아래: 방송별 지표 목록(최신순, 행 클릭 = 다시보기).
+// 위: 좌 지표 8행 | 우 시간 통계 다섯 값 + 시간대 그래프(같은 높이 — 2026-09-18 3차 Crenop 피드백). 아래: 방송별 지표 목록(최신순, 행 클릭 = 다시보기).
 // 기간 '연'은 지표 카드·목록만 연간 — 시간대 띠는 한 달의 날짜×시간 격자라 연 단위로 합칠 수 없어 안내 한 줄.
 function initStatsMembers() {
   const box = document.getElementById('statsMembersSide');
@@ -9937,24 +9920,33 @@ function selectStatsMember(id, opts) {
 }
 // 지표 카드 — 옛 크루 카드표의 카드 한 장(항목·메달·행 클릭 = 월별 추이 그래프 모달 그대로). mode 'month'|'year'.
 // 지표 요약 줄(2026-09-18 — 옛 지난 활동의 요약 줄 형식): 8항목, 항목 클릭 = 그 지표의 월별 추이 그래프. mode 'month'|'year'.
-function statsSummaryHtml(memberId, sum, md, mode, year, month) {
+// 지표 8행(2026-09-18 3차 — 사진·이름 없음, 행 클릭 = 그 지표의 월별 추이 그래프). mode 'month'|'year'.
+function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
   const mv = (k) => (md && md[k]) ? `<span style="margin-right:3px;line-height:1">${md[k]}</span>` : '';
   const days = mode === 'year' ? `${mv('sessions')}${sum.sessions}일` : `${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일`;
   const fan = mode === 'year' ? fanCellYear(memberId, year) : fanCellMonth(memberId, year, month);
-  const item = (metric, color, icon, label, value) => `<div class="stats-summary-item" data-metric="${metric}"><span class="stats-summary-label"><span class="stats-row-icon" style="color:${color}">${icon}</span>${label}</span><span class="stats-summary-value">${value}</span></div>`;
-  return `<div class="stats-summary"><div class="ss-row">${item('broadcastDays', 'var(--ev-start)', SVG_ICONS.calendar, '방송 일수', days)}${item('broadcastTime', 'var(--ev-start)', SVG_ICONS.clockTime, '방송 시간', `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`)}<span class="ss-brk"></span>${item('fan', '#FFC94D', FAN_ICON, '애청자', fan)}${item('peakViewer', '#FF8C00', SVG_ICONS.arrowUp, '최고 시청자', sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-')}${item('avgViewer', '#FF8C00', SVG_ICONS.barChart, '평균 시청자', sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-')}</div><div class="ss-row">${item('post', 'var(--ev-post)', SVG_ICONS.board, '숲 게시글', `${mv('postCount')}${sum.postCount}개`)}${item('cafe', '#03C75A', SVG_ICONS.coffee, '카페 게시글', `${mv('cafeCount')}${sum.cafeCount}개`)}${item('youtube', 'var(--ev-youtube)', SVG_ICONS.youtube, '유튜브 업로드', `${mv('youtubeCount')}${sum.youtubeCount}개`)}</div></div>`;
+  const row = (metric, color, icon, label, value) => `<div class="stats-num-row" data-metric="${metric}"><span class="stats-num-label"><span class="stats-row-icon" style="color:${color}">${icon}</span>${label}</span><span class="stats-num-value">${value}</span></div>`;
+  return row('broadcastDays', 'var(--ev-start)', SVG_ICONS.calendar, '방송 일수', days)
+    + row('broadcastTime', 'var(--ev-start)', SVG_ICONS.clockTime, '방송 시간', `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`)
+    + row('fan', '#FFC94D', FAN_ICON, '애청자', fan)
+    + row('peakViewer', '#FF8C00', SVG_ICONS.arrowUp, '최고 시청자', sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-')
+    + row('avgViewer', '#FF8C00', SVG_ICONS.barChart, '평균 시청자', sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-')
+    + row('post', 'var(--ev-post)', SVG_ICONS.board, '숲 게시글', `${mv('postCount')}${sum.postCount}개`)
+    + row('cafe', '#03C75A', SVG_ICONS.coffee, '카페 게시글', `${mv('cafeCount')}${sum.cafeCount}개`)
+    + row('youtube', 'var(--ev-youtube)', SVG_ICONS.youtube, '유튜브 업로드', `${mv('youtubeCount')}${sum.youtubeCount}개`);
 }
 // 시간 통계 줄(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — computeMonthTimeStats의 숫자 필드로 요약 줄과 같은 부품. 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
+// 시간 통계 다섯 값(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — 그래프 상자 위에 한 줄(관련 숫자를 그래프 옆에 묶는다). 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 function timeStatsRowHtml(ts) {
   const hm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
   const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
-  const item = (tkey, icon, label, value) => `<div class="stats-summary-item" data-tkey="${tkey}"><span class="stats-summary-label"><span class="stats-row-icon" style="color:var(--ev-start)">${icon}</span>${label}</span><span class="stats-summary-value">${value}</span></div>`;
-  return `<div class="stats-summary"><div class="ss-row">${item('tStart', SVG_ICONS.clockTime, '평균 시작', hm(ts.startMin))}${item('tEnd', SVG_ICONS.clockTime, '평균 종료', hm(ts.endMin))}${item('tAvg', SVG_ICONS.clockTime, '평균 시간', `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`)}</div><div class="ss-row">${item('tBands', SVG_ICONS.clockTime, '시간대 구성', hl(['새벽', '오전', '오후', '야간'], ts.bands))}${item('tWdWe', SVG_ICONS.calendar, '주중 / 주말', hl(['주중', '주말'], ts.wdwe))}</div></div>`;
+  const item = (tkey, icon, label, value) => `<div class="stats-time-item" data-tkey="${tkey}"><span class="stats-time-label"><span class="stats-row-icon" style="color:var(--ev-start)">${icon}</span>${label}</span><span class="stats-time-value">${value}</span></div>`;
+  return `<div class="stats-time-row">${item('tStart', SVG_ICONS.clockTime, '평균 시작', hm(ts.startMin))}${item('tEnd', SVG_ICONS.clockTime, '평균 종료', hm(ts.endMin))}${item('tAvg', SVG_ICONS.clockTime, '평균 시간', `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`)}${item('tBands', SVG_ICONS.clockTime, '시간대 구성', hl(['새벽', '오전', '오후', '야간'], ts.bands))}${item('tWdWe', SVG_ICONS.calendar, '주중 / 주말', hl(['주중', '주말'], ts.wdwe))}</div>`;
 }
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
 const STATS_SORTS = [
   { key: 'newest', label: '최신순' }, { key: 'oldest', label: '과거순' }, { key: 'duration', label: '방송 시간' },
-  { key: 'peak', label: '최고 시청자' }, { key: 'avg', label: '평균 시청자' }, null,
+  { key: 'peak', label: '최고 시청자' }, { key: 'avg', label: '평균 시청자' },
 ];
 function sessionSortValue(s, key) {
   if (key === 'duration') return s.end ? new Date(s.end).getTime() - new Date(s.start).getTime() : -1;
@@ -9977,15 +9969,10 @@ function renderStats() {
   statsState.selectedTab = memberId;
   document.querySelectorAll('#statsMembersSide .cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === memberId));
   if (!statsState.viewMonth) { const n = kstNow(); statsState.viewMonth = { year: n.getUTCFullYear(), month: n.getUTCMonth() + 1 }; }   // 기간 선택기보다 먼저(첫 진입에 viewMonth가 없다 — 헤드리스 실측 2026-09-18)
-  if (side) {
-    side.innerHTML = `<div><div class="filter-title">기간</div>${periodSelectorHtml(true)}</div>`
-      + `<div><div class="filter-title">정렬</div><div class="stats-range" id="statsSortBox">${STATS_SORTS.map(o => o ? `<button class="stats-range-btn${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${o.label}</button>` : '<span class="stats-range-btn stats-range-spacer" aria-hidden="true"></span>').join('')}</div></div>`;
-    bindPeriodSelector(side, true, renderStats);
-    side.querySelectorAll('.stats-range-btn[data-sort]').forEach(b => b.addEventListener('click', () => { if (b.dataset.sort === statsState.sortKey) return; statsState.sortKey = b.dataset.sort; renderStats(); }));
-  }
+  if (side) { side.innerHTML = `<div><div class="filter-title">기간</div>${periodSelectorHtml(true)}</div>`; bindPeriodSelector(side, true, renderStats); }   // 정렬은 목록 상단바(2026-09-18 3차: 기둥은 PC에서 아래가 잘린다)
   const { year, month } = statsState.viewMonth;
   const m = MEMBER_BY_ID[memberId];
-  let summary = '', timeRow = '', heatHtml = '', sessions = [];   // sessions: [{ s, ym, dk }]
+  let numRows = '', timeRow = '', heatHtml = '', sessions = [];   // sessions: [{ s, ym, dk }]
   if (statsState.periodAll) {
     const now = kstNow();
     const maxMonth = year === now.getUTCFullYear() ? now.getUTCMonth() + 1 : 12;
@@ -10004,7 +9991,7 @@ function renderStats() {
     }
     const annualSums = computeAnnualSums(year);
     const medals = computeMedals(annualSums, ANNUAL_MEDAL_KEYS);
-    summary = statsSummaryHtml(memberId, annualSums[m.id], medals[m.id], 'year', year, 0);
+    numRows = statsNumRowsHtml(memberId, annualSums[m.id], medals[m.id], 'year', year, 0);
     heatHtml = '<div class="lr-msg">시간대 분포는 월 단위에서 보입니다.</div>';   // 시간 통계 줄도 월 단위라 이 한 줄이 둘을 대신한다
     const startMo = year === STATS_START_YEAR ? STATS_START_MONTH : 1;
     for (let mo = startMo; mo <= maxMonth; mo++) {
@@ -10029,12 +10016,12 @@ function renderStats() {
     MEMBERS.forEach(mm => { allSums[mm.id] = computeMonthSummary(statsState.data[ym][mm.id], year, month); });   // 메달은 13명 자료로 계산(비교는 메달까지만)
     const medals = computeMedals(allSums, MONTHLY_MEDAL_KEYS);
     const sum = allSums[memberId];
-    summary = statsSummaryHtml(memberId, sum, medals[memberId], 'month', year, month);
+    numRows = statsNumRowsHtml(memberId, sum, medals[memberId], 'month', year, month);
     const isCur = isCurrentMonth(ym);
     const h = renderTimeOfDayHeatmap(year, month, sum, isCur);
     const ts = h ? computeMonthTimeStats(sum, computeTimeOfDayMinutes(sum.sessionsByDate, year, month, isCur), year, month, isCur) : null;   // 방송 없는 달은 null
     timeRow = ts ? timeStatsRowHtml(ts) : '';
-    heatHtml = h ? `<div class="stats-heat-cell" data-member="${m.id}">${h}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';   // 그래프만(다섯 값은 위 줄)
+    heatHtml = h ? `<div class="stats-heat-cell" data-member="${m.id}">${h}</div>` : '<div class="lr-msg">그 달의 방송 기록이 없습니다.</div>';   // 그래프(다섯 값은 그 위 한 줄)
     for (const [dk, arr] of Object.entries(sum.sessionsByDate)) for (const s of arr) sessions.push({ s, ym, dk });
   }
   // 방송별 목록 — 걸친 방송은 여러 날짜에 들어 있으므로 방송 하나로 모으고(시작 시각 기준), 기둥의 정렬대로(기본 최신순)
@@ -10044,10 +10031,17 @@ function renderStats() {
     if (seen.has(key)) continue; seen.add(key);
     rows.push(sessionRowHtml(s, memberId, ym, calDateLabel(isoToKstDateKey(s.start))));
   }
-  top.innerHTML = summary + timeRow + heatHtml;   // 세로 3줄: 지표 요약 · 시간 통계 · 시간대 그래프(2026-09-18 Crenop)
-  list.innerHTML = rows.length ? `<div class="stats-sess-head">방송 ${rows.length}회</div><div class="day-detail-list">${rows.join('')}</div>` : '';
-  top.querySelectorAll('.stats-summary-item[data-metric]').forEach(r => r.addEventListener('click', () => openStatGraphModal(memberId, r.dataset.metric)));   // 항목 → 그 지표의 월별 추이 그래프
-  top.querySelectorAll('.stats-summary-item[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
+  top.innerHTML = `<div class="stats-top-grid"><div class="stats-num-box">${numRows}</div><div class="stats-heat-box">${timeRow}${heatHtml}</div></div>`;   // 좌 지표 8행 | 우 시간 통계 + 그래프, 같은 높이(2026-09-18 3차)
+  // 목록 상단바(2026-09-18 3차, 최근 활동 문법 그대로 — sticky): 왼쪽 '방송 N회', 오른쪽 정렬 5종 + 맨 위로·맨 아래로
+  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button"><span>${o.label}</span></button>`).join('');
+  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right">${sortBtns}<button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div>`;
+  list.innerHTML = rows.length ? bar + `<div class="day-detail-list">${rows.join('')}</div>` : '';
+  list.querySelectorAll('.sort-toggle[data-sort]').forEach(b => b.addEventListener('click', () => { if (b.dataset.sort === statsState.sortKey) return; statsState.sortKey = b.dataset.sort; renderStats(); }));
+  const stTop = document.getElementById('statsScrollTop'), stBottom = document.getElementById('statsScrollBottom');
+  if (stTop) stTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  if (stBottom) stBottom.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
+  top.querySelectorAll('.stats-num-row[data-metric]').forEach(r => r.addEventListener('click', () => openStatGraphModal(memberId, r.dataset.metric)));   // 행 → 그 지표의 월별 추이 그래프
+  top.querySelectorAll('.stats-time-item[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
   list.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
     const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
     openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);

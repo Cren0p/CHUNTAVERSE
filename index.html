@@ -3156,7 +3156,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19i';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -9537,14 +9537,6 @@ function hallTopRanks(getVal) {
   return distinct.slice(0, 3).map((v, i) => ({ rank: i + 1, value: v, members: MEMBERS.filter(m => getVal(m.id) === v) }));
 }
 
-// 명전 기간 분할 — 통산 / 2026 상반기 / 2026 하반기. 기본 통산(7월 초 하반기가 빌 동안 통산 노출).
-let statsPeriod = 'total';
-const STATS_PERIODS = [
-  // 정사각 칸에 맞춘 두 줄 표기(2026-09-01) — 연/월 버튼과 같은 문법
-  { key: 'total', label: '<span class="pb-m">통산</span>' },   // 상/하반기의 본 낱말(.pb-m)과 같은 굵기 — 혼자 여려 보이던 것 교정(2026-09-02 Crenop)
-  { key: 'h1',    label: '<span class="pb-y">26년</span><span class="pb-m">상반기</span>' },
-  { key: 'h2',    label: '<span class="pb-y">26년</span><span class="pb-m">하반기</span>' },
-];
 // 상반기는 시작·종료월 둘 다 필요하고 하반기는 시작월만 필요하다 — 워커 /chat-counts의 to는 '거기까지'라
 // 진행 중인 하반기에 상한을 걸면 새 달이 열릴 때마다 상수를 고쳐야 한다(미지정 = 현재 KST월까지가 맞다).
 // [2026-08-13] 상반기가 HALL_H1_CHAT_MONTH='2026-06' 단일 버킷이었다. 채팅 수집 개시가 6/5라 그때는 6월=상반기 전체가 맞았지만,
@@ -9555,6 +9547,20 @@ const HALL_H2_START_MONTH = '2026-07';                 // 하반기 채팅 버�
 const HALL_H1_LO = kstMonthStartMs(2026, 1);           // 2026-01-01 KST 자정 (세션·시트 상반기 하한) — 로컬 Date 생성자는 뷰어 TZ에 따라 경계가 밀려 금지(KST 정렬 정책)
 const HALL_H2_LO = kstMonthStartMs(2026, 7);           // 2026-07-01 KST 자정 (상/하반기 경계)
 const HALL_H2_HI = kstMonthStartMs(2027, 1);           // 2027-01-01 KST 자정 (하반기 상한)
+// 파생값(2026-09-19): 반기 버튼의 연도·달 목록·YYMMDD 경계는 위 여섯 상수에서 만든다 — 연초 갱신 지점을 위 여섯 줄로 한정.
+//   (종전엔 STATS_PERIODS의 연도 표기와 renderHall 안의 월·YYMMDD 리터럴을 따로 고쳐야 했고, 워커 체크리스트는 없는 이름(HALL_PERIODS)을 가리켰다.)
+const HALL_YEAR_LABEL = HALL_H1_START_MONTH.slice(2, 4) + '년';                  // 반기 버튼 윗줄(예: 26년)
+const HALL_H2_END_MONTH = HALL_H2_START_MONTH.slice(0, 4) + '-12';               // 하반기 달 목록 상한(그 해 12월) — 채팅 질의(loadHallChem)의 to는 종전대로 없음
+const hallSortKeyOf = ms => new Date(ms + 9 * 3600 * 1000).toISOString().slice(2, 10).replace(/-/g, '');   // KST 자정 epoch → 'YYMMDD'(시트 행 정렬키 sort와 같은 꼴)
+const HALL_H1_SORT_LO = hallSortKeyOf(HALL_H1_LO), HALL_H2_SORT_LO = hallSortKeyOf(HALL_H2_LO), HALL_H2_SORT_HI = hallSortKeyOf(HALL_H2_HI);   // 260101 · 260701 · 270101
+// 명전 기간 분할 — 통산 / 상반기 / 하반기(연도는 위 상수에서). 기본 통산(7월 초 하반기가 빌 동안 통산 노출). 상수 뒤에 두어야 한다(위 파생값을 쓴다 — const라 앞에 두면 TDZ).
+let statsPeriod = 'total';
+const STATS_PERIODS = [
+  // 정사각 칸에 맞춘 두 줄 표기(2026-09-01) — 연/월 버튼과 같은 문법
+  { key: 'total', label: '<span class="pb-m">통산</span>' },   // 상/하반기의 본 낱말(.pb-m)과 같은 굵기 — 혼자 여려 보이던 것 교정(2026-09-02 Crenop)
+  { key: 'h1',    label: `<span class="pb-y">${HALL_YEAR_LABEL}</span><span class="pb-m">상반기</span>` },
+  { key: 'h2',    label: `<span class="pb-y">${HALL_YEAR_LABEL}</span><span class="pb-m">하반기</span>` },
+];
 const hallChemCache = {};
 
 // 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-01~06 합산, h2=2026-07~현재 합산. 기간별 캐시.
@@ -10016,13 +10022,13 @@ function renderHall() {
   }
   const chem = hallChemCache[period];
   // 기간별 월 목록(월 stats 합산용) / 세션·시트 시각 경계
-  const periodMonths = period === 'h1' ? allMonths.filter(ym => ym >= '2026-01' && ym <= '2026-06')
-                     : period === 'h2' ? allMonths.filter(ym => ym >= '2026-07' && ym <= '2026-12')
+  const periodMonths = period === 'h1' ? allMonths.filter(ym => ym >= HALL_H1_START_MONTH && ym <= HALL_H1_END_MONTH)   // 리터럴 → 상수(2026-09-19): 연초 갱신은 상수 여섯 줄만
+                     : period === 'h2' ? allMonths.filter(ym => ym >= HALL_H2_START_MONTH && ym <= HALL_H2_END_MONTH)
                      : allMonths;
   const inPeriodTs  = t    => period === 'h1' ? (t >= HALL_H1_LO && t < HALL_H2_LO)
                             : period === 'h2' ? (t >= HALL_H2_LO && t < HALL_H2_HI) : true;
-  const inPeriodYmd = sort => period === 'h1' ? (sort >= '260101' && sort < '260701')   // YYMMDD
-                            : period === 'h2' ? (sort >= '260701' && sort < '270101') : true;
+  const inPeriodYmd = sort => period === 'h1' ? (sort >= HALL_H1_SORT_LO && sort < HALL_H2_SORT_LO)   // YYMMDD — 상수에서 파생
+                            : period === 'h2' ? (sort >= HALL_H2_SORT_LO && sort < HALL_H2_SORT_HI) : true;
 
   // 라이브 스냅샷(60초 캐시) — 도착하면 재렌더, 그 전엔 빈 맵(=기존 48h 상한 동작)
   if (Date.now() - hallLiveAt > 60000) loadHallLive().then(() => { if (currentPage === 'hall') renderHall(); });

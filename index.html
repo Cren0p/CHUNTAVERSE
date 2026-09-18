@@ -1178,10 +1178,13 @@
      부모 border-top은 같은 자리·같은 색으로 남겨 폴백. box-sizing:border-box라 21 = 배경 20 + 선 1. */
   .timeline-header::before { content: ''; position: absolute; left: -1px; right: -1px; top: -21px; height: 21px; background: var(--bg); border-bottom: 1px solid var(--border); }
   .timeline-bar-left, .timeline-bar-right { display: flex; align-items: center; gap: 8px; }
-  /* 좁은 화면(2026-09-19 Crenop): 버튼 글씨는 한 줄을 지키고, 줄바꿈은 기능 묶음(.tl-group: 맨 위로·맨 아래로 | 정렬) 단위로. 묶음 하나도 안 들어가는 폭에서만 묶음 안에서 접는다. */
-  .timeline-bar-right { flex-wrap: wrap; }
-  .tl-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .timeline-scroll-btn, .sort-toggle { white-space: nowrap; }   /* 간격 통일(2026-08-09): 버튼 사이·가장자리·행간 전부 상하 패딩과 같은 8px */
+  /* 좁은 화면(2026-09-19 Crenop): 버튼 글씨는 한 줄. 오른쪽 묶음은 줄이 바뀌어도 오른쪽 끝에 붙는다(margin-left:auto). 접힘 순서 — 한 줄 → [맨 위/아래] / [정렬 4] → [맨 위/아래] / [정렬 2] / [정렬 2]:
+     맨 위/아래와 정렬이 각각 한 묶음(.tl-group)이고, 정렬 묶음 안은 두 개씩 짝(.tl-pair, 안 끊김)이라 묶음이 통째로 내려간 뒤에야 짝 단위로 갈린다. */
+  .timeline-bar-right { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+  .tl-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+  .tl-pair { display: flex; align-items: center; gap: 8px; flex: none; }
+  .timeline-scroll-btn, .sort-toggle { white-space: nowrap; }
+  .stats-sess-head { display: inline-flex; align-items: center; padding: 5px 0; border: 1px solid transparent; line-height: 1.2; }   /* 글자만이지만 높이는 옆 버튼과 같게(테두리·바탕 없음 — 버튼으로 보이면 안 된다, 2026-09-19 Crenop) */   /* 간격 통일(2026-08-09): 버튼 사이·가장자리·행간 전부 상하 패딩과 같은 8px */
   .timeline-scroll-btn {
     display: inline-flex;
     align-items: center;
@@ -3155,7 +3158,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7461,7 +7464,7 @@ function applyFilter() {
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
   // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
-  const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><div class="tl-group"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button></div><div class="tl-group">${sortBtnHtml}</div></div></div>`;   // 묶음 단위 줄바꿈(2026-09-19, 통계 상단바와 같은 문법)
+  const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" id="scrollToTop">${scrollUpSvg}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="scrollToBottom">${scrollDownSvg}<span>맨 아래로</span></button></div></div><div class="tl-group"><div class="tl-pair">${sortBtnHtml}</div></div></div></div>`;   // 묶음 단위 줄바꿈(2026-09-19, 통계 상단바와 같은 문법)
   if (filtered.length === 0) {
     tl.innerHTML = headerHtml + (allEvents.length === 0
       ? '<div class="timeline-empty">아직 기록된 이벤트가 없습니다<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다</div>'
@@ -10065,8 +10068,9 @@ function renderStats() {
   top.innerHTML = `<div class="stats-top-grid"><div class="stats-num-box">${numRows}</div><div class="stats-heat-box">${timeRow}${heatHtml}</div></div>`;   // 좌 지표 8행 | 우 시간 통계 + 그래프, 같은 높이(2026-09-18 3차)
   fitTimeRow();
   // 목록 상단바(2026-09-18 3차, 최근 활동 문법 그대로 — sticky): 왼쪽 '방송 N회', 오른쪽 정렬 5종 + 맨 위로·맨 아래로
-  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === statsState.sortKey && statsState.sortAsc)}</button>`).join('');   // 고르지 않은 버튼의 화살표는 기본 방향(↑, 흐리게) — 폭이 안 흔들린다
-  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right"><div class="tl-group"><button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div><div class="tl-group">${sortBtns}</div></div></div>`;   // 순서 = 최근 활동 상단바(맨 위로·맨 아래로 → 정렬), 묶음 단위 줄바꿈(2026-09-19)
+  const sortBtns = STATS_SORTS.map(o => `<button class="sort-toggle${o.key === statsState.sortKey ? ' active' : ''}" data-sort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === statsState.sortKey && statsState.sortAsc)}</button>`);   // 고르지 않은 버튼의 화살표는 기본 방향(↑, 흐리게) — 폭이 안 흔들린다
+  const sortPairs = [sortBtns.slice(0, 2), sortBtns.slice(2)].map(pr => `<div class="tl-pair">${pr.join('')}</div>`).join('');   // 정렬 4개 = 두 짝(날짜·방송 시간 | 최고·평균) — 접힐 때 2/2
+  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">방송 ${rows.length}회</span></div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" id="statsScrollTop" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="statsScrollBottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div><div class="tl-group">${sortPairs}</div></div></div>`;   // 순서 = 최근 활동 상단바(맨 위로·맨 아래로 → 정렬), 묶음·짝 단위 줄바꿈(2026-09-19)
   list.innerHTML = rows.length ? bar + `<div class="day-detail-list">${rows.join('')}</div>` : '';
   list.querySelectorAll('.sort-toggle[data-sort]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.sort === statsState.sortKey) statsState.sortAsc = !statsState.sortAsc;   // 같은 버튼 = 역정렬

@@ -3156,7 +3156,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19j';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3935,6 +3935,8 @@ const statsState = {
   sortKey: 'date', sortAsc: false,   // 방송별 목록 정렬(2026-09-18): date·duration·peak·avg, asc=역정렬(다시 누르면)
   viewMonth: null,
   fancnt: null,                                   // 애청자 일별 누적 { [id]: { 'YYYY-MM-DD': n } } — /fancnt에서 1회 로드
+  failAt: {},                                     // 달별 마지막 실패 시각(2026-09-19): loadStatsMonth가 어느 호출부에서 불리든 30초 안엔 재요청하지 않는다 — 정전 오버레이의 1초 틱이 없는 달을 매초 다시 묻던 것 차단. 달력 탭 calStatsFailAt·통계 탭 statsFailAt과 같은 30초
+  fancntFailAt: 0,                                // /fancnt 마지막 실패 시각(2026-09-19): 5분 뒤 재시도. 성공에만 fancntLoadedDate를 확정한다
 };
 let lastStatsSig = null;   // 통계 60초 폴링의 직전 렌더 입력(현재월 데이터) 시그니처 — 무변화면 재구축 스킵(lastTimelineSig와 동일 취지)
 const LS_STATS_PREFIX = 'chuntaverse_stats_v19_';   // v19(2026-09-03 세션 70): v18을 자료 수정 '전에' 배포해 그 사이 굳은 옛 5·6월을 다시 푼다 — 순서: 자료 고치기 → 판 올린 index.html 배포. v18: 체비 5/31 번호 채움 + 6/1 중복 삭제. v17: 25년 12월 주입 + 시딩 잔재 삭제 + 시청자 값 교체 — v16 캐시(그 전 자료) 무효화
@@ -7276,16 +7278,20 @@ function applyFilter() {
 
 
 // 애청자(즐겨찾기) 일별 누적을 /fancnt에서 1회 로드. 카드 표시·그래프 공용.
-let fancntLoadedDate = null;   // 로드 시점의 KST 날짜 — 자정 넘겨 열어둔 탭에서 팬 수가 하루 낡는 것 방지(날짜 바뀌면 1회 재조회)
+let fancntLoadedDate = null;   // 로드 시점의 KST 날짜 — 자정 넘겨 열어둔 탭에서 팬 수가 하루 낡는 것 방지(날짜 바뀌면 1회 재조회). 성공에만 확정(2026-09-19)
 async function loadFancnt() {
   const today = kstNow().toISOString().slice(0, 10);
   if (statsState.fancnt && fancntLoadedDate === today) return;
+  if (Date.now() - (statsState.fancntFailAt || 0) < 300000) return;   // 실패 뒤 5분 쉼(2026-09-19): 워커 /fancnt가 KV 읽기 실패에 503 no-store를 주므로 프론트가 하루 굳히면 그 효과가 상쇄된다(종전엔 실패도 오늘로 굳혀 다음 날까지 빈 애청자). 1분 폴링(loadStats)이 5분마다 한 번씩만 다시 묻는다
+  let ok = false;
   try {
     const res = await fetch(WORKER_URL + '/fancnt');
     if (res.ok) statsState.fancnt = await res.json();
     else if (!statsState.fancnt) statsState.fancnt = {};   // 재조회 실패는 기존 값 유지({}로 덮지 않음)
+    ok = res.ok;   // json() 예외면 catch로 빠져 ok=false 유지
   } catch (e) { if (!statsState.fancnt) statsState.fancnt = {}; }
-  fancntLoadedDate = today;   // 실패 포함 — 기존처럼 같은 날 재시도 없음(다음 날짜 전환 때 1회 재시도)
+  if (ok) { fancntLoadedDate = today; statsState.fancntFailAt = 0; }   // 성공에만 날짜 확정
+  else statsState.fancntFailAt = Date.now();   // 날짜는 굳히지 않는다 — 5분 뒤 재시도
 }
 // 해당 멤버·해당 월의 월말 누적 애청자(그 달 일별 중 가장 늦은 날짜 값). 없으면 null.
 function fancntMonthEnd(memberId, year, month1) {
@@ -8352,6 +8358,10 @@ function syncDataVersion(ver, freshYm) {
   else if (currentPage === 'hall') renderHall();
   else if (currentPage === 'calendar') { ensureCalMonth(); queueCalRender(); }   // 빠진 달은 ensureCalMonth가 다시 받고 도착하면 다시 그린다
 }
+// 실패 백오프 일원화(2026-09-19): 달력 탭(ensureCalMonth·calStatsFailAt)·통계 탭(renderStats·statsFailAt)의 30초와 같은 값을 로더 자체에 둔다 —
+// 정전 오버레이의 1초 틱(tickBlackout→blackoutSubHtml→computeBlackoutStats)은 없는 달을 그냥 loadStatsMonth(ym)으로 불러, 워커 장애나 자료 없는 달에서
+// 매초 /stats 요청이 나갔다(탭마다·달마다). 어느 호출부에서 부르든 실패 뒤 30초 안엔 즉시 return. 기존 두 호출부의 failAt 판정은 그대로 두되(같은 30초라 어긋나지 않음),
+// 백오프에 걸려 즉시 돌아온 호출도 그쪽 .then이 '아직 없음'으로 보고 실패 화면을 내므로 루프는 없다.
 async function loadStatsMonth(yyyymm) {
   if (!yyyymm) return;
   if (!isCurrentMonth(yyyymm)) {
@@ -8359,6 +8369,7 @@ async function loadStatsMonth(yyyymm) {
     if (cached) { statsState.data[yyyymm] = cached; return; }
   }
   if (statsState.loadingMonths.has(yyyymm)) return;
+  if (Date.now() - (statsState.failAt[yyyymm] || 0) < 30000) return;   // 실패한 달은 30초 동안 다시 묻지 않는다(2026-09-19)
   statsState.loadingMonths.add(yyyymm);
   try {
     const res = await fetch(`${WORKER_URL}/stats?month=${yyyymm}`);
@@ -8366,6 +8377,7 @@ async function loadStatsMonth(yyyymm) {
     const data = await res.json();
     const monthData = data.stats || {};
     statsState.data[yyyymm] = monthData;
+    statsState.failAt[yyyymm] = 0;   // 받았으면 백오프 해제
     syncDataVersion(data.dataVersion, yyyymm);   // 자료 판이 바뀌었으면 굳혀 둔 지난달을 버린다(방금 받은 이 달은 새 것이라 남김)
     // 미종료 세션(end 없음)이 하나라도 있으면 캐시 보류 — 자정 걸친 방송이 끝나기 전에 월이 바뀌어 이 달을 받으면
     // '진행 중' 상태로 영구 동결됨(그 사용자 화면에서 방송 시간 누락 + 명전 정전위원회 최대 48h 오염).
@@ -8376,6 +8388,7 @@ async function loadStatsMonth(yyyymm) {
     const allEmpty = !Object.values(monthData).some(ms => (ms.sessions || []).length || (ms.posts || []).length || (ms.youtube || []).length || (ms.cafe || []).length);
     if (!isCurrentMonth(yyyymm) && !hasOpenSession && !allEmpty) lsSetMonthCache(yyyymm, monthData);
   } catch (e) {
+    statsState.failAt[yyyymm] = Date.now();   // 응답 없음·!ok·JSON 오류 전부(2026-09-19) — 30초 뒤 다음 호출에서 한 번 더
   } finally {
     statsState.loadingMonths.delete(yyyymm);
   }
@@ -8449,6 +8462,7 @@ function tickBlackout() {
 // 정전 통계(2026-09-08 Crenop): 정전 = 크루 전원 오프라인 구간 = 13명 세션 구간 합집합의 틈. 명전의 정전 중단·방지 위원회와 같은 재료(월 통계 전 달)·
 // 같은 합치기(mergeIntervals). 진행 중 방송은 끝을 지금으로, 마지막 틈(지금 진행 중인 정전)은 뺀다. 문턱 없이 모든 틈을 센다(한 사람이 끄고 다른 사람이 켜기까지의 몇 초도 정전).
 // 달이 아직 안 와 있으면 명전과 같은 로더(loadStatsMonth)로 받고, 도착하면 오버레이가 다음 폴링·틱에 채운다 — 첫 번만 요청, 그 뒤는 브라우저 저장본.
+// 못 받은 달(워커 장애·자료 없음)은 loadStatsMonth의 달별 30초 백오프가 매초 재요청을 막는다(2026-09-19 — 종전엔 1초 틱마다 /stats가 나갔다).
 function computeBlackoutStats() {
   const now = kstNow(); const nowMs = Date.now();
   const months = [];
@@ -8728,7 +8742,7 @@ function likePollingState(runNow) {
   }
 }
 likePollingState(false);   // 부트 직후 — 위에서 4개를 이미 1회씩 호출했으므로 즉시 재실행 불필요
-setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간(전부 순수 로컬 연산, 네트워크 없음)
+setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간. tickSchedule은 순수 로컬 연산. tickBlackout은 오버레이에 부가 정보가 아직 없으면 blackoutSubHtml→computeBlackoutStats로 빠진 달을 loadStatsMonth에 요청할 수 있다(네트워크 있음 — 달별 30초 백오프로 매초 재요청은 안 함. 2026-09-19 정정: 종전 '전부 순수 로컬, 네트워크 없음'은 틀렸다)
 
 // ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──
 // (구 모드 배지 내부 보정(--badge-vnudge)은 2026-07-13 SVG 전환으로 소멸 — 지금은 줄 정렬 축만 이 함수를 씀)

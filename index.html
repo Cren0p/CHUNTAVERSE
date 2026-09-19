@@ -2377,7 +2377,8 @@
     line-height: 1.8;
     margin: 0; word-break: keep-all;   /* auto 여백 폐지(2026-09-19 Crenop): auto면 남는 폭이 글 양옆으로만 가서 로고 쪽 여백(왼쪽)보다 글 오른쪽 여백이 컸다. 이제 로고+글 묶음을 상자가 통째로 가운데 둔다 */
   }
-  .profile-crew-intro p.wrap-both .ci-b { display: block; }   /* 셋째 줄이 접혀야 하는 폭이면 첫째 줄도 같은 자리에서 접는다(fitCrewIntro) */
+  .profile-crew-intro p.wrap-both .ci-b::before { content: '\A'; white-space: pre; }   /* 셋째 줄이 접혀야 하는 폭이면 첫째 줄도 같은 자리에서 접는다(fitCrewIntro).
+     block이 아니라 강제 줄바꿈인 이유(2026-09-19): .ci-b를 block으로 두면 그 뒤의 <br><br>가 빈 줄 둘을 만들어 첫 덩어리 아래 간격만 3줄(76px), 나머지는 2줄(50px)로 어긋났다 */
   /* 글 묶음은 가운데(2026-09-01, Crenop 지정) — 본문이 왼쪽으로 쏠려 보이던 인상의 한 축.
      각 줄 안의 글자는 좌측정렬 그대로 두고, 줄들이 이루는 덩어리만 가운데 세운다. */
   .profile-crew-activities {
@@ -3156,7 +3157,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19k';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-19m';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3436,16 +3437,16 @@ const MEMBER_BIRTHDAYS = {
 // 이름이라 서버에 그 파일이 있어야 한다 — 값이 같아도 역할이 달라 일부러 묶지 않았다(en만 바꾸면 이미지가 깨짐).
 const MEMBERS = [
   { id: '243000',      en: 'chunyang', name: '천양',   img: 'members/01.webp?v=2', color: '#43EAF6' },
-  { id: 'madaomm',     en: 'madaomm',  name: '마다옴', img: 'members/02.webp?v=2', color: '#FFDE9B' },
+  { id: 'madaomm',     en: 'madaomm',  name: '마다옴', img: 'members/02.webp?v=3', color: '#FFDE9B' },
   { id: 'nanamoon777', en: 'nanamoon', name: '나나문', img: 'members/03.webp?v=2', color: '#DBDCE5' },
-  { id: 'imha22',      en: 'imhaming', name: '임하밍', img: 'members/04.webp?v=2', color: '#F5D3FE' },
+  { id: 'imha22',      en: 'imhaming', name: '임하밍', img: 'members/04.webp?v=3', color: '#F5D3FE' },
   { id: 'doormomo',    en: 'moonmomo', name: '문모모', img: 'members/05.webp?v=2', color: '#8D4BD6' },
   { id: 'kappuchan',   en: 'kappu',    name: '카푸',   img: 'members/07.webp?v=2', color: '#FFCFB7' },
   { id: 'kyaang123',   en: 'kyaang',   name: '캬앙',   img: 'members/08.webp?v=2', color: '#EA4335' },
   { id: 'wellro314',   en: 'wellro',   name: '김웰로', img: 'members/09.webp?v=2', color: '#BFEF90' },
   { id: 'mocamu2',     en: 'moca',     name: '모카',   img: 'members/10.webp?v=2', color: '#366CD8' },
   { id: 'dalta20',     en: 'dalta',    name: '달타',   img: 'members/11.webp?v=2', color: '#F8C24F' },
-  { id: 'chebi2',      en: 'chebi',    name: '체비',   img: 'members/13.webp?v=2', color: '#FFFFFF' },
+  { id: 'chebi2',      en: 'chebi',    name: '체비',   img: 'members/13.webp?v=3', color: '#FFFFFF' },
   { id: 'plincess',    en: 'pli',      name: '플리',   img: 'members/14.webp?v=2', color: '#A8D6FF' },
   { id: 'tleod1818',   en: 'vingming', name: '빙밍',   img: 'members/15.webp?v=3', color: '#30BBBA' },   // 2026-08-02 합류 · 색 2026-08-02 변경(구 #269695 — 어두움)
 ];
@@ -10342,7 +10343,7 @@ function renderProfileCrew(body) {
         <!-- 줄바꿈 자리 지정(2026-09-01 Crenop): 줄이 바뀔 곳에만 보통 공백을 두고 나머지 어절은 붙여(&nbsp;) 둔다.
              → '참가하기 위해 / 결성한', '합방과 / 다채로운', '뽐내는 / 버추얼'에서만 갈린다. -->
         <!-- 첫째·셋째 줄은 같이 접힌다(2026-09-19 Crenop): 셋째 줄(가장 긴 줄)이 한 줄에 안 들어가면 fitCrewIntro가 .wrap-both를 붙여 두 줄 다 지정 자리에서 갈라진다.
-             셋째만 갈리고 첫째는 한 줄인 상태(따로 줄바꿈)를 막는다. 뒤 토막(.ci-b)이 block이 되는 방식. -->
+             셋째만 갈리고 첫째는 한 줄인 상태(따로 줄바꿈)를 막는다. 뒤 토막(.ci-b) 앞에 ::before 강제 줄바꿈을 넣는 방식(block이 아니라서 뒤의 <br><br>가 빈 줄 하나로 남는다). -->
         <p><span class="ci-a">천타버스는&nbsp;원래&nbsp;천양님이&nbsp;크루&nbsp;콘텐츠에&nbsp;참가하기&nbsp;위해</span> <span class="ci-b">결성한&nbsp;'위장&nbsp;크루'로&nbsp;시작했으나</span><br><br>지속적인&nbsp;합방과 다채로운&nbsp;자체&nbsp;콘텐츠를&nbsp;통해<br><br><span class="ci-a">이제는&nbsp;그&nbsp;누구도&nbsp;대체할&nbsp;수&nbsp;없는&nbsp;독보적인&nbsp;매력을&nbsp;뽐내는</span> <span class="ci-b">버추얼&nbsp;크루로&nbsp;당당히&nbsp;성장해&nbsp;나가는&nbsp;중입니다.</span></p>
       </div>
       <div class="profile-crew-activities">

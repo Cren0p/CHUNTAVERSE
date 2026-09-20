@@ -3157,7 +3157,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-19o';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-20a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3275,17 +3275,17 @@ const MEMBER_BIRTHDAYS = {
     btnL.setAttribute('aria-expanded', String(!closed));
   }
   window.syncBtnL = syncBtnL;
+  // 태블릿 기둥 펴기·접기 — ☰ 버튼과 손짓이 같은 손을 쓴다(2026-09-20, 종전엔 버튼 안에만 있던 것을 꺼냈다).
+  // 닫기는 닫기만 한다: 반대쪽을 자동으로 열면 둘 중 하나가 늘 열려 있어 '양쪽 다 치우고 본문만 크게 보기'라는
+  // 선택지가 사라진다. 펴는 것은 여는 행동이라 그때만 조작부를 닫는다 — 기둥과 조작부가 동시에 자리를 차지하면
+  // 본문이 화면폭−600px이 된다(태블릿 하한 701px에서 본문 101px, 격자가 전멸).
+  function setPillar(show) {
+    body.classList.toggle('side-off', !show);
+    if (show) setDrawer('r', false);
+    syncBtnL();
+  }
   if (btnL) btnL.addEventListener('click', () => {
-    if (tabletPinned()) {
-      // 닫기는 닫기만 한다: 반대쪽을 자동으로 열면 둘 중 하나가 늘 열려 있어
-      // '양쪽 다 치우고 본문만 크게 보기'라는 선택지가 사라진다.
-      // 펴는 것은 여는 행동이라 그때만 조작부를 닫는다.
-      const opening = body.classList.contains('side-off');
-      body.classList.toggle('side-off');
-      if (opening) setDrawer('r', false);
-      syncBtnL();
-      return;
-    }
+    if (tabletPinned()) { setPillar(body.classList.contains('side-off')); return; }
     setDrawer('l', !body.classList.contains('drawer-l'));
   });
   if (btnR) btnR.addEventListener('click', () => setDrawer('r', !body.classList.contains('drawer-r')));
@@ -3325,6 +3325,10 @@ const MEMBER_BIRTHDAYS = {
     // 폭이 넓어져 서랍이 사라졌는데 열림 상태가 남으면 가림막·닫기 버튼만 화면에 떠 있게 된다(실사고)
     if (!overlay && document.body.classList.contains('drawer-l')) setDrawer('l', false);
     if (!mobile && document.body.classList.contains('drawer-r')) setDrawer('r', false);
+    // 폰 가로 회전(≤700에서 조작부를 연 채 돌리면 폭이 701~1150 띠로 들어온다, 2026-09-20): 그대로 두면 기둥과 조작부가
+    // 동시에 자리를 차지해 본문이 화면폭−600px이 된다(932px에서 약 330px). setDrawer(위 '여는 것은 명시적 행동' 줄)가
+    // 태블릿에서 쓰는 규칙 — 조작부가 열려 있으면 기둥이 자리를 내준다 — 를 폭이 바뀌어 들어올 때도 똑같이 적용한다.
+    if (mobile && !overlay && document.body.classList.contains('drawer-r')) setPillar(false);
     if (mobile === wasMobile && overlay === wasOverlay) return;
     wasMobile = mobile; wasOverlay = overlay;
     const bar = document.querySelector('.main-header');
@@ -3384,6 +3388,9 @@ const MEMBER_BIRTHDAYS = {
   // 드래그는 보조 수단이다(표시가 없어 발견되지 않으므로 버튼이 주 경로).
   // 가장자리 20px는 브라우저 뒤로가기 제스처에 양보하고, 가로 이동이 세로의 1.5배를 넘을 때만
   // 서랍으로 판정한다 — 그러지 않으면 세로로 훑다가 서랍이 튀어나온다.
+  // [태블릿 복구 2026-09-20] 손짓은 태블릿(701~1150)에서도 돈다. 2026-09-01 손짓을 만들 때는 모드가 둘(PC·모바일)이고
+  //   전환점이 1100px이라 지금의 태블릿 폭까지 먹고 있었는데, 같은 날 3모드로 재편하며 조건이 ≤700으로 좁아졌다(판정이 아니라 누락).
+  //   자리는 두 모드가 똑같이 셋이다 — [좌측(모바일 서랍·태블릿 기둥)] ↔ [둘 다 치움] ↔ [우측 조작부]. 민 방향으로 한 칸씩 옮긴다.
   let sx = 0, sy = 0, track = false;
   // 가로로 미는 목록(프로필·음악 탭의 영상 스트립, 보조바, 관련 링크 표 등) 안에서 시작한 손짓은 그 목록 것이다 —
   // 종전엔 목록을 옆으로 미는 것만으로 서랍이 같이 튀어나왔다(2026-09-04 Crenop 신고).
@@ -3398,7 +3405,9 @@ const MEMBER_BIRTHDAYS = {
     return false;
   };
   document.addEventListener('touchstart', e => {
-    if (e.touches.length !== 1 || innerWidth > 700) { track = false; return; }   // 드래그는 서랍이 겹쳐 뜨는 폭에서만
+    if (e.touches.length !== 1 || innerWidth > 1150) { track = false; return; }   // 드래그는 기둥·조작부가 손짓으로 움직이는 폭에서만(태블릿 701~1150 + 모바일 ≤700)
+    const ov = document.getElementById('lrOverlay');
+    if (ov && !ov.hidden) { track = false; return; }   // 모달이 떠 있으면 뒤의 본문·서랍을 건드리지 않는다(2026-09-20) — 종전엔 모달 안에서 옆으로 훑으면 뒤에서 서랍이 열려 모달을 닫는 순간 튀어나왔다. 태블릿은 본문이 밀려나는 구조라 더 크게 보인다
     if (inHScroller(e.target)) { track = false; return; }
     sx = e.touches[0].clientX; sy = e.touches[0].clientY;
     track = sx > 20 && sx < innerWidth - 20;
@@ -3406,9 +3415,21 @@ const MEMBER_BIRTHDAYS = {
   document.addEventListener('touchend', e => {
     if (!track) return;
     track = false;
+    // 폭은 손을 뗀 시점으로 다시 읽는다(2026-09-20). 손짓 도중 회전하면 화면은 이미 새 폭으로 다시 그려져 있어,
+    // 시작 시점의 모드로 판단하면 지금 화면에 없는 것을 건드린다(모바일 판정으로 태블릿에서 drawer-l을 붙이는 식).
+    if (innerWidth > 1150) return;   // 회전해서 PC 폭이 됐다 — 이 폭엔 기둥도 서랍도 없다
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     const openL = body.classList.contains('drawer-l'), openR = body.classList.contains('drawer-r');
+    if (tabletPinned()) {
+      // 태블릿에서 좌측은 서랍이 아니라 상시 기둥(side-off)이라 여기서 setDrawer('l', …)을 부르면 안 된다 —
+      // 대응 CSS가 모바일 블록 안에만 있어 화면은 그대로인데 body에 drawer-l 유령 클래스만 남아 다음 손짓을 먹는다.
+      // 기둥 펴짐 = 모바일의 좌 서랍 열림 자리. 그래서 판정문은 아래 모바일 줄과 모양이 같다.
+      const pillar = !body.classList.contains('side-off');
+      if (dx > 0) { if (openR) setDrawer('r', false); else if (!pillar) setPillar(true); }
+      else { if (pillar) setPillar(false); else if (!openR && btnR && btnR.style.visibility !== 'hidden') setDrawer('r', true); }
+      return;
+    }
     if (dx > 0) { if (openR) setDrawer('r', false); else if (!openL) setDrawer('l', true); }
     // 우측 서랍이 없는 탭(버튼이 visibility:hidden)에서는 열지 않는다 — 종전엔 display만 봐서 가림막과 ✕만 떴다(2026-09-03 실사고)
     else { if (openL) setDrawer('l', false); else if (!openR && btnR && btnR.style.visibility !== 'hidden') setDrawer('r', true); }

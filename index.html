@@ -809,18 +809,44 @@
   .blackout-msg {
     position: sticky; top: 42vh;
     width: fit-content; margin: 0 auto;         /* 내용 크기만큼 감싸고 가로 중앙 — sticky는 세로만 담당 */
-    text-align: center; padding: 20px 32px;     /* 여백 확대(2026-08-10 2차: 구 14/26이 좁다는 피드백) */
+    text-align: center; padding: 16px 32px 20px;
     background: rgba(7, 10, 20, 0.45);          /* 테두리 없는 순수 스크림(3차 확정): 뒤가 어두우면 어둡게, 밝은 썸네일이면 비쳐 보임. 조절은 이 알파값 하나 */
-    font-size: 22px; font-weight: 800; color: var(--text);
-    line-height: 1.25;                          /* 1.45→1.25: 반행간이 위(22px줄 +5px)·아래(30px줄 +7px)에 다르게 붙어 여백이 불균일해 보이던 원인 — 조여서 패딩이 여백을 지배하게 */
+    color: var(--text);
     text-shadow: 0 2px 14px rgba(0,0,0,0.85);
   }
-  .blackout-time {
-    display: block; margin-top: 12px;
-    font-size: 30px; color: var(--accent);
-    font-variant-numeric: tabular-nums;   /* 초가 흘러도 글자 폭이 안 흔들리게 */
+  /* 제목 한 줄(2026-09-20 Crenop): 타이머만 있던 시절엔 22/30/13을 세 줄로 쌓는 게 보기 좋았지만, 아래에 목록이 생기면서
+     그 세 줄이 높이 예산을 먹는 쪽이 됐다. 한 줄로 접어 머리가 183px → 106px — 돌려받은 77px이 타일 반 줄이다.
+     휴대폰은 '정전된지 + 시간'까지만 한 줄이고 평균·최대는 둘째 줄로 내린다(.blackout-sub의 flex-basis 100%). */
+  .blackout-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 12px; margin-bottom: 14px; line-height: 1.2; }
+  .bh-lead { font-size: 17px; font-weight: 800; }
+  .blackout-time { font-size: 26px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }   /* 초가 흘러도 글자 폭이 안 흔들리게 */
+  .blackout-sub { font-size: 12px; font-weight: 600; color: var(--muted); }   /* 평균·최대 정전 시간(2026-09-08) — 최소는 교대(몇 초 틈)에 붙잡혀 뺐다 */
+  @media (max-width: 700px) {
+    .blackout-msg { padding: 14px 16px 16px; }
+    .blackout-head { gap: 2px 8px; margin-bottom: 10px; }
+    .bh-lead { font-size: 15px; }
+    .blackout-time { font-size: 22px; }
+    .blackout-sub { flex: 0 0 100%; }
   }
-  .blackout-sub { display: block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }   /* 최소·평균·최대 정전 시간(2026-09-08) — 타이머보다 작은 부가 정보 */
+  /* 어제 다시보기(2026-09-20 Crenop): 라이브가 없으니 찬밥이라도 데워 먹는 자리 — 타이머와 한 몸이라 치우면 같이 사라진다.
+     타일 속은 생방송 카드 문법 그대로(썸네일 → [이름 · 시간] → 제목)라 .card-* 를 그대로 쓴다.
+     [접어서 전부 보인다] 어제 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만' 고를 근거가 없다(Crenop) — 그래서 가로 스크롤도,
+     높이 상한도, 안쪽 스크롤도 두지 않는다. 대신 한 줄에 놓는 장수를 화면에 맞춰 고른다(syncBlackoutVods).
+     타일 폭 200px은 다시보기 모달과 같은 값이고, 하한 160px은 그 모달이 휴대폰에서 쓰는 반폭(calc(50% - 6px))이다 —
+     200은 위 한계, 160은 읽히는 하한. 열 수와 폭은 JS가 px로 써넣는다(퍼센트는 fit-content 상자 안에서 폭을 못 정한다). */
+  .blackout-vods { font-weight: 400; font-size: 12px; text-shadow: none; }
+  .bv-sec { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .bv-sec svg { width: 14px; height: 14px; display: block; flex: none; color: var(--ev-start); }
+  .bv-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 auto; }
+  .bv-tile { flex: 0 0 var(--bv-tile, 200px); width: var(--bv-tile, 200px); display: block; text-decoration: none; color: inherit; text-align: left; }
+  .bv-tile:hover .card-thumb { outline: 1.5px solid var(--accent); }
+  .bv-tile .card-text { margin-top: 6px; }
+  /* 좁아지면 이름이 먼저다 — .card-name은 말줄임인데 .card-btime은 flex-shrink:0이라, 배지(약 69px)가 이름을 통째로 밀어낸다 */
+  .bv-grid.bv-tight .card-btime { display: none; }
+  .bv-grid.bv-tight .card-name { font-size: 14px; }
+  /* 하한까지 줄여도 화면을 넘는 날(휴대폰에서 대여섯 장 이상) — sticky를 놓고 흐름에 둬 창 스크롤로 전부 본다.
+     sticky는 담는 블록(카드 격자) 밖으로 못 나가므로 '길어지면 페이지가 늘어난다'가 저절로 되지 않는다: #app 최소 높이도 같이 준다. */
+  .blackout-msg.bv-flow { position: relative; top: auto; margin: 24px auto; }
   @container (min-width: 1500px) { .grid { grid-template-columns: repeat(5, 1fr); } }   /* 13인 홈 역할: 넓은 화면에서 전원 한눈에(5+5+3) — 2026-08-02 확정 */
   @container (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   @container (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
@@ -3165,7 +3191,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-20c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-20g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6404,6 +6430,7 @@ function switchPage(page, opts) {
     // 직전 폴링 값(lastLiveCount)을 재사용하므로 재조회는 없다.
     blackoutDismissed = false;
     applyBlackout();
+    syncBlackoutVods(document.getElementById('blackoutOverlay'));   // 다른 탭에서 정전이 시작됐으면 폭 0으로 굳어 있다 — 보이게 된 지금 다시 잰다
   }
   if (page === 'chemistry') {
     renderChemistry();
@@ -7266,7 +7293,7 @@ function applyFilter() {
   // 정렬(2026-09-18 Crenop 5차): '시간순' 버튼 하나 — 시계(2026-09-20 Crenop: 모래시계에서 교체) + 글씨 + 오른쪽 방향 화살표(↑ 최신 먼저 / ↓ 과거 먼저), 누를 때마다 역정렬. 통계 탭 상단바의 정렬 버튼과 같은 문법
   const scrollDownSvg = SVG_ICONS.chevronsDown;
   const scrollUpSvg = SVG_ICONS.chevronsUp;
-  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync" data-sort="time" type="button">${SVG_ICONS.clockTime}<span>시간순</span>${sortDirSvg(eventSortAsc)}</button>`;   // 2026-09-20 Crenop: 모래시계 → 시계(여기 '시간순'은 시각 차례라 시계가 맞다. 모래시계는 '얼마나 걸렸나'(방송 길이·평균 시간) 쪽에 남는다)
+  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync" data-sort="time" type="button">${SVG_ICONS.clockTime}<span>시간순</span>${sortDirSvg(eventSortAsc)}</button>`;   // 2026-09-20 Crenop: 모래시계 → 시계. 시계는 이 탭이 시간을 적는 글리프라(줄마다 붙는 경과 시간과 같은 그림) 한 식구가 된다 — 통계 '방송 시간순' 버튼이 시계인 것도 같은 계통. 모래시계는 단독 지표('평균 시간'·'단일 방송 시간') 쪽
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
   // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
@@ -8495,7 +8522,10 @@ function tickBlackout() {
   const t = lastEndTime();
   if (t !== null) el.textContent = formatBlackout(Date.now() - t);
   const ov = document.getElementById('blackoutOverlay');   // 달이 늦게 도착했으면 부가 정보를 그때 채운다(초마다 확인 — 자료가 같으면 계산 생략)
-  if (ov && !ov.querySelector('.blackout-sub')) { const html = blackoutSubHtml(); if (html) ov.querySelector('.blackout-msg').insertAdjacentHTML('beforeend', html); }
+  if (ov && !ov.querySelector('.blackout-sub')) {
+    const html = blackoutSubHtml();
+    if (html) { ov.querySelector('.blackout-head').insertAdjacentHTML('beforeend', html); syncBlackoutVods(ov); }   // 한 줄 늘어난 만큼 열 수·자리를 다시 잡는다(2026-09-20: 이 경로가 빠져 있으면 마지막 줄이 다음 폴링까지 잘린다)
+  }
 }
 // 정전 통계(2026-09-08 Crenop): 정전 = 크루 전원 오프라인 구간 = 13명 세션 구간 합집합의 틈. 명전의 정전 중단·방지 위원회와 같은 재료(월 통계 전 달)·
 // 같은 합치기(mergeIntervals). 진행 중 방송은 끝을 지금으로, 마지막 틈(지금 진행 중인 정전)은 뺀다. 문턱 없이 모든 틈을 센다(한 사람이 끄고 다른 사람이 켜기까지의 몇 초도 정전).
@@ -8536,6 +8566,47 @@ function blackoutSubHtml() {
   if (!b || !b.n) return '';
   return `<span class="blackout-sub">평균 ${formatSpanCoarse(b.avg_ms)} · 최대 ${formatSpanCoarse(b.max_ms)}</span>`;   // 최소는 뺐다(2026-09-08 Crenop): 한 사람이 끄자마자 다른 사람이 켠 몇 초짜리 교대가 늘 0분으로 잡힌다
 }
+// 어제 다시보기(2026-09-20 Crenop) — 정전 타이머 아래. 라이브가 없으니 찬밥이라도 데워 먹는 자리다.
+// 어제(KST)에 '시작한' 방송만 센다. 자정을 넘겨 끝난 방송도 어제 것 — 세션의 시작월 귀속과 같은 규칙이다.
+// 다시보기가 아직 안 잡혔거나(종료 후 포착 대기) 구독 전용이라 못 잡는 방송도 줄을 남기고 그 멤버 VOD 목록으로 보낸다:
+//   방송 종료는 잡혀 있어 '어제 켰다'는 사실이 확실하므로, 이 자리가 비어 있다는 것은 '어제 휴방'이라는 뜻이어야 한다(Crenop).
+// 한 멤버가 여럿이면 전부 — 파트로 나뉜 방송, 하루에 두 번 켠 날. 자료는 정전 통계가 이미 받아 둔 월 통계라 추가 요청이 없다.
+let blackoutVodsSig = '';   // 방금 그린 목록의 자료 지문 — 다시 그릴지 판정에 쓴다(HTML 문자열 비교는 못 쓴다, applyBlackout 곁 주석)
+function blackoutVodsHtml() {
+  blackoutVodsSig = '';
+  const ymd = new Date(kstNow().getTime() - 86400000).toISOString().slice(0, 10);
+  const ym = ymd.slice(0, 7);
+  if (!statsState.data[ym]) { loadStatsMonth(ym); return ''; }   // 달이 바뀐 1일엔 어제가 지난달 — 도착하면 다음 판(≤10초)의 applyBlackout이 그린다
+  const kstDay = (iso) => { const t = new Date(iso).getTime(); return isNaN(t) ? '' : new Date(t + 9 * 3600 * 1000).toISOString().slice(0, 10); };
+  const rows = [];
+  for (const m of MEMBERS) {
+    const mine = [];
+    let longest = null;   // 다시보기가 하나도 없는 멤버의 대표 줄 — 어제 가장 길게 켠 방송
+    for (const s of ((statsState.data[ym][m.id] || {}).sessions || [])) {
+      if (kstDay(s.start) !== ymd) continue;
+      const at = new Date(s.start).getTime();
+      const ms = s.end ? new Date(s.end).getTime() - at : 0;
+      if (!longest || ms > longest.ms) longest = { m, at, href: `https://www.sooplive.com/station/${m.id}/vod`, thumb: '', title: s.title || '다시보기', ms };
+      for (const v of (sessionVods(s) || [])) mine.push({ m, at, href: vodPlayerUrl(v), thumb: v.thumb || '', title: v.title || s.title || '다시보기', ms: v.duration_ms || 0 });
+    }
+    // 다시보기가 있으면 그것만 전부. 하나도 없으면(포착 대기·구독 전용) 대표 한 줄로 '어제 켰다'는 사실만 남긴다 —
+    // 안 그러면 제목만 바꾼 몇 분짜리 켜짐(대기방 등)까지 다 서서 목록이 잡음으로 찬다(2026-09-20 실측: 14장 중 3장이 0분).
+    rows.push(...(mine.length ? mine : longest ? [longest] : []));
+  }
+  if (!rows.length) return '';
+  rows.sort((a, b) => a.at - b.at);
+  blackoutVodsSig = rows.map(r => `${r.m.id}|${r.at}|${r.href}|${r.ms}|${r.title}`).join('||');
+  const tiles = rows.map(r => {
+    const dur = r.ms >= 60000 ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${formatDuration(r.ms)}</span></span>` : '';   // 1분 미만은 시간을 안 적는다 — '0분'으로 읽히느니 비우는 게 낫다(제목만 바꾼 짧은 켜짐)
+    const thumb = r.thumb ? `<img src="${escapeHtml(r.thumb)}" alt="" loading="lazy">` : `<div class="placeholder"><img src="${escapeHtml(r.m.img)}" alt=""></div>`;   // 썸네일이 없으면 카드와 같은 아바타 자리
+    return `<a class="bv-tile" href="${escapeHtml(r.href)}" target="_blank" rel="noopener">`
+      + `<div class="card-thumb">${thumb}</div>`
+      + `<div class="card-text"><div class="card-name-row"><span class="card-name" style="color: ${r.m.color}">${r.m.name}</span>${dur}</div>`
+      + `<div class="card-title">${escapeHtml(r.title)}</div></div></a>`;
+  }).join('');
+  return `<div class="blackout-vods"><div class="bv-sec">${SVG_ICONS.soop}<span>어제 다시보기</span></div>`
+    + `<div class="bv-grid">${tiles}</div></div>`;   // 열 수·타일 폭은 syncBlackoutVods가 실측으로 정한다
+}
 // 현재 상태에 맞춰 오버레이를 붙이거나 뗀다. loadFeed 렌더 직후와 생방송 탭 진입 때 호출.
 function applyBlackout() {
   const app = document.getElementById('app');
@@ -8546,21 +8617,106 @@ function applyBlackout() {
   if (!(lastLiveCount === 0 && t !== null && !blackoutDismissed)) {
     if (existing) existing.remove();
     grid.classList.remove('blackout');
+    app.style.minHeight = '';   // bv-flow로 늘려 뒀던 자리(syncBlackoutVods)를 되돌린다
     return;
   }
   grid.classList.add('blackout');
-  if (existing) { tickBlackout(); const sub = existing.querySelector('.blackout-sub'); const html = blackoutSubHtml(); if ((sub ? sub.outerHTML : '') !== html) { if (sub) sub.remove(); if (html) existing.querySelector('.blackout-msg').insertAdjacentHTML('beforeend', html); } return; }   // 이미 떠 있으면 숫자만 갱신(부가 정보는 바뀌었을 때만)
+  if (existing) {   // 이미 떠 있으면 숫자만 갱신 — 꼬리(부가 정보·어제 다시보기)는 자료가 바뀌었을 때만 갈아끼운다
+    tickBlackout();
+    const msg = existing.querySelector('.blackout-msg');
+    const sub = blackoutSubHtml(), vods = blackoutVodsHtml();   // 둘은 한 덩어리로 비교·교체해야 순서가 안 뒤집힌다(하나만 다시 붙이면 뒤로 간다)
+    // 판정은 HTML 문자열이 아니라 자료 지문으로 한다(2026-09-20 실사고): 소스의 <path …/>를 DOM은 <path …></path>로 다시 적고,
+    // 화살표의 hidden 속성도 스크롤에 따라 오가서 문자열 비교가 영영 불일치했다 → 10초마다 목록이 통째로 갈려 밀어 둔 자리가 맨 앞으로 튕겼다.
+    const sig = sub + '||' + blackoutVodsSig;
+    if (msg.dataset.tail !== sig) {
+      msg.querySelectorAll('.blackout-sub, .blackout-vods').forEach(n => n.remove());
+      if (sub) msg.querySelector('.blackout-head').insertAdjacentHTML('beforeend', sub);   // 평균·최대는 제목 줄의 끝
+      if (vods) msg.insertAdjacentHTML('beforeend', vods);
+      msg.dataset.tail = sig;
+      syncBlackoutVods(existing);
+    }
+    return;
+  }
   const ov = document.createElement('div');
   ov.className = 'blackout-overlay';
   ov.id = 'blackoutOverlay';
-  ov.innerHTML = `<div class="blackout-msg">천타버스 정전된지<span class="blackout-time" id="blackoutTime">${formatBlackout(Date.now() - t)}</span>${blackoutSubHtml()}</div>`;
-  ov.addEventListener('click', () => {
+  const sub = blackoutSubHtml(), vods = blackoutVodsHtml();
+  ov.innerHTML = `<div class="blackout-msg"><div class="blackout-head"><span class="bh-lead">천타버스 정전된지</span>`
+    + `<span class="blackout-time" id="blackoutTime">${formatBlackout(Date.now() - t)}</span>${sub}</div>${vods}</div>`;
+  ov.querySelector('.blackout-msg').dataset.tail = sub + '||' + blackoutVodsSig;
+  ov.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;   // 타일(링크)·좌우 화살표(버튼)는 제 일만 하고 타이머는 그대로 둔다 — 화살표가 button이라 'a'만 보던 가드를 지나쳐 다음 타일을 보려다 타이머가 닫혔다(2026-09-20)
     blackoutDismissed = true;
     ov.remove();
     grid.classList.remove('blackout');
   });
   app.appendChild(ov);
+  syncBlackoutVods(ov);
 }
+// 다시보기 격자 자리잡기(2026-09-20 Crenop): 어제 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만'을 고를 근거가 없다 —
+//   그래서 전부 한 화면에 보이게 '한 줄에 몇 장'을 실측으로 고른다. 타일은 200px(다시보기 모달과 같은 크기)을 넘지 않고,
+//   160px(그 모달이 휴대폰에서 쓰는 반폭) 아래로도 안 내려간다. 200은 위 한계, 160은 읽히는 하한이다.
+// 폭의 출처는 창(100vw)이 아니라 흐린 카드 격자의 실측 폭이다 — 태블릿 좌 기둥 300px과 html의 scrollbar-gutter가 저절로 빠진다.
+//   (구 min(620px, 100vw-112px)는 900px 태블릿에서 상자를 본문 밖으로 114px 내보내고 페이지에 가로 스크롤 104px을 만들었다, 2026-09-20 실측)
+// 안 보이는 탭에서 재면 폭이 0이라 1열로 굳는다 — 0이면 아무것도 확정하지 않고 나간다(생방송 탭에 들어올 때 switchPage가 다시 부른다).
+// 자리 보정: 타이머는 화면 위 42% 지점에 붙는다(sticky top:42vh — 카드가 두 화면을 넘어 가운데 고정이 불가능해 택한 값).
+//   덩어리가 아래로만 자라면 치우쳐 보이므로 늘어난 높이의 절반만큼 끌어올린다.
+// 하한까지 줄여도 화면을 넘는 날(휴대폰에서 대여섯 장 이상)은 sticky를 놓고 흐름에 둔다(bv-flow) — 잘린 채 못 보느니 창 스크롤로 전부 본다.
+//   sticky는 담는 블록 밖으로 못 나가므로 #app 최소 높이도 같이 준다. 안 그러면 넘친 부분에 영영 닿을 수 없다.
+const BV_TILE_MAX = 200, BV_TILE_MIN = 160, BV_TIGHT = 130;   // 130 미만이면 시간 배지를 숨겨 이름을 살린다(.bv-tight)
+function syncBlackoutVods(ov) {
+  const msg = ov && ov.querySelector('.blackout-msg');
+  if (!msg) return;
+  const app = ov.parentElement;
+  const vods = msg.querySelector('.blackout-vods');
+  const grid = vods && vods.querySelector('.bv-grid');
+  const host = app && app.querySelector('.grid');
+  const n = grid ? grid.children.length : 0;
+  if (!n || !host || !host.clientWidth) {   // 목록이 없거나(어제 휴방) 안 보이는 탭에서 잰 값
+    if (!vods) { msg.style.top = ''; msg.classList.remove('bv-flow'); if (app) app.style.minHeight = ''; }
+    return;
+  }
+  const narrow = innerWidth <= 700, gap = narrow ? 8 : 12, pad = narrow ? 32 : 64;   // 상자 좌우 안여백(CSS와 같은 값)
+  const maxW = Math.max(BV_TILE_MIN, Math.min(1472, host.clientWidth - pad));
+  const headH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--head-h')) || 90;
+  const avail = innerHeight - headH - 48;
+  const apply = (c) => {
+    const tw = Math.min(BV_TILE_MAX, Math.floor((maxW - (c - 1) * gap) / c));
+    grid.style.gap = gap + 'px';
+    grid.style.width = (c * tw + (c - 1) * gap) + 'px';   // 상자 폭 = 실제로 쓰는 만큼(적게 켠 날 스크림만 넓어지지 않게)
+    grid.style.setProperty('--bv-tile', tw + 'px');
+    grid.classList.toggle('bv-tight', tw < BV_TIGHT);
+    return tw;
+  };
+  msg.classList.remove('bv-flow');
+  let cols = Math.max(1, Math.min(n, Math.floor((maxW + gap) / (BV_TILE_MAX + gap))));
+  for (;;) {
+    apply(cols);
+    if (msg.offsetHeight <= avail) break;                                                    // 한 화면에 들어갔다
+    if (cols >= n) break;                                                                    // 한 줄에 다 놓았는데도 넘친다
+    if (Math.min(BV_TILE_MAX, Math.floor((maxW - cols * gap) / (cols + 1))) < BV_TILE_MIN) break;   // 더 줄이면 못 읽는다
+    cols++;
+  }
+  // 하한(160px)까지는 줄이 줄어드는 쪽이 낫다 — 900px 태블릿에서 200px 두 열 여섯 줄(1101px)보다 160px 세 열 네 줄이 폭을 제대로 쓴다.
+  //   줄 수가 그대로면 안 바꾼다(PC에서 200px을 지키는 이유).
+  for (;;) {
+    const next = Math.min(BV_TILE_MAX, Math.floor((maxW - cols * gap) / (cols + 1)));
+    if (cols >= n || next < BV_TILE_MIN || Math.ceil(n / (cols + 1)) >= Math.ceil(n / cols)) break;
+    apply(++cols);
+  }
+  const rows = Math.ceil(n / cols);
+  if (Math.ceil(n / rows) < cols) apply(cols = Math.ceil(n / rows));   // 줄 수가 같으면 고르게 나눈다(11장 → 7+4 대신 6+5)
+  const over = msg.offsetHeight > avail;
+  msg.classList.toggle('bv-flow', over);
+  msg.style.top = over ? '' : `calc(42vh - ${Math.round(vods.getBoundingClientRect().height / 2)}px)`;
+  app.style.minHeight = over ? (msg.offsetHeight + 48) + 'px' : '';
+}
+// 창 크기가 바뀌면 열 수를 다시 고른다 — 이 파일의 다른 재계산들과 같은 120ms 묶음
+let blackoutFitTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(blackoutFitTimer);
+  blackoutFitTimer = setTimeout(() => syncBlackoutVods(document.getElementById('blackoutOverlay')), 120);
+});
 
 function renderLinks() {
   const body = document.getElementById('linksBody');
@@ -9802,8 +9958,9 @@ function timeStatsRowHtml(ts) {
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
 // 정렬 버튼(2026-09-18 Crenop 5차): 키마다 버튼 하나 — 왼쪽 아이콘 + 글씨 + 오른쪽 방향 화살표(↑ = 최신·큰 값 먼저, ↓ = 역순). 고른 버튼을 다시 누르면 역정렬.
 // 최근 활동의 '시간순'(시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'(달력 그림). 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
-// [알지만 안 고침 · 2026-09-20] 최근 활동 '시간순'이 시계로 바뀌면서 아래 '방송 시간순'(clockTime)과 그림이 겹친다. 뜻으로는 '길이'인 이 줄이 모래시계
-//   (통계 '평균 시간'과 같은 짝)가 맞지만, 아이콘 교체는 Crenop 확정 사항이라 이번엔 손대지 않았다.
+// [시계 vs 모래시계 · 2026-09-20 Crenop] '방송 시간순'을 모래시계로 바꾸지 않는 이유: 시계(clockTime)는 시간을 가리키는 표기 글리프이고,
+//   바로 아래 목록이 방송 길이를 그 그림으로 적는다 — 정렬 버튼은 자기가 줄 세우는 값과 같은 그림을 써야 한다. 그 문법은 최근 활동(줄마다 붙는
+//   경과 시간)부터 생방송 카드·영상 길이를 거쳐 여기까지 이어진다. 모래시계는 '얼마나 걸렸나'를 단독 지표로 말하는 자리(통계 '평균 시간' · 명전 '단일 방송 시간')에 남는다.
 const STATS_SORTS = [
   { key: 'date', label: '날짜순', ic: 'calendar' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },   // 날짜순은 달력 그림(2026-09-19 Crenop) — 최근 활동의 '시간순'은 2026-09-20부터 시계
   { key: 'peak', label: '최고 시청자순', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자순', ic: 'barChart' },

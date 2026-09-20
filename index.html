@@ -328,7 +328,7 @@
      그만큼 가운데 묶음이 옆으로 밀려 위 탭 줄과 어긋난다(2026-08-31 실사고). */
   .subbar-lead, .subbar-right { display: flex; align-items: center; gap: 8px; flex: 1 1 0; min-width: 0; overflow: hidden; }
   /* 중간 폭(950~1150): 갱신 문구를 보조바 우측으로 내려 상단바를 [로고 + 탭]만으로 줄인다.
-     탭 11칸(770) + 로고(120) = 890이라 950px까지 버틴다 — 태블릿·폴더블을 모바일 UI로 보내지 않기 위한 단계.
+     탭 12칸(802) + 로고(120) = 922라 950px까지 버틴다 — 태블릿·폴더블을 모바일 UI로 보내지 않기 위한 단계(11칸 770·890은 12탭 이전 수치, 2026-09-20 정정).
      탭을 2행으로 접는 대신 이 길을 택한 이유: 2행이 되면 보조바 부속이 '어느 행 아래'에 서야 하는지가
      사라져 칸 정렬이 무너지고, 아낀 가로만큼 세로(54→108)를 잃어 이득이 상쇄된다. */
 
@@ -379,8 +379,7 @@
   /* 일정 버튼의 종류 그림(2026-09-04): 달력 칸의 태그 그림(.cal-tag — 태그별 고유색)을 그대로 쓰되, 버튼 안에서는 다른 버튼 아이콘과 같은 자리·크기(16px·-1px 되감기·gap 10) */
   .sch-btn .cal-tag { display: contents; }
   .sch-btn .cal-tag svg { width: 16px; height: 16px; margin-top: -1px; flex-shrink: 0; }
-  /* 일정 줄은 좌우 한 칸씩 더 쓴다 — 양옆 탭(통계·현수막)은 보조바를 안 쓰므로 자리가 비어 있고,
-     제목이 잘리면 표시의 뜻이 사라진다. 흐름에서 빼내야(absolute) 칸 폭(64px)에 눌리지 않는다. */
+  /* (2026-09-20 삭제) '일정 줄은 양옆 탭 칸을 빌려 쓴다'는 설명은 2026-09-06에 일정 줄이 왼쪽 묶음 맨 앞으로 떠나면서 끝났다 — 지금 규칙은 아래 '일정 줄(왼쪽 묶음 맨 앞)' 주석. */
   /* 기념일은 프로필 칸의 오른쪽 끝에 붙는다 — 오른쪽 경계가 프로필 탭의 오른쪽 경계와 일치한다.
      문구가 칸(64px)보다 넓으므로 흐름에서 빼내 왼쪽으로 넘치게 둔다(일정 줄과 같은 문법). */
   .tab-aux[data-for="members"] { overflow: visible; position: relative; }
@@ -1956,7 +1955,11 @@
   /* 상세 펼침(주 아래·행 아래·오른쪽 열, 2026-09-01~09-06)은 폐지 — 칸을 누르면 1개는 그 영상으로 직행, 2개 이상은 영상 선택 모달(사이트 공통 규칙, 2026-09-06 Crenop).
      한 사람으로 좁힌 뒤엔 칸에 1~2개가 대부분이라 펼쳐 봐야 같은 그림 + 제목·길이뿐이었다. 제목은 PC에서 칸에 마우스를 올리면 뜬다(title). */
   .cal-di-none { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 0; }
-  .cal-loading { font-size: 11px; color: var(--muted); text-align: right; line-height: 14px; margin-bottom: 4px; }   /* 자료 도착 중 표시 — 자리를 잡아 두지 않아 다 오면 사라진다 */
+  /* 자료 도착 중 표시 — 흐름에서 빼낸다(2026-09-20 Crenop 신고: 다 오면 이 줄이 사라지며 달력이 18px 위로 들썩였다).
+     자리를 늘 잡아 두면(빈 줄 유지) 안 쓰는 여백이 상시 18px 남으므로, 기념일·일정 줄과 같은 문법으로 absolute를 택했다.
+     겹치는 자리: 격자 폼은 .calendar의 위 안여백(12px)이라 요일 머리줄을 2px만 스친다. 목록 폼은 첫 타일 오른쪽 위 모서리 — 불러오는 중이라 그 칸이 비어 있다. */
+  .calendar, .cal-list-form { position: relative; }
+  .cal-loading { position: absolute; top: 0; right: 0; z-index: 2; font-size: 11px; color: var(--muted); text-align: right; line-height: 14px; }
   /* 폼 전환 — 두 폼을 다 그려 두고 CSS가 하나만 보인다. 기본 = 타일 흐름(좁은 폭), PC 넓은 폭 = 7열 달력. */
   .cal-grid-form { display: none; max-width: 1450px; }   /* 200px 칸 ×7 + 간격 24 + .calendar 패딩 24 + 테두리 2(옛 폼 상한과 같은 값) — 본문이 더 넓어도 칸은 200에서 멈춘다 */
   .cal-list-form { display: block; }
@@ -2728,11 +2731,11 @@
     .nav-item[data-page="live"]      { grid-row: 3; grid-column: 2; }
     .nav-item[data-page="recent"]    { grid-row: 3; grid-column: 3; }
     .nav-item[data-page="calendar"] { grid-row: 4; grid-column: 1; }   /* 2026-09-18: 달력(구 썸네일)이 옛 지난 활동 자리로 */
-    .nav-item[data-page="chemistry"] { grid-row: 4; grid-column: 2; }
-    .nav-item[data-page="stats"]      { grid-row: 4; grid-column: 3; }
-    .nav-item[data-page="hall"]      { grid-row: 5; grid-column: 1; }   /* 2026-09-18: 명전(통계에서 독립)이 옛 썸네일 자리로 */
-    .nav-item[data-page="content"]   { grid-row: 5; grid-column: 2; }
-    .nav-item[data-page="banner"]    { grid-row: 5; grid-column: 3; }
+    .nav-item[data-page="stats"]      { grid-row: 4; grid-column: 2; }   /* 2026-09-20: 통계·케미 맞바꿈 */
+    .nav-item[data-page="chemistry"] { grid-row: 4; grid-column: 3; }
+    .nav-item[data-page="content"]   { grid-row: 5; grid-column: 1; }
+    .nav-item[data-page="banner"]    { grid-row: 5; grid-column: 2; }
+    .nav-item[data-page="hall"]      { grid-row: 5; grid-column: 3; }   /* 2026-09-20: 명전이 컨텐츠·현수막 뒤로(그림으로 모아 보는 세 탭이 한 줄) */
     .nav-item[data-page="music"]     { grid-row: 6; grid-column: 1; }
     .nav-item[data-page="like"]     { grid-row: 6; grid-column: 2; }
     .nav-item[data-page="links"]     { grid-row: 6; grid-column: 3; }
@@ -2869,12 +2872,16 @@
   <div class="topbar-logo"><img id="siteLogoImg" src="Title.webp" alt="CHUNTAVERSE"></div>
 <nav class="sidebar" id="sidebar">
   <button class="drawer-close" id="drawerClose" type="button" aria-label="메뉴 닫기"></button>
-  <!-- 탭 순서(2026-08-31 → 2026-09-18 12탭): [프로필 · 생방송 · 최근 활동] 매일 보는 것 → [달력 · 케미 · 통계]
-       쌓인 것을 보는 것 → [명전 · 컨텐츠 · 현수막] 모아 보는 것 → [음악 · 좋아요] → [관련 링크] 도구.
+  <!-- 탭 순서(2026-08-31 → 2026-09-20 12탭): [프로필 · 생방송 · 최근 활동] 매일 보는 것 → [달력 · 통계 · 케미]
+       쌓인 것을 보는 것 → [컨텐츠 · 현수막 · 명전] 모아 보는 것 → [음악 · 좋아요] → [관련 링크] 도구.
+       ★ 이 순서를 바꾸면 세 곳을 같이 고친다: ① 아래 버튼 마크업(PC 상단바는 마크업 순서가 곧 화면 순서 — .nav-list가 grid-auto-flow: column)
+       ② ≤1150px 블록의 '탭 이름 → 행·열' 표(태블릿 기둥·모바일 서랍은 마크업을 안 보고 그 표만 본다 — 빼먹으면 PC만 바뀐다)
+       ③ 보조바 .subbar-mid의 빈 칸 차례(탭과 같은 칸 규격이라 N번째 부속이 N번째 탭 아래에 선다 — 이름이 아니라 자리로 짝이 맺힌다).
        2026-09-06 재편(Crenop): 달력 탭이 컨텐츠·일정까지 담아 지난 활동과 역할이 겹쳤다 → 달력은 썸네일(다시보기·유튜브 그림)로 압축,
        컨텐츠 탭을 현수막과 같은 카드 격자로 되살리고, 일정은 보조바 버튼의 목록만 남긴다.
        2026-09-18 재편(Crenop): 지난 활동(옛 통계 탭, 05-06 신설)은 폐지 — 숫자 요약은 통계 탭으로, 달력·날짜 상세는 달력 탭(구 썸네일)으로 흩어 넣었다.
-       명전(06-12 신설)은 통계 탭에서 독립해 옛 썸네일 자리로. 탭마다 형태 하나: 최근 활동=흐름 · 달력=날짜 · 통계=한 멤버의 숫자 · 명전=크루 순위. -->
+       명전(06-12 신설)은 통계 탭에서 독립. 탭마다 형태 하나: 최근 활동=흐름 · 달력=날짜 · 통계=한 멤버의 숫자 · 명전=크루 순위.
+       2026-09-20 자리 이동(Crenop): 둘째 줄은 통계·케미 맞바꿈, 명전은 컨텐츠·현수막 뒤로 — 그림으로 모아 보는 세 탭이 한 줄에 선다. -->
   <div class="nav-list">
     <button class="nav-item" data-page="profile">
       <span class="nav-icon" id="navProfileIcon"></span>
@@ -2895,17 +2902,13 @@
       <span class="nav-icon" id="navCalendarIcon"></span>
       <span>달력</span>
     </button>
-    <button class="nav-item" data-page="chemistry">
-      <span class="nav-icon" id="navChemistryIcon"></span>
-      <span>케미</span>
-    </button>
     <button class="nav-item" data-page="stats">
       <span class="nav-icon" id="navStatsIcon"></span>
       <span>통계</span>
     </button>
-    <button class="nav-item" data-page="hall">
-      <span class="nav-icon" id="navHallIcon"></span>
-      <span>명전</span>
+    <button class="nav-item" data-page="chemistry">
+      <span class="nav-icon" id="navChemistryIcon"></span>
+      <span>케미</span>
     </button>
     <button class="nav-item" data-page="content">
       <span class="nav-icon" id="navContentIcon"></span>
@@ -2914,6 +2917,10 @@
     <button class="nav-item" data-page="banner">
       <span class="nav-icon" id="navBannerIcon"></span>
       <span>현수막</span>
+    </button>
+    <button class="nav-item" data-page="hall">
+      <span class="nav-icon" id="navHallIcon"></span>
+      <span>명전</span>
     </button>
     <button class="nav-item" data-page="music">
       <span class="nav-icon" id="navMusicIcon"></span>
@@ -2961,11 +2968,12 @@
         <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="최근 활동 알림"></span>
       </div>
       <div class="tab-aux" data-for="calendar"></div>
-      <div class="tab-aux" data-for="chemistry"></div>
+      <!-- 아래 다섯 칸의 차례는 탭 차례와 같아야 한다(2026-09-20 이동 반영) — 짝은 이름이 아니라 자리로 맺힌다(.subbar-mid가 탭 줄과 같은 칸 규격). -->
       <div class="tab-aux" data-for="stats"></div>
-      <div class="tab-aux" data-for="hall"></div>
+      <div class="tab-aux" data-for="chemistry"></div>
       <div class="tab-aux" data-for="content"></div><!-- 일정 줄은 2026-09-06부터 왼쪽 묶음(subbarLead) 맨 앞 — 이 칸은 열 맞춤용 빈 자리 -->
       <div class="tab-aux" data-for="banner"></div>
+      <div class="tab-aux" data-for="hall"></div>
       <div class="tab-aux" data-for="disco"></div>
       <div class="tab-aux" data-for="apply"></div>
       <div class="tab-aux" data-for="links" id="auxLinks"></div>
@@ -3157,7 +3165,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-20a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-20c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3290,7 +3298,13 @@ const MEMBER_BIRTHDAYS = {
   });
   if (btnR) btnR.addEventListener('click', () => setDrawer('r', !body.classList.contains('drawer-r')));
   if (scrim) scrim.addEventListener('click', closeAll);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+  // 모달이 떠 있으면 ESC는 모달 몫이다(2026-09-20) — 종전엔 서랍까지 같이 닫혀, 서랍 안 버튼으로 연 모달을 끄면 뒤의 서랍도 사라졌다.
+  // 판정은 손짓 가드와 같은 ov.hidden 하나로 통일. 모달 닫기는 아래 closeModal의 ESC 처리가 맡는다(두 리스너가 같은 키를 나눠 가진다).
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const ov = document.getElementById('lrOverlay');
+    if (!ov || ov.hidden) closeAll();
+  });
 
   // 탭을 고르면 좌측 서랍은 닫힌다. 벨은 탭 안에 있지만 탭 전환이 아니므로 제외.
   document.querySelectorAll('.nav-item').forEach(btn => {
@@ -3314,7 +3328,7 @@ const MEMBER_BIRTHDAYS = {
     btnR.classList.toggle('filtered', !!(c && c.total && c.shown < c.total));
   };
   // 폭에 따라 실제로 요소를 옮긴다(CSS로는 부모를 못 바꾼다).
-  //  PC   : [기념일·링크] [탭별 부속 11칸] [가이드]  — 보조바 한 줄
+  //  PC   : [기념일·링크] [탭별 부속 12칸] [가이드]  — 보조바 한 줄
   //  모바일: 드로어 우측 칸에 같은 순서로 세로 배치 — 기념일은 닫기 버튼 행, 가이드는 관련 링크 행.
   // 두 배치의 대응이 1:1이라 한쪽을 고치면 다른 쪽 자리가 자동으로 정해진다.
   let wasMobile = null, wasOverlay = null;
@@ -5583,7 +5597,9 @@ function updateHeaderCenter() {
     topLine = lastContentUpdate ? '열람 시 자동 갱신 · ' + lastContentUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'banner') {
     topLine = lastBannerUpdate ? '열람 시 자동 갱신 · ' + lastBannerUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
-  } else if (currentPage === 'stats') {
+  } else if (currentPage === 'hall') {
+    // 2026-09-20: 조건이 'stats'로 남아 있어 위 통계 분기에 먼저 걸려 영영 안 돌았다(명전이 통계에서 독립한 2026-09-18 재편의 잔재).
+    // 쓰는 쪽(renderHall 끝의 lastStatsTabUpdate)은 계속 살아 있었으므로 조건만 명전으로 옮긴다.
     topLine = lastStatsTabUpdate ? '열람 시 자동 갱신 · ' + lastStatsTabUpdate.toLocaleTimeString('ko-KR') + ' 기준' : '';
   } else if (currentPage === 'profile') {
     topLine = '';
@@ -7246,11 +7262,11 @@ function applyFilter() {
     if (cat === 'chat') return memberMatch || channelMatch;
     return memberMatch;
   });
-  filterCounts.events = { shown: filtered.length, total: allEvents.length };   // 서랍 버튼 채움용(2026-09-02)
-  // 정렬(2026-09-18 Crenop 5차): '시간순' 버튼 하나 — 모래시계 + 글씨 + 오른쪽 방향 화살표(↑ 최신 먼저 / ↓ 과거 먼저), 누를 때마다 역정렬. 통계 탭 상단바의 정렬 버튼과 같은 문법
+  filterCounts.recent = { shown: filtered.length, total: allEvents.length };   // 서랍 버튼 아이콘용(2026-09-02). 키는 화면 id(page-recent)에서 잘라낸 이름 — 2026-09-17 개명 때 여기만 'events'로 남아 최근 활동에서만 걸러짐 표시가 안 켜졌다(2026-09-20 정정)
+  // 정렬(2026-09-18 Crenop 5차): '시간순' 버튼 하나 — 시계(2026-09-20 Crenop: 모래시계에서 교체) + 글씨 + 오른쪽 방향 화살표(↑ 최신 먼저 / ↓ 과거 먼저), 누를 때마다 역정렬. 통계 탭 상단바의 정렬 버튼과 같은 문법
   const scrollDownSvg = SVG_ICONS.chevronsDown;
   const scrollUpSvg = SVG_ICONS.chevronsUp;
-  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync" data-sort="time" type="button">${SVG_ICONS.hourglass}<span>시간순</span>${sortDirSvg(eventSortAsc)}</button>`;
+  const sortBtnHtml = `<button class="sort-toggle sort-toggle-sync" data-sort="time" type="button">${SVG_ICONS.clockTime}<span>시간순</span>${sortDirSvg(eventSortAsc)}</button>`;   // 2026-09-20 Crenop: 모래시계 → 시계(여기 '시간순'은 시각 차례라 시계가 맞다. 모래시계는 '얼마나 걸렸나'(방송 길이·평균 시간) 쪽에 남는다)
   const markReadBtn = `<button class="timeline-scroll-btn mark-read-btn">${SVG_ICONS.checkAll}<span>모두 읽음</span></button>`;
   // 상단바 sticky(2026-08-09): 스크롤 내내 붙어 다니므로 모두 읽음·맨 위/아래·정렬을 여기 다 모은다.
   // 하단바는 완전 중복이 되어 폐지 — 맨 위로 버튼이 이리로 이사(맨 아래로 왼쪽).
@@ -9498,18 +9514,21 @@ function renderChemistry() {
     const cards = [...grid.querySelectorAll('.chem-card')];
     if (cards.length) {
       const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
-      const headOf = c => { const h = c.querySelector('.chem-head'); return h ? h.offsetHeight : 0; };
+      // 실측은 소수점까지(2026-09-20): offsetHeight는 정수로 내림해서, 실제 168.33px인 카드에 min-height 168px가 걸렸다.
+      // 그 0.33px만큼 카드가 자라 설명 보기를 켤 때마다 아래 카드들이 미세하게 들썩였다(Crenop 신고). 마지막에 올림해 늘 덮는다.
+      const hOf = el => el.getBoundingClientRect().height;
+      const headOf = c => { const h = c.querySelector('.chem-head'); return h ? hOf(h) : 0; };
       const wasOn = grid.classList.contains('chem-show-desc');
       grid.classList.add('chem-measure');   // 실측 동안 행 늘림 차단 — 옆 카드 높이가 내 실측에 오염되는 것 방지
-      grid.classList.remove('chem-show-desc'); const hOff = cards.map(c => c.offsetHeight); const headOff = cards.map(headOf);
-      grid.classList.add('chem-show-desc');    const hOn = cards.map(c => c.offsetHeight);  const headOn = cards.map(headOf);
+      grid.classList.remove('chem-show-desc'); const hOff = cards.map(hOf); const headOff = cards.map(headOf);
+      grid.classList.add('chem-show-desc');    const hOn = cards.map(hOf);  const headOn = cards.map(headOf);
       grid.classList.toggle('chem-show-desc', wasOn);
       grid.classList.remove('chem-measure');
       const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
       const maxByKind = {};   // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
       cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
       Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
-      cards.forEach(c => { c.style.minHeight = maxByKind[kindOf(c)] + 'px'; });
+      cards.forEach(c => { c.style.minHeight = Math.ceil(maxByKind[kindOf(c)]) + 'px'; });
     }
   }
 }
@@ -9782,9 +9801,11 @@ function timeStatsRowHtml(ts) {
 }
 // 방송별 목록 정렬(2026-09-18 Crenop): 최신순·과거순·방송 시간·최고 시청자·평균 시청자 — 값 없는 방송(진행 중 등)은 뒤로.
 // 정렬 버튼(2026-09-18 Crenop 5차): 키마다 버튼 하나 — 왼쪽 아이콘 + 글씨 + 오른쪽 방향 화살표(↑ = 최신·큰 값 먼저, ↓ = 역순). 고른 버튼을 다시 누르면 역정렬.
-// 최근 활동의 '시간순'(모래시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'(달력 그림). 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
+// 최근 활동의 '시간순'(시계)과 같은 문법 — 여기는 방송 시간순이 따로 있어 '날짜순'(달력 그림). 값 없는 방송(진행 중 등)은 방향과 무관하게 뒤로.
+// [알지만 안 고침 · 2026-09-20] 최근 활동 '시간순'이 시계로 바뀌면서 아래 '방송 시간순'(clockTime)과 그림이 겹친다. 뜻으로는 '길이'인 이 줄이 모래시계
+//   (통계 '평균 시간'과 같은 짝)가 맞지만, 아이콘 교체는 Crenop 확정 사항이라 이번엔 손대지 않았다.
 const STATS_SORTS = [
-  { key: 'date', label: '날짜순', ic: 'calendar' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },   // 날짜순은 달력 그림(2026-09-19 Crenop) — 최근 활동의 '시간순'은 모래시계 그대로
+  { key: 'date', label: '날짜순', ic: 'calendar' }, { key: 'duration', label: '방송 시간순', ic: 'clockTime' },   // 날짜순은 달력 그림(2026-09-19 Crenop) — 최근 활동의 '시간순'은 2026-09-20부터 시계
   { key: 'peak', label: '최고 시청자순', ic: 'arrowUp' }, { key: 'avg', label: '평균 시청자순', ic: 'barChart' },
 ];
 function sortDirSvg(asc) { return `<span class="sort-dir" aria-hidden="true">${asc ? SVG_ICONS.arrowLineDown : SVG_ICONS.arrowLineUp}</span>`; }

@@ -3191,7 +3191,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-21a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-22a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8521,11 +8521,11 @@ function tickBlackout() {
   if (!el) return;
   const t = lastEndTime();
   if (t !== null) el.textContent = formatBlackout(Date.now() - t);
-  const ov = document.getElementById('blackoutOverlay');   // 달이 늦게 도착했으면 부가 정보를 그때 채운다(초마다 확인 — 자료가 같으면 계산 생략)
-  if (ov && !ov.querySelector('.blackout-sub')) {
-    const html = blackoutSubHtml();
-    if (html) { ov.querySelector('.blackout-head').insertAdjacentHTML('beforeend', html); syncBlackoutVods(ov); }   // 한 줄 늘어난 만큼 열 수·자리를 다시 잡는다(2026-09-20: 이 경로가 빠져 있으면 마지막 줄이 다음 폴링까지 잘린다)
-  }
+  // 달이 늦게 도착했으면 꼬리(평균·최대 · 어제 다시보기)를 그 초에 채운다 — 다음 폴링(최대 10초)까지 기다리지 않는다.
+  //   2026-09-22 실측: 이번 달 자료는 0.03초에 왔는데 목록은 5.4초에 붙었다(다음 /feed 폴링이 끝난 순간). 종전엔 이 틱이 평균·최대만 채우고
+  //   목록은 applyBlackout(10초 폴링)에만 걸려 있었다. 둘 중 하나라도 비어 있을 때만 확인한다 — 다 붙은 뒤의 변화는 폴링 몫.
+  const ov = document.getElementById('blackoutOverlay');
+  if (ov && (!ov.querySelector('.blackout-sub') || !ov.querySelector('.blackout-vods'))) syncBlackoutTail(ov);
 }
 // 정전 통계(2026-09-08 Crenop): 정전 = 크루 전원 오프라인 구간 = 13명 세션 구간 합집합의 틈. 명전의 정전 중단·방지 위원회와 같은 재료(월 통계 전 달)·
 // 같은 합치기(mergeIntervals). 진행 중 방송은 끝을 지금으로, 마지막 틈(지금 진행 중인 정전)은 뺀다. 문턱 없이 모든 틈을 센다(한 사람이 끄고 다른 사람이 켜기까지의 몇 초도 정전).
@@ -8607,6 +8607,21 @@ function blackoutVodsHtml() {
   return `<div class="blackout-vods"><div class="bv-sec">${SVG_ICONS.soop}<span>어제 다시보기</span></div>`
     + `<div class="bv-grid">${tiles}</div></div>`;   // 열 수·타일 폭은 syncBlackoutVods가 실측으로 정한다
 }
+// 꼬리(평균·최대 + 어제 다시보기)를 지금 자료에 맞춘다 — 폴링(applyBlackout)과 1초 틱(tickBlackout)이 같이 쓴다.
+// 둘은 한 덩어리로 비교·교체해야 순서가 안 뒤집힌다(하나만 다시 붙이면 뒤로 간다).
+// 판정은 HTML 문자열이 아니라 자료 지문으로 한다(2026-09-20 실사고): 소스의 <path …/>를 DOM은 <path …></path>로 다시 적어
+//   문자열 비교가 영영 불일치했다 → 10초마다 목록이 통째로 갈렸다. 지문이 같으면 아무것도 안 건드린다.
+function syncBlackoutTail(ov) {
+  const msg = ov.querySelector('.blackout-msg');
+  const sub = blackoutSubHtml(), vods = blackoutVodsHtml();
+  const sig = sub + '||' + blackoutVodsSig;
+  if (msg.dataset.tail === sig) return;
+  msg.querySelectorAll('.blackout-sub, .blackout-vods').forEach(n => n.remove());
+  if (sub) msg.querySelector('.blackout-head').insertAdjacentHTML('beforeend', sub);   // 평균·최대는 제목 줄의 끝
+  if (vods) msg.insertAdjacentHTML('beforeend', vods);
+  msg.dataset.tail = sig;
+  syncBlackoutVods(ov);
+}
 // 현재 상태에 맞춰 오버레이를 붙이거나 뗀다. loadFeed 렌더 직후와 생방송 탭 진입 때 호출.
 function applyBlackout() {
   const app = document.getElementById('app');
@@ -8623,18 +8638,7 @@ function applyBlackout() {
   grid.classList.add('blackout');
   if (existing) {   // 이미 떠 있으면 숫자만 갱신 — 꼬리(부가 정보·어제 다시보기)는 자료가 바뀌었을 때만 갈아끼운다
     tickBlackout();
-    const msg = existing.querySelector('.blackout-msg');
-    const sub = blackoutSubHtml(), vods = blackoutVodsHtml();   // 둘은 한 덩어리로 비교·교체해야 순서가 안 뒤집힌다(하나만 다시 붙이면 뒤로 간다)
-    // 판정은 HTML 문자열이 아니라 자료 지문으로 한다(2026-09-20 실사고): 소스의 <path …/>를 DOM은 <path …></path>로 다시 적고,
-    // 화살표의 hidden 속성도 스크롤에 따라 오가서 문자열 비교가 영영 불일치했다 → 10초마다 목록이 통째로 갈려 밀어 둔 자리가 맨 앞으로 튕겼다.
-    const sig = sub + '||' + blackoutVodsSig;
-    if (msg.dataset.tail !== sig) {
-      msg.querySelectorAll('.blackout-sub, .blackout-vods').forEach(n => n.remove());
-      if (sub) msg.querySelector('.blackout-head').insertAdjacentHTML('beforeend', sub);   // 평균·최대는 제목 줄의 끝
-      if (vods) msg.insertAdjacentHTML('beforeend', vods);
-      msg.dataset.tail = sig;
-      syncBlackoutVods(existing);
-    }
+    syncBlackoutTail(existing);
     return;
   }
   const ov = document.createElement('div');
@@ -8936,7 +8940,7 @@ function likePollingState(runNow) {
   }
 }
 likePollingState(false);   // 부트 직후 — 위에서 4개를 이미 1회씩 호출했으므로 즉시 재실행 불필요
-setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간. tickSchedule은 순수 로컬 연산. tickBlackout은 오버레이에 부가 정보가 아직 없으면 blackoutSubHtml→computeBlackoutStats로 빠진 달을 loadStatsMonth에 요청할 수 있다(네트워크 있음 — 달별 30초 백오프로 매초 재요청은 안 함. 2026-09-19 정정: 종전 '전부 순수 로컬, 네트워크 없음'은 틀렸다)
+setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간. tickSchedule은 순수 로컬 연산. tickBlackout은 오버레이에 부가 정보나 어제 다시보기가 아직 없으면 syncBlackoutTail→blackoutSubHtml·blackoutVodsHtml로 빠진 달을 loadStatsMonth에 요청할 수 있다(네트워크 있음 — 달별 30초 백오프로 매초 재요청은 안 함. 2026-09-19 정정: 종전 '전부 순수 로컬, 네트워크 없음'은 틀렸다)
 
 // ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──
 // (구 모드 배지 내부 보정(--badge-vnudge)은 2026-07-13 SVG 전환으로 소멸 — 지금은 줄 정렬 축만 이 함수를 씀)

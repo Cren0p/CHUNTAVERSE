@@ -1417,16 +1417,11 @@
   .ds-vod-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface2); }
   .ds-vod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ds-vod:hover .ds-vod-thumb { outline: 1.5px solid var(--accent); }
-  .ds-vod-title { display: flex; align-items: center; gap: 4px; min-height: 20px; margin-top: 4px; font-size: 12px; line-height: 1.35; color: var(--text); }   /* v13: 배지·글자 세로 중앙 + 배지 없는 타일도 같은 높이(20px 상시 확보 — 정렬 어긋남 예방, Crenop 지정) */
-  .ds-vod-title .day-session-mode { flex: none; }
-  .ds-vod-tt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 타일 글자는 생방송 카드 규칙(2026-09-22 Crenop) — tileTextHtml 곁 주석. 1행 높이 고정: 이름을 모르는(멤버 아닌) 타일도 제목 줄이 옆 타일과 같은 높이(이름 19px 실측) */
+  .ds-vod .card-text { margin-top: 6px; }
+  .ds-vod .card-name-row { min-height: 19px; }
   /* (.ds-vod-badge는 v12에서 폐기 — 기존 모드 배지 문법(day-session-mode + labelBadgeSvg) 재사용) */
   .ds-vod-none { font-size: 11px; color: var(--muted); }
-  /* v4: 영상 길이는 썸네일을 가리지 않고 제목 아래 줄에 — 생방송/이벤트 탭의 clockTime 문법 그대로 */
-  /* v5 색 분류: 인라인 시간 배지는 무채색 — 생방송 카드 .card-btime의 2026-07-17 확정("무채색, 경과 표시와 통일")과 동일 부류.
-     파랑(--ev-start)은 '방송 시간' 지표 라벨 아이콘과 세션 행 시간 아이콘에만. */
-  .ds-vod-dur { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; font-size: 11px; color: var(--text2); font-weight: 600; }   /* 사실 값(길이) = 2차 */
-  .ds-vod-dur svg { width: 12px; height: 12px; display: block; flex: none; }
   /* 일별 요약 변경 로그의 경과 배지 — 이벤트 탭 .event-elapsed 재사용, 10px 라인에 맞게 축소 */
   .day-session-change .event-elapsed { font-size: 11px; margin-left: 2px; }
   .day-session-change .event-elapsed svg { width: 10px; height: 10px; vertical-align: -1px; }
@@ -2044,10 +2039,8 @@
   .cal-tag[data-tag="music"] { color: var(--ev-yellow); }
   .cal-cell.has:hover { border-color: var(--accent); }
   a.cal-cell { text-decoration: none; color: inherit; }   /* 1개인 날 = 그 영상으로 직행하는 링크 — 버튼(2개 이상, 모달)·상자(없음)와 같은 모양 */
-  /* 타일 200px 문법(.ds-vod)의 겉상자 — 영상 선택 모달(그날 타일·컨텐츠 카드)이 쓴다. 이름줄(.cal-vod-who)은 컨텐츠 모달용 */
+  /* 타일 200px 문법(.ds-vod)의 겉상자 — 영상 선택 모달(그날 타일·컨텐츠 카드)이 쓴다. 이름은 타일 안 1행(썸네일 위 이름줄 .cal-vod-who는 2026-09-22 폐지) */
   .cal-vod { width: 200px; }
-  .cal-vod-who { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
-  .cal-vod-who img { width: 18px; height: 18px; display: block; }
   /* 기둥의 종류 버튼 아이콘 색 = 그 아이콘의 사이트 배정색(2026-09-02 Crenop 지정): 숲 ∞ 파랑(--ev-start)·유튜브 빨강.
      칸의 칩도 같은 그림이라 같은 색 — 지난 활동의 .cd-chip.broadcast(숲=파랑)와 한 문법이 된다.
      글자는 통계 탭 종류 버튼과 같이 흐림→켜지면 민트(.stats-kind-btn). */
@@ -3191,7 +3184,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-22c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-22d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3855,7 +3848,7 @@ function openTitleImageModal(name, url) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .cal-txt-line, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .ds-vod-tt, .sch-line-txt, .sch-line-shell, .tb-t-pc';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .cal-txt-line, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .sch-line-txt, .sch-line-shell, .tb-t-pc';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -5910,11 +5903,10 @@ function calPeriodHtml() {
     <div class="stats-period-row"><button class="stats-month-btn" data-calydir="prev" ${prevDis}>${SVG_ICONS.chevronLeft}</button><div class="stats-period-wrap no-all">${btns.join('')}</div><button class="stats-month-btn" data-calydir="next" ${nextDis}>${SVG_ICONS.chevronRight}</button></div>`;
 }
 
-// 유튜브 타일 — 다시보기 타일(vodTileHtml)과 같은 200px 문법(.ds-vod)에 썸네일 + 제목
-function ytTileHtml(y) {
+// 유튜브 타일 — 다시보기 타일(vodTileHtml)과 같은 200px 문법(.ds-vod) · 같은 글자 규칙(mediaTileHtml)
+function ytTileHtml(y, member) {
   const id = ytVideoId(y.url);
-  return `<a class="ds-vod" href="${escapeHtml(y.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : ''}</span>` +
-    `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(y.title || '')}</span></span></a>`;
+  return mediaTileHtml({ href: y.url, thumb: id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : '', member, title: y.title });
 }
 // 그날 영상이 둘 이상인 칸을 누르면 — 영상 선택 모달(사이트 공통 패널, 제목 자리에 날짜). 타일엔 제목·길이가 있다(칸엔 없다).
 function openDayPickModal(key, d) {
@@ -5925,13 +5917,13 @@ function openDayPickModal(key, d) {
   const memberId = calMember().id, ym = calYm();
   if (calState.type === 'live') {
     // 방송 단위: 방송마다 글자 행(시각·길이·시청자 — 통계 탭의 방송별 목록과 같은 부품) + 그 방송의 다시보기 타일. 다시보기 없는 방송은 행만.
-    body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, parts }) => sessionRowHtml(s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v)}</div>`).join('')}</div>` : '')).join('')}</div>`;
+    body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, parts }) => sessionRowHtml(s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v, calMember())}</div>`).join('')}</div>` : '')).join('')}</div>`;
     body.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
       const sess = d.live.find(({ s }) => String(s.broad_no) === b.dataset.vodpick);
-      openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`);
+      openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId]);
     }));
   } else if (calState.type === 'youtube') {
-    body.innerHTML = `<div class="ds-vods">${d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y)}</div>`).join('')}</div>`;
+    body.innerHTML = `<div class="ds-vods">${d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y, calMember())}</div>`).join('')}</div>`;
   } else if (calState.type === 'post') {
     body.innerHTML = `<div class="day-detail-list">${d.posts.map(({ p }) => dayItemRowHtml('post', p)).join('')}</div>`;
   } else {
@@ -6050,7 +6042,6 @@ function pickVodTiles(pick) {
   if (pick.ym && !monthData) return { html: '', clipsHtml: '', pending: true, hrefs: [] };
   const [y, mo] = pick.ym ? pick.ym.split('-').map(Number) : [0, 0];
   const mi = id => { const k = MEMBERS.findIndex(x => x.id === id); return k < 0 ? 999 : k; };
-  const whoLine = m => `<span class="cal-vod-who"><img src="${m.img}" alt="">${escapeHtml(m.name)}</span>`;
   const items = [];   // { mi: 멤버 순서, k: 같은 멤버 안 순서, html }
   const clips = [];   // 클립·캐치(2026-09-09) — 다시보기와 다른 구획
   const shown = new Set();   // 이미 그린 영상 번호 — 시트 포함이 자동 목록과 겹치면 한 번만
@@ -6068,7 +6059,7 @@ function pickVodTiles(pick) {
         seen.add(v.title_no);
         if ((pick.exclude || []).includes(String(v.title_no))) continue;   // 시트가 뺀 것('-' 표시)
         shown.add(String(v.title_no));
-        items.push({ mi: mi(id), k: items.length, href: vodPlayerUrl(v), html: `<div class="cal-vod">${whoLine(m)}${vodTileHtml(v)}</div>` });
+        items.push({ mi: mi(id), k: items.length, href: vodPlayerUrl(v), html: `<div class="cal-vod">${vodTileHtml(v, m)}</div>` });
       }
     }
   }
@@ -6076,7 +6067,7 @@ function pickVodTiles(pick) {
     if (shown.has(String(it.no))) return;
     shown.add(String(it.no));
     const hit = it.catch ? null : findLoadedVod(it.no);   // ① 불러온 목록 어디든(캐치는 목록에 없다)
-    if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, href: vodPlayerUrl(hit.v), html: `<div class="cal-vod">${whoLine(hit.m)}${vodTileHtml(hit.v)}</div>` }); return; }
+    if (hit) { items.push({ mi: mi(hit.m.id), k: items.length, href: vodPlayerUrl(hit.v), html: `<div class="cal-vod">${vodTileHtml(hit.v, hit.m)}</div>` }); return; }
     if (!it.catch && pick.ym && members.some(id => vodState.loading.has(vodKey(id, prevYmOf(pick.ym))))) { pending = true; }   // 전달 목록이 오는 중이면 기다린다
     else {
       // ①-2 번호 조회(2026-09-09): 목록·스냅샷에 없는 번호(클립·캐치·19금 등)는 워커 /vodinfo로 제목·썸네일·길이·종류를 받는다. 오는 중이면 pending(도착하면 다시 그린다)
@@ -6086,8 +6077,7 @@ function pickVodTiles(pick) {
         const sp = splitMemberPrefix(it.title);   // 시트 제목 앞의 멤버 이름은 멤버로(제목에서 뗀다) — 조회의 주인 멤버가 있으면 그것이 우선
         const v = vodInfoAsItem(it.no, info, it.url, sp.rest);
         const owner = sp.member || MEMBER_BY_ID[info.member_id];   // 시트에 적은 이름이 우선(2026-09-10 Crenop: 캐치 뒤 '김웰로'), 없으면 조회의 주인 멤버
-        const who = owner ? whoLine(owner) : '';
-        const tile = `<div class="cal-vod">${who}${vodTileHtml(v)}</div>`;
+        const tile = `<div class="cal-vod">${vodTileHtml(v, owner)}</div>`;
         if (info.kind === 'REVIEW') items.push({ mi: owner ? mi(owner.id) : 999, k: items.length, href: v.href || vodPlayerUrl(v), html: tile });
         else clips.push({ mi: owner ? mi(owner.id) : 999, k: clips.length, href: v.href || vodPlayerUrl(v), html: tile });   // 다시보기(REVIEW)가 아니면 전부 '클립' 구획(클립·캐치·업로드 VOD — 2026-09-10 Crenop)
         return;
@@ -6096,7 +6086,7 @@ function pickVodTiles(pick) {
     const sp = splitMemberPrefix(it.title); const named = sp.member;   // ② 제목 첫 낱말 = 멤버 이름
     const label = named ? (sp.rest || '다시보기') : (it.title || `다시보기 ${i + 1}`);
     // 목록 밖(19금·구독+ 등)은 시트 제목만 단 빈 틀 — 링크 고르기의 유튜브 아닌 링크와 같은 모양
-    items.push({ mi: named ? mi(named.id) : 999, k: items.length, href: it.url, html: `<div class="cal-vod">${named ? whoLine(named) : ''}<a class="ds-vod" href="${escapeHtml(it.url)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>` });
+    items.push({ mi: named ? mi(named.id) : 999, k: items.length, href: it.url, html: `<div class="cal-vod">${mediaTileHtml({ href: it.url, thumb: '', member: named, title: label })}</div>` });
   });
   items.sort((a, b) => a.mi - b.mi || a.k - b.k); clips.sort((a, b) => a.mi - b.mi || a.k - b.k);
   return { html: items.map(x => x.html).join(''), clipsHtml: clips.map(x => x.html).join(''), pending, hrefs: items.concat(clips).map(x => x.href) };
@@ -6133,9 +6123,7 @@ function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '
     const sp = splitMemberPrefix(rawTitle), manual = sp.rest;
     if (PHOTO_URL_RE.test(u)) {   // 사진(2026-09-16) — 조회 없음(유튜브·게시글 판정보다 먼저)
       const pn = ++nth.photo;
-      const pwho = sp.member ? `<span class="cal-vod-who"><img src="${sp.member.img}" alt="">${escapeHtml(sp.member.name)}</span>` : '';
-      groups.photo.push(`<div class="cal-vod photo">${pwho}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="${escapeHtml(u)}" alt="" loading="lazy"></span>`
-        + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || `사진 ${pn}`)}</span></span></a></div>`);
+      groups.photo.push(`<div class="cal-vod photo">${mediaTileHtml({ href: u, thumb: u, member: sp.member, title: manual || `사진 ${pn}` })}</div>`);
       return;
     }
     const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
@@ -6145,23 +6133,22 @@ function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
     const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (yt && yt.title) || (id ? `유튜브 ${nth.youtube + 1}` : postNo ? '게시글' : (host || `링크 ${nth.link + 1}`));
     const whoM = sp.member || (found && found.m) || (yt && memberByYtAuthor(yt.author_url)) || null;
-    const who = whoM ? `<span class="cal-vod-who"><img src="${whoM.img}" alt="">${escapeHtml(whoM.name)}</span>` : '';
     const vodNo = (!id && !postNo) ? soopVodTitleNo(u) : '';
     if (vodNo) {   // 숲 플레이어 주소(2026-09-09): 스냅샷·목록 → 없으면 번호 조회. 다시보기는 '다시보기' 구획, 클립·캐치는 '클립·캐치' 구획(모두 타일)
       const hit = isSoopCatchUrl(u) ? null : findLoadedVod(vodNo);
-      if (hit) { groups.vod.push(`<div class="cal-vod"><span class="cal-vod-who"><img src="${hit.m.img}" alt="">${escapeHtml(hit.m.name)}</span>${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v)}</div>`); return; }
+      if (hit) { groups.vod.push(`<div class="cal-vod">${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v, hit.m)}</div>`); return; }
       const info = vodInfoState.data[vodNo];
-      if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}"><a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"></span><span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || '불러오는 중')}</span></span></a></div>`); return; }
+      if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}">${mediaTileHtml({ href: u, thumb: '', member: sp.member, title: manual || '불러오는 중' })}</div>`); return; }
       // 멤버 이름은 위에서 한 번 뗀 sp(rawTitle 기준)를 쓴다 — 여기서 manual(이미 뗀 제목)에 다시 걸면 이름이 사라진다(2026-09-10 실사고: 캐치 뒤 '김웰로' 소실)
       const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
       const owner = sp.member || (info && MEMBER_BY_ID[info.member_id]);   // 시트 이름 우선(2026-09-10)
-      const tile = `<div class="cal-vod">${owner ? `<span class="cal-vod-who"><img src="${owner.img}" alt="">${escapeHtml(owner.name)}</span>` : ''}${vodTileHtml(v)}</div>`;
+      const tile = `<div class="cal-vod">${vodTileHtml(v, owner)}</div>`;
       groups[(info && info.kind !== 'REVIEW') || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);   // 다시보기(REVIEW)가 아니면 전부 '클립'(2026-09-10)
       return;
     }
     if (id) nth.youtube++; else if (!postNo) nth.link++;   // 이 칸이 들어갈 구획의 순번을 센다(제목이 있는 칸도 자리는 차지한다)
-    if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
-      + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
+    const ytThumb = id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : '';   // 따로 뺀 까닭: 템플릿 안 템플릿에 '//'가 있으면 부팅 순서 검사(verify_boot_order)의 주석 판별이 뒤를 통째로 지운다
+    if (id) groups.youtube.push(`<div class="cal-vod">${mediaTileHtml({ href: u, thumb: ytThumb, member: whoM, title: label })}</div>`);
     else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${whoM ? `<span class="day-item-time">${escapeHtml(whoM.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);
   });
   const SEC = { photo: ['photo', '사진'], youtube: ['youtube', '유튜브'], post: ['board', '게시글'], link: ['link', '링크'], vod: ['soop', '다시보기'], clip: ['soop', '클립'] };   // clip = 다시보기 아닌 숲 영상 전부(클립·캐치·업로드)
@@ -6823,8 +6810,6 @@ function buildCard(m, info) {
   else if (info.title) titleText = info.title;
   else if (mode && mode !== 'normal') titleText = modePlaceholder(mode) || '방송 중';
   else titleText = '방송 중';
-  const btimeHtml = btime ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${btime}</span></span>` : '';   // 시계 = SVG 아이콘(구 ⏱ 이모지 — 이모지 배제, 2026-07-13)
-  const nameColorStyle = info.live ? `color: ${m.color}` : '';
   card.innerHTML = `
     <div class="card-thumb">
       ${thumbHtml}
@@ -6833,13 +6818,7 @@ function buildCard(m, info) {
     </div>
     <div class="card-info">
       ${avatarHtml}
-      <div class="card-text">
-        <div class="card-name-row">
-          <span class="card-name" style="${nameColorStyle}">${m.name}</span>
-          ${btimeHtml}
-        </div>
-        <div class="card-title ${info.live ? 'is-live' : ''}">${escapeHtml(titleText)}</div>
-      </div>
+      ${tileTextHtml({ name: m.name, color: info.live ? m.color : '', time: btime, title: titleText, titleCls: info.live ? 'is-live' : '' })}
     </div>
   `;
   return card;
@@ -7332,7 +7311,7 @@ function applyFilter() {
     if (!a || !tl.contains(a)) return;
     ev.preventDefault();
     const parts = a.classList.contains('ev-vodnone') ? [] : (endVodResolve(a.dataset.member, a.dataset.broad) || []);
-    openVodPickModal(parts, a.getAttribute('href'));   // 없음 확정 → "다시보기가 없습니다." 알림(목록 링크는 모달 안 보조)
+    openVodPickModal(parts, a.getAttribute('href'), MEMBER_BY_ID[a.dataset.member]);   // 없음 확정 → "다시보기가 없습니다." 알림(목록 링크는 모달 안 보조)
   });
   // 맨 위/아래 = 페이지 끝(2026-09-03 세션 70, Crenop 실사고): 종전 scrollIntoView는 목록 상자의 위·아랫변을 화면에 맞추는 것이라
   // 위쪽은 붙어 있는 머리(띠+보조바 ≈ --head-h) 아래로 들어가 가려지고, 아래쪽은 상자 밑 여백(20px)만큼 못 갔다. 목록은 어느 폭에서도
@@ -7644,7 +7623,7 @@ function ensureVodInfo(no, isCatch) {
   no = String(no);
   if (vodInfoState.data[no] !== undefined || vodInfoState.loading.has(no)) return;
   vodInfoState.loading.add(no);
-  fetch(`${WORKER_URL}/vodinfo?no=${encodeURIComponent(no)}${isCatch ? '&kind=catch' : ''}`).then(r => r.ok ? r.json() : null).then(j => {
+  fetch(`${WORKER_URL}/vodinfo?no=${encodeURIComponent(no)}${isCatch ? '&kind=catch' : ''}&v=2`).then(r => r.ok ? r.json() : null).then(j => {   // &v= = 워커 VODINFO_V(조회 모양의 판) — 올리면 브라우저 하루 캐시의 옛 응답을 건너뛴다(2: 다시보기·캐치 주인, 2026-09-22)
     vodInfoState.data[no] = (j && j.ok) ? j : false;
   }).catch(() => { vodInfoState.data[no] = false; }).finally(() => { vodInfoState.loading.delete(no); if (modalRepaint) modalRepaint(); });
 }
@@ -7663,7 +7642,9 @@ function memberByYtAuthor(authorUrl) {
   const h = ytHandleOf(authorUrl); if (!h) return null;
   for (const m of MEMBERS) {
     const L = (MEMBER_LINKS[m.id] || {}).common || {};
-    for (const v of [L['유튜브'], L['유튜브2'] && L['유튜브2'].url]) if (v && ytHandleOf(v) === h) return m;
+    // 둘 다 { label, url } — 관련 링크 시트 이관(2026-09-19) 뒤로 '유튜브'도 객체다. 종전 코드 표는 '유튜브'만 주소 문자열이라 여기가 문자열로 읽었고,
+    //   이관 뒤엔 첫 채널이 '[object Object]'로 비교돼 멤버 본채널 영상의 이름줄이 빠졌다(2026-09-22 Crenop 발견). 두 꼴 다 받는다
+    for (const v of [L['유튜브'], L['유튜브2']]) { const u = typeof v === 'string' ? v : (v && v.url); if (u && ytHandleOf(u) === h) return m; }
   }
   return null;
 }
@@ -7696,18 +7677,34 @@ function vodsForBroad(memberId, ym, broadNo) {   // null=목록 미도착·broad
   return list.filter(v => v.broad_no === String(broadNo)).sort((a, b) => (a.part || 0) - (b.part || 0));
 }
 function vodPlayerUrl(v, sec) { return `https://vod.sooplive.com/player/${v.title_no}${sec != null ? `/?change_second=${sec}` : ''}`; }   // v13: 시점 이동(Crenop 제공 파라미터)
-function vodBadges(v) {   // v12: 기존 모드 배지 문법 그대로(labelBadgeSvg 계열) — 새 배지 스타일 폐기(Crenop 지정)
+// 다시보기 배지(19+·구독+) — 썸네일 오른쪽 위, 생방송 카드의 방송 모드 배지와 같은 자리·같은 모양(.badge-mode, 2026-09-22 Crenop 1-A). 종전엔 제목 앞(.day-session-mode)
+function vodBadges(v) {
   let b = '';
-  if (v.grade === 19) b += `<span class="day-session-mode adult" role="img" aria-label="19+">${modeBadgeSvg('adult')}</span>`;
-  if (v.auth_no === 107) b += `<span class="day-session-mode subscription" role="img" aria-label="구독+">${modeBadgeSvg('subscription')}</span>`;   // auth 107 — 실측 상관 기반
+  if (v.grade === 19) b += `<span class="badge-mode adult" role="img" aria-label="19+">${modeBadgeSvg('adult')}</span>`;
+  if (v.auth_no === 107) b += `<span class="badge-mode subscription" role="img" aria-label="구독+">${modeBadgeSvg('subscription')}</span>`;   // auth 107 — 실측 상관 기반
   return b;
 }
-function vodTileHtml(v) {
-  // v4: 길이는 썸네일 오버레이가 아니라 제목 아래 줄 — 생방송·이벤트 탭의 clockTime 문법 준용(썸네일 가림 방지, Crenop 지정)
-  const dur = v.duration_ms ? `<span class="ds-vod-dur">${SVG_ICONS.clockTime}${v.duration_ms < 60000 ? `${Math.round(v.duration_ms / 1000)}초` : formatDuration(v.duration_ms)}</span>` : '';   // v5: 무채색 — card-btime 부류(인라인 시간 배지). 1분 미만(캐치)은 초로(2026-09-09)
-  return `<a class="ds-vod" href="${v.href ? escapeHtml(v.href) : vodPlayerUrl(v)}" target="_blank" rel="noopener">` +   // v.href: 캐치(/player/번호/catch) 같은 특수 주소(2026-09-09)
-    `<span class="ds-vod-thumb">${v.thumb ? `<img src="${escapeHtml(v.thumb)}" alt="" loading="lazy">` : ''}</span>` +
-    `<span class="ds-vod-title">${vodBadges(v)}<span class="ds-vod-tt">${escapeHtml(v.title || '')}</span></span>${dur}</a>`;   // v13: 제목=flex 행(배지·글자 세로 중앙), 말줄임은 내부 스팬
+// ── 썸네일 타일의 글자(2026-09-22 Crenop): 생방송 카드 규칙 — 썸네일 아래 1행 [이름(멤버 색) · 시계 시간], 2행 제목(회색 한 줄).
+//    생방송 카드·정전 '어제 다시보기'·모달 타일(다시보기·클립·유튜브·사진 — 컨텐츠·현수막·케미·달력 하루·다시보기 선택)이 이 함수 하나를 쓰고,
+//    글자 모양은 .card-name-row·.card-name·.card-btime·.card-title 한 벌이다. 이름을 모르면(멤버가 아닌 영상) 이름 자리만 비운다.
+//    영상 줄(프로필·음악·크루 핫클립)은 시트 자료가 제목뿐(이름·시간 없음)이라 이 규칙 밖 — 두 줄 제목(.vs-title) 그대로(Crenop 2026-09-22 2-제외).
+//    o = { name, color, time, title, titleCls } — color가 비면 이름은 기본 글자색(생방송 카드의 오프라인), time은 시계 뒤 글자.
+function tileTextHtml(o) {
+  const t = o.time ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${escapeHtml(o.time)}</span></span>` : '';   // 시계 = SVG 아이콘(구 ⏱ 이모지 — 이모지 배제, 2026-07-13)
+  const n = o.name ? `<span class="card-name"${o.color ? ` style="color: ${o.color}"` : ''}>${escapeHtml(o.name)}</span>` : '';
+  return `<div class="card-text"><div class="card-name-row">${n}${t}</div><div class="card-title${o.titleCls ? ' ' + o.titleCls : ''}">${escapeHtml(o.title || '')}</div></div>`;
+}
+// 모달 타일(200px .ds-vod) — 썸네일(배지는 오른쪽 위) + tileTextHtml. o = { href, thumb, badges, member, time, title }
+function mediaTileHtml(o) {
+  return `<a class="ds-vod" href="${escapeHtml(o.href || '')}" target="_blank" rel="noopener">`
+    + `<span class="ds-vod-thumb">${o.thumb ? `<img src="${escapeHtml(o.thumb)}" alt="" loading="lazy">` : ''}${o.badges ? `<span class="badge-mode-wrap">${o.badges}</span>` : ''}</span>`
+    + tileTextHtml({ name: o.member ? o.member.name : '', color: o.member ? o.member.color : '', time: o.time, title: o.title }) + '</a>';
+}
+// 영상 길이 글자 — 1분 미만(캐치)은 초로(2026-09-09)
+function vodDurText(ms) { return ms ? (ms < 60000 ? `${Math.round(ms / 1000)}초` : formatDuration(ms)) : ''; }
+// 다시보기·클립 타일 — member = 그 영상의 멤버(모르면 비움). v.href: 캐치(/player/번호/catch) 같은 특수 주소(2026-09-09)
+function vodTileHtml(v, member) {
+  return mediaTileHtml({ href: v.href || vodPlayerUrl(v), thumb: v.thumb, badges: vodBadges(v), member, time: vodDurText(v.duration_ms), title: v.title });
 }
 
 // ── 이벤트 탭 VOD 직결 v12(2026-08-29): 종료된 방송의 "모든" 이벤트(시작·제목/모드 변경·채팅·종료)를 그 VOD로 ──
@@ -7807,14 +7804,14 @@ function applyVodLinks(tl) {
     a.classList.add('ev-vodmulti');                   // 오프셋 미상 + 복수 파트 → 선택 모달
   });
 }
-function openVodPickModal(parts, listUrl) {
+function openVodPickModal(parts, listUrl, member) {   // member = 그 방송의 멤버(타일 1행 이름, 2026-09-22)
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
   head.innerHTML = `<span>${parts.length > 0 ? '다시보기 선택' : '다시보기'}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   body.innerHTML = parts.length > 0
-    ? `<div class="ds-vods">${parts.map(vodTileHtml).join('')}</div>`
+    ? `<div class="ds-vods">${parts.map(v => vodTileHtml(v, member)).join('')}</div>`
     : `<div class="vod-pick-empty">다시보기가 없습니다.${listUrl ? ` <a href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">VOD 목록 ${SVG_ICONS.externalLink}</a>` : ''}</div>`;   // v12: 문구·링크 통일(Crenop 지정)
   showModal();
 }
@@ -8605,12 +8602,10 @@ function blackoutVodsHtml() {
   rows.sort((a, b) => a.at - b.at);
   blackoutVodsSig = rows.map(r => `${r.m.id}|${r.at}|${r.href}|${r.ms}|${r.title}`).join('||');
   const tiles = rows.map(r => {
-    const dur = r.ms >= 60000 ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${formatDuration(r.ms)}</span></span>` : '';   // 1분 미만은 시간을 안 적는다 — '0분'으로 읽히느니 비우는 게 낫다(제목만 바꾼 짧은 켜짐)
     const thumb = r.thumb ? `<img src="${escapeHtml(r.thumb)}" alt="" loading="lazy">` : `<div class="placeholder"><img src="${escapeHtml(r.m.img)}" alt=""></div>`;   // 썸네일이 없으면 카드와 같은 아바타 자리
     return `<a class="bv-tile" href="${escapeHtml(r.href)}" target="_blank" rel="noopener">`
       + `<div class="card-thumb">${thumb}</div>`
-      + `<div class="card-text"><div class="card-name-row"><span class="card-name" style="color: ${r.m.color}">${r.m.name}</span>${dur}</div>`
-      + `<div class="card-title">${escapeHtml(r.title)}</div></div></a>`;
+      + tileTextHtml({ name: r.m.name, color: r.m.color, time: r.ms >= 60000 ? formatDuration(r.ms) : '', title: r.title }) + '</a>';   // 1분 미만은 시간을 안 적는다 — '0분'으로 읽히느니 비우는 게 낫다(제목만 바꾼 짧은 켜짐)
   }).join('');
   return `<div class="blackout-vods"><div class="bv-sec">${SVG_ICONS.soop}<span>어제 다시보기</span></div>`
     + `<div class="bv-grid">${tiles}</div></div>`;   // 열 수·타일 폭은 syncBlackoutVods가 실측으로 정한다
@@ -10095,7 +10090,7 @@ function renderStats() {
   top.querySelectorAll('.stats-kv[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
   list.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
     const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
-    openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`);
+    openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId]);
   }));
 }
 // ── 연간 시간대(2026-09-18 Crenop): 그 해 달들을 합친다 ──

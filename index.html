@@ -3191,7 +3191,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-22b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-22c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6125,14 +6125,17 @@ const PHOTO_URL_RE = /\.(webp|png|jpe?g|gif|avif)(?:[?#].*)?$/i;
 function manualLinkSectionsHtml(links) { const sec = manualLinkSections(links); return LINK_SEC_ORDER.map(k => sec[k]).join(''); }
 function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '') — 컨텐츠 모달이 자동 구획을 사이에 끼우려고 낱개로 받는다
   const groups = { photo: [], youtube: [], post: [], link: [], vod: [], clip: [] };   // vod·clip: 숲 플레이어 주소(2026-09-09)
-  (links || []).forEach((it, i) => {
+  // 제목 없는 칸의 'N' = 그 구획 안에서 몇 번째(2026-09-22 Crenop: 사진이 한 장인데 '사진 4' — 행 전체 링크 중 순번을 쓰고 있었다)
+  const nth = { photo: 0, youtube: 0, link: 0 };
+  (links || []).forEach((it) => {
     const u = typeof it === 'string' ? it : it.url, rawTitle = typeof it === 'string' ? '' : (it.title || '');
     // 시트 제목 앞의 멤버 이름 규칙(2026-09-10 Crenop: 유튜브에도 — 전 링크 종류 공통): '주소 천양 제목' → 이름줄 천양, 제목 '제목'. 숲 다시보기와 같은 규칙
     const sp = splitMemberPrefix(rawTitle), manual = sp.rest;
     if (PHOTO_URL_RE.test(u)) {   // 사진(2026-09-16) — 조회 없음(유튜브·게시글 판정보다 먼저)
+      const pn = ++nth.photo;
       const pwho = sp.member ? `<span class="cal-vod-who"><img src="${sp.member.img}" alt="">${escapeHtml(sp.member.name)}</span>` : '';
       groups.photo.push(`<div class="cal-vod photo">${pwho}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="${escapeHtml(u)}" alt="" loading="lazy"></span>`
-        + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || `사진 ${i + 1}`)}</span></span></a></div>`);
+        + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(manual || `사진 ${pn}`)}</span></span></a></div>`);
       return;
     }
     const id = ytVideoId(u), postNo = id ? '' : soopPostNo(u);
@@ -6140,7 +6143,7 @@ function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '
     let yt = null;   // 유튜브 조회(2026-09-11): 시트에도 목록에도 없을 때만 — 제목·채널(→ 멤버)
     if (id && !found && !(manual && sp.member)) { yt = ytInfoState.data[id]; if (yt === undefined) { ensureYtInfo(id); yt = null; } }
     let host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
-    const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (yt && yt.title) || (id ? `유튜브 ${i + 1}` : postNo ? '게시글' : (host || `링크 ${i + 1}`));
+    const label = manual || (found && (found.y ? found.y.title : found.p.title)) || (yt && yt.title) || (id ? `유튜브 ${nth.youtube + 1}` : postNo ? '게시글' : (host || `링크 ${nth.link + 1}`));
     const whoM = sp.member || (found && found.m) || (yt && memberByYtAuthor(yt.author_url)) || null;
     const who = whoM ? `<span class="cal-vod-who"><img src="${whoM.img}" alt="">${escapeHtml(whoM.name)}</span>` : '';
     const vodNo = (!id && !postNo) ? soopVodTitleNo(u) : '';
@@ -6156,6 +6159,7 @@ function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '
       groups[(info && info.kind !== 'REVIEW') || isSoopCatchUrl(u) ? 'clip' : 'vod'].push(tile);   // 다시보기(REVIEW)가 아니면 전부 '클립'(2026-09-10)
       return;
     }
+    if (id) nth.youtube++; else if (!postNo) nth.link++;   // 이 칸이 들어갈 구획의 순번을 센다(제목이 있는 칸도 자리는 차지한다)
     if (id) groups.youtube.push(`<div class="cal-vod">${who}<a class="ds-vod" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="ds-vod-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"></span>`
       + `<span class="ds-vod-title"><span class="ds-vod-tt">${escapeHtml(label)}</span></span></a></div>`);
     else groups[postNo ? 'post' : 'link'].push(`<a class="day-item" href="${escapeHtml(u)}" target="_blank" rel="noopener"><span class="day-kind-icon ${postNo ? 'post' : 'link'}">${SVG_ICONS[postNo ? 'board' : 'link']}</span>${whoM ? `<span class="day-item-time">${escapeHtml(whoM.name)}</span>` : ''}<span class="day-item-title">${escapeHtml(label)}</span></a>`);

@@ -3191,7 +3191,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-22a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-22b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4932,16 +4932,20 @@ function refreshLikeDot() {
   if (tab) tab.classList.toggle('has-new', computeLikeDot());
 }
 // 페이지 로드 시 점 계산용 목록 1회 로드(엣지 캐시 max-age=60 → 대부분 히트, 비용 미미). 캐시 우선으로 점 즉시 반영.
+// 숨김 시트도 같이 새로 받는다(2026-09-22) — 탭(renderLike)은 열 때마다 최신 시트로 거르는데, 점은 마지막으로 탭을 연 때 저장해 둔 사본으로 셌다.
+//   그 뒤 시트에 숨김 줄이 늘면 '점은 켜졌는데 들어가 보면 새 요청이 하나도 없는' 헛점이 났다(실측: 처음 온 사람은 사본이 0줄이라 요청 79건 전부를
+//   새 요청으로 세어 점이 켜졌고, 최신 시트 56줄로 거르면 보이는 새 요청은 0건). 시트 요청은 구글 쪽이라 워커·KV 비용이 없다.
+// 숨김 사본을 한 번도 받은 적 없으면(처음 온 사람) 캐시로 먼저 켜지 않는다 — 숨김 없이 세면 거의 반드시 헛점이 잠깐 켜졌다 꺼진다.
 async function loadLikeReqForDot() {
   try { likeReqCache = dedupeLikeReqs(JSON.parse(lsGet(LS_LIKEREQ_CACHE, '[]'))); } catch (e) { likeReqCache = []; }
-  refreshLikeDot();
+  if (lsGet(LS_LIKEHIDE_CACHE, null) !== null) refreshLikeDot();
   try {
-    const res = await fetch(WORKER_URL + '/like-requests');
+    const [res] = await Promise.all([fetch(WORKER_URL + '/like-requests'), loadLikeHideSet()]);   // loadLikeHideSet이 숨김 사본(LS_LIKEHIDE_CACHE)을 최신으로 바꿔 둔다 — 실패하면 옛 사본 그대로
     const data = await res.json();
     likeReqCache = dedupeLikeReqs(data.like_requests || []);
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
-    refreshLikeDot();
   } catch (e) {}
+  refreshLikeDot();
 }
 // 체크 토글(구 ✕ 대체) — '확인함/좋아요 눌러줌'을 요청 키 단위로 localStorage 저장. 행은 목록에 남고 재클릭으로 해제(✕의 캐시 삭제 없인 복구 불가 문제 해소).
 // 해당 행만 제자리 갱신(전체 재렌더 없음 — 스크롤 위치 보존).

@@ -3184,7 +3184,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-22d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-22e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3491,9 +3491,9 @@ const MEMBER_BIRTHDAYS = {
 // 이름이라 서버에 그 파일이 있어야 한다 — 값이 같아도 역할이 달라 일부러 묶지 않았다(en만 바꾸면 이미지가 깨짐).
 const MEMBERS = [
   { id: '243000',      en: 'chunyang', name: '천양',   img: 'members/01.webp?v=2', color: '#43EAF6' },
-  { id: 'madaomm',     en: 'madaomm',  name: '마다옴', img: 'members/02.webp?v=3', color: '#FFDE9B' },
+  { id: 'madaomm',     en: 'madaomm',  name: '마다옴', img: 'members/02.webp?v=4', color: '#FFDE9B' },
   { id: 'nanamoon777', en: 'nanamoon', name: '나나문', img: 'members/03.webp?v=4', color: '#DBDCE5' },
-  { id: 'imha22',      en: 'imhaming', name: '임하밍', img: 'members/04.webp?v=4', color: '#F5D3FE' },
+  { id: 'imha22',      en: 'imhaming', name: '임하밍', img: 'members/04.webp?v=5', color: '#F5D3FE' },
   { id: 'doormomo',    en: 'moonmomo', name: '문모모', img: 'members/05.webp?v=2', color: '#8D4BD6' },
   { id: 'kappuchan',   en: 'kappu',    name: '카푸',   img: 'members/07.webp?v=2', color: '#FFCFB7' },
   { id: 'kyaang123',   en: 'kyaang',   name: '캬앙',   img: 'members/08.webp?v=2', color: '#EA4335' },
@@ -8584,22 +8584,24 @@ function blackoutVodsHtml() {
   if (!statsState.data[ym]) { loadStatsMonth(ym); return ''; }   // 달이 바뀐 1일엔 어제가 지난달 — 도착하면 다음 판(≤10초)의 applyBlackout이 그린다
   const kstDay = (iso) => { const t = new Date(iso).getTime(); return isNaN(t) ? '' : new Date(t + 9 * 3600 * 1000).toISOString().slice(0, 10); };
   const rows = [];
-  for (const m of MEMBERS) {
+  MEMBERS.forEach((m, mi) => {   // mi = 사이트 멤버 고정 순서(정렬 첫 축)
     const mine = [];
     let longest = null;   // 다시보기가 하나도 없는 멤버의 대표 줄 — 어제 가장 길게 켠 방송
     for (const s of ((statsState.data[ym][m.id] || {}).sessions || [])) {
       if (kstDay(s.start) !== ymd) continue;
       const at = new Date(s.start).getTime();
       const ms = s.end ? new Date(s.end).getTime() - at : 0;
-      if (!longest || ms > longest.ms) longest = { m, at, href: `https://www.sooplive.com/station/${m.id}/vod`, thumb: '', title: s.title || '다시보기', ms };
-      for (const v of (sessionVods(s) || [])) mine.push({ m, at, href: vodPlayerUrl(v), thumb: v.thumb || '', title: v.title || s.title || '다시보기', ms: v.duration_ms || 0 });
+      if (!longest || ms > longest.ms) longest = { m, mi, at, part: 0, href: `https://www.sooplive.com/station/${m.id}/vod`, thumb: '', title: s.title || '다시보기', ms };
+      for (const v of (sessionVods(s) || [])) mine.push({ m, mi, at, part: v.part || 0, href: vodPlayerUrl(v), thumb: v.thumb || '', title: v.title || s.title || '다시보기', ms: v.duration_ms || 0 });
     }
     // 다시보기가 있으면 그것만 전부. 하나도 없으면(포착 대기·구독 전용) 대표 한 줄로 '어제 켰다'는 사실만 남긴다 —
     // 안 그러면 제목만 바꾼 몇 분짜리 켜짐(대기방 등)까지 다 서서 목록이 잡음으로 찬다(2026-09-20 실측: 14장 중 3장이 0분).
     rows.push(...(mine.length ? mine : longest ? [longest] : []));
-  }
+  });
   if (!rows.length) return '';
-  rows.sort((a, b) => a.at - b.at);
+  // 순서 = 멤버 고정 순서 → 시작 시각 → 파트(2026-09-22 Crenop): 생방송 카드·컨텐츠 모달과 같은 사이트 순서(달력 하루 모달의 '시각 → 파트'는 이 순서에서 멤버 축만 뺀 것).
+  //   종전의 시작 시각 순은 타일에 시작 시각이 없어 화면에서 읽히지 않았고, 한 멤버의 여러 판이 다른 멤버 사이로 흩어졌다.
+  rows.sort((a, b) => a.mi - b.mi || a.at - b.at || a.part - b.part);
   blackoutVodsSig = rows.map(r => `${r.m.id}|${r.at}|${r.href}|${r.ms}|${r.title}`).join('||');
   const tiles = rows.map(r => {
     const thumb = r.thumb ? `<img src="${escapeHtml(r.thumb)}" alt="" loading="lazy">` : `<div class="placeholder"><img src="${escapeHtml(r.m.img)}" alt=""></div>`;   // 썸네일이 없으면 카드와 같은 아바타 자리

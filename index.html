@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <style>
   :root {
-    --tag-valign: -6px;      /* 타임라인 모드 배지(19px SVG) 줄 정렬 — 배지 박스 중심을 제목(400·12px) 잉크 중심에. calibrateBadgeValign() 실측 주입, 폴백은 정적 근사 */
+    --tag-valign: -5.7px;    /* 타임라인 모드 배지(19px SVG) 줄 정렬 — 배지 박스 중심을 제목(400·13px) 잉크 중심에(폴백은 12px 때 -6의 13/12 비례 근사). calibrateBadgeValign() 실측 주입, 폴백은 정적 근사 */
     --daytag-valign: -5.5px; /* 통계 일별 모드 배지 줄 정렬 — 제목(600·13px) 문맥. 상동 */
     --bg: #070a14;
     --surface: #0d1120;
@@ -123,6 +123,11 @@
     word-break: keep-all;
     overflow-wrap: break-word;
   }
+  /* 글자 크기 하한(2026-09-23 Crenop — 100%에서 읽는 데 문제없게, 사용 가이드의 '배율을 맞춰 쓰라'는 안내를 안 읽는 사람이 더 많다):
+     모든 글자 12px 이상, 읽는 글(내용·이름 — 방송·영상 제목, 최근 활동 세부·채팅, 케미 설명·구성원 이름, 명전 설명 등) 13px 이상.
+     일괄 확대(+1·+2px)는 기각 — 이미 괜찮은 제목까지 커져 배치가 깨졌다. 13px 이상 제목급과 12px 조작 라벨(탭 이름·버튼·필터·정렬·표 머리·차트 눈금)은 그대로.
+     예외: 시간대 분포 가로 날짜 눈금(.toh-xlabel — 15px 칸에 두 자리 날짜라 12px면 이웃과 겹친다) · 보조바 버튼 글자(.page-title-link·기념일 상자 — 픽셀 단위로
+     맞춘 자리라 보조바 개선 때 함께) · 글자가 아닌 11px(.nav-notify-bell·.day-kind-icon — 아이콘 상자). 새 글자도 이 하한을 따른다(verify_legibility_20260923). */
   /* 배경은 단색(--bg). 화면에 고정된 별 점 6개(body::before의 radial-gradient)는 2026-09-03 Crenop 지정으로 제거 — 지저분해 보였다. */
 
   /* ── 상단바 (2026-08-31 개편) ─────────────────────────────────────────────────────
@@ -535,8 +540,8 @@
   .rk-ev:last-child { border-bottom: none; }
   /* 제목 + 컷라인 한 줄. 좁은 폭에서만 컷이 다음 줄로 접힘 */
   .rk-ev-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-  .rk-ev-title { font-size: 12px; font-weight: 700; color: var(--text); }
-  .rk-ev-sub { font-size: 11px; color: var(--muted); }
+  .rk-ev-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .rk-ev-sub { font-size: 12px; color: var(--muted); }
   /* 열 폭 고정. 이름 칸을 1fr로 두면 남는 폭을 이름이 다 먹어 전형이 멀리 밀려난다(2026-08-04 지적) →
      좌측(사진·이름·전형)은 붙이고, 남는 폭은 숫자 블록 사이로 보낸다. 전형 없는 대회는 열 자체를 뺀다. */
   /* 좌측(사진·이름·전형)은 고정폭으로 붙이고, 남는 폭은 숫자 3열이 균등하게 나눠 갖는다.
@@ -544,7 +549,7 @@
   .rk-row {
     display: grid;
     grid-template-columns: 28px 60px 32px 1fr 1fr 1.1fr;   /* 사진 이름 전형 | 순위 좋아요 컷차이 */
-    align-items: center; gap: 6px; padding: 3px 0; font-size: 12px;
+    align-items: center; gap: 6px; padding: 3px 0; font-size: 13px;
   }
   .rk-ev.no-group .rk-row { grid-template-columns: 28px 60px 1fr 1fr 1.1fr; }
   .rk-av { width: 28px; height: 28px; object-fit: cover; }
@@ -561,7 +566,7 @@
   a.rk-row:hover { border-color: var(--accent); }
   /* 팀 병합(2026-08-20): 이어지는 팀 행은 위 간격을 붙여 한 덩어리로 — 행 사이 구분감 제거. 숫자 칸은 렌더러가 비운다 */
   .rk-row.rk-teamcont { padding-top: 0; margin-top: -1px; }
-  .rk-grp { color: var(--muted); font-size: 11px; }
+  .rk-grp { color: var(--muted); font-size: 12px; }
   .rk-rank, .rk-like, .rk-gap { font-variant-numeric: tabular-nums; text-align: right; }
   /* 순위·컷은 대회 색을 따르지 않는다 — '안정권이냐 탈락권이냐'가 한눈에 보여야 하므로 고정 의미색을 쓴다.
      대회 색(--rk-c)은 정체성 표시(테두리·헤더·제목)에만 쓴다. 둘을 섞으면 색이 두 가지 뜻을 갖게 된다. */
@@ -576,7 +581,7 @@
   .lr-panel.rk-modal, .lr-panel.tbm-modal { border-color: rgba(var(--rk-rgb, 52,211,153), 0.4); }
   .lr-panel.rk-modal .lr-head, .lr-panel.tbm-modal .lr-head { color: var(--rk-c, var(--ev-post)); }
   .rk-like { color: var(--text); }
-  .rk-gap { font-size: 11px; }
+  .rk-gap { font-size: 12px; }
   /* 컷 경계 행 — 좋아요 내림차순 목록에서 그 전형의 컷 값이 놓일 자리에 끼워 넣는다.
      전형마다 컷이 다르므로 경계선 하나로는 표현할 수 없다(남자 1,424 / 여자 2,239) → 전형별로 각자의 자리에 한 줄씩.
      높이·글씨 크기는 멤버 행과 동일하게 맞춘다(2026-08-04 지적) — 눈금이 어긋나면 표로 안 읽힌다. */
@@ -603,7 +608,7 @@
   .rk-cut-row .rk-rank { color: var(--rk-cut); }
   .rk-in { color: var(--rk-in); }
   .rk-out { color: var(--rk-out); }
-  .rk-note { font-size: 11px; color: var(--muted); padding: 4px 0 0; }
+  .rk-note { font-size: 12px; color: var(--muted); padding: 4px 0 0; }
   /* 순위 버튼: 색은 시트 G열 hex(tb-sheet-btn과 동일 방식). button은 기본 가운데정렬이라 text-align 명시 필요 */
   button.page-title-link.rank-btn, button.page-title-link.tbm-btn { cursor: pointer; font-family: inherit; text-align: left; }
   /* 상단바 시트 모달 — lr-panel 골격 재사용. 한 행 = 항목 하나를 세로로 쌓는다(사진·링크·안내문이 한 모달에 섞인다).
@@ -614,7 +619,7 @@
   /* 제목 줄 끝 externalLink = 링크 있음. 규격(12px·0.7·gap 6px)은 일정 항목(.sch-item-title)과 동일 — 같은 뜻이면 같게 보여야 한다 */
   .tbm-title { font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
   .tbm-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
-  .tbm-desc { display: block; font-size: 12px; color: var(--muted); white-space: pre-line; }   /* pre-line: 시트 셀 안 줄바꿈(Alt+Enter)을 그대로 보여준다 */
+  .tbm-desc { display: block; font-size: 13px; color: var(--muted); white-space: pre-line; }   /* pre-line: 시트 셀 안 줄바꿈(Alt+Enter)을 그대로 보여준다 */
   .tbm-title + .tbm-desc { margin-top: 4px; }
   .tbm-img { display: block; width: 100%; }
   .tbm-title + .tbm-img, .tbm-desc + .tbm-img { margin-top: 8px; }
@@ -650,8 +655,8 @@
   .lrq-avatar { width: 26px; height: 26px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
   .lrq-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .lrq-l1 { font-size: 13px; font-weight: 700; line-height: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lrq-l1 .lrq-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-left: 6px; }   /* 멤버명-라벨 간격 6px — 이벤트 탭 .event-member 규칙과 동일 */
-  .lrq-l2 { color: var(--text3); font-size: 12px; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 이벤트 탭 .event-detail과 동일 톤·1줄 말줄임 */
+  .lrq-l1 .lrq-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 6px; }   /* 멤버명-라벨 간격 6px — 이벤트 탭 .event-member 규칙과 동일 */
+  .lrq-l2 { color: var(--text3); font-size: 13px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 이벤트 탭 .event-detail과 동일 톤·1줄 말줄임 */
   .lrq-link:hover .lrq-l2 { color: var(--accent); }
   /* 체크박스(구 ✕ 대체): '확인함/좋아요 눌러줌' 토글 저장 — 행은 목록에 남고 재클릭으로 해제 가능(✕는 캐시 삭제 없이는 복구 불가였음) */
   .lrq-check {
@@ -680,7 +685,7 @@
   }
   .sch-item:last-child { border-bottom: none; }
   .sch-item-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .sch-item-when { font-size: 11px; color: var(--text2); font-weight: 600; }   /* 사실 값(시각) = 2차(2026-09-04 대비 점검: 11px 캡션 중 시각·날짜·길이·축 숫자는 4차 회색이 아니라 2차 — 무채색은 유지) */
+  .sch-item-when { font-size: 12px; color: var(--text2); font-weight: 600; }   /* 사실 값(시각) = 2차(2026-09-04 대비 점검: 11px 캡션 중 시각·날짜·길이·축 숫자는 4차 회색이 아니라 2차 — 무채색은 유지) */
   .sch-item-title {
     font-size: 14px; color: var(--text); font-weight: 700;
     text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0;   /* gap 4(구 6): 종류 그림끼리·그림-제목 사이가 넓어 보였다(2026-09-03 Crenop) */
@@ -715,7 +720,7 @@
      목록은 행마다 구분선이 이어지는 구조라 자연스럽지만, 달력은 선이 없는 구조라 붙이지 않는다(2026-08-11 확정).
      자체 border-top은 두지 않는다 — 끝 표시가 붙으면 마지막 .sch-item이 :last-child가 아니게 되어 그 행의 밑선이 살아나므로,
      여기서 윗선을 또 그으면 1px 두 개가 맞닿아 그 선만 굵어 보인다(2026-08-11 수정). */
-  .sch-end { padding: 12px 0; text-align: center; color: var(--muted); font-size: 11px; font-weight: 600; }   /* 달력 접힘 안내(.sch-gap)와 같은 톤 — 두 뷰가 같은 말투로 '없음'을 알린다 */
+  .sch-end { padding: 12px 0; text-align: center; color: var(--muted); font-size: 12px; font-weight: 600; }   /* 달력 접힘 안내(.sch-gap)와 같은 톤 — 두 뷰가 같은 말투로 '없음'을 알린다 */
   .sch-weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
     padding: 10px 12px 2px; position: sticky; top: 0; background: var(--surface); z-index: 2;
@@ -736,7 +741,7 @@
   .sch-gap {
     margin: 8px 12px; padding: 8px 0; text-align: center;
     border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
-    color: var(--muted); font-size: 11px; font-weight: 600;
+    color: var(--muted); font-size: 12px; font-weight: 600;
   }
   .sch-item-dday {
     font-size: 13px; color: var(--accent); font-weight: 700;
@@ -777,7 +782,7 @@
     max-width: 100%;
   }
   .header-disclaimer {
-    font-size: 11px;
+    font-size: 12px;
     opacity: 0.75;
   }
   .hc-stale { color: #FFA94D; }   /* 감지 지연 경고 — 기존 팔레트의 경고 주황(cbr-sanction과 동일 계열) */
@@ -936,7 +941,7 @@
   }
   .card-btime svg { width: 12px; height: 12px; }   /* 시계 아이콘(구 ⏱) — flex 중앙정렬이라 오프셋 불요 */
   .card-btime {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text2);   /* 무채색 — 이벤트 목록 경과 표시와 통일(2026-07-17 확정, 구 앰버 var(--time)). 4차→2차(2026-09-04 대비 점검: 사실 값) */
     font-weight: 600;
     flex-shrink: 0;
@@ -946,7 +951,7 @@
     white-space: nowrap;
   }
   .card-title {
-    font-size: 12px; color: var(--muted);
+    font-size: 13px; color: var(--muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     line-height: 1.3;
   }
@@ -982,7 +987,7 @@
      본문이 300px 좁아진 채 왼쪽으로 쏠렸다(Crenop 실사고 보고: 최근 활동·케미만 그랬던 이유가 이것).
      구 규칙(필터를 이벤트 위 strip으로, position:static !important)은 2026-08-31 폐지 — !important가 남으면
      서랍의 position:fixed를 덮어 서랍이 안 열린다(실제로 그랬음). */
-  .timeline { background: var(--surface); border: 1px solid var(--border); border-top: none; min-width: 0; }   /* 윗변은 sticky 헤더가 가짐(2026-08-09) — 헤더가 20px 떠 있어도 rest 상태 박스 윗변이 그대로 */
+  .timeline { background: var(--surface); border: 1px solid var(--border); border-top: none; min-width: 0; container-type: inline-size; container-name: timeline; }   /* 윗변은 sticky 헤더가 가짐(2026-08-09) — 헤더가 20px 떠 있어도 rest 상태 박스 윗변이 그대로 */
   .timeline-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
 
   /* 기둥은 테두리를 두지 않는다(2026-09-01) — .side-pick과 같은 규칙.
@@ -1007,7 +1012,7 @@
     color: var(--accent);
     cursor: pointer;
     font-family: inherit;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     padding: 4px 2px;
     line-height: 1.25;
@@ -1073,7 +1078,7 @@
   .filter-summary {
     margin-top: 14px; padding-top: 12px;
     border-top: 1px solid var(--border);
-    font-size: 11px; color: var(--muted); text-align: center;
+    font-size: 12px; color: var(--muted); text-align: center;
   }
   .event {
     display: flex; align-items: center; gap: 14px;
@@ -1134,7 +1139,7 @@
   .event-mode-tag {
     display: inline-block;
     margin-left: 0; margin-right: 6px;
-    vertical-align: var(--tag-valign);   /* 배지 박스 중심 = 제목(12px) 잉크 중심 — calibrateBadgeValign()이 실측 주입 */
+    vertical-align: var(--tag-valign);   /* 배지 박스 중심 = 제목(13px) 잉크 중심 — calibrateBadgeValign()이 실측 주입 */
   }
   .event-mode-tag.adult { color: var(--mode-adult); }
   .event-mode-tag.subscription { color: var(--mode-subscription); }
@@ -1142,7 +1147,7 @@
   .event-mode-tag.password { color: var(--mode-password); }
   .event-mode-tag.restricted { color: var(--mode-restricted); }
   .event-detail {
-    color: var(--text3); font-size: 12px;
+    color: var(--text3); font-size: 13px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     margin-top: 3px;
   }
@@ -1152,7 +1157,7 @@
   }
   .event-time-rel { display: block; }
   .event-time-abs {
-    display: block; font-size: 11px;
+    display: block; font-size: 12px;
     color: var(--text2);   /* 구 muted + opacity 0.7 = 실효 대비 3.3:1(기준 4.5 미달) → 2차 색, 투명도 없음(2026-09-04 대비 점검) */
     white-space: nowrap;   /* 기본 1줄 고정(PC·일반 모바일) — 날짜/시간 inline */
   }
@@ -1167,11 +1172,11 @@
   }
   .chat-bundle-row {
     display: flex; align-items: baseline; gap: 8px;
-    font-size: 12px; line-height: 1.45;
+    font-size: 13px; line-height: 1.45;
     color: inherit; text-decoration: none;
   }
   .chat-bundle-row:hover .cbr-msg { color: var(--accent); }
-  .cbr-time { color: var(--text2); font-size: 11px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
+  .cbr-time { color: var(--text2); font-size: 12px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
   .cbr-name { font-weight: 700; flex-shrink: 0; }
   .cbr-msg { color: var(--text3); min-width: 0; overflow-wrap: anywhere; }
   /* 아이콘+텍스트 뱃지: align-items가 center면 baseline 참여 아이템이 없어 박스 하단이 기준선으로 합성 →
@@ -1187,6 +1192,36 @@
   .cbr-chan:hover { text-decoration: underline; }
   .event.chat-bundle { align-items: flex-start; }   /* 다행 묶음: center면 아이콘·아바타·시간이 세로 중앙에 떠 헤더와 분리돼 보임 */
   .chat-bundle-avatars { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }   /* 발화자 사진 세로 나열(겹침 없음) — 묶음이 세로로 자라는 아이템이라 사진 열도 세로가 공간 문법에 맞음 */
+  /* ── 최근 활동 좁은 폭 배치(2026-09-23 Crenop): 목록 칸(.timeline) 440px 이하 ──
+     넓을 때의 한 줄 [아이콘 | 사진 | 내용 | 시간]은 휴대폰에서 가운데 내용 칸이 눌렸다 — 360px에서 채팅 메시지 칸 약 14px, 한 글자씩 세로로 쌓인 곳 584.
+     좁으면 PC 배치를 유지할 까닭이 없다: 1줄 [종류 아이콘(바탕 없음) 활동 제목 ⏱ 방송 시간 (카페·컨텐츠 장소)] / 2줄 [사진 20 이름 (XXX 방송)] /
+     그 아래 내용(세부 줄·채팅 줄)을 폭 전체로, 시간은 오른쪽 두 줄 옆. 채팅 모아보기의 [아이콘+글](바탕 없음) 꼴을 1줄에 빌렸다.
+     기준 440은 실측: 537px 휴대폰(목록 479)은 넓은 배치가 더 짧고 눌림도 없어 그대로(좁은 배치면 +17%), 768px 태블릿(목록 410)·412·360은 좁은 배치.
+     글과 순서는 넓은 배치와 같다(.ev-what·.ev-where는 인라인 묶음일 뿐) — 1400px에서 머리줄 글이 종전과 글자 하나까지 같음을 확인.
+     시간 칸: [연도][월일][시각] 조각 사이에서만 꺾인다. 1줄이 꺾일 항목만 시간 칸을 가장 좁혀(.ev-tight — fitEventTimes) 연도 뒤에서 꺾는다 —
+     전부 꺾으면 꺾을 필요 없는 항목까지 높아졌다(360px 평균 131→144). 360px 실측: 1줄 한 줄 396/400(꺾기 전 316), 꺾인 항목 84. */
+  @container timeline (max-width: 440px) {
+    .event { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; row-gap: 3px; align-items: center; padding: 12px 14px; }
+    .event .event-body { display: contents; }
+    /* 머리줄 = 1줄 [활동 제목] / 2줄 [이름 (XXX 방송)] — 바깥 줄(아이콘·사진)과 같은 높이에 서도록 subgrid */
+    .event .event-body > div:first-child { grid-column: 2; grid-row: 1 / span 2; display: grid; grid-template-rows: subgrid; grid-template-columns: auto minmax(0, 1fr); align-items: center; min-width: 0; }
+    .event .event-icon { grid-column: 1; grid-row: 1; width: auto; height: 20px; background: none; justify-self: center; align-self: start; }   /* 제목이 두 줄로 꺾여도 아이콘은 첫 줄에 */
+    .event .event-icon svg { width: 15px; height: 15px; }
+    .event .ev-what { grid-column: 1 / -1; grid-row: 1; line-height: 20px; min-width: 0; }
+    .event .event-avatar { grid-column: 1; grid-row: 2; width: 20px; height: 20px; justify-self: center; }
+    .event .event-member { grid-column: 1; grid-row: 2; margin-right: 0; }
+    .event .ev-where { grid-column: 2; grid-row: 2; min-width: 0; }   /* 이름 옆 한 칸(.event-target 왼쪽 여백 4px) */
+    .event .battle-result { grid-column: 1 / -1; grid-row: 2; }
+    .event .event-time { grid-column: 3; grid-row: 1 / span 2; align-self: start; }
+    .event .event-time-abs { white-space: normal; }
+    .event .ev-abs-y, .event .ev-abs-md, .event .ev-abs-t, .event .event-time-rel { white-space: nowrap; }
+    .event.ev-tight { grid-template-columns: auto minmax(0, 1fr) min-content; }
+    .event .event-detail { grid-column: 1 / -1; grid-row: 3; margin-top: 3px; }
+    .event.chat-bundle { align-items: center; }
+    .event.chat-bundle .chat-bundle-avatars { grid-column: 1; grid-row: 2; flex-direction: row; gap: 3px; }
+    .event.chat-bundle .chat-bundle-avatars .event-avatar { width: 20px; height: 20px; }
+    .event.chat-bundle .chat-bundle-rows { grid-column: 1 / -1; grid-row: 3; margin-top: 4px; }
+  }
   .timeline-header {
     display: flex;
     align-items: center;
@@ -1430,9 +1465,9 @@
   .ds-vod .card-text { margin-top: 6px; }
   .ds-vod .card-name-row { min-height: 19px; }
   /* (.ds-vod-badge는 v12에서 폐기 — 기존 모드 배지 문법(day-session-mode + labelBadgeSvg) 재사용) */
-  .ds-vod-none { font-size: 11px; color: var(--muted); }
+  .ds-vod-none { font-size: 12px; color: var(--muted); }
   /* 일별 요약 변경 로그의 경과 배지 — 이벤트 탭 .event-elapsed 재사용, 10px 라인에 맞게 축소 */
-  .day-session-change .event-elapsed { font-size: 11px; margin-left: 2px; }
+  .day-session-change .event-elapsed { font-size: 12px; margin-left: 2px; }
   .day-session-change .event-elapsed svg { width: 10px; height: 10px; vertical-align: -1px; }
   /* v5: 일별 요약 헤더 — 날짜는 요일색, 개수는 달력과 동일한 칩 문법(약간 키움) */
   .day-session-change .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }   /* "구제목 →" 다음 새 제목부터 줄바꿈(안 넘치면 한 줄 유지) — 2026-08-29 확정 */
@@ -1464,7 +1499,7 @@
   .chem-modal-card.self .chem-card { border-color: var(--accent); }
   .chem-mhead { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 42px; }
   .chem-mname { display: block; }
-  .chem-mdesc { font-size: 12px; font-weight: 500; color: var(--muted); line-height: 17px; min-height: 17px; text-align: center; }
+  .chem-mdesc { font-size: 13px; font-weight: 500; color: var(--muted); line-height: 18px; min-height: 18px; text-align: center; }
   /* .chem-mmembers(모달 전용 flex 배열)는 폐지 — 모달 카드도 벽의 .chem-group-members 규칙을 쓴다(2026-09-10) */
   .vod-pick-sec[data-kind="vod"] svg, .vod-pick-sec[data-kind="clip"] svg { color: var(--ev-start); }   /* 클립·캐치(2026-09-09)도 숲 파랑 */
   .vod-pick-sec:first-child { margin-top: 0; }   /* v13: 2타일 정합 — 고정 200px 딱맞춤은 패널 테두리 1~2px 산입에 1열로 무너졌다(Crenop 적발). 타일을 반폭 계산으로 */
@@ -1492,13 +1527,13 @@
   .toh-wrap { margin: 16px auto 0; width: fit-content; max-width: 100%; }
   .toh-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
   .toh-title { font-size: 12px; font-weight: 600; color: var(--text2); }
-  .toh-sub { font-size: 11px; color: var(--muted); }
+  .toh-sub { font-size: 12px; color: var(--muted); }
   .toh-headright { display: inline-flex; align-items: center; gap: 10px; }
-  .toh-tendency { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }   /* 성향 라벨: 아이콘·텍스트 단일 색 통일(여기 한 줄로 조절) */
+  .toh-tendency { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }   /* 성향 라벨: 아이콘·텍스트 단일 색 통일(여기 한 줄로 조절) */
   .toh-tendency svg { width: 12px; height: 12px; }
   .toh-body { display: flex; align-items: flex-start; padding: 7px 0; }
   .toh-yaxis { position: relative; width: 22px; flex: none; }
-  .toh-ylabel { position: absolute; right: 4px; font-size: 11px; line-height: 12px; color: var(--text2); }   /* 축 숫자 = 2차 */
+  .toh-ylabel { position: absolute; right: 4px; font-size: 12px; line-height: 13px; color: var(--text2); }   /* 축 숫자 = 2차 */
   .toh-right { flex: 1; min-width: 0; }   /* v4: 스크롤 제거 — 열을 minmax(0,15px)로 두어 좁으면 셀이 줄어든다(스크롤바 억제) */
   .toh-grid { display: grid; gap: 0; }
   .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
@@ -1550,7 +1585,7 @@
   }
   .day-item-title {
     flex: 1;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1592,10 +1627,10 @@
     display: flex; flex-direction: column; gap: 4px;
   }
   .day-session-change {
-    font-size: 11px; color: var(--text3);
+    font-size: 12px; color: var(--text3);
     display: flex; align-items: center; gap: 6px;
   }
-  .day-session-change-time { color: var(--text2); font-size: 11px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
+  .day-session-change-time { color: var(--text2); font-size: 12px; flex-shrink: 0; }   /* 사실 값(시각) = 2차 */
   .day-session-change-icon {
     flex-shrink: 0; width: 16px; display: flex; align-items: center; justify-content: center;
     color: var(--ev-yellow); font-weight: 700;
@@ -1705,7 +1740,7 @@
   }
   .ogq-name {
     display: block;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     word-break: keep-all;
     overflow-wrap: break-word;
@@ -1716,7 +1751,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
     font-weight: 500;
   }
@@ -1849,7 +1884,7 @@
   .chem-nrow.has-link:hover .chem-name-part, .chem-nrow.has-link:hover .chem-nicon, .chem-nrow.has-link:hover .chem-ndesc,
   .chem-nrow.hl .chem-name-part, .chem-nrow.hl .chem-nicon, .chem-nrow.hl .chem-ndesc { color: var(--accent); }
   .chem-ndesc {
-    font-size: 11px; font-weight: 400; line-height: 19px; color: var(--text); opacity: 0.85;   /* 400 명시: 부모 .chem-nlist의 700 상속 차단 */
+    font-size: 13px; font-weight: 400; line-height: 19px; color: var(--text); opacity: 0.85;   /* 400 명시: 부모 .chem-nlist의 700 상속 차단 */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
   }
   /* 링크 아이콘(2026-08-08 확정): 이름 뒤 인라인 상시 표시 — 클릭 동작의 존재를 토글과 무관하게 알린다.
@@ -1879,7 +1914,7 @@
     border: 1.5px solid var(--border);
   }
   .chem-member-name {
-    font-size: 12px; font-weight: 700;   /* 12px(2026-09-03 Crenop: 케미 이름보다 작게 — 아침의 14는 케미 이름을 눌렀다) */
+    font-size: 13px; font-weight: 700;   /* 12px(2026-09-03 Crenop: 케미 이름보다 작게 — 아침의 14는 케미 이름을 눌렀다) */
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; max-width: 60px;
     text-align: center;
@@ -1962,7 +1997,7 @@
      1열은 스크롤이 많다(카드 117장이 한 줄로) — 쌓인 카드의 세로 공간을 줄이는 게 목적이다(휴대폰 360·412px 페이지 −40%). 여러 열은 그대로.
      · 케미명은 한 줄에 하나, 구분점(·) 없음 — 줄이 바뀌면 구분점이 뜻이 없다. 칸보다 긴 이름 하나만 그 안에서 줄을 바꾼다.
      · 2인: [케미명 ··· 얼굴 · 채팅 수 · 얼굴], 설명을 켜면 채팅 수 자리를 설명(이름 옆)에 내준다 — 얼굴 48 그대로.
-     · 3인: 좌우, 얼굴 34(칸 44 — 이름 12px 세 글자가 이웃과 붙지 않는 최소), 설명은 이름 옆. 이름 아래로 붙이면 이름 3개짜리 카드 하나가 3인 전체를 146px로 키운다.
+     · 3인: 좌우, 얼굴 34(칸 44 — 이름 세 글자가 이웃과 붙지 않는 최소, 13px에서도 틈 10), 설명은 이름 옆. 이름 아래로 붙이면 이름 3개짜리 카드 하나가 3인 전체를 146px로 키운다.
      · 4인: 좌우, 얼굴 34, 설명은 케미명 아래(두 줄까지) — 이름 옆이면 설명 칸이 90px대라 거의 다 잘렸다. 얼굴 크기는 켬·끔 같다.
      · 5~7인: 좌우 [케미명 | 구성원 두 줄](여러 열·PC와 같은 3+2·3+3·4+3, 칸 44·얼굴 34), 설명은 4인처럼 케미명 아래 — 구성원 두 줄 옆 세로 여유로 4줄까지(높이 그대로).
        (2026-09-23 b Crenop: 종전 위아래 [케미명 설명] / [구성원 한 줄]은 2~4인과 문법이 달랐다. 한 줄 그대로 좌우는 360~412px에서 6·7인이 한 장도 안 들어간다 — 실측)
@@ -1986,7 +2021,7 @@
     .chem-group-grid .chem-group-members .chem-member img { width: 34px; height: 34px; }
     .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-nlist { grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }
     .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-ndesc {
-      grid-column: 1 / -1; white-space: normal; line-height: 15px; margin-bottom: 3px;
+      grid-column: 1 / -1; white-space: normal; line-height: 17px; margin-bottom: 3px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
     .chem-group-grid .chem-group-members:has(> :nth-child(5)) { display: grid; column-gap: 0; row-gap: 8px; }   /* 두 줄 — 줄 나눔·마지막 줄 가운데는 chemMembersGridHtml(사람당 2트랙) 그대로, 트랙만 22(칸 44) */
@@ -2025,7 +2060,7 @@
      자리를 늘 잡아 두면(빈 줄 유지) 안 쓰는 여백이 상시 18px 남으므로, 기념일·일정 줄과 같은 문법으로 absolute를 택했다.
      겹치는 자리: 격자 폼은 .calendar의 위 안여백(12px)이라 요일 머리줄을 2px만 스친다. 목록 폼은 첫 타일 오른쪽 위 모서리 — 불러오는 중이라 그 칸이 비어 있다. */
   .calendar, .cal-list-form { position: relative; }
-  .cal-loading { position: absolute; top: 0; right: 0; z-index: 2; font-size: 11px; color: var(--muted); text-align: right; line-height: 14px; }
+  .cal-loading { position: absolute; top: 0; right: 0; z-index: 2; font-size: 12px; color: var(--muted); text-align: right; line-height: 14px; }
   /* 폼 전환 — 두 폼을 다 그려 두고 CSS가 하나만 보인다. 기본 = 타일 흐름(좁은 폭), PC 넓은 폭 = 7열 달력. */
   .cal-grid-form { display: none; max-width: 1450px; }   /* 200px 칸 ×7 + 간격 24 + .calendar 패딩 24 + 테두리 2(옛 폼 상한과 같은 값) — 본문이 더 넓어도 칸은 200에서 멈춘다 */
   .cal-list-form { display: block; }
@@ -2055,7 +2090,7 @@
   /* 달력 4종(2026-09-18): 고르지 않은 종류의 존재 칩은 아이콘만 흐리게 · 글 종류 상자 = 그날 글 제목 최대 3줄 · 종류 격자 빈칸(채팅 자리) */
   .cal-main .cd-chip.cd-mark .cd-full { display: none; }
   .cal-main .cd-chip.cd-mark .cd-ic { display: inline-flex; opacity: 0.45; }
-  .cal-txt { display: flex; flex-direction: column; gap: 2px; width: 100%; height: 100%; padding: 0; box-sizing: border-box; font-size: 12px; line-height: 16px; color: var(--text); text-align: left; }
+  .cal-txt { display: flex; flex-direction: column; gap: 2px; width: 100%; height: 100%; padding: 0; box-sizing: border-box; font-size: 13px; line-height: 17px; color: var(--text); text-align: left; }
   .cal-thumb:has(.cal-txt) { background: transparent; }   /* 글 종류는 상자 바탕을 비운다 — 글 줄에만 배경(2026-09-18 Crenop: 빈 자리가 칠해진 것처럼 보이던 것) */
   .cal-txt-line { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 6px; flex: none; }   /* 글 하나 = 상자 하나 */
   .cal-txt.post .cal-txt-line { background: rgba(52, 211, 153, 0.12); }   /* 숲 게시글 초록(--ev-post)의 옅은 판 — .day-kind-icon.post와 같은 색 계열 */
@@ -2166,7 +2201,7 @@
     white-space: nowrap;
   }
   .content-card-date {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text2);   /* 사실 값(날짜) = 2차(2026-09-04 대비 점검) */
   }
@@ -2283,7 +2318,7 @@
   .hall-v-w img { object-fit: cover; box-sizing: border-box; border: 2px solid var(--time); }
   .hall-v-name { font-size: 13px; font-weight: 700; }
   .hall-v-val { font-size: 13px; font-weight: 700; color: var(--time); text-align: center; line-height: 1; }
-  .hall-v-desc { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .hall-v-desc { color: var(--muted); font-weight: 600; font-size: 13px; }
   /* 켬: 수평 [좌: 1위 사진 | 우: 설명 헤더 + 금/은/동 1~3위 행] */
   .hall-photos {
     display: flex; flex-wrap: wrap; gap: 8px;
@@ -2295,7 +2330,7 @@
     border: 2px solid var(--time);           /* 공동 1위 = 금 테두리. 크기는 단독 64/공동 48, JS에서 인라인 지정 */
   }
   .hall-data { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .hall-desc { color: var(--muted); font-weight: 600; font-size: 12px; text-align: right; }
+  .hall-desc { color: var(--muted); font-weight: 600; font-size: 13px; text-align: right; }
   .hall-row {
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
     font-size: 13px; font-weight: 700; line-height: 18px;   /* 1.4(=18.2px 소수)면 행 피치 21.2px가 21/22px로 번갈아 라운딩 → 줄간격 비대칭(2026-08-02 스크린샷 실측). 정수 18px로 피치 21px 균일화 */
@@ -2551,7 +2586,7 @@
   .vs-thumb img.ph { object-fit: contain; opacity: 0.4; }
   .vs-tile:hover .vs-thumb { border-color: var(--accent); }
   .vs-title {
-    margin-top: 6px; font-size: 12px; line-height: 1.4; color: var(--text);
+    margin-top: 6px; font-size: 13px; line-height: 1.4; color: var(--text);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   /* 폭 바깥에 선다. 22px + 오프셋 22px는 .members-wrap의 좌우 패딩(24px) 안에 들어가므로
@@ -3246,7 +3281,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-23b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-23c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6739,14 +6774,16 @@ function monthGridCells(year, month1) {
   for (let dn = 1; dn <= daysInMonth(year, month1); dn++) cells.push({ key: ymdKey(year, month1, dn), label: String(dn), dow: (lead + dn - 1) % 7 });
   return cells;
 }
-function formatAbsTime(iso) {
+function formatAbsTime(iso, tail = '') {   // tail = 시각 조각 뒤에 붙일 글(채팅 묶음 ' ~ 18:18') — 한 조각이라 중간에서 안 꺾인다
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
   const k = new Date(d.getTime() + 9 * 3600 * 1000);
   const hh = String(k.getUTCHours()).padStart(2, '0');
   const mi = String(k.getUTCMinutes()).padStart(2, '0');
-  return `<span class="ev-abs-d">${koDate(k.getUTCFullYear(), k.getUTCMonth() + 1, k.getUTCDate())}</span> <span class="ev-abs-t">${hh}:${mi}</span>`;   // 날짜·시간 분리 span. 기본 1줄, 좁은 화면(≤480px)에서만 CSS로 2줄
+  // 날짜·시간 분리 span. 기본 1줄, 좁은 화면(≤480px)에서만 CSS로 2줄. 날짜는 [연도][월일] 두 조각(2026-09-23c) — 최근 활동 좁은 배치에서 1줄이 꺾일 항목만
+  //   '2026년 / 9월 23일'로 꺾는다(fitEventTimes). 글은 koDate와 같다
+  return `<span class="ev-abs-d"><span class="ev-abs-y">${k.getUTCFullYear()}년</span> <span class="ev-abs-md">${k.getUTCMonth() + 1}월 ${k.getUTCDate()}일</span></span> <span class="ev-abs-t">${hh}:${mi}${tail}</span>`;
 }
 function formatHHMM(iso) {
   if (!iso) return '';
@@ -7002,6 +7039,7 @@ function renderEvent(e, allEvents) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
   }
   const eventTime = new Date(e.time).getTime() || 0;
+  const whereIsBroadcast = ['chat', 'chat_emoticon', 'donation', 'sanction', 'mission_gift'].includes(e.type);   // '(XXX 방송)' — 좁은 배치에서 이름 옆(2026-09-23c)
   const iconHtml = e.type === 'sanction' ? (e.kind === 'kick' ? SVG_ICONS.kickOut : SVG_ICONS.ban) : (iconMap[e.type] || '•');
   const inner = `
     <div class="event-icon ${e.type}">${iconHtml}</div>
@@ -7009,8 +7047,7 @@ function renderEvent(e, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member" style="color: ${memberColor}">${escapeHtml(e.member_name)}</span>
-        <span class="event-action"><span class="event-action-label">${actionLabel}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''; })()}</span>
-        ${targetTag}
+        <span class="ev-what"><span class="event-action"><span class="event-action-label">${actionLabel}</span>${(() => { const el = getBroadcastElapsed(e, allEvents||[]); return el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''; })()}</span>${targetTag && !whereIsBroadcast ? ' ' + targetTag : ''}</span>${targetTag && whereIsBroadcast ? ' ' + targetTag.replace('class="event-target"', 'class="event-target ev-where"') : ''}
       </div>
       ${detail}
     </div>
@@ -7125,7 +7162,7 @@ function renderChatBundle(items, allEvents) {
     return `<span style="color: ${m ? m.color : '#fff'}">${escapeHtml(it.member_name || '')}</span>`;
   }).join('·');
   const el = getBroadcastElapsed(first, allEvents || []);
-  const absRange = formatAbsTime(first.time) + (formatHHMM(last.time) !== formatHHMM(first.time) ? ` ~ ${formatHHMM(last.time)}` : '');
+  const absRange = formatAbsTime(first.time, formatHHMM(last.time) !== formatHHMM(first.time) ? ` ~ ${formatHHMM(last.time)}` : '');
   const liveUrl = `https://play.sooplive.co.kr/${first.channel_id}`;
   const bundleSess = resolveEventSession(first, allEvents || []);   // v13: 묶음도 개별 채팅과 같은 규칙 — 종료 세션이면 행마다 그 시각의 VOD 지점으로
   const listUrl = bundleSess && bundleSess.ended ? `https://www.sooplive.com/station/${bundleSess.memberId}/vod` : null;
@@ -7162,8 +7199,8 @@ function renderChatBundle(items, allEvents) {
     <div class="event-body">
       <div>
         <span class="event-member">${senderHtml}</span>
-        <span class="event-action"><span class="event-action-label">채팅</span>${el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''}</span>
-        <span class="event-target">(<a class="cbr-chan" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener" style="color: ${channelColor}">${escapeHtml(first.channel_name || '')}</a> 방송)</span>
+        <span class="ev-what"><span class="event-action"><span class="event-action-label">채팅</span>${el ? ` <span class="event-elapsed">${SVG_ICONS.clockTime} ${el}</span>` : ''}</span></span>
+        <span class="event-target ev-where">(<a class="cbr-chan" href="${escapeHtml(liveUrl)}" target="_blank" rel="noopener" style="color: ${channelColor}">${escapeHtml(first.channel_name || '')}</a> 방송)</span>
       </div>
       <div class="chat-bundle-rows">${rows}</div>
     </div>
@@ -7205,7 +7242,7 @@ function renderBattleItem(g) {
     <img class="event-avatar" src="Favicon.webp" alt="천타버스">
     <div class="event-body">
       <div>
-        <span class="event-action"><span class="event-action-label">대결미션 종료</span></span>
+        <span class="ev-what"><span class="event-action"><span class="event-action-label">대결미션 종료</span></span></span>
         <span class="battle-result">— ${resultHtml}</span>
       </div>
       ${first.title ? `<div class="event-detail">“${escapeHtml(first.title)}”</div>` : ''}
@@ -7310,6 +7347,25 @@ function updateTypeAllToggle() {
   el.textContent = filterState.types.size === ALL_TYPE_KEYS.length ? '모두 해제' : '모두 선택';
 }
 
+// 최근 활동 좁은 배치의 시간 칸(2026-09-23c): 1줄(활동 제목)이 두 줄로 꺾인 항목만 .ev-tight — 시간 칸을 가장 좁혀 '연도 / 월일'로 꺾고 1줄에 자리를 준다.
+// 항목마다 판단하는 까닭: 전부 꺾으면 꺾을 필요 없는 항목까지 높아졌다(CSS 곁 주석). 넓은 배치(그리드 아님)면 표시만 지운다.
+// 읽기 한 번(1줄 높이)·쓰기 한 번(표시) — 1000항목도 배치 계산은 두 번. 폭이 바뀌면(기둥 여닫기 포함) 다시 잰다(아래 감시).
+function fitEventTimes(tl) {
+  if (!tl || !tl.clientWidth) return;   // 안 보이는 탭(폭 0)에선 재지 않는다 — 탭에 들어오면 폭 감시가 다시 부른다
+  const evs = [...tl.querySelectorAll('.event')];
+  evs.forEach(e => e.classList.remove('ev-tight'));
+  if (!evs.length || getComputedStyle(evs[0]).display !== 'grid') return;
+  const need = evs.filter(e => { const w = e.querySelector('.ev-what'); if (!w) return false; const lh = parseFloat(getComputedStyle(w).lineHeight) || 20; return w.getBoundingClientRect().height > lh * 1.5; });
+  need.forEach(e => e.classList.add('ev-tight'));
+}
+let evFitW = 0, evFitTimer = 0;
+const evFitRO = (typeof ResizeObserver === 'function') ? new ResizeObserver(entries => {
+  const w = Math.round(entries[0].contentRect.width);
+  if (!w || w === evFitW) return;   // 폭 변화만(높이 변화·폭 0 무시)
+  evFitW = w;
+  clearTimeout(evFitTimer);
+  evFitTimer = setTimeout(() => fitEventTimes(document.getElementById('timeline')), 120);
+}) : null;
 function applyFilter() {
   const tl = document.getElementById('timeline');
   if (!tl) return;
@@ -7367,6 +7423,8 @@ function applyFilter() {
   });
   // v12: VOD 링크 확정 패스 + 복수 파트 모달(위임 1개 — 도착 후 표식이 붙어도 동작)
   applyVodLinks(tl);
+  fitEventTimes(tl);   // 좁은 배치의 시간 칸(2026-09-23c)
+  if (evFitRO) { evFitRO.disconnect(); evFitW = Math.round(tl.clientWidth); evFitRO.observe(tl); }
   tl.addEventListener('click', (ev) => {
     const a = ev.target.closest('a.ev-vodmulti, a.ev-vodnone');
     if (!a || !tl.contains(a)) return;
@@ -9059,7 +9117,7 @@ function scanInkCenter(fontDecl, text, fontPx) {
 function calibrateBadgeValign() {
   try {
     const fam = getComputedStyle(document.body).fontFamily;
-    const evtInk = scanInkCenter(`400 12px ${fam}`, '방송제목가힣19+', 12);   // .event-detail 문맥(400·12px) — CSS 변경 시 함께 갱신
+    const evtInk = scanInkCenter(`400 13px ${fam}`, '방송제목가힣19+', 13);   // .event-detail 문맥(400·13px, 2026-09-23c) — CSS 변경 시 함께 갱신
     const dayInk = scanInkCenter(`600 13px ${fam}`, '방송제목가힣19+', 13);   // .day-session-title 문맥(600·13px)
     if (evtInk !== null) document.documentElement.style.setProperty('--tag-valign', Math.max(-12, Math.min(0, -evtInk - 9.5)).toFixed(2) + 'px');
     if (dayInk !== null) document.documentElement.style.setProperty('--daytag-valign', Math.max(-12, Math.min(0, -dayInk - 9.5)).toFixed(2) + 'px');

@@ -1769,7 +1769,7 @@
     gap: 20px; align-items: start;
   }
   /* 칸을 비우는 규칙은 태블릿 블록(1150px)이 다른 탭들과 함께 가진다(2026-09-02 이동, 사유는 .recent-wrap 쪽 주석) */
-  .chem-content { container-type: inline-size; min-width: 0; }   /* 카드 열 수를 뷰포트가 아닌 이 콘텐츠 칸 폭 기준으로 판단(컨테이너 쿼리) */
+  .chem-content { container-type: inline-size; container-name: chem-col; min-width: 0; }   /* 카드 열 수를 뷰포트가 아닌 이 콘텐츠 칸 폭 기준으로 판단(컨테이너 쿼리). 이름(chem-col)은 1열 규칙용 — 아래 케미 1열 곁 주석 */
   /* 케미 필터: 이벤트 .filter-panel과 동일 — 우측 사이드 sticky. 스크롤이 길어(2인+그룹) 필터 상시 노출이 이득 */
   .chem-filter-panel { position: sticky; top: calc(var(--head-h, 0px) + 20px); }
   .chem-filter-members {
@@ -1964,10 +1964,13 @@
      · 2인: [케미명 ··· 얼굴 · 채팅 수 · 얼굴], 설명을 켜면 채팅 수 자리를 설명(이름 옆)에 내준다 — 얼굴 48 그대로.
      · 3인: 좌우, 얼굴 34(칸 44 — 이름 12px 세 글자가 이웃과 붙지 않는 최소), 설명은 이름 옆. 이름 아래로 붙이면 이름 3개짜리 카드 하나가 3인 전체를 146px로 키운다.
      · 4인: 좌우, 얼굴 34, 설명은 케미명 아래(두 줄까지) — 이름 옆이면 설명 칸이 90px대라 거의 다 잘렸다. 얼굴 크기는 켬·끔 같다.
-     · 5~7인: 위아래 [케미명 설명] / [구성원 한 줄] — 한 줄 구성원 옆에는 설명 자리가 안 난다. 칸은 폭에 맞춰 줄인다(7인 360px에서 얼굴 약 34).
+     · 5~7인: 좌우 [케미명 | 구성원 두 줄](여러 열·PC와 같은 3+2·3+3·4+3, 칸 44·얼굴 34), 설명은 4인처럼 케미명 아래 — 구성원 두 줄 옆 세로 여유로 4줄까지(높이 그대로).
+       (2026-09-23 b Crenop: 종전 위아래 [케미명 설명] / [구성원 한 줄]은 2~4인과 문법이 달랐다. 한 줄 그대로 좌우는 360~412px에서 6·7인이 한 장도 안 들어간다 — 실측)
+     · 이 블록은 이름 붙인 컨테이너(chem-col = .chem-content)에 묻는다. 이름 없이 묻으면 몸통(.chem-body — 카드 안 inline-size 컨테이너) 안쪽 요소는
+       가장 가까운 몸통 폭(늘 480 이하)을 재서 PC 카드에도 규칙이 샜다(2026-09-23 a~b: PC 구성원 한 줄·얼굴 34·설명 켬에서 2인 채팅 수 사라짐).
      · 높이는 종전 규칙 그대로 종류별 통일·토글 불변 — 계산은 fitChemHeights(눕힌 카드 분기).
      모달의 간단 카드(.chem-modal-grid)는 이 규칙 밖이다(.chem-group-grid로 한정). */
-  @container (max-width: 480px) {
+  @container chem-col (max-width: 480px) {
     .chem-group-grid .chem-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px; align-items: center; align-content: center; }
     .chem-group-grid .chem-head { min-width: 0; margin-bottom: 0; justify-content: flex-start; }
     .chem-group-grid .chem-name { text-align: left; }
@@ -1981,14 +1984,15 @@
     .chem-group-grid .chem-group-members { display: flex; flex-wrap: nowrap; justify-content: flex-end; column-gap: 0; min-width: 0; }
     .chem-group-grid .chem-group-members .chem-member { flex: 0 0 44px; width: auto; min-width: 0; }
     .chem-group-grid .chem-group-members .chem-member img { width: 34px; height: 34px; }
-    .chem-grid.chem-show-desc .chem-group-grid .chem-card:has(.chem-group-members.n4) .chem-nlist { grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }
-    .chem-grid.chem-show-desc .chem-group-grid .chem-card:has(.chem-group-members.n4) .chem-ndesc {
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-nlist { grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-ndesc {
       grid-column: 1 / -1; white-space: normal; line-height: 15px; margin-bottom: 3px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
-    .chem-group-grid .chem-card:has(.chem-group-members > :nth-child(5)) { grid-template-columns: minmax(0, 1fr); }
-    .chem-group-grid .chem-group-members:has(> :nth-child(5)) .chem-member { flex: 0 1 50px; }
-    .chem-group-grid .chem-group-members:has(> :nth-child(5)) .chem-member img { width: min(40px, calc(100% - 6px)); height: auto; aspect-ratio: 1; }
+    .chem-group-grid .chem-group-members:has(> :nth-child(5)) { display: grid; column-gap: 0; row-gap: 8px; }   /* 두 줄 — 줄 나눔·마지막 줄 가운데는 chemMembersGridHtml(사람당 2트랙) 그대로, 트랙만 22(칸 44) */
+    .chem-group-grid .chem-group-members.cols3:has(> :nth-child(5)) { grid-template-columns: repeat(6, 22px); }
+    .chem-group-grid .chem-group-members.cols4:has(> :nth-child(5)) { grid-template-columns: repeat(8, 22px); }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:has(.chem-group-members > :nth-child(5)) .chem-ndesc { -webkit-line-clamp: 4; }
   }
 
   /* === 컨텐츠 탭 === */
@@ -3242,7 +3246,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-23a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-23b';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

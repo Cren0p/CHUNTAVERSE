@@ -801,8 +801,9 @@
   }
   /* ── 정전 타이머(2026-08-07) — 전원 오프라인일 때 카드 묶음을 흐리고 그 위에 경과 시간을 얹는다 ──
      흐림은 .grid에만 건다. #app에 걸면 문구까지 같이 흐려진다(문구는 .grid의 형제).
-     문구를 sticky로 두는 이유: 카드 13장이 두 화면 넘게 이어져서, 오버레이 한가운데에 두면
-     스크롤 안 한 첫 화면에서는 문구가 화면 밖에 있다. sticky면 어디를 보고 있든 화면 중앙에 붙는다. */
+     문구를 sticky로 두는 이유: 카드 13장이 한 화면을 넘게 이어져서(여러 열은 두 화면 넘게, 1열 휴대폰은 오프라인 띠라 약 1,100px),
+     오버레이 한가운데에 두면 스크롤 안 한 첫 화면에서는 문구가 화면 밖에 있다. sticky면 어디를 보고 있든 화면 중앙에 붙는다.
+     1열에서는 어제 다시보기 상자가 띠 격자보다 길어지는 날이 잦다 — 그땐 bv-flow가 페이지를 늘린다(흐린 배경 아래는 맨 바탕). */
   #app { position: relative; }
   .grid.blackout { filter: blur(5px) grayscale(0.35); }
   .blackout-overlay { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
@@ -950,6 +951,14 @@
     line-height: 1.3;
   }
   .card-title.is-live { color: var(--text3); }
+  /* 격자가 1열이면(생방송 칸 520px 이하 — 휴대폰 세로·기둥 편 태블릿) 오프라인 카드는 정보 띠만 남긴다(2026-09-23 Crenop).
+     '라이브·오프라인 카드 크기를 같게'(세션 52 기각 판정)의 1열 한정 예외다 — 1열은 어차피 한 화면에 다 안 들어와, 크기를 맞춰 지키는
+     일관성보다 띠로 줄여 덜 넘기는 이득이 크다(휴대폰 360px 전원 오프라인 기준 격자 약 3,300 → 1,100px). 여러 열에서는 그대로 같은 크기.
+     휴방 카드는 보여 줄 그림(휴방 공지)이 있어 16:9 그대로 둔다. 누가 켜고 끄면 그 카드만 띠 ↔ 카드로 바뀐다(받아들인 대가) */
+  @container (max-width: 520px) {
+    .card.offline:not(.vacation) .card-thumb { display: none; }
+    .card.offline:not(.vacation) .card-info { padding: 13px 14px; }   /* 위아래 같게 — 12/14면 아바타가 2px 위로 치우친다 */
+  }
 
   .loading { text-align: center; padding: 80px 20px; color: var(--muted); flex: 1; }
   .spinner {
@@ -1835,7 +1844,7 @@
   .chem-nrow { display: contents; }
   .chem-nrow.has-link > * { cursor: pointer; }
   .chem-nrow.dim > * { opacity: 0.35; }
-  .chem-nicon { color: var(--muted); transition: color 0.12s; justify-self: start; }
+  .chem-nicon { color: var(--muted); transition: color 0.12s; justify-self: start; display: flex; align-items: center; }   /* flex(2026-09-23): 바깥 링크·사슬 둘 다인 이름은 아이콘이 가로로 — 종전엔 svg가 블록이라 세로로 쌓여 19px 줄을 넘쳤다 */
   .chem-nicon svg { width: 12px; height: 12px; display: block; }
   .chem-nrow.has-link:hover .chem-name-part, .chem-nrow.has-link:hover .chem-nicon, .chem-nrow.has-link:hover .chem-ndesc,
   .chem-nrow.hl .chem-name-part, .chem-nrow.hl .chem-nicon, .chem-nrow.hl .chem-ndesc { color: var(--accent); }
@@ -1949,6 +1958,38 @@
   /* 4인은 카드가 좁으면(2열 벽 등) 2+2 — 4 → 2×2트랙이면 첫 줄 오프셋이 없어 그대로 맞는다 */
   @container (max-width: 215px) { .chem-group-members.cols4.n4 { grid-template-columns: repeat(4, 25px); } }
   .chem-group-members .chem-member img { width: 40px; height: 40px; }
+  /* ── 케미 1열(2026-09-23 Crenop, 목업 7차 G안): 카드 묶음이 1열(케미 칸 480px 이하 — 휴대폰 세로·기둥 편 태블릿)이면 카드를 옆으로 눕힌다 ──
+     1열은 스크롤이 많다(카드 117장이 한 줄로) — 쌓인 카드의 세로 공간을 줄이는 게 목적이다(휴대폰 360·412px 페이지 −40%). 여러 열은 그대로.
+     · 케미명은 한 줄에 하나, 구분점(·) 없음 — 줄이 바뀌면 구분점이 뜻이 없다. 칸보다 긴 이름 하나만 그 안에서 줄을 바꾼다.
+     · 2인: [케미명 ··· 얼굴 · 채팅 수 · 얼굴], 설명을 켜면 채팅 수 자리를 설명(이름 옆)에 내준다 — 얼굴 48 그대로.
+     · 3인: 좌우, 얼굴 34(칸 44 — 이름 12px 세 글자가 이웃과 붙지 않는 최소), 설명은 이름 옆. 이름 아래로 붙이면 이름 3개짜리 카드 하나가 3인 전체를 146px로 키운다.
+     · 4인: 좌우, 얼굴 34, 설명은 케미명 아래(두 줄까지) — 이름 옆이면 설명 칸이 90px대라 거의 다 잘렸다. 얼굴 크기는 켬·끔 같다.
+     · 5~7인: 위아래 [케미명 설명] / [구성원 한 줄] — 한 줄 구성원 옆에는 설명 자리가 안 난다. 칸은 폭에 맞춰 줄인다(7인 360px에서 얼굴 약 34).
+     · 높이는 종전 규칙 그대로 종류별 통일·토글 불변 — 계산은 fitChemHeights(눕힌 카드 분기).
+     모달의 간단 카드(.chem-modal-grid)는 이 규칙 밖이다(.chem-group-grid로 한정). */
+  @container (max-width: 480px) {
+    .chem-group-grid .chem-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px; align-items: center; align-content: center; }
+    .chem-group-grid .chem-head { min-width: 0; margin-bottom: 0; justify-content: flex-start; }
+    .chem-group-grid .chem-name { text-align: left; }
+    .chem-group-grid .chem-name .chem-name-part { display: block; white-space: normal; }
+    .chem-group-grid .chem-name .chem-name-sep { display: none; }
+    .chem-group-grid .chem-body { container-type: normal; justify-content: flex-end; min-width: 0; }   /* 폭을 구성원만큼 — inline-size 컨테이너면 폭이 0으로 접힌다 */
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nlist { display: grid; grid-template-columns: auto auto minmax(0, 1fr); width: 100%; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nlist .chem-name-part { justify-self: start; text-align: left; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-ndesc { max-width: none; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-arrows { display: none; }
+    .chem-group-grid .chem-group-members { display: flex; flex-wrap: nowrap; justify-content: flex-end; column-gap: 0; min-width: 0; }
+    .chem-group-grid .chem-group-members .chem-member { flex: 0 0 44px; width: auto; min-width: 0; }
+    .chem-group-grid .chem-group-members .chem-member img { width: 34px; height: 34px; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:has(.chem-group-members.n4) .chem-nlist { grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:has(.chem-group-members.n4) .chem-ndesc {
+      grid-column: 1 / -1; white-space: normal; line-height: 15px; margin-bottom: 3px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+    .chem-group-grid .chem-card:has(.chem-group-members > :nth-child(5)) { grid-template-columns: minmax(0, 1fr); }
+    .chem-group-grid .chem-group-members:has(> :nth-child(5)) .chem-member { flex: 0 1 50px; }
+    .chem-group-grid .chem-group-members:has(> :nth-child(5)) .chem-member img { width: min(40px, calc(100% - 6px)); height: auto; aspect-ratio: 1; }
+  }
 
   /* === 컨텐츠 탭 === */
   .content-wrap {
@@ -2263,6 +2304,23 @@
   .hall-empty {
     flex: 1; display: flex; align-items: center; justify-content: center;
     color: var(--muted); font-size: 12px; padding: 16px 0;
+  }
+  /* ── 명전 휴대폰·태블릿 배치(2026-09-23 Crenop, 목업 B안): 창 1008px 이하 — 명전이 1열이 될 수 있는 기기 전부(기둥을 접어 2열이어도 같은 모양) ──
+     1행 [제목 ··· 설명] · 2행 [1위 사진 | 1위 이름 ··· 값] · 2·3위를 켜면 3·4행 [2위]·[3위]. PC의 2·3위 보기 부품(.hall-h)을 그대로 쓰고,
+     감싸는 상자(.hall-content·.hall-h)를 풀어(display: contents) 설명을 제목 줄 오른쪽으로 올린다. 끔 모양(.hall-v)은 쓰지 않는다.
+     사진은 켜고 꺼도 같은 크기(단독 64·공동 48 — PC 켬과 같은 값). 끄면 1위 한 줄이 사진 가운데 높이에, 켜면 세 줄(18×3 + 3×2 = 60)이 사진 64 안에 든다.
+     여백은 PC와 같다: 사진 칸 104에 사진을 가운데(양옆 20), 값·설명은 오른쪽에서 20 안쪽, 제목도 20 들여 제목 그림이 사진 왼쪽 끝과 맞는다.
+     높이는 전 카드 공통·토글 불변(fitHallHeights — 이 배치에선 카드에 건다). 1008은 태블릿 좌 기둥을 편 상태에서 명전이 1열이 되는 창 폭의 상한 */
+  @media (max-width: 1008px) {
+    .hall-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 10px; padding: 14px; align-content: center; }
+    .hall-cat { grid-column: 1; grid-row: 1; justify-content: flex-start; text-align: left; min-width: 0; padding-left: 20px; }
+    .hall-card .hall-content, .hall-card .hall-h, #hallBody.show-ranks .hall-h { display: contents; }
+    .hall-card .hall-v { display: none; }
+    .hall-desc { grid-column: 2; grid-row: 1; align-self: center; padding-right: 20px; }
+    .hall-h-body { grid-column: 1 / -1; grid-row: 2; }
+    .hall-data { padding-right: 20px; }
+    #hallBody:not(.show-ranks) .hall-row.m2, #hallBody:not(.show-ranks) .hall-row.m3 { display: none; }
+    .hall-card .hall-empty { grid-column: 1 / -1; }   /* '아직 집계 전' — 상자가 풀려 제목 옆 칸으로 들어가지 않게 */
   }
 
   /* === 구성원 탭 === */
@@ -3184,7 +3242,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-22f';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-23a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8721,12 +8779,24 @@ function syncBlackoutVods(ov) {
   msg.style.top = over ? '' : `calc(42vh - ${Math.round(vods.getBoundingClientRect().height / 2)}px)`;
   app.style.minHeight = over ? (msg.offsetHeight + 48) + 'px' : '';
 }
-// 창 크기가 바뀌면 열 수를 다시 고른다 — 이 파일의 다른 재계산들과 같은 120ms 묶음
-let blackoutFitTimer;
-window.addEventListener('resize', () => {
+// 창 크기가 바뀌면 열 수를 다시 고른다 — 이 파일의 다른 재계산들과 같은 120ms 묶음.
+// 창 크기 신호만으로는 모자란다(2026-09-23 적발): 태블릿에서 기둥·조작부를 여닫으면 창은 그대로인데 본문(#app) 폭만 300px 바뀌어,
+// 정전 중 다시보기 상자가 옛 폭으로 남아 본문 밖으로 넘치고 페이지에 가로 스크롤이 생겼다 → 본문 폭 변화도 같이 본다(ResizeObserver).
+// 창 높이 변화(휴대폰 주소창 접힘·회전)는 폭이 그대로여도 '한 화면에 들어가나' 판정이 바뀌므로 창 크기 신호도 남긴다.
+let blackoutFitTimer, blackoutFitW = 0;
+const refitBlackout = () => {
   clearTimeout(blackoutFitTimer);
   blackoutFitTimer = setTimeout(() => syncBlackoutVods(document.getElementById('blackoutOverlay')), 120);
-});
+};
+window.addEventListener('resize', refitBlackout);
+if (typeof ResizeObserver === 'function' && document.getElementById('app')) {
+  new ResizeObserver(entries => {
+    const w = Math.round(entries[0].contentRect.width);
+    if (!w || w === blackoutFitW) return;   // 폭 0(안 보이는 탭)·높이만 바뀐 경우(카드 재구축 등)는 무시
+    blackoutFitW = w;
+    refitBlackout();
+  }).observe(document.getElementById('app'));
+}
 
 function renderLinks() {
   const body = document.getElementById('linksBody');
@@ -9673,30 +9743,52 @@ function renderChemistry() {
       openChemModal(entry.name, urls, refs, (nm) => jumpToChem(nm, part), cardHtmlByName);
     });
 
-    // ── 카드 높이 고정(명전 방식 실측, 2026-08-09 개정) ──
-    // 이름 영역은 '전 카드 공통' 최대(꺼짐·켬 중 큰 쪽), 몸통(멤버 줄)은 '카드 종류별' 최대를 확보 —
-    // 높이 차이가 시트의 항목 수 우연이 아니라 멤버 줄 수(구조)로만 남는다. 시트에 항목이 늘면 전 카드가 함께 자란다.
-    // 종류 = 2인 카드 / N인 그룹 카드(멤버 수별). (구: 종류별 '총높이' 최대 — 다항목 케미가 있는 종류만 커져 종류 간 단차)
-    const cards = [...grid.querySelectorAll('.chem-card')];
-    if (cards.length) {
-      const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
-      // 실측은 소수점까지(2026-09-20): offsetHeight는 정수로 내림해서, 실제 168.33px인 카드에 min-height 168px가 걸렸다.
-      // 그 0.33px만큼 카드가 자라 설명 보기를 켤 때마다 아래 카드들이 미세하게 들썩였다(Crenop 신고). 마지막에 올림해 늘 덮는다.
-      const hOf = el => el.getBoundingClientRect().height;
-      const headOf = c => { const h = c.querySelector('.chem-head'); return h ? hOf(h) : 0; };
-      const wasOn = grid.classList.contains('chem-show-desc');
-      grid.classList.add('chem-measure');   // 실측 동안 행 늘림 차단 — 옆 카드 높이가 내 실측에 오염되는 것 방지
-      grid.classList.remove('chem-show-desc'); const hOff = cards.map(hOf); const headOff = cards.map(headOf);
-      grid.classList.add('chem-show-desc');    const hOn = cards.map(hOf);  const headOn = cards.map(headOf);
-      grid.classList.toggle('chem-show-desc', wasOn);
-      grid.classList.remove('chem-measure');
-      const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
-      const maxByKind = {};   // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
-      cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
-      Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
-      cards.forEach(c => { c.style.minHeight = Math.ceil(maxByKind[kindOf(c)]) + 'px'; });
-    }
+    fitChemHeights(grid);
+    // 폭이 바뀌면(기둥 여닫기·회전 — 창 크기 신호가 안 나는 것도) 다시 잰다: 1열 ↔ 여러 열은 카드 모양이 달라 옛 높이가 남으면 안 된다
+    const content = body.querySelector('.chem-content');
+    if (chemFitRO && content) { chemFitRO.disconnect(); chemFitW = Math.round(content.clientWidth); chemFitRO.observe(content); }
   }
+}
+// ── 케미 카드 높이 고정(명전 방식 실측, 2026-08-09 개정 · 2026-09-23 함수로 분리) ──
+// 쌓인 카드(여러 열): 이름 영역은 '전 카드 공통' 최대(꺼짐·켬 중 큰 쪽), 몸통(멤버 줄)은 '카드 종류별' 최대를 확보 —
+//   높이 차이가 시트의 항목 수 우연이 아니라 멤버 줄 수(구조)로만 남는다. 시트에 항목이 늘면 전 카드가 함께 자란다.
+// 눕힌 카드(1열, 케미명 옆에 구성원 — 2026-09-23): 이름 칸이 몸통 위에 쌓이지 않으므로 위 덧셈을 쓰면 부푼다 →
+//   종류별로 두 상태 중 가장 큰 카드 높이에 맞춘다(같은 종류는 같은 크기, 토글해도 불변 — 규칙은 그대로).
+// 종류 = 2인 카드 / N인 그룹 카드(멤버 수별). (구: 종류별 '총높이' 최대 — 다항목 케미가 있는 종류만 커져 종류 간 단차)
+// 안 보이는 탭(폭 0)에서 잰 값은 버린다 — 탭에 들어올 때 renderChemistry가 다시 잰다.
+let chemFitW = 0, chemFitTimer = 0;
+const chemFitRO = typeof ResizeObserver === 'function' ? new ResizeObserver(entries => {
+  const w = Math.round(entries[0].contentRect.width);
+  if (!w || w === chemFitW) return;   // 폭 0(안 보이는 탭)·높이만 바뀐 경우는 무시
+  chemFitW = w;
+  clearTimeout(chemFitTimer);
+  chemFitTimer = setTimeout(() => { const g = document.querySelector('#page-chemistry .chem-grid'); if (g) fitChemHeights(g); }, 120);
+}) : null;
+function fitChemHeights(grid) {
+  const cards = [...grid.querySelectorAll('.chem-card')];
+  if (!cards.length || !grid.clientWidth) return;
+  cards.forEach(c => { c.style.minHeight = ''; });   // 다시 잴 때 옛 높이가 실측을 오염시키지 않게
+  const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
+  // 실측은 소수점까지(2026-09-20): offsetHeight는 정수로 내림해서, 실제 168.33px인 카드에 min-height 168px가 걸렸다.
+  // 그 0.33px만큼 카드가 자라 설명 보기를 켤 때마다 아래 카드들이 미세하게 들썩였다(Crenop 신고). 마지막에 올림해 늘 덮는다.
+  const hOf = el => el.getBoundingClientRect().height;
+  const headOf = c => { const h = c.querySelector('.chem-head'); return h ? hOf(h) : 0; };
+  const wasOn = grid.classList.contains('chem-show-desc');
+  grid.classList.add('chem-measure');   // 실측 동안 행 늘림 차단 — 옆 카드 높이가 내 실측에 오염되는 것 방지
+  grid.classList.remove('chem-show-desc'); const hOff = cards.map(hOf); const headOff = cards.map(headOf);
+  grid.classList.add('chem-show-desc');    const hOn = cards.map(hOf);  const headOn = cards.map(headOf);
+  grid.classList.toggle('chem-show-desc', wasOn);
+  grid.classList.remove('chem-measure');
+  const maxByKind = {};
+  if (getComputedStyle(cards[0]).display === 'grid') {   // 눕힌 카드(1열)
+    cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i], hOn[i]); });
+  } else {
+    const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
+    // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
+    cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
+    Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
+  }
+  cards.forEach(c => { c.style.minHeight = Math.ceil(maxByKind[kindOf(c)]) + 'px'; });
 }
 
 // ── 명예의 전당 ── 전 항목 통산(개시 이래) 집계. 연간 경쟁은 통계 탭 연간 메달이 담당.
@@ -10407,18 +10499,36 @@ function renderHall() {
 
   // 기간 버튼·2·3위 토글 모두 우측 기둥으로 이관(2026-09-01) — 본문에는 카드만 남는다
   body.innerHTML = `<div class="hall-grid">${cards}</div>`;
-  // 끔(세로)·켬(수평) 양쪽에서 각 카드 콘텐츠 높이를 실측해, 가장 큰 값을 전 카드 공통 높이로 → 토글해도·카드끼리도 높이 동일
-  const contentEls = body.querySelectorAll('.hall-content');
-  contentEls.forEach(el => { el.style.minHeight = ''; });
-  let maxH = 0;
-  body.classList.remove('show-ranks');
-  contentEls.forEach(el => { if (el.offsetHeight > maxH) maxH = el.offsetHeight; });
-  body.classList.add('show-ranks');
-  contentEls.forEach(el => { if (el.offsetHeight > maxH) maxH = el.offsetHeight; });
-  contentEls.forEach(el => { el.style.minHeight = maxH + 'px'; });
-  body.classList.toggle('show-ranks', hallShowRanks);   // 실제 토글 상태로 복원
+  fitHallHeights(body);
+  if (hallFitRO) { hallFitRO.disconnect(); hallFitW = Math.round(body.clientWidth); hallFitRO.observe(body); }   // 폭이 바뀌면(기둥 여닫기·회전) 다시 잰다
   lastStatsTabUpdate = new Date();
   updateHeaderCenter();
+}
+// 명전 카드 높이(2026-09-23 함수로 분리): 끔·켬 양쪽에서 실측해 가장 큰 값을 전 카드 공통 높이로 → 토글해도·카드끼리도 높이 동일.
+// PC는 카드 본문(.hall-content)에, 휴대폰·태블릿 배치(본문 상자를 풀어 설명을 제목 줄로 올린 것 — .hall-content가 display: contents)는 카드 자체에 건다.
+// 소수점까지 재고 올린다(케미 2026-09-20과 같은 이유). 안 보이는 탭(폭 0)에서 잰 값은 버린다.
+let hallFitW = 0, hallFitTimer = 0;
+const hallFitRO = typeof ResizeObserver === 'function' ? new ResizeObserver(entries => {
+  const w = Math.round(entries[0].contentRect.width);
+  if (!w || w === hallFitW) return;
+  hallFitW = w;
+  clearTimeout(hallFitTimer);
+  hallFitTimer = setTimeout(() => { const b = document.getElementById('hallBody'); if (b) fitHallHeights(b); }, 120);
+}) : null;
+function fitHallHeights(body) {
+  const cards = [...body.querySelectorAll('.hall-card')];
+  if (!cards.length || !body.clientWidth) return;
+  const contents = [...body.querySelectorAll('.hall-content')];
+  cards.forEach(el => { el.style.minHeight = ''; });
+  contents.forEach(el => { el.style.minHeight = ''; });
+  const els = getComputedStyle(contents[0]).display === 'contents' ? cards : contents;
+  let maxH = 0;
+  [false, true].forEach(on => {
+    body.classList.toggle('show-ranks', on);
+    els.forEach(el => { const h = el.getBoundingClientRect().height; if (h > maxH) maxH = h; });
+  });
+  els.forEach(el => { el.style.minHeight = Math.ceil(maxH) + 'px'; });
+  body.classList.toggle('show-ranks', hallShowRanks);   // 실제 토글 상태로 복원
 }
 
 function initProfileTabs() {

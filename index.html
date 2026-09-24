@@ -126,7 +126,7 @@
   /* 글자 크기 하한(2026-09-23 Crenop — 100%에서 읽는 데 문제없게, 사용 가이드의 '배율을 맞춰 쓰라'는 안내를 안 읽는 사람이 더 많다):
      모든 글자 12px 이상, 읽는 글(내용·이름 — 방송·영상 제목, 최근 활동 세부·채팅, 케미 설명·구성원 이름, 명전 설명 등) 13px 이상.
      일괄 확대(+1·+2px)는 기각 — 이미 괜찮은 제목까지 커져 배치가 깨졌다. 13px 이상 제목급과 12px 조작 라벨(탭 이름·버튼·필터·정렬·표 머리·차트 눈금)은 그대로.
-     예외: 시간대 분포 가로 날짜 눈금(.toh-xlabel — 15px 칸에 두 자리 날짜라 12px면 이웃과 겹친다) · 글자가 아닌 11px(.day-kind-icon — 아이콘 상자).
+     예외: 글자가 아닌 11px(.day-kind-icon — 아이콘 상자). 시간대 분포 가로 날짜 눈금(.toh-xlabel)은 2026-09-24 토·일 합친 눈금으로 겹칠 까닭이 없어져 12px.
      보조바 버튼·기념일·알림 종은 2026-09-24 보조바 개선 때 12px로 올렸다. 새 글자도 이 하한을 따른다(verify_legibility_20260923). */
   /* 배경은 단색(--bg). 화면에 고정된 별 점 6개(body::before의 radial-gradient)는 2026-09-03 Crenop 지정으로 제거 — 지저분해 보였다. */
 
@@ -339,7 +339,8 @@
 
   .subbar-right { justify-content: flex-end; }
   /* 왼쪽 묶음은 왼쪽 끝(로고 왼쪽 선)부터 일정 줄 → 시트 왼쪽 버튼 순으로 선다(2026-09-06 Crenop). 종전(2026-09-04) '기념일 바로 왼쪽에 붙는다'는 철회 —
-     일정 줄이 이 묶음에 들어오면서 기준이 기념일이 아니라 일정 줄이 됐다. 기념일은 2026-09-24부터 이 묶음 끝(시트 왼쪽 버튼 뒤) — 자리가 모자라면 약식으로 준다(syncLeadCeleb). */
+     일정 줄이 이 묶음에 들어오면서 기준이 기념일이 아니라 일정 줄이 됐다. 기념일은 2026-09-24부터 이 묶음 끝 — 자리가 모자라면 약식으로 준다(syncLeadCeleb).
+     기념일이 있는 날은 시트 왼쪽 버튼이 오른쪽 묶음 맨 앞으로 가 이 묶음은 [일정][기념일]뿐이다(2026-09-24 Crenop, updatePageTitle). */
   .subbar-lead { justify-content: flex-start; }
   /* 탭 줄과 같은 칸 규격 — 부속이 자기 탭 아래에 정확히 선다 */
   .subbar-mid { display: grid; grid-auto-flow: column; grid-auto-columns: var(--tab-w); gap: 2px; padding: 0 6px; }
@@ -399,8 +400,8 @@
     position: absolute; right: 0; top: 50%; transform: translateY(-50%);
     display: flex; align-items: center; gap: 6px;   /* 여럿이면 왼쪽으로 나열된다(오른쪽 경계 고정) */
   }
-  /* PC 보조바의 기념일(2026-09-24 Crenop): 왼쪽 묶음 끝에 다른 버튼과 간격 없이(8) 나란히. 둘 이상이거나, 묶음이 넘치거나 일정·시트 버튼 글자가 말줄임되면
-     약식 문구('천양 생축!')로 — 판정은 syncLeadCeleb이 실측으로(다른 버튼 글자보다 기념일 전체 문구가 먼저 준다) */
+  /* PC 보조바의 기념일(2026-09-24 Crenop): 왼쪽 묶음 끝에 일정과 간격 없이(8) 나란히. 둘 이상이거나, 묶음이 넘치거나 일정 글자가 말줄임되면
+     약식 문구('천양 생축!')로 — 판정은 syncLeadCeleb이 실측으로(일정 글자보다 기념일 전체 문구가 먼저 준다) */
   .subbar-lead .celeb-wrap { display: flex; align-items: center; gap: 8px; flex: none; }
   .subbar-lead .celeb-wrap.short .celebration-box .tb-t-pc { display: none; }
   .subbar-lead .celeb-wrap.short .celebration-box .tb-t-mb { display: inline; }
@@ -409,7 +410,10 @@
      묶음이 좁아지면 시트 버튼이 먼저(3배) 줄고 글자는 말줄임, 일정 줄은 그다음. */
   .subbar-lead .sch-line { flex: 0 1 auto; min-width: 0; max-width: calc(var(--tab-w) * 3 + 4px); }
   .subbar-lead .tb-sheet-btn { flex: 0 3 auto; min-width: 0; }
-  .tb-t-pc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* 줄어들 때 글자 말줄임(왼쪽 묶음에서만 줄어든다). 잘린 글은 ELLIPSIS_TIP_SEL 글상자 */
+  /* 오른쪽 묶음의 시트 버튼도 모자라면 글자가 준다(2026-09-24) — 기념일 날 왼쪽 버튼까지 이리 오므로. 줄지 않으면 오른쪽 정렬(flex-end)이라 넘친 만큼 왼쪽 끝이
+     보이지 않게 잘린다(1160px에 긴 버튼 셋: 맨 앞 버튼 233px 중 138px만 보임 — 헤드리스 가짜 자료). 최애·가이드는 종전대로 줄지 않는다 */
+  .main-header > .subbar-right .tb-sheet-btn { flex: 0 3 auto; min-width: 0; }
+  .tb-t-pc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* 줄어들 때 글자 말줄임(왼쪽 묶음과 오른쪽 묶음의 시트 버튼). 잘린 글은 ELLIPSIS_TIP_SEL 글상자 */
 
   /* 드로어 여닫이 — 상단바가 화면 밖으로 나가는 폭에서만 나타난다 */
   .drawer-btn {
@@ -794,6 +798,14 @@
     opacity: 0.75;
   }
   .hc-stale { color: #FFA94D; }   /* 감지 지연 경고 — 기존 팔레트의 경고 주황(cbr-sanction과 동일 계열) */
+  /* PC 갱신 문구 접기(2026-09-24 Crenop #10): 한 줄에 안 들어가면 '주기 ·' / '시각'으로 접는다(≤900의 두 줄과 같은 자리에서) — 종전엔 말줄임이 시각을 잘랐다.
+     가장 긴 문구('10초마다 자동 갱신 · 오후 12:59:59 기준' 195px)가 1151~1240px에서 잘렸다(1260부터 한 줄에 든다). 폭 구간이 아니라 칸이 모자랄 때만 접히므로 문구 오른쪽에
+     버튼(라이트 모드 등)이 붙어 칸이 줄어도 그대로 맞는다. 세 줄(14 × 3 + 간격 2 = 44)이라 띠 높이 56은 그대로. 시각 숫자는 등폭 — 초가 바뀔 때마다 폭이 흔들려 경계 폭에서 접힘이 오락가락하지 않게 */
+  @media (min-width: 1151px) {
+    .header-center-line:not(.header-disclaimer) { white-space: normal; }
+    .hc-period, .hc-stamp { white-space: nowrap; }
+    .hc-stamp { font-variant-numeric: tabular-nums; }
+  }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
@@ -1009,6 +1021,8 @@
   @media (min-width: 1151px) {
     .filter-panel, .chem-filter-panel, .side-pick, .like-side { max-height: calc(100vh - var(--head-h, 0px) - 40px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   }
+  /* 스크롤바가 생기면 그 폭만큼 기둥을 오른쪽 바깥 여백으로 넓힌다(fitPillarGutter, 2026-09-24) — 280 안에서 자리를 먹으면 그 탭만 칸이 60 → 56.7로 줄어
+     탭을 넘길 때 칸이 튀었다(1280×900 달력만 5px 넘쳐 스크롤, 1536×864 노트북은 달력·통계). 스크롤바가 겹쳐 뜨는 기기(폭 0)는 그대로 */
   /* 기둥 오른쪽 44px 빈 슬롯과 짝이 되는 왼쪽 44px — 기둥을 쓰는 탭 전부에 같은 값(2026-09-01 전수 적용) */
   .recent-wrap > .timeline, .chem-wrap > .chem-content { margin-left: 44px; }
   /* 묶음 사이 간격은 .side-pick 쪽 한 규칙이 전 탭(최근 활동·케미 포함)을 맡는다(2026-09-19 Crenop: 구분선 잔재 제거·한곳 관리) */
@@ -1167,6 +1181,12 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     margin-top: 3px;
   }
+  /* 다 보여 주는 세부 줄(2026-09-24 Crenop): 제목·카테고리·모드 변경과 채팅류 단건은 말줄임 없이 꺾는다 — 변경은 '구 → 새'의 새 값이 잘려 안 보였고,
+     채팅 단건은 묶음 줄(.chat-bundle-row)이 꺾이는데 혼자 잘렸다. 변경의 새 값은 달력 하루 모달 변경 줄처럼 '→' 뒤에서 꺾는다(.chg-after).
+     줄 높이는 좁은 배치에서만 묶음 줄과 같게(아래 @container timeline) — 넓은 배치는 거의 한 줄이라 종전 줄 높이로 둬 한 줄 항목의 글 위치가 그대로다(1.45면 PC에서 머리 줄이 1.9px 떴다).
+     나머지(방송 시작·종료 제목, 게시글·유튜브·카페 제목 등)는 한 줄 말줄임 그대로 */
+  .event-detail.ev-wrap { white-space: normal; text-overflow: clip; overflow: visible; overflow-wrap: anywhere; }
+  .event-detail .chg-after { display: inline-block; max-width: 100%; vertical-align: top; }
   .event-time {
     font-size: 12px; color: var(--muted);
     flex-shrink: 0; text-align: right; line-height: 1.4;
@@ -1206,6 +1226,7 @@
   .cbr-chan { text-decoration: none; }
   .cbr-chan:hover { text-decoration: underline; }
   .event.chat-bundle { align-items: flex-start; }   /* 다행 묶음: center면 아이콘·아바타·시간이 세로 중앙에 떠 헤더와 분리돼 보임 */
+  .event.ev-multi { align-items: flex-start; }      /* 여러 줄로 꺾인 단건(.ev-wrap — 변경·채팅)도 묶음과 같이 위에 붙인다(2026-09-24). 한 줄이면 종전대로 가운데 — fitEventTimes가 줄 수를 재 붙인다 */
   .chat-bundle-avatars { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }   /* 발화자 사진 세로 나열(겹침 없음) — 묶음이 세로로 자라는 아이템이라 사진 열도 세로가 공간 문법에 맞음 */
   /* ── 최근 활동 좁은 폭 배치(2026-09-23 Crenop): 목록 칸(.timeline) 440px 이하 ──
      넓을 때의 한 줄 [아이콘 | 사진 | 내용 | 시간]은 휴대폰에서 가운데 내용 칸이 눌렸다 — 360px에서 채팅 메시지 칸 약 14px, 한 글자씩 세로로 쌓인 곳 584.
@@ -1235,6 +1256,7 @@
     .event .ev-abs-y, .event .ev-abs-md, .event .ev-abs-t, .event .event-time-rel { white-space: nowrap; }
     .event.ev-tight { grid-template-columns: auto minmax(0, 1fr) min-content; }
     .event .event-detail { grid-column: 1 / -1; grid-row: 4; margin-top: 0; }
+    .event .event-detail.ev-wrap { line-height: 1.45; }   /* 꺾이는 세부 줄 = 묶음 줄(.chat-bundle-row)과 같은 줄 높이 */
     .event.chat-bundle { align-items: center; }
     .event.chat-bundle .chat-bundle-avatars { grid-column: 1; grid-row: 2; flex-direction: row; gap: 3px; }
     .event.chat-bundle .chat-bundle-avatars .event-avatar { width: 20px; height: 20px; }
@@ -1576,7 +1598,9 @@
   .toh-right { flex: 1; min-width: 0; }   /* v4: 스크롤 제거 — 열을 minmax(0,15px)로 두어 좁으면 셀이 줄어든다(스크롤바 억제) */
   .toh-grid { display: grid; gap: 0; }
   .toh-xaxis { display: grid; gap: 0; margin-top: 3px; }
-  .toh-xlabel { font-size: 11px; line-height: 12px; text-align: center; white-space: nowrap; }   /* 두 자리(20·26)가 세로로 쪼개지던 것 — 칸(15px)보다 넓어도 넘치게 두고 줄만 안 바꾼다 */
+  .toh-xlabel { font-size: 12px; line-height: 13px; display: flex; justify-content: center; white-space: nowrap; }   /* 두 자리(20·26)가 세로로 쪼개지던 것 — 칸보다 넓어도 넘치게 두고 줄만 안 바꾼다. 넘칠 땐 양옆으로 고르게(flex 가운데 — text-align: center는 넘치는 줄을 왼쪽에 붙여 눈금이 칸 오른쪽으로 쏠렸다).
+     월 화면의 토·일은 두 칸 합친 눈금 하나라(renderTimeOfDayHeatmap) 이웃이 7칸 떨어져 12px 하한을 지켜도 안 겹친다(2026-09-24, 종전 11px 예외). 크기·줄 간격 = 세로 눈금 */
+  .toh-xsep { color: var(--muted); }
 
   .day-kind-icon {
     width: 18px;
@@ -1633,6 +1657,11 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
+  /* 카페 행 [카페 이름] 제목(2026-09-24 Crenop): 이름은 흐린 글씨(--text3 — 제목(--text)과 한눈에 갈리는 층. --text2는 제목과 거의 같아 보인다) 한 줄, 길면 말줄임.
+     제목은 제 두 줄(.day-item-title). 한 줄에 다 들어가면 나란히, 모자라면 이름과 제목 사이에서만 꺾여 제목이 통째로 다음 줄 — 억지 줄바꿈은 없다. */
+  .day-item-body { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 4px; }
+  .day-item-cafe { flex: 0 1 auto; min-width: 0; font-size: 13px; line-height: 1.4; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-item-body > .day-item-title { flex: 1 1 auto; }   /* 바탕 크기 = 제목 한 줄 길이 — flex: 1(바탕 0)이면 늘 이름 옆에 끼어 이름·제목 사이에서 꺾이지 않는다 */
 
   /* (.day-detail 컨테이너 CSS는 v2에서 제거 — 패널이 사라지고 내용물은 .cal-week-detail 확장 슬롯 안에서 렌더) */
   .day-session {
@@ -1916,7 +1945,7 @@
     display: flex; align-items: center; justify-content: flex-end;
   }
   .chem-toggle-sticky::before { content: ''; position: absolute; left: 0; right: 0; top: -20px; height: 20px; background: var(--bg); }
-  .chem-bar { display: flex; align-items: center; gap: 8px; }
+  .chem-bar { display: flex; align-items: center; }   /* 간격·시작선은 기둥 공통 규칙(.side-pick .stats-bar, .chem-bar) */
   /* 이름 영역(명전 메커니즘 그대로, 2026-08-08 재수정): 꺼짐(가로)·켬(2열) 두 변형을 함께 렌더해두고
      클래스(.chem-show-desc)로 전환 — 재렌더 없이 즉시 토글. 카드 높이는 렌더 뒤 두 상태를 '실측'해
      종류별 최댓값을 공통 min-height로 고정(renderChemistry 끝) — 본문 덩어리는 토글 따라 자연 이동, 카드 크기만 불변. */
@@ -1937,8 +1966,8 @@
   .chem-nrow.dim > * { opacity: 0.35; }
   .chem-nicon { color: var(--muted); transition: color 0.12s; justify-self: start; display: flex; align-items: center; }   /* flex(2026-09-23): 바깥 링크·사슬 둘 다인 이름은 아이콘이 가로로 — 종전엔 svg가 블록이라 세로로 쌓여 19px 줄을 넘쳤다 */
   .chem-nicon svg { width: 12px; height: 12px; display: block; }
-  .chem-nrow.has-link:hover .chem-name-part, .chem-nrow.has-link:hover .chem-nicon, .chem-nrow.has-link:hover .chem-ndesc,
-  .chem-nrow.hl .chem-name-part, .chem-nrow.hl .chem-nicon, .chem-nrow.hl .chem-ndesc { color: var(--accent); }
+  .chem-nrow.has-link:hover .chem-name-part, .chem-nrow.has-link:hover .chem-nicon, .chem-nrow.has-link:hover .chem-ndesc, .chem-nrow.has-link:hover .chem-name-link,
+  .chem-nrow.hl .chem-name-part, .chem-nrow.hl .chem-nicon, .chem-nrow.hl .chem-ndesc, .chem-nrow.hl .chem-name-link { color: var(--accent); }
   .chem-ndesc {
     font-size: 13px; font-weight: 400; line-height: 19px; color: var(--text); opacity: 0.85;   /* 400 명시: 부모 .chem-nlist의 700 상속 차단 */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
@@ -1948,6 +1977,7 @@
   .chem-name-link { display: inline-block; line-height: 0; margin-left: 3px; color: var(--muted); vertical-align: -1px; transition: color 0.12s; }   /* line-height:0 — 상자를 svg 12px로 잠가 줄높이(19px)를 못 키우게. 빠뜨리면 상자가 19px가 되어 아이콘 있는 카드만 꺼짐 제목이 1~2px 커지고 토글 시 하단 사진이 움직인다 */
   .chem-name-link svg { width: 12px; height: 12px; }
   .chem-name-part.has-link:hover .chem-name-link, .chem-name-part.hl .chem-name-link { color: var(--accent); }
+  .chem-nicon-in { display: none; }   /* 켬 행 이름 속 그림 — 1열에서만 보인다(여러 열은 아이콘 칸 .chem-nicon). 케미 1열 곁 주석 */
   /* 연관 케미 도착 강조: 민트 테두리 잠깐 — transition으로 자연 소멸(제거 시 원색 복귀) */
   .chem-card { transition: border-color 0.35s, box-shadow 0.35s; }
   .chem-card.chem-flash { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -2053,13 +2083,17 @@
      1열은 스크롤이 많다(카드 117장이 한 줄로) — 쌓인 카드의 세로 공간을 줄이는 게 목적이다(휴대폰 360·412px 페이지 −40%). 여러 열은 그대로.
      · 케미명은 한 줄에 하나, 구분점(·) 없음 — 줄이 바뀌면 구분점이 뜻이 없다. 칸보다 긴 이름 하나만 그 안에서 줄을 바꾼다.
      · 2인: [케미명 ··· 얼굴 · 채팅 수 · 얼굴], 설명을 켜면 채팅 수 자리를 설명(이름 옆)에 내준다 — 얼굴 48 그대로.
-     · 3인: 좌우, 얼굴 34(칸 44 — 이름 세 글자가 이웃과 붙지 않는 최소, 13px에서도 틈 10), 설명은 이름 옆. 이름 아래로 붙이면 이름 3개짜리 카드 하나가 3인 전체를 146px로 키운다.
+       채팅 수 칸은 화면에 뜬 2인 카드 중 가장 넓은 값의 폭으로 고정(--chem-arrows-w, fitChemHeights가 잰다) — 자릿수 따라 왼쪽 얼굴이 카드마다 24px 안팎 들쭉날쭉했다(2026-09-24 Crenop).
+       그 때문에 케미명이 더 꺾이는 폭(360px — 이름 칸이 카드에 따라 최대 24px 준다)에선 걸지 않는다(손해가 크면 안 한다, Crenop).
+     · 3인: 좌우, 얼굴 34(칸 44 — 이름 세 글자가 이웃과 붙지 않는 최소, 13px에서도 틈 10), 설명은 이름 옆.
+     · 설명 켬(2·3인): 줄마다 [이름 그림] [설명] — 그림은 제 이름 바로 뒤(6px, 여러 열의 공용 아이콘 칸을 쓰면 짧은 이름이 그림과 멀었다), 옆에 둔 설명끼리는 같은 시작선.
+       옆에서 잘릴 설명만 그 이름 아래로 내린다(줄 단위 — 한 카드의 다른 줄은 옆 그대로, 2026-09-24 Crenop). 판정은 fitChemHeights → placeChemDescs가 폭마다 잰다.
      · 4인: 좌우, 얼굴 34, 설명은 케미명 아래(두 줄까지) — 이름 옆이면 설명 칸이 90px대라 거의 다 잘렸다. 얼굴 크기는 켬·끔 같다.
      · 5~7인: 좌우 [케미명 | 구성원 두 줄](여러 열·PC와 같은 3+2·3+3·4+3, 칸 44·얼굴 34), 설명은 4인처럼 케미명 아래 — 구성원 두 줄 옆 세로 여유로 4줄까지(높이 그대로).
        (2026-09-23 b Crenop: 종전 위아래 [케미명 설명] / [구성원 한 줄]은 2~4인과 문법이 달랐다. 한 줄 그대로 좌우는 360~412px에서 6·7인이 한 장도 안 들어간다 — 실측)
      · 이 블록은 이름 붙인 컨테이너(chem-col = .chem-content)에 묻는다. 이름 없이 묻으면 몸통(.chem-body — 카드 안 inline-size 컨테이너) 안쪽 요소는
        가장 가까운 몸통 폭(늘 480 이하)을 재서 PC 카드에도 규칙이 샜다(2026-09-23 a~b: PC 구성원 한 줄·얼굴 34·설명 켬에서 2인 채팅 수 사라짐).
-     · 높이는 종전 규칙 그대로 종류별 통일·토글 불변 — 계산은 fitChemHeights(눕힌 카드 분기).
+     · 높이는 토글 불변 — 카드마다 자기 두 상태 중 큰 쪽(2026-09-24 Crenop ②. 종류별 통일 ③은 CHEM_COL_EQ 한 줄) — 계산은 fitChemHeights(눕힌 카드 분기).
      모달의 간단 카드(.chem-modal-grid)는 이 규칙 밖이다(.chem-group-grid로 한정). */
   @container chem-col (max-width: 480px) {
     .chem-group-grid .chem-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px; align-items: center; align-content: center; }
@@ -2068,14 +2102,27 @@
     .chem-group-grid .chem-name .chem-name-part { display: block; white-space: normal; overflow-wrap: anywhere; }   /* 칸보다 긴 한 낱말 이름은 글자 단위로(2026-09-24) */
     .chem-group-grid .chem-name .chem-name-sep { display: none; }
     .chem-group-grid .chem-body { container-type: normal; justify-content: flex-end; min-width: 0; }   /* 폭을 구성원만큼 — inline-size 컨테이너면 폭이 0으로 접힌다 */
-    .chem-grid.chem-show-desc .chem-group-grid .chem-nlist { display: grid; grid-template-columns: auto auto minmax(0, 1fr); width: 100%; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nlist { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; column-gap: 6px; width: 100%; }
     .chem-grid.chem-show-desc .chem-group-grid .chem-nlist .chem-name-part { justify-self: start; text-align: left; white-space: normal; overflow-wrap: anywhere; }   /* 긴 이름은 칸 안에서 꺾인다(2026-09-24 전 탭 점검: 360px 4인 카드에서 한 줄로 묶인 이름이 칸을 넘어 옆 그림이 얼굴 위에 겹쳤다) */
+    .chem-group-grid .chem-nlist .chem-nicon { display: none; }
+    /* 이름 칸 오른쪽 여백 + 칸 간격 6 = 여러 열 카드와 같은 거리: 이름–설명 12(여백 6), 이름 6 그림 6 설명(여백 18 = 6 + 12, 그림 둘이면 32 = 6 + 12 + 2 + 12).
+       이름 속 그림은 폭 0 상자 — 그림 때문에는 줄이 꺾이지 않아 그림이 홀로 다음 줄로 가지 않는다(마지막 글자 뒤에 붙어 다니고, 자리는 여백이 잡는다) */
+    .chem-group-grid .chem-nlist .chem-name-part { padding-right: 6px; }
+    .chem-group-grid .chem-nlist .chem-nicon-in { display: inline-block; width: 0; margin-left: 0; white-space: nowrap; }
+    .chem-group-grid .chem-nlist .chem-nicon-in svg:first-child { margin-left: 6px; }
+    .chem-group-grid .chem-nlist .chem-name-part:has(.chem-nicon-in) { padding-right: 18px; }
+    .chem-group-grid .chem-nlist .chem-name-part:has(.chem-nicon-in svg + svg) { padding-right: 32px; }
     .chem-grid.chem-show-desc .chem-group-grid .chem-ndesc { max-width: none; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nrow-below > * { grid-column: 1 / -1; }   /* 이름도 두 칸에 걸쳐 둔다 — 내린 줄의 이름은 옆 설명의 시작선을 정하지 않는다(유연 칸을 걸친 항목은 auto 칸 크기에 안 들어간다) */
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nrow:has(> .chem-ndesc:empty) > .chem-name-part { grid-column: 1 / -1; }   /* 설명 없는 줄의 이름도 — 옆에 둘 것이 없는데 시작선을 밀어 남의 설명을 잘랐다(360px '천양 × 빙밍') */
+    .chem-group-grid .chem-nlist .chem-ndesc:empty { display: none; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-nrow-below .chem-ndesc { white-space: normal; line-height: 17px; margin: -2px 0 1px; }   /* 4인 설명과 같은 줄 높이·간격(이름–설명 1, 설명–다음 이름 4). 줄 수 제한 없음 — 잘리지 않게 내린 것 */
     .chem-grid.chem-show-desc .chem-group-grid .chem-arrows { display: none; }
+    .chem-group-grid .chem-arrows { min-width: var(--chem-arrows-w, 0); }
     .chem-group-grid .chem-group-members { display: flex; flex-wrap: nowrap; justify-content: flex-end; column-gap: 0; min-width: 0; }
     .chem-group-grid .chem-group-members .chem-member { flex: 0 0 44px; width: auto; min-width: 0; }
     .chem-group-grid .chem-group-members .chem-member img { width: 34px; height: 34px; }
-    .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-nlist { grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }
+    .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-nlist { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; row-gap: 1px; }   /* 한 칸 — 그림이 이름 속에 들어가 아이콘 칸이 없다 */
     .chem-grid.chem-show-desc .chem-group-grid .chem-card:is(:has(.chem-group-members.n4), :has(.chem-group-members > :nth-child(5))) .chem-ndesc {
       grid-column: 1 / -1; white-space: normal; line-height: 17px; margin-bottom: 3px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -2097,12 +2144,11 @@
   /* ── 썸네일 탭 (2026-08-31 달력 탭 신설 · 2026-09-02 썸네일 모아보기 이관 · 2026-09-06 썸네일만 남기고 압축) ──────
      좌 = 달력 / 우 = 기둥(멤버 스트립 13 · 종류 다시보기/유튜브 · 연/월). 시트 행(컨텐츠·일정)은 이 탭에 없다(컨텐츠 탭·보조바 일정 목록 몫).
      두 폼 —
-       ① PC 모드(>1150)에서 본문 폭 934px 이상(칸 130px~)이면 7열 썸네일 칸. 칸 = 대표 그림 1장 + 개수 칩.
+       ① PC 모드(>1150)에서 본문(.cal-main 안쪽, 왼쪽 슬롯 44 제외) 934px 이상(칸 126px~)이면 7열 썸네일 칸. 칸 = 대표 그림 1장 + 개수 칩.
           그림을 다 쌓지 않는 이유: 하루 여러 파트·여러 업로드면 칸 하나가 길어진다. 대표 = 고른 종류의 첫 것.
-          눌렀을 때 그날 전부는 그 주 바로 아래.
-       ② 그 밖(좁은 PC 창·태블릿·모바일)은 1열 목록: 행 = 날짜 · 대표 그림(작게) · 칩. 눌러야 그날 전부가 나온다 —
-          폭이 남으면 오른쪽 열, 좁으면 그 행 바로 아래(지난 활동 탭의 넓으면 옆·좁으면 아래 문법).
-     폭 상한을 두지 않는다(다른 탭의 1400은 그대로): 200px 칸 7열 = 1424px이라 1444 상한 아래선 어떤 화면에서도 7열이 못 섰다. */
+          눌렀을 때 1개는 직행, 2개 이상은 영상 선택 모달.
+       ② 그 밖(좁은 PC 창·태블릿·모바일)은 타일 흐름(.cal-flow): 기록 있는 날만, 칸과 같은 부품. 누르는 규칙은 ①과 같다.
+     폭 상한은 묶음 1842(.cal-wrap)·격자 1450 — 칸은 200에서 멈춘다. */
   .cal-wrap {
     padding: 20px 24px; max-width: 1842px; width: 100%; margin: 0 auto; flex: 1;   /* 1842 = 격자 폼 상한 1450 + 본문 왼쪽 슬롯 44 + 간격 20 + 기둥 280 + 좌우 패딩 48. 묶음이 이보다 넓으면 격자는 1450에서 멈추는데
                                                                                        본문 영역은 계속 늘어나 기둥이 오른쪽 끝으로 떨어졌다(2026-09-03 Crenop: 기둥과의 간격을 다른 탭처럼 20px로). 칸 200px은 그대로 */
@@ -2120,16 +2166,20 @@
   /* 폼 전환 — 두 폼을 다 그려 두고 CSS가 하나만 보인다. 기본 = 타일 흐름(좁은 폭), PC 넓은 폭 = 7열 달력. */
   .cal-grid-form { display: none; max-width: 1450px; }   /* 200px 칸 ×7 + 간격 24 + .calendar 패딩 24 + 테두리 2(옛 폼 상한과 같은 값) — 본문이 더 넓어도 칸은 200에서 멈춘다 */
   .cal-list-form { display: block; }
-  /* 타일 흐름(2026-09-06 Crenop): 기록이 있는 날만 날짜순, 빈 날 없음. 타일 = 7열의 칸과 같은 부품(위 [날짜 | 칩], 아래 16:9 그림), 최소 폭 200 = PC 칸 —
-     휴대폰 1~2열, 태블릿 2~4열이 되어 그림이 PC보다 작아지지 않는다. 주(일~토)가 바뀌는 첫 타일은 새 줄에서 시작(.wk-first) — 주 단위 리듬을 남기고
+  /* 타일 흐름(2026-09-06 Crenop): 기록이 있는 날만 날짜순, 빈 날 없음. 타일 = 7열의 칸과 같은 부품(위 [날짜 | 칩], 아래 16:9 그림).
+     최소 폭 160(2026-09-24 Crenop: 열 수는 썸네일 크기로 정한다 — 160은 정전 '어제 다시보기'의 읽히는 하한, 종전 200) — 흐름 폭 328 이상(창 약 386px~)이면 2열:
+     412px 휴대폰 2열(타일 173), 360px은 1열(302 — 2열이면 147). 그림(타일 − 12)은 가장 작아도 148로, 1366 노트북 7열 칸의 그림(119)보다 크다.
+     주(일~토)가 바뀌는 첫 타일은 새 줄에서 시작(.wk-first) — 주 단위 리듬을 남기고
      빈 자리는 각 주의 끝에만 생긴다(빈 날마다 상자를 두는 것보다 싸다). 기록이 없는 주는 줄이 안 생긴다(아쉬우면 주 표시 한 줄을 붙일 수 있다). */
-  .cal-flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .cal-flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
   .cal-flow .cal-cell.wk-first { grid-column-start: 1; }
   /* 주 사이 구분선(2026-09-06 Crenop: 줄바꿈만으로는 '왜 빈칸이 있다 없다 하나'가 안 읽힌다) — 타일 테두리와 같은 색의 1px 선, 위아래 4px.
      한 줄 전체를 차지해 다음 주가 새 줄에서 시작하는 것도 이 선이 보장한다. 첫 주 앞에는 없다. */
   .cal-flow .cal-wk-sep { grid-column: 1 / -1; height: 1px; background: var(--border); margin: 4px 0; }
+  /* 7열 기준 934는 .cal-main 안쪽 폭(왼쪽 슬롯 44 제외) — 창 약 1336px부터. 1280은 안쪽 878이라 흐름: 격자로 세우면 칸 118·그림 106으로
+     지금 격자의 가장 작은 그림(114)보다 8px 작고, 흐름(5열) 그림 157이 더 크다 — 열 수는 썸네일 크기로 정한다(2026-09-24 Crenop)는 기준으로 1280은 흐름 유지 */
   @media (min-width: 1151px) {   /* PC 모드에서만 7열 — 태블릿은 폭이 남아도 1열(Crenop 지정: PC=썸네일 격자 / 태블릿·모바일=1열) */
-    @container (min-width: 934px) {   /* .calendar 안쪽 908 = 칸 약 126px. 1366 노트북(기둥 280 포함)에서 칸 약 132px — 피드백으로 조정하는 시작값 */
+    @container (min-width: 934px) {   /* .calendar 안쪽 908 = 칸 약 126px(그림 114). 1366 노트북에서 칸 131(그림 119) */
       .cal-grid-form { display: block; }
       .cal-list-form { display: none; }
     }
@@ -2148,6 +2198,11 @@
   .cal-main .cd-chip.cd-mark .cd-ic { display: inline-flex; opacity: 0.45; }
   .cal-txt { display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 2px; width: 100%; height: 100%; padding: 0; box-sizing: border-box; font-size: 13px; line-height: 17px; color: var(--text); text-align: left; }   /* 넘치면 다음 칸으로(wrap) — 상자에 다 안 들어가는 줄은 오른쪽 밖(상자가 자름)으로 통째로 넘어가 반쪽 줄이 안 보인다(2026-09-24 전 탭 점검: 픽셀 단위로 잘려 글자 아랫부분이 없는 줄) */
   .cal-thumb:has(.cal-txt) { background: transparent; }   /* 글 종류는 상자 바탕을 비운다 — 글 줄에만 배경(2026-09-18 Crenop: 빈 자리가 칠해진 것처럼 보이던 것) */
+  /* 타일 흐름에서는 글 종류 상자를 글 높이에 맞춘다(2026-09-24 Crenop) — 16:9를 지키면 글 1~3줄 아래가 통째로 비어 휴대폰 페이지의 절반쯤이 빈 상자였다
+     (360px 천양 9월 게시글: 페이지 4175px 중 빈 상자 2107px). 줄 수는 그대로 최대 8(calTextBoxHtml), 총 개수는 칩이 말한다.
+     7열 격자는 칸 높이를 맞춰야 하므로 16:9 그대로. 한 줄에 타일이 여럿이면 줄 높이는 그 줄의 가장 긴 타일(격자 줄 늘림). */
+  .cal-list-form .cal-thumb:has(.cal-txt) { aspect-ratio: auto; }
+  .cal-list-form .cal-txt { height: auto; }
   .cal-txt-line { display: block; min-width: 0; width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 6px; flex: none; }   /* 글 하나 = 상자 하나 */
   .cal-txt.post .cal-txt-line { background: rgba(52, 211, 153, 0.12); }   /* 숲 게시글 초록(--ev-post)의 옅은 판 — .day-kind-icon.post와 같은 색 계열 */
   .cal-txt.cafe .cal-txt-line { background: rgba(3, 199, 90, 0.12); }    /* 카페 초록 */
@@ -2198,17 +2253,18 @@
     .like-rank-slot { margin: 12px; }
   }
 
+  /* 열 수 = 격자 실제 폭에 카드 하한 280 + 간격 16이 몇 번 드느냐 — 식 하나(2026-09-24: 필터 기둥이 생겨 격자가 좁아진 만큼 하한 300 → 280).
+     열 경계 = 280×n + 16×(n−1): 2열 576 · 3열 872 · 4열 1168. 1280px PC(격자 878) 3열 · 1920px(1450) 4열.
+     auto-fill: 걸러서 카드가 몇 장 안 남아도 빈 칸을 남겨 카드 폭이 그대로다(auto-fit이면 남은 카드가 늘어난다). min(280px, 100%): 격자가 280보다 좁아도 가로로 넘치지 않게.
+     280 카드에서 제목이 버티는 것은 아래 좁은 카드 배치(cc-card) 덕 — 얼굴이 날짜 줄로 내려가 제목이 카드 폭을 다 쓴다.
+     종전 창 폭 기준(@media 1100/600)은 기둥 편 태블릿에서 격자가 좁아도 2열이라 768px에서 카드 197px(날짜가 한 글자씩 쌓임)이었다(2026-09-23d에 격자 폭 기준으로). */
   .content-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: 16px;
   }
-  /* 열 수 = 격자 실제 폭(2026-09-23d) — 카드가 300px 이상일 때만 그 열 수(아래 줄 = 사진 칸 최대 152 + 글 칸 120 이상 + 여백). 3열 932 = 300×3 + 간격 16×2, 2열 616.
-     종전 창 폭 기준(@media 1100/600)은 기둥 편 태블릿에서 격자가 좁아도 2열이라, 768px(격자 410·카드 197)에서 날짜가 한 글자씩 쌓이고 제목이 사라졌다.
-     실측: 360·537·700·1024·1100·1151px 이상은 종전과 같은 열 수, 768·900px만 2열 → 1열. */
-  @container content-col (max-width: 931px) { .content-grid { grid-template-columns: repeat(2, 1fr); } }
-  @container content-col (max-width: 615px) { .content-grid { grid-template-columns: 1fr; } }
   .content-card {
+    container: cc-card / inline-size;   /* 좁은 카드 배치의 기준 = 카드 자신의 폭(아래 @container cc-card) */
     background: var(--surface);
     border: 1px solid var(--border);
     overflow: hidden;
@@ -2277,16 +2333,28 @@
     object-fit: cover;
     border: 1px solid var(--border);
   }
-
-  /* === 현수막 탭 === */
-  .banner-wrap {
-    container-type: inline-size; container-name: content-col;   /* 컨텐츠·현수막 격자 열 수의 기준(2026-09-23d) */
-    padding: 20px 24px;
-    max-width: 1400px; width: 100%; margin: 0 auto;
-    flex: 1;
-    display: flex; flex-direction: column;
-    gap: 16px;
+  /* 좁은 카드(500px 미만, 2026-09-24 Crenop '날짜줄로 내려서 충분하면 그렇게, 아니면 날짜줄 아래로'): [제목 — 카드 폭 전부] / [날짜 ··· 얼굴].
+     날짜와 얼굴이 한 줄에 안 들어가면 얼굴이 날짜 줄 아래(오른쪽 붙임)로 꺾인다(flex-wrap).
+     넓은 배치(제목·날짜 | 얼굴)에선 제목 칸 = 카드 − 34 − 얼굴(최대 152)이라 좁은 카드에서 제목이 잘렸다(360px 컨텐츠 30/73·현수막 23/49).
+     500 = 넓은 배치에 지금 제목이 전부 들어가는 카드 폭(필요 폭 최대: 현수막 499·컨텐츠 490, 2026-09-24 실측) — 그보다 좁으면 좁은 배치가 늘 덜 잘린다.
+     얼굴 칸은 2줄 높이(42)를 늘 잡는다 — 하단바 높이가 멤버 수(0·1·2줄)와 무관하게 같다(넓은 배치 min-height 62와 같은 취지). 날짜 줄 높이 20 = 얼굴 첫 줄과 가운데가 맞는다.
+     정기 활동 모아보기 모달(.cc-collect-grid)도 같은 카드라 같은 규칙을 탄다. */
+  @container cc-card (max-width: 499px) {
+    .content-card-info { flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+    .content-card-text { display: contents; }
+    .content-card-title { flex: 0 0 100%; line-height: 16px; }   /* 줄 높이를 못 박는다 — 제목에 이모지가 섞이면 'normal'이 15 → 17로 늘어 그 카드만 하단바가 2px 컸다 */
+    .content-card-date { line-height: 20px; }
+    .content-card-members { margin-left: auto; min-height: 42px; align-content: flex-start; }
   }
+
+  /* === 컨텐츠·현수막 탭 === 좌 = 카드 격자(.cc-main) / 우 = 필터 기둥(.filter-panel — 최근 활동과 같은 부품, 2026-09-24 Crenop) */
+  .banner-wrap {
+    padding: 20px 24px;
+    max-width: 1842px; width: 100%; margin: 0 auto;   /* 달력·명전과 같은 값(2026-09-24 Crenop 'PC에서 2열은 공간 비효율') — 1842 = 격자 1450 + 왼쪽 슬롯 44 + 간격 20 + 기둥 280 + 좌우 패딩 48. 1920px에서 4열 */
+    flex: 1;
+    display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start;
+  }
+  .filter-type .cal-tag { display: contents; }   /* 종류 칸의 그림 = 카드 제목 앞 종류 그림(태그 고유색은 물려받고 크기는 칸 규격 20px — 일정 버튼 .sch-btn .cal-tag와 같은 수법) */
   /* === 명예의 전당 탭 === */
   /* 통계 탭 상단 — 크루 숫자 격자(통계 카드 재사용) + 멤버별 시간대 분포 */
   .stats-metrics { margin-bottom: 24px; }
@@ -2386,9 +2454,10 @@
     justify-content: center; align-content: center;
   }
   .hall-photos img {
-    object-fit: cover; box-sizing: border-box;
-    border: 2px solid var(--time);           /* 공동 1위 = 금 테두리. 크기는 단독 64/공동 48, JS에서 인라인 지정 */
+    width: 64px; height: 64px; object-fit: cover; box-sizing: border-box;
+    border: 2px solid var(--time);           /* 1위 = 금 테두리. 크기는 단독 64 / 공동 48(.co) — CSS에 둔다(2026-09-24: 좁은 카드 질의가 줄일 수 있게. 종전 JS 인라인은 CSS가 못 이긴다) */
   }
+  .hall-photos.co img { width: 48px; height: 48px; }
   .hall-data { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .hall-desc { color: var(--muted); font-weight: 600; font-size: 13px; text-align: right; }
   .hall-row {
@@ -2420,6 +2489,21 @@
     .hall-data { padding-right: 20px; }
     #hallBody:not(.show-ranks) .hall-row.m2, #hallBody:not(.show-ranks) .hall-row.m3 { display: none; }
     .hall-card .hall-empty { grid-column: 1 / -1; }   /* '아직 집계 전' — 상자가 풀려 제목 옆 칸으로 들어가지 않게 */
+    /* 기록 줄 [이름 | 값](2026-09-24): 이름 칸이 가장 긴 덩어리('마다옴 ·' — '·'는 앞 이름에 붙는다)까지 먼저 줄고, 그래도 모자라면 값이 낱말 사이('시간'과 '분')에서 꺾인다.
+       종전 flex는 값이 줄지 않아(nowrap) 칸이 모자라면 카드 밖으로 나갔다. 들어가는 동안은 종전 [이름 ··· 값]과 같은 자리(360·412 실측 불변) */
+    .hall-row { display: grid; grid-template-columns: minmax(min-content, 1fr) fit-content(100%); }
+    .hall-r-val { white-space: normal; }
+    /* 좁은 카드(2026-09-24 Crenop '사진크기를 줄이거나'): 카드 안쪽 폭 270 미만(창 약 358 미만 — 320 기기·확대해 보는 휴대폰)이면 [사진 칸 104 | 기록]의 기록 칸이
+       134(세 글자 이름 + 8 + '12345시간 59분')보다 좁아져 값이 카드 밖으로 나갔다(창 300에서 실제 값 '3155시간 52분'이 15px). 사진 칸을 사진 폭 64로 줄이고,
+       사진 양옆 20에 맞춰 둔 제목 왼쪽·값·설명 오른쪽 20도 같이 0 — 기록 칸 +60. 공동 1위 사진은 28(한 줄 둘 = 64): 48이면 한 줄에 하나씩 쌓여 4인 공동이 216px 기둥이 된다.
+       360(카드 안쪽 272)·412·태블릿·PC는 이 규칙 밖. 카드가 컨테이너다(이름 hall-card — §6 이름 붙인 질의) */
+    .hall-card { container: hall-card / inline-size; }
+    @container hall-card (max-width: 269px) {
+      .hall-cat { padding-left: 0; }
+      .hall-desc, .hall-data { padding-right: 0; }
+      .hall-photos { width: 64px; }
+      .hall-photos.co img { width: 28px; height: 28px; }
+    }
   }
 
   /* === 구성원 탭 === */
@@ -2447,13 +2531,16 @@
   /* 본문은 남은 폭 안에서 가운데 — 기둥이 오른쪽에 붙어도 본문이 치우쳐 보이지 않게 */
   /* 본문 왼쪽에 기둥의 빈 슬롯과 같은 44px을 둔다(2026-09-01, Crenop 지정).
      기둥 오른쪽 44px이 사실상 여백이므로, 왼쪽에 같은 값을 넣어야 덩어리 전체가 좌우 대칭으로 선다. */
-  .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
+  .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main, .cc-main { width: 100%; min-width: 0; padding-left: 44px; }   /* 폭 상한은 묶음(.〜-wrap)이 갖는다 — 여기서 또 조이면 본문만 안쪽으로 밀린다 */
   /* 묶음 사이 = 여백 하나(20px)(2026-09-02 Crenop 지정). 구 '여백 20 + 구분선 1 + 여백 20'은 높이가 모자란 화면에서 기둥이 넘쳤다. */
   .side-pick > * + *, .side-pick .side-stack > * + *, .filter-section + .filter-section { margin-top: 20px; }   /* 우측 기둥 전 탭 공통 — 최근 활동·케미(.filter-section)도 여기 한 규칙(구 '여백 20 + 구분선 + 여백 20' 잔재 제거, 2026-09-19) */
   /* .side-stack: 한 자리에서 내용을 갈아끼우는 묶음(#statsPeriodSide)도 안쪽 칸을 같은 간격으로 나눈다.
      종전엔 직계 자식만 걸려 2·3위 토글과 기간 버튼이 간격 0으로 붙어 있었다(반복 지적된 자리). */
-  .side-pick .stats-bar { justify-content: flex-start; gap: 10px; margin-left: 44px; }   /* 위아래 버튼 묶음과 같은 왼쪽 기준 */
-  .side-pick .filter-title { margin-left: 44px; }
+  /* 시작선(2026-09-24 Crenop '일관성은 맞춰야지'): 기둥 안의 제목·토글 줄은 전 탭이 버튼 격자와 같은 44에서 시작한다 — 왼쪽 38 + 6 슬롯(모두 해제·연도 화살표)은 버튼 줄만 쓴다.
+     종전엔 .side-pick 안만 44이고 최근 활동·케미(.filter-panel·.chem-filter-panel)는 0이라 탭을 넘기면 제목이 44px 뛰었다. .filter-title·.chem-bar는 기둥에만 있다.
+     토글 줄은 [이름 10 스위치] 한 벌 — 명전 2·3위 보기와 케미 설명 보기가 같은 부품(케미만 간격 8이었다) */
+  .side-pick .stats-bar, .chem-bar { justify-content: flex-start; gap: 10px; margin-left: 44px; }
+  .filter-title { margin-left: 44px; }
   .profile-tabs-wrap, .member-strip, .stats-kind, #statsPeriodSide .stats-range, #hallPeriodSide .stats-range { margin: 0 44px; }   /* 2026-09-18: 명전 기둥(#hallPeriodSide)도 같은 규격 */
   .stats-kind, #statsPeriodSide .stats-range, #hallPeriodSide .stats-range { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   /* 지난 활동 기둥의 기간 버튼과 같은 값(2026-09-02 Crenop 지적) — 칸이 60×60으로 똑같은데 여기만 10~11px이라
@@ -2601,6 +2688,7 @@
   .lrg-rank-btn svg { width: 14px; height: 14px; display: block; }
   .lrg-head { display: flex; align-items: center; gap: 8px; }
   .like-rank { background: var(--surface); border: 1px solid var(--border); padding: 12px; min-width: 0; }
+  .like-rank > .lr-msg { padding: 16px 4px; }   /* 상자 안쪽 12 + 16·4 = 왼쪽 목록 상자의 빈 문구(28·16)와 같은 자리 — 두 빈 상자의 높이·글자 줄이 맞는다(2026-09-24, 종전 72 대 96px) */
   @media (max-width: 1100px) {
     /* 순위·버튼은 조작부라 위로 — 요청 목록이 길어 아래에 두면 스크롤로 내려가야 닿는다.
        필터가 아니므로 우측 서랍으로 보내지 않는다(서랍은 걸러내기 전용). */
@@ -2646,13 +2734,15 @@
      '영상 그림이 아니라 자리 채움'이 바로 읽힌다. */
   .vs-thumb img.ph { object-fit: contain; opacity: 0.4; }
   .vs-tile:hover .vs-thumb { border-color: var(--accent); }
+  /* 제목 한 줄 + 말줄임(2026-09-24 Crenop '제목 두줄을 허용하지 않고 말줄임'): 두 줄을 허용하면 화면 밖 오른쪽 타일 하나가 두 줄이어도 줄 전체가 18px 높아졌다
+     (타일은 한 줄 격자라 가장 긴 제목에 높이가 맞춰진다). 잘린 제목의 전문은 말줄임 툴팁(ELLIPSIS_TIP_SEL)이 잘렸을 때만 보인다 */
   .vs-title {
     margin-top: 6px; font-size: 13px; line-height: 1.4; color: var(--text);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   /* 폭 바깥에 선다. 22px + 오프셋 22px는 .members-wrap의 좌우 패딩(24px) 안에 들어가므로
      섹션이 컨테이너를 꽉 채워 여백이 0인 폭에서도 페이지 가로 넘침이 없다.
-     세로는 썸네일(200px의 16:9) 한가운데 — 제목 두 줄까지 포함한 타일 전체 기준이 아니다. */
+     세로는 썸네일(200px의 16:9) 한가운데 — 제목 줄까지 포함한 타일 전체 기준이 아니다. */
   .vs-arrow {
     position: absolute; top: calc((200px * 9 / 16 - 60px) / 2);
     width: 22px; height: 60px;
@@ -2734,22 +2824,36 @@
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 24px;
-    display: flex; align-items: center; gap: 20px;
+    display: flex; align-items: center; gap: var(--pm-gap);
+    --pm-av: 72px; --pm-gap: 20px;   /* 사진 폭·칸 간격 — 칭호 제 줄(.pt-own)이 이름 선에 맞출 때 같이 쓴다 */
   }
   .profile-member-avatar {
-    width: 72px; height: 72px;
+    width: var(--pm-av); height: var(--pm-av);
     object-fit: cover;
     border: 3px solid var(--border);
     flex-shrink: 0;
   }
-  .profile-member-info { display: flex; flex-direction: column; gap: 4px; }
+  /* 정보 칸은 남는 폭만 받는다(2026-09-24, min-width 0) — 링크 버튼이 멤버와 무관하게 늘 카드 오른쪽 끝. 종전엔 명패·긴 영문 이름이 칸을 밀어
+     버튼 자리가 멤버마다 달랐고(360px 나나문 테두리까지 3.4 · 짧은 이름 24) 명패가 있으면 카드 밖으로 나갔다(버튼 오른쪽 끝이 테두리 밖 360px 71 · 412px 19 · 1024px 기둥 열림 23). */
+  .profile-member-info { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-width: 0; }
   .profile-member-name { font-size: 22px; font-weight: 800; }
   /* 직함 명패(2026-08-24, V2·높이22): 인라인 박스 바닥이 베이스라인에 앉아 잉크중심 base+11px(기하 중앙).
      이름 22px 잉크중심은 base+7.5~7.9px(문모모 7.54·임하밍 7.81 실측) → -3.3px 강하가 미니맥스(잔차 ±0.15px대 — 이름 잉크 높이 차의 물리 한계).
-     좁은 화면에서 이름 옆이 모자라면 명패가 이름 아래 줄로 내려앉는다(인라인 랩 — 의도된 동작). 실기기에서 어긋나면 이 값만 조정 */
+     이름 옆이 모자랄 때의 자리는 아래 '칭호 자리'(fitProfileTitles). 실기기에서 어긋나면 이 값만 조정 */
   .profile-member-title { display: inline-block; margin-left: 10px; vertical-align: -3.3px; }
   button.profile-member-title { all: unset; display: inline-block; margin-left: 10px; vertical-align: -3.3px; cursor: pointer; }   /* M열 이미지가 있는 칭호(2026-09-10) — 모양은 span과 같고 누를 수 있다 */
   button.profile-member-title:hover svg { filter: brightness(1.25); }
+  /* 칭호 자리(2026-09-24 Crenop '짧게'): fitProfileTitles가 정보 칸 폭을 재서 들어가는 첫 모양을 고른다 — 이름 옆(기본) → 이름 아래(.pt-below) →
+     약식(.pt-short: 양끝 그림을 뺀 짧은 명패, 이름 아래) → 제 줄(.pt-own: 버튼 아래 한 줄, 이름 선에 맞춤 — 약식도 안 들어갈 때만).
+     이름 아래로 내려갈 때 왼쪽 여백 10을 없앤다 — 종전엔 인라인으로 꺾여 명패가 이름보다 10px 안쪽에서 시작했다. */
+  .pt-below .profile-member-titles, .pt-short .profile-member-titles, .pt-own > .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+  .pt-below .profile-member-titles, .pt-short .profile-member-titles { margin-top: 4px; }
+  .pt-below .profile-member-title, .pt-short .profile-member-title, .pt-own .profile-member-title { margin-left: 0; }
+  .pt-below .profile-member-title svg, .pt-short .profile-member-title svg, .pt-own .profile-member-title svg { display: block; }
+  .profile-member-title svg.pt-s, .pt-short .profile-member-title svg:not(.pt-s) { display: none; }
+  .pt-short .profile-member-title svg.pt-s { display: block; }
+  .profile-member-header.pt-own { flex-wrap: wrap; row-gap: 12px; }
+  .pt-own > .profile-member-titles { flex: 0 0 100%; padding-left: calc(var(--pm-av) + var(--pm-gap)); }
   .title-img-panel { width: fit-content; max-width: min(960px, calc(100vw - 32px)); }
   .title-img-wrap img { display: block; max-width: 100%; max-height: 80vh; }
   .profile-member-eng {
@@ -2783,11 +2887,16 @@
   .profile-quick-btn.quick-naver:hover { background: rgba(3,199,90,0.22); }
   .profile-quick-btn svg { width: 16px; height: 16px; display: block; }
   @container (max-width: 520px) { .profile-member-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 정보 컬럼 ≤520px면(폰/태블릿 2단 무관) 이름 우측 버튼 2×2 */
+  /* 좁은 머리 카드(2026-09-24): 좌우 여백 16(크루 소개 ≤700과 같은 값)·칸 간격 12·사진 60. 400 = 칭호 표에서 가장 긴 전체 명패(긴급소집 꼴등 153)가
+     종전 간격의 정보 칸(카드 − 240)에 들어가는 폭(393) 바로 위 — 이보다 넓으면 종전 간격으로도 전체 명패가 이름 아래에 든다(좁아질수록 명패가 커지는 역전 없음).
+     360px(카드 302)에서 정보 칸 62 → 106: 가장 긴 영문 이름(MOONMOMO 88)과 태양·태앙 약식(103)이 든다 */
+  @container (max-width: 400px) { .profile-member-header { padding: 24px 16px; --pm-av: 60px; --pm-gap: 12px; } }
   .profile-info-section {
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 20px 24px;
   }
+  @container (max-width: 400px) { .profile-info-section { padding: 20px 16px; } }   /* 머리 카드(≤400 여백 16)와 같게 — 머리만 줄이면 두 상자의 글 시작선이 8px 어긋났다. 기본 규칙 뒤에 둬야 이긴다 */
   .profile-info-title {
     font-size: 12px; font-weight: 700;
     color: var(--muted); letter-spacing: 1px;
@@ -2974,8 +3083,8 @@
     body.drawer-r .side-pick, body.drawer-r .filter-panel, body.drawer-r .chem-filter-panel { transform: none; }
     /* 필터·기둥이 서랍으로 빠지는 폭이므로 격자의 280px 칸도 여기서 함께 없앤다 — 탭마다 다른 값을 쓰면
        그 사이 폭에서 그 탭만 본문이 좁아진다(2026-09-02: 최근 활동·케미가 1100px으로 따로 놀던 것을 합침) */
-    .profile-wrap, .stats-wrap, .cal-wrap, .recent-wrap, .chem-wrap { grid-template-columns: 1fr; }
-    .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
+    .profile-wrap, .stats-wrap, .cal-wrap, .recent-wrap, .chem-wrap, .banner-wrap { grid-template-columns: 1fr; }
+    .profile-wrap > #profileBody, .stats-main, .cal-main, .music-main, .cc-main { padding-left: 0; }   /* 기둥이 서랍으로 빠지면 왼쪽 44px도 뜻이 없다 */
     .recent-wrap > .timeline, .chem-wrap > .chem-content { margin-left: 0; }
     .drawer-btn#drawerBtnR { display: inline-flex; }   /* 고르는 기둥이 서랍이므로 태블릿에서도 필요하다 */
   }
@@ -3268,13 +3377,16 @@
   </div>
 
   <!-- 컨텐츠 탭(2026-09-06 부활): 현수막 탭과 같은 카드 격자(내용만 다름 — Crenop). 자료 = 지난 그림 행 + 지난 일정 행(contentAll), 최신순.
-       링크가 둘 이상인 카드는 고르기 모달(최근 활동의 다시보기 고르기와 같은 틀). 기둥 없음(현수막과 같음). -->
+       링크가 둘 이상인 카드는 고르기 모달(최근 활동의 다시보기 고르기와 같은 틀). 기둥 = 멤버·종류 필터(2026-09-24 Crenop, 최근 활동 필터 복제 — renderCcFilter가 채운다, 현수막과 같음). -->
   <div class="page" id="page-content">
-    <div class="banner-wrap" id="contentBody">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>컨텐츠 데이터 불러오는 중...</div>
+    <div class="banner-wrap">
+      <div class="cc-main" id="contentBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>컨텐츠 데이터 불러오는 중...</div>
+        </div>
       </div>
+      <div class="filter-panel" id="contentFilter"></div>
     </div>
   </div>
 
@@ -3283,11 +3395,14 @@
   </div>
 
   <div class="page" id="page-banner">
-    <div class="banner-wrap" id="bannerBody">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>현수막 데이터 불러오는 중...</div>
+    <div class="banner-wrap">
+      <div class="cc-main" id="bannerBody">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>현수막 데이터 불러오는 중...</div>
+        </div>
       </div>
+      <div class="filter-panel" id="bannerFilter"></div>
     </div>
   </div>
 
@@ -3299,7 +3414,7 @@
       <!-- 우측은 순위만. 컨텐츠 고르기는 좌측 각 묶음 머리의 순위 버튼이 담당한다(2026-08-31) —
            같은 일을 하는 목록이 양쪽에 있으면 어느 쪽이 본체인지 갈린다. -->
       <aside class="like-side">
-        <div class="like-rank" id="likeRankBody"><div class="lr-msg">컨텐츠를 고르면 순위가 나옵니다.</div></div>
+        <div class="like-rank" id="likeRankBody"><div class="lr-msg">순위가 나타나는 공간입니다.</div></div>
       </aside>
     </div>
   </div>
@@ -3353,7 +3468,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-24a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-24c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -3504,7 +3619,7 @@ const MEMBER_BIRTHDAYS = {
   // 발생시키지 않아 버튼이 첫 화면 이후로 갱신되지 않았다(실제 사고). 지금 열려 있는 화면을 직접 본다.
   window.syncDrawerFilterBtn = function () {
     if (!btnR) return;
-    const panel = document.querySelector('.page.active .filter-panel, .page.active .chem-filter-panel, .page.active .side-pick');
+    const panel = document.querySelector('.page.active .filter-panel:not(:empty), .page.active .chem-filter-panel, .page.active .side-pick');   // :not(:empty) — 컨텐츠·현수막 기둥은 자료가 와야 채워진다(첫 방문·시트 실패 땐 빈 서랍이 열렸다)
     // 자리는 늘 차지하고 보이기만 끈다 — display:none으로 빼면 그 폭만큼 로고가 왼쪽으로 밀린다(가운데 어긋남).
     btnR.style.visibility = panel ? '' : 'hidden';
     // 여는 버튼이 없으면 서랍 상태도 반드시 내린다 — 안 그러면 겹쳐 뜨는 ✕만 화면에 남는다(실사고)
@@ -3955,24 +4070,26 @@ const badgeGid = (label, k) => k + [...label].reduce((a, c) => (a * 31 + c.charC
 const badgeGradV = (gid, color, a0, a1) => `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="${a0}"/><stop offset="1" stop-color="${color}" stop-opacity="${a1}"/></linearGradient></defs>`;
 const badgeText = (L, color) => `<g fill="${color}" transform="translate(0 ${L.yBase.toFixed(3)}) scale(${L.s} ${-L.s})">${L.paths}</g>`;
 // 가족 1 — 반장·부반장: 양끝 뾰족 윙 + 다이아 악센트(2026-08-24 V2). 좌우 여백 20 = 윙 깊이 8 + 패딩 12
-function ornateTitleBadgeSvg(label, color) {
-  const L = badgeTextLayout(label, 20, 20), { W, H, m } = L, P = 8, gid = badgeGid(label, 'tb');
+// short = 약식(2026-09-24 Crenop '짧게' — 프로필 머리 카드에 자리가 모자랄 때 fitProfileTitles가 쓴다): 세 가족 모두 양끝 그림을 빼고 여백을 줄인다. 글자·색·몸통 모양은 그대로.
+//   윙 12(깊이 8 + 4) · 해 상자 10 · 꼬리표 10(파임 5 + 5). 그라데이션 id는 전체 명패와 갈라 둔다(한 명패 안에 둘이 같이 있다)
+function ornateTitleBadgeSvg(label, color, short) {
+  const pad = short ? 12 : 20, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, P = 8, gid = badgeGid(label, short ? 'tbs' : 'tb');
   const body = `M${P} 0.75H${(W - P).toFixed(2)}L${(W - 0.75).toFixed(2)} ${m}L${(W - P).toFixed(2)} ${H - 0.75}H${P}L0.75 ${m}Z`;
   const dia = (x) => `M${x.toFixed(1)} ${m - 2.6}L${(x + 2.6).toFixed(1)} ${m}L${x.toFixed(1)} ${m + 2.6}L${(x - 2.6).toFixed(1)} ${m}Z`;
-  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/><path d="${dia(P + 3.4)}${dia(W - P - 3.4)}" fill="${color}"/>${badgeText(L, color)}</svg>`;
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${short ? '' : `<path d="${dia(P + 3.4)}${dia(W - P - 3.4)}" fill="${color}"/>`}${badgeText(L, color)}</svg>`;
 }
 // 가족 2 — 태양·태앙(2026-09-10 Crenop 안 7): 반듯한 상자, 양끝 안쪽에 각진 해(팔각 원반 + 8방 빛살). 둥근 데 없음(각진 정책)
-function sunTitleBadgeSvg(label, color) {
-  const L = badgeTextLayout(label, 32, 32), { W, H, m } = L, gid = badgeGid(label, 'ts');
+function sunTitleBadgeSvg(label, color, short) {
+  const pad = short ? 10 : 32, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, gid = badgeGid(label, short ? 'tss' : 'ts');
   const body = `M0.75 0.75H${(W - 0.75).toFixed(2)}V${H - 0.75}H0.75Z`;
   const oct = (cx, r) => { const pts = []; for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; pts.push(`${(cx + Math.cos(a) * r).toFixed(2)},${(m + Math.sin(a) * r).toFixed(2)}`); } return `<polygon points="${pts.join(' ')}" fill="${color}"/>`; };
   const rays = (cx) => { let d = ''; for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; d += `M${(cx + Math.cos(a) * 4.6).toFixed(2)} ${(m + Math.sin(a) * 4.6).toFixed(2)}L${(cx + Math.cos(a) * 7.2).toFixed(2)} ${(m + Math.sin(a) * 7.2).toFixed(2)}`; } return `<path d="${d}" stroke="${color}" stroke-width="1.3"/>`; };
   const sun = (cx) => oct(cx, 3) + rays(cx);
-  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.18, 0.04)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${sun(15)}${sun(W - 15)}${badgeText(L, color)}</svg>`;
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.18, 0.04)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${short ? '' : sun(15) + sun(W - 15)}${badgeText(L, color)}</svg>`;
 }
 // 가족 3 — 긴급소집(2026-09-10 Crenop C2): 좌우대칭 꼬리표(양끝이 안으로 파인 제비꼬리, 깊이 5), 표식 없음 — 색이 1등·꼴등·노쇼를 가른다
-function tagTitleBadgeSvg(label, color) {
-  const L = badgeTextLayout(label, 16, 16), { W, H, m } = L, n = 5, gid = badgeGid(label, 'tt');
+function tagTitleBadgeSvg(label, color, short) {
+  const pad = short ? 10 : 16, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, n = 5, gid = badgeGid(label, short ? 'tts' : 'tt');
   const body = `M0.75 0.75H${(W - 0.75).toFixed(2)}L${(W - n).toFixed(2)} ${m}L${(W - 0.75).toFixed(2)} ${H - 0.75}H0.75L${n} ${m}Z`;
   return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5" stroke-linejoin="miter"/>${badgeText(L, color)}</svg>`;
 }
@@ -4006,6 +4123,37 @@ function titleBadgesHtml(titleCell, imgCell) {
   const imgs = String(imgCell || '').split(/[,|\n]/).map(x => x.trim());
   return titles.map((t, i) => titleBadgeHtml(t, imgs[i] || '')).join('');
 }
+// 칭호 자리(2026-09-24 Crenop '짧게', CSS '칭호 자리' 곁 주석): 프로필 머리 카드의 정보 칸 폭을 재서 ① 이름 옆 ② 이름 아래 ③ 약식(이름 아래)
+// ④ 제 줄(버튼 아래) 중 들어가는 첫 모양. 폭은 명패 그림의 width(그린 크기 그대로)와 이름 글자 폭으로 잰다. 약식 그림은 처음 필요할 때 명패 안에 한 번 그려 둔다.
+// 그린 뒤(renderProfileMember)와 프로필 본문 폭이 바뀔 때(#profileBody 관찰자) 다시 잰다.
+function fitProfileTitles() {
+  const hd = document.querySelector('#profileBody .profile-member-header');
+  const tt = hd && hd.querySelector('.profile-member-titles');
+  if (!tt) return;
+  const info = hd.querySelector('.profile-member-info'), nm = hd.querySelector('.profile-member-name');
+  const have = info.getBoundingClientRect().width + 0.5;   // 0.5 = 소수 폭 반올림 여유
+  if (have < 1) return;   // 안 보이는 탭(폭 0)에선 재지 않는다
+  hd.classList.remove('pt-below', 'pt-short', 'pt-own');
+  if (tt.parentNode !== nm) nm.appendChild(tt);
+  const badges = [...tt.querySelectorAll('.profile-member-title')];
+  const wOf = svg => parseFloat(svg.getAttribute('width')) || 0;
+  const full = badges.map(b => wOf(b.querySelector('svg')));
+  const rg = document.createRange(); rg.selectNodeContents(nm.firstChild);   // 이름 글자(명패 앞 글자 마디)
+  if (rg.getBoundingClientRect().width + full.reduce((a, w) => a + 10 + w, 0) <= have) return;   // ① 10 = 명패 왼쪽 여백
+  if (Math.max(...full) <= have) { hd.classList.add('pt-below'); return; }
+  const short = badges.map(b => {
+    let s = b.querySelector('svg.pt-s');
+    if (!s) {
+      const t = b.dataset.tname || b.getAttribute('aria-label') || '';   // 이미지 있는 명패(button)는 aria-label에 안내가 붙어 data-tname이 문구
+      const [fam, color] = TITLE_BADGE_STYLES[t] || ['wing', TITLE_BADGE_FALLBACK];
+      b.insertAdjacentHTML('beforeend', TITLE_BADGE_DRAW[fam](t, color, true));
+      s = b.lastElementChild; s.classList.add('pt-s');
+    }
+    return wOf(s);
+  });
+  if (Math.max(...short) <= have) { hd.classList.add('pt-short'); return; }
+  hd.classList.add('pt-own'); hd.appendChild(tt);
+}
 // 칭호 이미지 모달 — 사이트 공통 패널, 제목 자리에 칭호, 본문에 이미지 한 장(원본 비율, 패널 폭에 맞춤)
 function openTitleImageModal(name, url) {
   const head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
@@ -4019,7 +4167,7 @@ function openTitleImageModal(name, url) {
 // ── 말줄임 툴팁(2026-08-24) — 전수조사한 말줄임 클래스에서, 실제로 잘렸을 때만 hover 시 전체 텍스트를 네이티브 title로 ──
 // (종류 필터 버튼과 같은 문법. 잘림 판정: 가로 초과 = 1줄 ellipsis, 세로 +1px 초과 = 2줄 클램프 — +1은 라인하이트 반올림 오탐 방지.)
 // 안 잘린 요소는 title 제거(리사이즈로 풀린 경우 추종). 말줄임 클래스 신설 시 이 목록에 추가 — 누락은 dom 스위트가 CSS 대조로 잡는다.
-const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .cal-txt-line, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .sch-line-txt, .sch-line-shell, .tb-t-pc';
+const ELLIPSIS_TIP_SEL = '.rk-name, .lrg-head-txt, .lrq-l1, .lrq-l2, .header-center-line, .card-name, .card-title, .event-member, .event-detail, .day-item-title, .day-item-cafe, .cal-txt-line, .chem-ndesc, .chem-member-name, .content-card-title, .vs-title, .sch-line-txt, .sch-line-shell, .tb-t-pc';
 document.addEventListener('mouseover', (e) => {
   const el = e.target.closest ? e.target.closest(ELLIPSIS_TIP_SEL) : null;
   if (!el) return;
@@ -4190,6 +4338,14 @@ const saveChemFilters = () => {
   lsSetSet(LS_CHEM_FILTER_MEMBERS_OFF, new Set(MEMBERS.map(m => m.id).filter(id => !chemFilterMembers.has(id))));
   lsSetSet(LS_CHEM_FILTER_TYPES_OFF, new Set(CHEM_TYPES.filter(t => !chemFilterTypes.has(t))));
 };
+// 컨텐츠·현수막 필터(2026-09-24 Crenop): 저장은 최근 활동·케미와 같은 '제외 목록', 탭마다 제 키(한 키면 한 탭에서 끈 것이 다른 탭에도 꺼진다).
+// 멤버는 id, 종류는 별칭표(CAL_TAG_ICON)의 키로 적는다 — 시트 표기('VRC'·'브챗')가 달라도 같은 그림이면 같은 종류.
+const LS_CC_FILTER = {
+  content: ['chuntaverse_content_filter_members_off', 'chuntaverse_content_filter_types_off'],
+  banner: ['chuntaverse_banner_filter_members_off', 'chuntaverse_banner_filter_types_off'],
+};
+const ccFilter = {};
+for (const tab in LS_CC_FILTER) ccFilter[tab] = { mOff: lsGetSet(LS_CC_FILTER[tab][0], []), kOff: lsGetSet(LS_CC_FILTER[tab][1], []) };
 const LS_CHEM_CACHE = 'chuntaverse_chem_counts';
 let lastChemText = null;   // 케미 60초 폴링의 직전 응답 원문 — 동일하면 재구축 스킵(lastTimelineSig와 동일 취지)
 
@@ -4513,7 +4669,7 @@ function parseTopbarRows(rows) {
       mb: (r[2] || '').trim(),
       l1: (r[3] || '').trim(),   // D=라벨(한 줄)
       hex: /^#[0-9A-Fa-f]{6}$/.test(hexRaw) ? hexRaw : '#FFFFFF',   // 기본 = 흰색(2026-09-04, 구 커버곡 핑크)
-      // G열(구 H, 2026-08-31): 보조바에서 어느 쪽에 설지(2026-09-04 정리). PC: '우'/'right'/'r'이면 오른쪽 묶음(최애·가이드 왼쪽), 그 밖(빈칸 포함)은 왼쪽 묶음(기념일 바로 왼쪽에 붙어 선다).
+      // G열(구 H, 2026-08-31): 보조바에서 어느 쪽에 설지(2026-09-04 정리). PC: '우'/'right'/'r'이면 오른쪽 묶음(최애·가이드 왼쪽), 그 밖(빈칸 포함)은 왼쪽 묶음(일정 뒤 — 기념일이 있는 날은 오른쪽 묶음 맨 앞, 2026-09-24).
       // 세로 배치(서랍): 오른쪽 묶음은 맨 아래 묶음에서 최애 위에 쌓이고, 왼쪽 묶음은 가이드와 같은 줄의 왼쪽(왼쪽 정렬).
       side: /^(우|right|r)$/i.test((r[6] || '').trim()) ? 'right' : 'left',
     });
@@ -4731,38 +4887,41 @@ function fitBtnIcons(root) {
   });
 }
 
-// 기념일 약식 판정(PC 보조바, 2026-09-24 Crenop): 기념일은 왼쪽 묶음 끝에 선다(updatePageTitle). 묶음이 넘치거나 일정·시트 버튼 글자가 말줄임되면
-// 기념일을 약식('천양 생축!')으로 — 다른 버튼 글자보다 기념일 전체 문구가 먼저 준다. 둘 이상이면 늘 약식. 창 크기(resize)·다시 그릴 때 잰다. 서랍(≤1150)은 CSS가 늘 약식.
+// 기념일 약식 판정(PC 보조바, 2026-09-24 Crenop): 기념일은 왼쪽 묶음 끝에 선다(updatePageTitle — 그날은 시트 왼쪽 버튼이 오른쪽 묶음으로 가 왼쪽은 [일정][기념일]뿐).
+// 묶음이 넘치거나 일정 글자가 말줄임되면 기념일을 약식('천양 생축!')으로 — 일정 글자보다 기념일 전체 문구가 먼저 준다. 둘 이상이면 늘 약식. 창 크기(resize)·다시 그릴 때 잰다. 서랍(≤1150)은 CSS가 늘 약식.
 function syncLeadCeleb() {
   const lead = document.getElementById('subbarLead'), wrap = lead && lead.querySelector('.celeb-wrap');
   if (!wrap || innerWidth <= 1150) return;
   wrap.classList.toggle('short', wrap.children.length > 1);
-  const cut = lead.scrollWidth > lead.clientWidth + 1 || [...lead.querySelectorAll('.tb-sheet-btn .tb-t-pc, .sch-line-txt')].some(t => t.offsetParent && t.scrollWidth > t.clientWidth + 1);
+  const cut = lead.scrollWidth > lead.clientWidth + 1 || [...lead.querySelectorAll('.sch-line-txt')].some(t => t.offsetParent && t.scrollWidth > t.clientWidth + 1);
   if (cut) wrap.classList.add('short');
 }
 function updatePageTitle() {
   const scheduleBtn = scheduleBtnHTML();  // 가장 임박한 날짜의 일정 묶음(같은 날 2건+는 열 정렬, 데이터 전엔 셸)
   const celebrations = getTodayCelebrations();
-  // 자리 규칙(2026-08-31, 2026-09-06 일정 이동, 2026-09-24 기념일 이동): 왼쪽 묶음 = 일정 → 상단바 왼쪽 링크 → 기념일(PC) · 가이드 → 맨 오른쪽(마크업 고정).
+  // 자리 규칙(2026-08-31, 2026-09-06 일정 이동, 2026-09-24 기념일 이동): 왼쪽 묶음 = 일정 → 상단바 왼쪽 링크(기념일 있는 PC에선 오른쪽 묶음으로) → 기념일(PC) · 가이드 → 맨 오른쪽(마크업 고정).
   // 좋아요 요청·순위 버튼은 폐지 — 컨텐츠 신청 탭이 그 둘을 다 담는다.
   // 일정 줄은 왼쪽 묶음 맨 앞(2026-09-06 Crenop): 어느 탭에도 속하지 않는 '다가올 것'이라 탭 칸이 아니라 묶음에 산다 —
   // 가로 배치에선 묶음의 왼쪽 끝(로고 왼쪽 선)부터 시트 버튼과 차례로, 세로 배치(서랍)에선 가이드 줄 왼쪽 열에 위에서부터 세로로.
-  // 기념일(2026-09-24 Crenop): PC 보조바에선 왼쪽 묶음 끝 — [일정][시트 왼쪽 버튼][기념일]이 간격 없이 나란히(오른쪽 [최애][가이드]와 같은 문법).
+  // 기념일(2026-09-24 Crenop): PC 보조바에선 왼쪽 묶음 끝 — [일정][기념일]이 간격 없이 나란히(오른쪽 [최애][가이드]와 같은 문법).
   //   종전엔 프로필 칸 오른쪽 끝에 맞춰 왼쪽으로 넘쳐, 왼쪽 끝의 일정과 사이에 까닭 모를 틈이 생겼다. 서랍(≤1150)에선 종전대로 프로필 탭 칸(탭 바로 옆이라 틈이 없다).
   //   여럿일 때를 위해 한 묶음(.celeb-wrap)으로 싸고, 둘 이상이면 약식('이름 종류').
+  //   기념일이 있는 날은 시트 왼쪽 버튼이 오른쪽 묶음 맨 앞으로 간다(2026-09-24 Crenop — 시트 G열 무관, 폭 무관. 차례는 시트 왼쪽 → 시트 오른쪽 → 최애 → 가이드).
+  //   왼쪽 묶음은 생방송 칸 앞까지라 1200~1366px에서 일정·시트 버튼·기념일이 셋 다 말줄임·약식이었고, 오른쪽 묶음은 최애·가이드 옆이 비어 있었다. 서랍(≤1150)은 종전대로.
   const auxMembers = document.querySelector('.tab-aux[data-for="members"]');
   const celebHtml = celebrations.length ? `<span class="celeb-wrap${celebrations.length > 1 ? ' short' : ''}">${celebrations.join('')}</span>` : '';
   const pcBar = innerWidth > 1150;   // 폭이 PC ↔ 서랍을 넘나들면 syncBarPlacement가 이 함수를 다시 불러 자리를 옮긴다
+  const leftToRight = pcBar && celebrations.length > 0;
   if (auxMembers) auxMembers.innerHTML = pcBar ? '' : celebHtml;
   const lead = document.getElementById('subbarLead');
-  if (lead) { lead.innerHTML = scheduleBtn + topbarLinksHtml('left') + (pcBar ? celebHtml : ''); syncLeadCeleb(); }
+  if (lead) { lead.innerHTML = scheduleBtn + (leftToRight ? '' : topbarLinksHtml('left')) + (pcBar ? celebHtml : ''); syncLeadCeleb(); }
   const sbRight = document.getElementById('subbarRight');
   if (sbRight) {   // 오른쪽 묶음은 어느 배치에서나 같은 상자(세션 70: 세로 배치도 이 상자째 서랍 맨 아래로 내려간다) — 시트 버튼은 최애·가이드 왼쪽
     // 세로 배치에선 오른쪽 열 상자(#subbarRightStack) 안이 '오른쪽 묶음'이다. 직속 자식만 지운다(:scope >) — 왼쪽 묶음(subbarLead)이 같은 상자 안에
     // 들어와 있어, 종전 선택자는 방금 채운 왼쪽 묶음의 버튼(시트 왼쪽 버튼·일정)까지 지웠다(2026-09-06 헤드리스 실측 — 세로 배치에서 왼쪽 시트 버튼이 사라지던 선재 버그).
     const host = document.getElementById('subbarRightStack') || sbRight;
     host.querySelectorAll(':scope > .page-title-link:not(#guideLink):not(#favBtn), :scope > .celebration-box').forEach(n => n.remove());
-    host.insertAdjacentHTML('afterbegin', topbarLinksHtml('right'));
+    host.insertAdjacentHTML('afterbegin', (leftToRight ? topbarLinksHtml('left') : '') + topbarLinksHtml('right'));
   }
   refreshLikeDot();   // 상단바 innerHTML 재생성으로 클래스가 날아가므로 점 상태 재적용
   fitBtnIcons();      // 새로 그린 버튼의 아이콘 여백을 그림 기준으로 맞춘다
@@ -6082,7 +6241,7 @@ function openDayPickModal(key, d) {
     body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, parts }) => sessionRowHtml(s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v, calMember())}</div>`).join('')}</div>` : '')).join('')}</div>`;
     body.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
       const sess = d.live.find(({ s }) => String(s.broad_no) === b.dataset.vodpick);
-      openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId]);
+      openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId], (sess && isoToKstDateKey(sess.s.start)) || key);
     }));
   } else if (calState.type === 'youtube') {
     body.innerHTML = `<div class="ds-vods">${d.youtube.map(({ y }) => `<div class="cal-vod">${ytTileHtml(y, calMember())}</div>`).join('')}</div>`;
@@ -6470,11 +6629,15 @@ window.addEventListener('resize', () => { if (likeReqShown) renderLikeReqBody();
   if (src && window.MutationObserver) new MutationObserver(placeLikeRank).observe(src, { childList: true, subtree: true });
 })();
 
+// 순위를 안 골랐을 때 우측 칸 문구(2026-09-24 Crenop): 목록에 고를 순위 버튼이 없으면(요청 0건·집계 없는 글뿐) '고르면'이 말이 되지 않는다 — 무엇이 나오는 자리인지만 알린다
+function likeRankIdleHtml() {
+  return `<div class="lr-msg">${document.querySelector('#likeReqBody .lrg-rank-btn') ? '컨텐츠를 고르면 순위가 나옵니다.' : '순위가 나타나는 공간입니다.'}</div>`;
+}
 function clearLikeRank() {
   likeRankPost = null;
   stopLikePoll();
   const body = document.getElementById('likeRankBody');
-  if (body) body.innerHTML = '<div class="lr-msg">컨텐츠를 고르면 순위가 나옵니다.</div>';
+  if (body) body.innerHTML = likeRankIdleHtml();
   document.body.classList.remove('apply-rank-on');
   renderLikeReqBody();
   placeLikeRank();
@@ -6515,6 +6678,7 @@ function renderLike() {
       const seen = lsKeySet(LS_LIKE_SEEN);
       likeReqNewSet = new Set(likeReqShown.map(likeReqKey).filter(k => !seen.has(k)));
       renderLikeReqBody();
+      if (!likeRankPost) { const rb = document.getElementById('likeRankBody'); if (rb) rb.innerHTML = likeRankIdleHtml(); }   // 고를 버튼이 있는지는 목록을 그린 뒤에야 안다
       placeLikeRank();   // 목록을 다시 그리면 머리 요소가 새로 나므로 순위도 다시 그 아래로
       lsKeyAdd(LS_LIKE_SEEN, likeReqShown.map(likeReqKey));
       refreshLikeDot();
@@ -7082,9 +7246,9 @@ function renderEvent(e, allEvents) {
     const titleText2 = lastTitle ? escapeHtml(lastTitle) : '';
     detail = `<div class="event-detail">${modeTag}${modeTag && titleText2 ? ' ' : ''}${titleText2}</div>`;
   } else if (e.type === 'title' || e.type === 'category') {
-    detail = `<div class="event-detail">${escapeHtml(e.before)} → ${escapeHtml(e.after)}</div>`;
+    detail = `<div class="event-detail">${escapeHtml(e.before)} → <span class="chg-after">${escapeHtml(e.after)}</span></div>`;
   } else if (e.type === 'mode_change') {
-    detail = `<div class="event-detail">${escapeHtml(modeLabel(e.before))} → ${escapeHtml(modeLabel(e.after))}</div>`;
+    detail = `<div class="event-detail">${escapeHtml(modeLabel(e.before))} → <span class="chg-after">${escapeHtml(modeLabel(e.after))}</span></div>`;
   } else if (e.type === 'comment_recommend' && e.title) {
     // '누구 댓글 · 원본 숲 게시글 제목'. e.title은 링크를 담고 있던 멤버 글의 제목이다.
     //   [이벤트 탭] 그 게시글 이벤트가 타임라인에 따로 있으므로 둘의 연결이 보인다.
@@ -7104,6 +7268,8 @@ function renderEvent(e, allEvents) {
   } else if (e.type === 'mission_gift' && e.title) {
     detail = `<div class="event-detail">“${escapeHtml(e.title)}”</div>`;
   }
+  // 말줄임 없이 꺾는 세부 줄(CSS .ev-wrap 곁 주석) — 변경 셋과 채팅 묶음에 들어가는 채팅류(단건일 때 여기로 온다)
+  if (['title', 'category', 'mode_change', 'chat', 'chat_emoticon', 'donation', 'mission_gift'].includes(e.type)) detail = detail.replace('class="event-detail"', 'class="event-detail ev-wrap"');
   if (e.type === 'end' && !e.url && e.member_id) {
     e = { ...e, url: `https://www.sooplive.com/station/${e.member_id}/vod` };
   }
@@ -7427,8 +7593,13 @@ function updateTypeAllToggle() {
 function fitEventTimes(tl) {
   if (!tl || !tl.clientWidth) return;   // 안 보이는 탭(폭 0)에선 재지 않는다 — 탭에 들어오면 폭 감시가 다시 부른다
   const evs = [...tl.querySelectorAll('.event')];
-  evs.forEach(e => e.classList.remove('ev-tight'));
-  if (!evs.length || getComputedStyle(evs[0]).display !== 'grid') return;
+  evs.forEach(e => e.classList.remove('ev-tight', 'ev-multi'));
+  if (!evs.length) return;
+  if (getComputedStyle(evs[0]).display !== 'grid') {   // 넓은 배치: 두 줄 넘게 꺾인 단건 세부 줄만 위 붙임(.ev-multi — CSS 곁 주석)
+    evs.filter(e => { const d = e.querySelector('.event-detail.ev-wrap'); if (!d) return false; const lh = parseFloat(getComputedStyle(d).lineHeight) || 18; return d.getBoundingClientRect().height > lh * 1.5; })
+      .forEach(e => e.classList.add('ev-multi'));
+    return;
+  }
   const need = evs.filter(e => { const w = e.querySelector('.ev-what'); if (!w) return false; const lh = parseFloat(getComputedStyle(w).lineHeight) || 20; return w.getBoundingClientRect().height > lh * 1.5; });
   need.forEach(e => e.classList.add('ev-tight'));
   fitEventTails(evs);
@@ -7445,11 +7616,25 @@ function fitEventTails(evs) {
     const tr = t.getBoundingClientRect();
     const hb = Math.max(...[...e.querySelectorAll(HEAD)].map(h => h.getBoundingClientRect().bottom));
     const tail = Math.ceil(tr.bottom - hb);
-    return tail > 0 ? { e, t, c, tail, bottom: tr.bottom, w: Math.ceil(tr.width) } : null;
+    return tail > 0 ? { e, t, c, tail, w: Math.ceil(tr.width) } : null;
   }).filter(Boolean);
   m.forEach(x => x.e.style.setProperty('--ev-tail', x.tail + 'px'));
-  m.forEach(x => { x.fl = Math.ceil(x.bottom - x.c.getBoundingClientRect().top); });
+  // 시간 칸 아래 끝도 꼬리를 뺀 뒤에 다시 잰다 — 처음 잰 값을 쓰면 위 항목들이 줄어든 만큼 아래 항목일수록 띄움 칸이 부풀었다(360px 443항목에서 페이지 약 66만px)
+  m.forEach(x => { x.fl = Math.ceil(x.t.getBoundingClientRect().bottom - x.c.getBoundingClientRect().top); });
   m.forEach(x => { if (x.fl > 0) { x.e.style.setProperty('--ev-tw', (x.w + 8) + 'px'); x.e.style.setProperty('--ev-float', x.fl + 'px'); } });
+}
+// PC 기둥 스크롤바 자리(CSS 곁 주석): 기둥 크기가 바뀔 때마다(스크롤바가 생기거나 사라지면 안쪽 폭이 바뀐다) 넓힌 폭을 풀고 다시 잰다.
+// 되먹임 없음 — 넓힌 뒤 안쪽 폭은 넓히기 전의 280 그대로라 관찰자가 다시 부르지 않는다. 안 보이는 탭(폭 0)·서랍 폭은 넓히지 않는다.
+function fitPillarGutter(p) {
+  p.style.width = '';
+  if (innerWidth <= 1150 || !p.offsetWidth) return;
+  const cs = getComputedStyle(p);
+  const sb = p.offsetWidth - p.clientWidth - (parseFloat(cs.borderLeftWidth) || 0) - (parseFloat(cs.borderRightWidth) || 0);
+  if (sb > 0) p.style.width = (p.offsetWidth + sb) + 'px';
+}
+if (typeof ResizeObserver === 'function') {
+  const pillarRO = new ResizeObserver(entries => requestAnimationFrame(() => entries.forEach(en => fitPillarGutter(en.target))));
+  document.querySelectorAll('.filter-panel, .chem-filter-panel, .side-pick, .like-side').forEach(p => pillarRO.observe(p));
 }
 let evFitW = 0, evFitTimer = 0;
 // 글꼴 조각이 늦게 도착하면 글 폭이 바뀌어 첫 판정(날짜 꺾기·꼬리)이 빗나간다 — 도착할 때마다 다시 잰다(2026-09-24 전 탭 점검: 360px 4회 중 1회 어긋남). 120ms 묶음
@@ -7524,8 +7709,9 @@ function applyFilter() {
     const a = ev.target.closest('a.ev-vodmulti, a.ev-vodnone');
     if (!a || !tl.contains(a)) return;
     ev.preventDefault();
-    const parts = a.classList.contains('ev-vodnone') ? [] : (endVodResolve(a.dataset.member, a.dataset.broad) || []);
-    openVodPickModal(parts, a.getAttribute('href'), MEMBER_BY_ID[a.dataset.member]);   // 없음 확정 → "다시보기가 없습니다." 알림(목록 링크는 모달 안 보조)
+    // 고르는 순서는 applyVodLinks와 같게 — 세션 스냅샷 먼저, 없으면 최근 목록(2026-09-24: 종전엔 최근 목록만 봐서 스냅샷 4파트로 모달 표식이 붙은 방송이 3파트로 떴다)
+    const parts = a.classList.contains('ev-vodnone') ? [] : ((snapshotVodsForBroad(a.dataset.member, a.dataset.broad) ?? endVodResolve(a.dataset.member, a.dataset.broad)) || []);
+    openVodPickModal(parts, a.getAttribute('href'), MEMBER_BY_ID[a.dataset.member], broadDateKey(a.dataset.member, a.dataset.broad));   // 없음 확정 → "다시보기가 없습니다." 알림(목록 링크는 모달 안 보조)
   });
   // 맨 위/아래 = 페이지 끝(2026-09-03 세션 70, Crenop 실사고): 종전 scrollIntoView는 목록 상자의 위·아랫변을 화면에 맞추는 것이라
   // 위쪽은 붙어 있는 머리(띠+보조바 ≈ --head-h) 아래로 들어가 가려지고, 아래쪽은 상자 밑 여백(20px)만큼 못 갔다. 목록은 어느 폭에서도
@@ -7902,7 +8088,7 @@ function vodBadges(v) {
 //    생방송 카드·정전 '어제 다시보기'·모달 타일(다시보기·클립·유튜브 — 컨텐츠·현수막·케미·달력 하루·다시보기 선택)이 이 함수 하나를 쓰고,
 //    사진 타일은 글자 없이 그림만(mediaTileHtml bare, 2026-09-22 Crenop).
 //    글자 모양은 .card-name-row·.card-name·.card-btime·.card-title 한 벌이다. 이름을 모르면(멤버가 아닌 영상) 이름 자리만 비운다.
-//    영상 줄(프로필·음악·크루 핫클립)은 시트 자료가 제목뿐(이름·시간 없음)이라 이 규칙 밖 — 두 줄 제목(.vs-title) 그대로(Crenop 2026-09-22 2-제외).
+//    영상 줄(프로필·음악·크루 핫클립)은 시트 자료가 제목뿐(이름·시간 없음)이라 이 규칙 밖(Crenop 2026-09-22 2-제외) — 제목(.vs-title)만, 한 줄 말줄임(2026-09-24 Crenop).
 //    o = { name, color, time, title, titleCls } — color가 비면 이름은 기본 글자색(생방송 카드의 오프라인), time은 시계 뒤 글자.
 function tileTextHtml(o) {
   const t = o.time ? `<span class="card-btime">${SVG_ICONS.clockTime}<span>${escapeHtml(o.time)}</span></span>` : '';   // 시계 = SVG 아이콘(구 ⏱ 이모지 — 이모지 배제, 2026-07-13)
@@ -8020,16 +8206,27 @@ function applyVodLinks(tl) {
     a.classList.add('ev-vodmulti');                   // 오프셋 미상 + 복수 파트 → 선택 모달
   });
 }
-function openVodPickModal(parts, listUrl, member) {   // member = 그 방송의 멤버(타일 1행 이름, 2026-09-22)
+// dateKey = 그 방송의 시작일(KST 'YYYY-MM-DD') — 머리에 달력 하루 모달과 같은 꼴 '다시보기 선택 — 9월 22일 (화)'(2026-09-24 Crenop). 모르면 날짜 없이
+function openVodPickModal(parts, listUrl, member, dateKey) {   // member = 그 방송의 멤버(타일 1행 이름, 2026-09-22)
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!head || !body) return;
   modalPanel('vod-pick-panel');
-  head.innerHTML = `<span>${parts.length > 0 ? '다시보기 선택' : '다시보기'}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
+  head.innerHTML = `<span>${parts.length > 0 ? '다시보기 선택' : '다시보기'}${dateKey ? ` — ${escapeHtml(calDateLabel(dateKey))}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   body.innerHTML = parts.length > 0
     ? `<div class="ds-vods">${parts.map(v => vodTileHtml(v, member)).join('')}</div>`
     : `<div class="vod-pick-empty">다시보기가 없습니다.${listUrl ? ` <a href="${escapeHtml(listUrl)}" target="_blank" rel="noopener">VOD 목록 ${SVG_ICONS.externalLink}</a>` : ''}</div>`;   // v12: 문구·링크 통일(Crenop 지정)
   showModal();
+}
+// 최근 활동의 다시보기 링크엔 방송 번호뿐이라 번호로 시작일을 찾는다(2026-09-24) — 불러온 월 통계의 세션(달력·통계와 같은 출처) → 없으면 이벤트 목록의 종료(broad_start)
+function broadDateKey(memberId, broadNo) {
+  if (!broadNo) return null;
+  for (const monthData of Object.values(statsState.data || {})) {
+    const s = ((monthData[memberId] || {}).sessions || []).find(x => String(x.broad_no) === String(broadNo));
+    if (s) return isoToKstDateKey(s.start);
+  }
+  const end = allEvents.find(e => e.type === 'end' && e.member_id === memberId && String(e.broad_no) === String(broadNo));
+  return end ? isoToKstDateKey(end.broad_start) : null;
 }
 
 // 종료 방송 행(버튼)의 다시보기 선택 모달 — 일별 요약은 세 자리(첫 그림·주 아래·오른쪽 패널)에 그려지므로 본문에 위임 리스너 하나(2026-09-06)
@@ -8513,8 +8710,11 @@ function renderTimeOfDayHeatmap(year, month1, sum, isCurrentMonth) {
   }
   cells += `</div>`;
   let xa = `<div class="toh-xaxis" style="grid-template-columns:repeat(${dim},minmax(0,${R}px));">`;
+  // 주말 눈금: 토·일이 붙어 있으면 두 칸을 합친 눈금 하나 '토·일'(2026-09-24 Crenop이 든 안 중 '셀을 합쳐 이어 적기') — 휴대폰에선 칸이 8px 남짓이라
+  //   칸마다 두 자리 날짜를 적으면 이웃과 겹쳐 '1213'으로 읽혔다(360px 실측 겹침 3곳). 합친 눈금의 이웃은 7칸 떨어져 있어 어느 폭에서도 안 겹친다. 색은 그대로(토 파랑·일 빨강)
   for (let d = 1; d <= dim; d++) {
     const g = new Date(year, month1 - 1, d).getDay();
+    if (g === 6 && d < dim) { xa += `<div class="toh-xlabel" style="grid-column:span 2;"><span style="color:#60a5fa;">${d}</span><span class="toh-xsep">·</span><span style="color:#f87171;">${d + 1}</span></div>`; d++; continue; }
     const c = g === 0 ? '#f87171' : (g === 6 ? '#60a5fa' : '');
     xa += `<div class="toh-xlabel" style="color:${c || 'transparent'};">${c ? d : ''}</div>`;
   }
@@ -9320,17 +9520,22 @@ function parseBannerDate(url) {
 }
 
 // 현수막 행 파서(2026-09-08 중규모 패치): A=이미지 B=날짜(다시보기 기준일 — 현수막 게시일은 컨텐츠 날짜와 다른 때가 많다. 비우면 파일 이름 날짜)
-//   C=링크(컨텐츠 시트 C열과 같은 문법 — 여러 개, 숲 다시보기 포함/'-' 제외, 유튜브·게시글) D=제목 E=종류(컨텐츠 F열 문법) F~=멤버.
-//   시트에 B열(날짜)을 먼저 삽입한 뒤 이 코드를 배포할 것 — 종전 B(링크)가 C로, C(제목)가 D로, D(종류)가 E로 한 칸씩 밀린다.
+//   C=링크(컨텐츠 시트 C열과 같은 문법 — 여러 개, 숲 다시보기 포함/'-' 제외, 유튜브·게시글) D=제목 E=종류(컨텐츠 F열 문법) F=명전 제외 G~=멤버(컨텐츠 시트와 같은 G~).
 //   카드에 찍는 날짜는 종전대로 파일 이름의 게시일. B는 카드를 눌렀을 때 참여 멤버의 그날 다시보기를 찾는 데만 쓴다(vodDate).
+// F=명전 제외(2026-09-24 Crenop): 아무 글자나 적으면('제외' 등) 카드·필터엔 멤버와 함께 그대로 나오고 명전 '천타버스의 위상을 드높인'에만 세지 않는다 —
+//   탈락한 경기의 현수막처럼 멤버는 있지만 위상을 드높인 것은 아닌 것. 비우면 종전대로 센다.
+//   배포 순서: 시트에 F열을 먼저 삽입 → 이 코드. 옛 코드는 F~를 멤버로 읽고 등록 이름만 쓰므로 '제외' 글자를 그냥 지나친다.
+//   F가 등록 멤버 이름이면 삽입 전 옛 시트로 보고 F부터 멤버로 읽는다 — 옛 시트의 F는 천양 칸이라(2026-09-24 실데이터 7행), 이 판정이 없으면
+//   순서가 뒤바뀌거나 시트 CSV가 잠시 옛 판일 때 천양이 그 카드들과 명전에서 빠진다.
 function parseBannerRows(rows) {
   const ord = new Map(MEMBERS.map((m, i) => [m.name, i]));
   return rows.filter(r => r[0] && r[0].startsWith('http')).map(r => {
-    const members = r.slice(5).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
+    const f = (r[5] || '').trim(), oldSheet = ord.has(f);
+    const members = r.slice(oldSheet ? 5 : 6).filter(c => c.length > 0).sort((a, b) => (ord.get(a) ?? 99) - (ord.get(b) ?? 99));
     const entries = parseLinkCell(r[2]);
     const links = entries.map(e => e.url), linkTitles = entries.map(e => e.title);
     const date = parseBannerDate(r[0]);
-    return { url: r[0], link: links[0] || '', links, linkTitles, title: (r[3] || '').trim(), tags: parseTags(r[4]), members, date, vodDate: parseSheetDate(r[1]) || date };   // vodDate: 다시보기 기준일(B, 없으면 게시일)
+    return { url: r[0], link: links[0] || '', links, linkTitles, title: (r[3] || '').trim(), tags: parseTags(r[4]), hallOff: !!f && !oldSheet, members, date, vodDate: parseSheetDate(r[1]) || date };   // vodDate: 다시보기 기준일(B, 없으면 게시일). hallOff가 없는 옛 캐시(LS_BANNER_CACHE)는 '센다'로 읽힌다(종전과 같음)
   });
 }
 // 현수막·컨텐츠 시트는 첫 화면에 쓰이지 않는다 — 재방문자는 부팅에서 캐시만 되살리고(요청 0), 이 데이터를
@@ -9386,12 +9591,18 @@ function renderBanners() {
   // 데이터가 직전 렌더와 동일하고 이미 그려져 있으면 재구축 생략(탭 전환은 CSS show/hide라 DOM이 유지됨 → 매 진입 재구축은 낭비).
   // 비교는 내용 전체(JSON). 종전의 개수+최신 날짜 비교는 개수·날짜가 그대로인 채 제목·링크만 고친 시트 수정을 못 알아봐
   // 열어 둔 화면에 옛 카드가 남았다(2026-09-17 외부 평가). 47장 분량 문자열 비교라 비용은 무시할 수준.
-  const sig = JSON.stringify(bannerData);
+  // 필터 상태도 입력이다(2026-09-24) — 필터를 바꾸면 같은 데이터라도 다시 그린다. 걸러서 0장이면 격자가 없어 이 생략을 타지 않는다.
+  const sig = JSON.stringify(bannerData) + '|' + ccFilterKey('banner');
   if (sig === _bannerRenderSig && body.querySelector('.content-grid')) return;
   _bannerRenderSig = sig;
 
+  renderCcFilter('banner', bannerData);
+  const items = bannerData.filter(c => ccVisible('banner', c));
+  filterCounts.banner = { shown: items.length, total: bannerData.length };   // 서랍 버튼 '걸러짐' 표시(syncDrawerFilterBtn)
   // 카드·그리드는 컨텐츠 탭과 공용(2026-08-24 통일 — 디자인 준용 지시). 전용 CSS(.banner-*)는 제거.
-  body.innerHTML = `<div class="content-grid">${bannerData.map(c => contentCardHtml(c, true)).join('')}</div>`;   // 2026-09-08: 컨텐츠 카드와 같은 갈래(하나면 직행 · 둘 이상 모달 — 게시글·유튜브·B열 날짜의 다시보기)
+  body.innerHTML = items.length
+    ? `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`   // 2026-09-08: 컨텐츠 카드와 같은 갈래(하나면 직행 · 둘 이상 모달 — 게시글·유튜브·B열 날짜의 다시보기)
+    : '<div class="loading"><div>필터 조건에 맞는 현수막이 없습니다</div></div>';
   bindLinkPicks(body);
 }
 
@@ -9596,13 +9807,72 @@ function openContentCollect(key) {
 function renderContent() {
   const body = document.getElementById('contentBody');
   if (!body) return;
-  const items = contentAll().sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));   // 최신순(모아보기 모달의 과거순과 반대)
-  if (items.length === 0) {
+  const all = contentAll().sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));   // 최신순(모아보기 모달의 과거순과 반대)
+  renderCcFilter('content', all);
+  if (all.length === 0) {
     body.innerHTML = `<div class="loading"><div>${contentData.length === 0 ? '컨텐츠 데이터가 없습니다' : '아직 지난 컨텐츠가 없습니다'}</div></div>`;
     return;
   }
-  body.innerHTML = `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`;
+  const items = all.filter(c => ccVisible('content', c));
+  filterCounts.content = { shown: items.length, total: all.length };   // 서랍 버튼 '걸러짐' 표시(syncDrawerFilterBtn)
+  body.innerHTML = items.length
+    ? `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
+    : '<div class="loading"><div>필터 조건에 맞는 컨텐츠가 없습니다</div></div>';
   bindLinkPicks(body);   // 카드 → 고르기 모달(수동 링크 + 관련 다시보기)
+}
+
+// ── 컨텐츠·현수막 필터 기둥(2026-09-24 Crenop) — 최근 활동 필터(.filter-panel)의 복제: 멤버 13칸 + 종류(카드 제목 앞 종류 그림).
+// 종류 칸은 그 탭 자료에 실제로 있는 종류만, 별칭표(CAL_TAG_ICON) 차례로. 이름표는 별칭표의 첫 표기(영문은 대문자 — VRC).
+// 카드 판정(ccVisible): 등록 멤버 중 하나라도 켜져 있으면 보인다(케미 N인·최근 활동 채팅의 '말한 사람 또는 방송 주인'과 같은 '하나라도').
+//   종류도 아는 종류 중 하나라도 켜져 있으면. 등록 멤버가 없는 카드·아는 종류가 없는 카드는 그 필터와 무관하게 보인다(걸러낼 근거가 없다).
+// 누르면 탭을 통째로 다시 그린다(케미 필터와 같은 방식) — 기둥의 켬/끔·'모두 선택/해제' 글자가 카드와 한 번에 맞는다.
+function ccCardKinds(c) { return [...new Set((c.tags || []).map(t => CAL_TAG_LOOKUP[String(t).toLowerCase()]).filter(Boolean))]; }
+function ccVisible(tab, c) {
+  const f = ccFilter[tab];
+  const ids = (c.members || []).map(n => MEMBERS.find(m => m.name === n)).filter(Boolean).map(m => m.id);
+  const ks = ccCardKinds(c);
+  return (!ids.length || ids.some(id => !f.mOff.has(id))) && (!ks.length || ks.some(k => !f.kOff.has(k)));
+}
+function ccFilterKey(tab) { const f = ccFilter[tab]; return [...f.mOff].sort().join(',') + '|' + [...f.kOff].sort().join(','); }
+function renderCcFilter(tab, items) {
+  const panel = document.getElementById(tab + 'Filter');
+  if (!panel) return;
+  const f = ccFilter[tab];
+  const present = new Set(items.flatMap(ccCardKinds));
+  const kinds = Object.keys(CAL_TAG_ICON).filter(k => present.has(k));
+  const kindLabel = k => { const n = CAL_TAG_ICON[k][0]; return /^[a-z]+$/.test(n) ? n.toUpperCase() : n; };
+  const mAll = MEMBERS.every(m => !f.mOff.has(m.id)), kAll = kinds.every(k => !f.kOff.has(k));
+  panel.innerHTML = `
+    <div class="filter-section">
+      <div class="filter-title">멤버</div>
+      <div class="filter-row">
+        <button class="filter-toggle-all" type="button" data-all="m">${mAll ? '모두 해제' : '모두 선택'}</button>
+        <div class="filter-members">${MEMBERS.map(m => `<button class="filter-member${f.mOff.has(m.id) ? '' : ' on'}" type="button" data-id="${m.id}" title="${escapeHtml(m.name)}"><img src="${m.img}" alt="${escapeHtml(m.name)}"></button>`).join('')}</div>
+      </div>
+    </div>
+    ${kinds.length ? `<div class="filter-section">
+      <div class="filter-title">종류</div>
+      <div class="filter-row">
+        <button class="filter-toggle-all" type="button" data-all="k">${kAll ? '모두 해제' : '모두 선택'}</button>
+        <div class="filter-types">${kinds.map(k => `<button class="filter-type${f.kOff.has(k) ? '' : ' on'}" type="button" data-kind="${k}"><span class="filter-icon"><span class="cal-tag" data-tag="${k}">${SVG_ICONS[k]}</span></span><span class="filter-lbl">${escapeHtml(kindLabel(k))}</span></button>`).join('')}</div>
+      </div>
+    </div>` : ''}`;
+  if (panel.dataset.inited) return;
+  panel.dataset.inited = '1';
+  panel.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const f = ccFilter[tab];
+    const flip = (set, v) => { if (set.has(v)) set.delete(v); else set.add(v); };
+    if (b.dataset.id) flip(f.mOff, b.dataset.id);
+    else if (b.dataset.kind) flip(f.kOff, b.dataset.kind);
+    else if (b.dataset.all === 'm') f.mOff = MEMBERS.every(m => !f.mOff.has(m.id)) ? new Set(MEMBERS.map(m => m.id)) : new Set();
+    else if (b.dataset.all === 'k') { const ks = [...panel.querySelectorAll('[data-kind]')].map(x => x.dataset.kind); f.kOff = ks.every(k => !f.kOff.has(k)) ? new Set(ks) : new Set(); }
+    else return;
+    lsSetSet(LS_CC_FILTER[tab][0], f.mOff);
+    lsSetSet(LS_CC_FILTER[tab][1], f.kOff);
+    if (tab === 'banner') renderBanners(); else renderContent();
+  });
 }
 // 컨텐츠 탭 진입 시 컨텐츠 시트를 새로 받는다(일정 시트는 2026-09-06부터 이 탭과 무관). 10초 안에 요청한 것이면 건너뛴다 —
 // 부팅 직후 #content 진입(부팅이 방금 요청함)이나 탭을 빠르게 오갈 때 같은 시트를 겹쳐 받지 않기 위해. 도착하면 로더가 카드 격자를 다시 그린다.
@@ -9710,7 +9980,10 @@ function renderChemistry() {
     const active = e.types.some(t => chemFilterTypes.has(t));
     const info = linkInfo(e); const { link } = info;
     const ico = link ? `<span class="chem-nicon">${linkIcons(info)}</span>` : '<span class="chem-nicon"></span>';
-    return `<span class="chem-nrow${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}"><span class="chem-name-part">${escapeHtml(e.name)}</span>${ico}<span class="chem-ndesc">${escapeHtml(e.desc)}</span></span>`;
+    // 그림을 이름 속에도 한 벌(.chem-nicon-in) — 1열은 이것을 이름 바로 뒤에 보이고 아이콘 칸을 숨긴다, 여러 열은 반대(케미 1열 곁 주석).
+    //   이름 글자는 쪼개지 않는다 — partSpan처럼 마지막 낱말을 따로 감싸면 여러 열 켬 화면의 이름이 0.1px 움직여 글자 픽셀이 달라졌다(2026-09-24 전후 캡처 대조)
+    const nm = link ? `${escapeHtml(e.name)}<span class="chem-name-link chem-nicon-in">${linkIcons(info)}</span>` : escapeHtml(e.name);
+    return `<span class="chem-nrow${active ? '' : ' dim'}${link ? ' has-link' : ''}" data-cname="${escapeHtml(e.name)}" data-clip="${escapeHtml(link)}"><span class="chem-name-part">${nm}</span>${ico}<span class="chem-ndesc">${escapeHtml(e.desc)}</span></span>`;
   };
   const nameRowHtml = (entries) => {
     if (!entries) return null;
@@ -9940,9 +10213,14 @@ function renderChemistry() {
 // 쌓인 카드(여러 열): 이름 영역은 '전 카드 공통' 최대(꺼짐·켬 중 큰 쪽), 몸통(멤버 줄)은 '카드 종류별' 최대를 확보 —
 //   높이 차이가 시트의 항목 수 우연이 아니라 멤버 줄 수(구조)로만 남는다. 시트에 항목이 늘면 전 카드가 함께 자란다.
 // 눕힌 카드(1열, 케미명 옆에 구성원 — 2026-09-23): 이름 칸이 몸통 위에 쌓이지 않으므로 위 덧셈을 쓰면 부푼다 →
-//   종류별로 두 상태 중 가장 큰 카드 높이에 맞춘다(같은 종류는 같은 크기, 토글해도 불변 — 규칙은 그대로).
+//   카드 높이 = 두 상태(설명 끔·켬) 중 큰 쪽 — 토글해도 불변. 카드마다(②)인지 종류별 통일(③)인지는 CHEM_COL_EQ.
+//   설명 켬 상태를 재기 전에 채팅 수 칸 폭(--chem-arrows-w)과 줄마다의 설명 자리(placeChemDescs)를 먼저 정한다 — 둘 다 폭에 따라 달라진다.
 // 종류 = 2인 카드 / N인 그룹 카드(멤버 수별). (구: 종류별 '총높이' 최대 — 다항목 케미가 있는 종류만 커져 종류 간 단차)
 // 안 보이는 탭(폭 0)에서 잰 값은 버린다 — 탭에 들어올 때 renderChemistry가 다시 잰다.
+// 1열 카드 높이(2026-09-24 Crenop '2로 가되'): 'card' = 카드마다 자기 두 상태 중 큰 쪽(②) · 'kind' = 종류별로 가장 큰 카드에 통일(③).
+//   ③은 설명을 아래로 내린 카드 하나가 그 종류 전체를 키운다. 케미 격자 높이 실측(2026-09-24 실자료 117장, 끔·켬 같음):
+//   360px 종전 14,207 → ② 12,977 · ③ 14,682 / 412px 13,175 → ② 12,903 · ③ 13,175 / 768px(기둥 편) 13,139 → ② 12,899 · ③ 13,139.
+const CHEM_COL_EQ = 'card';
 let chemFitW = 0, chemFitTimer = 0;
 const chemFitRO = typeof ResizeObserver === 'function' ? new ResizeObserver(entries => {
   const w = Math.round(entries[0].contentRect.width);
@@ -9951,10 +10229,16 @@ const chemFitRO = typeof ResizeObserver === 'function' ? new ResizeObserver(entr
   clearTimeout(chemFitTimer);
   chemFitTimer = setTimeout(() => { const g = document.querySelector('#page-chemistry .chem-grid'); if (g) fitChemHeights(g); }, 120);
 }) : null;
+// 글꼴이 잰 뒤에 도착하면 글 폭이 바뀌어 채팅 수 칸·설명 자리·높이가 빗나간다 — 도착할 때마다 다시 잰다(fitEventTimes와 같은 방식.
+// 2026-09-24 412px 재현: 대체 글꼴로 잰 채팅 수 칸 62px, 글꼴 적용 뒤 가장 넓은 값 62.5px). 안 보이는 탭이면 fitChemHeights가 폭 0을 보고 바로 끝난다
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { clearTimeout(chemFitTimer); chemFitTimer = setTimeout(() => { const g = document.querySelector('#page-chemistry .chem-grid'); if (g) fitChemHeights(g); }, 120); });
 function fitChemHeights(grid) {
   const cards = [...grid.querySelectorAll('.chem-card')];
   if (!cards.length || !grid.clientWidth) return;
   cards.forEach(c => { c.style.minHeight = ''; });   // 다시 잴 때 옛 높이가 실측을 오염시키지 않게
+  grid.querySelectorAll('.chem-nrow-below').forEach(r => r.classList.remove('chem-nrow-below'));   // 설명 자리·채팅 수 칸도 이 폭에서 새로 정한다
+  grid.style.removeProperty('--chem-arrows-w');
+  const lying = getComputedStyle(cards[0]).display === 'grid';   // 눕힌 카드(1열)
   const kindOf = c => { const gm = c.querySelector('.chem-group-members'); return gm ? 'g' + gm.children.length : 'pair'; };
   // 실측은 소수점까지(2026-09-20): offsetHeight는 정수로 내림해서, 실제 168.33px인 카드에 min-height 168px가 걸렸다.
   // 그 0.33px만큼 카드가 자라 설명 보기를 켤 때마다 아래 카드들이 미세하게 들썩였다(Crenop 신고). 마지막에 올림해 늘 덮는다.
@@ -9962,20 +10246,58 @@ function fitChemHeights(grid) {
   const headOf = c => { const h = c.querySelector('.chem-head'); return h ? hOf(h) : 0; };
   const wasOn = grid.classList.contains('chem-show-desc');
   grid.classList.add('chem-measure');   // 실측 동안 행 늘림 차단 — 옆 카드 높이가 내 실측에 오염되는 것 방지
-  grid.classList.remove('chem-show-desc'); const hOff = cards.map(hOf); const headOff = cards.map(headOf);
-  grid.classList.add('chem-show-desc');    const hOn = cards.map(hOf);  const headOn = cards.map(headOf);
+  grid.classList.remove('chem-show-desc');
+  if (lying) {   // 채팅 수 칸 = 뜬 카드 중 가장 넓은 값(올림 — 모든 칸이 같은 폭이 되어 왼쪽 얼굴이 한 선)
+    // 단 그 때문에 케미명이 한 줄이라도 더 꺾이면 걸지 않는다(2026-09-24 Crenop '손해가 크지 않으면': 360px은 이름 칸이 카드에 따라 최대 24px 줄어 2인 23장의 이름이 두 줄 —
+    //   '카푸 ×' / '김웰로' — 에 카드 하나 +20px, 412·768px은 꺾임 0)
+    const arrows = [...grid.querySelectorAll('.chem-arrows')], heads = arrows.map(a => a.closest('.chem-card').querySelector('.chem-head'));
+    const aw = Math.max(0, ...arrows.map(a => a.getBoundingClientRect().width));
+    const before = heads.map(hOf);
+    if (aw) grid.style.setProperty('--chem-arrows-w', Math.ceil(aw) + 'px');
+    if (heads.some((h, i) => hOf(h) > before[i] + 0.5)) grid.style.removeProperty('--chem-arrows-w');
+  }
+  const hOff = cards.map(hOf); const headOff = cards.map(headOf);
+  grid.classList.add('chem-show-desc');
+  if (lying) placeChemDescs(cards);
+  const hOn = cards.map(hOf);  const headOn = cards.map(headOf);
   grid.classList.toggle('chem-show-desc', wasOn);
   grid.classList.remove('chem-measure');
   const maxByKind = {};
-  if (getComputedStyle(cards[0]).display === 'grid') {   // 눕힌 카드(1열)
-    cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i], hOn[i]); });
+  const keyOf = (c, i) => (lying && CHEM_COL_EQ === 'card') ? i : kindOf(c);
+  if (lying) {
+    cards.forEach((c, i) => { const k = keyOf(c, i); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i], hOn[i]); });
   } else {
     const headMax = Math.max(...headOff, ...headOn);   // 이름 영역 공통 확보분
     // 종류별 몸통(카드 높이 − 이름 영역) 최대 → 아래서 공통 이름 영역을 더해 최종 높이로
     cards.forEach((c, i) => { const k = kindOf(c); maxByKind[k] = Math.max(maxByKind[k] || 0, hOff[i] - headOff[i], hOn[i] - headOn[i]); });
     Object.keys(maxByKind).forEach(k => { maxByKind[k] += headMax; });
   }
-  cards.forEach(c => { c.style.minHeight = Math.ceil(maxByKind[kindOf(c)]) + 'px'; });
+  cards.forEach((c, i) => { c.style.minHeight = Math.ceil(maxByKind[keyOf(c, i)]) + 'px'; });
+}
+// 1열 설명 자리(2026-09-24 Crenop): 이름 옆에서 잘릴 설명만 그 이름 아래로 — 카드 통째가 아니라 줄마다(설명 켬 상태에서 부른다).
+// 한 판에 카드마다 한 줄씩, 잘리는 줄 가운데 이름이 가장 넓은 것부터 내린다 — 그 이름이 옆 설명의 시작선을 정하고 있었다면
+// 내린 뒤 시작선이 당겨져 남은 줄이 옆에 들어갈 수 있다. 판마다 전부 읽고 나서 쓴다(판당 배치 계산 한 번).
+// 잘림 = 글자 실제 폭 > 칸 폭(Range — scrollWidth는 정수로 반올림돼 1px 미만 넘침을 놓친다). 줄바꿈 설명(4인 이상)은 대상 아님.
+function placeChemDescs(cards) {
+  const cut = r => {
+    const d = r.querySelector('.chem-ndesc');
+    if (!d || !d.textContent || getComputedStyle(d).whiteSpace !== 'nowrap') return false;
+    const rg = document.createRange(); rg.selectNodeContents(d);
+    return rg.getBoundingClientRect().width > d.getBoundingClientRect().width + 0.5;
+  };
+  let todo = cards.filter(c => c.querySelector('.chem-nlist .chem-ndesc'));
+  while (todo.length) {
+    const pick = todo.map(c => {
+      let best = null, bw = -1;
+      c.querySelectorAll('.chem-nrow:not(.chem-nrow-below)').forEach(r => {
+        if (!cut(r)) return;
+        const w = r.querySelector('.chem-name-part').getBoundingClientRect().width;
+        if (w > bw) { bw = w; best = r; }
+      });
+      return best;
+    });
+    todo = todo.filter((c, i) => { if (pick[i]) pick[i].classList.add('chem-nrow-below'); return !!pick[i]; });
+  }
 }
 
 // ── 명예의 전당 ── 전 항목 통산(개시 이래) 집계. 연간 경쟁은 통계 탭 연간 메달이 담당.
@@ -10193,7 +10515,9 @@ function sessionRowHtml(s, memberId, ym, dateLabel) {
 function dayItemRowHtml(kind, data) {
   const icon = kind === 'post' ? SVG_ICONS.board : kind === 'youtube' ? SVG_ICONS.youtube : SVG_ICONS.coffee;
   const cafeName = kind === 'cafe' ? escapeHtml(data.cafe_name || '') : '';
-  const inner = `<span class="day-kind-icon ${kind}">${icon}</span><span class="day-item-time">${formatHHMM(data.time)}</span><span class="day-item-title">${cafeName ? `[${cafeName}] ` : ''}${escapeHtml(data.title || '(제목 없음)')}</span>`;
+  const title = `<span class="day-item-title">${escapeHtml(data.title || '(제목 없음)')}</span>`;
+  // 카페 이름은 제목과 떼어 따로 둔다(2026-09-24 Crenop) — 한 덩어리 두 줄이면 긴 카페 이름이 한도를 먹어 제목이 두세 글자만 남았다. 꺾임은 이름과 제목 사이에서만(CSS .day-item-body)
+  const inner = `<span class="day-kind-icon ${kind}">${icon}</span><span class="day-item-time">${formatHHMM(data.time)}</span>${cafeName ? `<span class="day-item-body"><span class="day-item-cafe">[${cafeName}]</span>${title}</span>` : title}`;
   const href = data.url ? (kind === 'post' ? withTextFragment(data.url, data.title) : data.url) : '';
   return href ? `<a class="day-item" href="${escapeHtml(href)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="day-item">${inner}</div>`;
 }
@@ -10372,7 +10696,7 @@ function renderStats() {
   top.querySelectorAll('.stats-kv[data-tkey]').forEach(b => b.addEventListener('click', () => openStatGraphModal(memberId, b.dataset.tkey)));   // 다섯 값 → 월별 추이(2026-09-07 문법)
   list.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
     const sess = ((statsState.data[b.dataset.vodym] || {})[memberId] || {}).sessions?.find(x => String(x.broad_no) === b.dataset.vodpick);
-    openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId]);
+    openVodPickModal(sessionVods(sess) ?? (vodsForBroad(memberId, b.dataset.vodym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId], isoToKstDateKey(sess && sess.start));
   }));
 }
 // ── 연간 시간대(2026-09-18 Crenop): 그 해 달들을 합친다 ──
@@ -10458,13 +10782,13 @@ function fitCrewDates() {
   });
   if (wraps) box.classList.add('d2');
 }
-// 소개글·날짜 줄은 프로필 본문 폭이 바뀌면 다시 잰다 — 창 크기(resize)만 들으면 태블릿 기둥 여닫기(본문만 300px 바뀜)를 놓친다(CLAUDE.md §6). 폭 변화만·폭 0 무시·120ms 묶음
+// 소개글·날짜 줄·칭호 자리는 프로필 본문 폭이 바뀌면 다시 잰다 — 창 크기(resize)만 들으면 태블릿 기둥 여닫기(본문만 300px 바뀜)를 놓친다(CLAUDE.md §6). 폭 변화만·폭 0 무시·120ms 묶음
 let fitCrewTimer = 0, fitCrewW = 0;
 if (typeof ResizeObserver === 'function') new ResizeObserver(entries => {
   const w = Math.round(entries[0].contentRect.width);
   if (!w || w === fitCrewW) return;
   fitCrewW = w;
-  clearTimeout(fitCrewTimer); fitCrewTimer = setTimeout(() => { fitCrewIntro(); fitCrewDates(); }, 120);
+  clearTimeout(fitCrewTimer); fitCrewTimer = setTimeout(() => { fitCrewIntro(); fitCrewDates(); fitProfileTitles(); }, 120);
 }).observe(document.getElementById('profileBody'));
 // 시간 통계 줄 접기(2026-09-18 6차 Crenop): 한 줄에 다 들어가면 한 줄. 넘치면 3/2(시작·종료·시간 | 분포·주중/주말), 그래도 넘치면 3/1/1.
 // 접힘은 폭 추정이 아니라 그린 뒤 실측(항목들의 세로 위치가 갈리는가)으로 판단하고, 창 크기가 바뀌면 다시 잰다.
@@ -10630,11 +10954,11 @@ function renderHall() {
     if (chemIn[toId] !== undefined) chemIn[toId] += cnt;
   }
 
-  // 컨텐츠·현수막 왕: 시트 데이터의 멤버 표기 횟수 누적 (각 탭 랭킹과 동일 기준)
+  // 컨텐츠·현수막 왕: 시트 데이터의 멤버 표기 횟수 누적 (각 탭 랭킹과 동일 기준). 현수막 시트 F열(명전 제외)에 글자가 있는 행은 세지 않는다(2026-09-24 Crenop — parseBannerRows 곁 주석)
   const bannerCounts = {};
   const contentCounts = {};
   MEMBERS.forEach(m => { bannerCounts[m.id] = 0; contentCounts[m.id] = 0; });
-  bannerData.forEach(b => { if (!inPeriodYmd(b.date?.sort || '')) return; b.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) bannerCounts[m.id]++; }); });
+  bannerData.forEach(b => { if (b.hallOff || !inPeriodYmd(b.date?.sort || '')) return; b.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) bannerCounts[m.id]++; }); });
   contentAll().filter(isCountedContent).forEach(c => { if (!inPeriodYmd(c.date?.sort || '')) return; c.members.forEach(name => { const m = MEMBERS.find(x => x.name === name); if (m) contentCounts[m.id]++; }); });   // 그림 또는 링크가 있는 것만(단순 합방 제외)
 
   const categories = [
@@ -10663,7 +10987,6 @@ function renderHall() {
       const g1 = ranks[0], g2 = ranks[1], g3 = ranks[2];
       const isSolo = g1.members.length === 1;
       const psV = 64;                 // 끔(세로): 단독·공동 모두 64
-      const psH = isSolo ? 64 : 48;   // 켬(수평): 단독 64 / 공동 48
       // 끔(세로): 1위 사진+이름 + "설명: 값"
       const vWinners = g1.members.map(w => `
             <div class="hall-v-w">
@@ -10676,17 +10999,18 @@ function renderHall() {
             <div class="hall-v-val"><span class="hall-v-desc">${cat.desc}:</span> ${cat.fmt(g1.value)}</div>
           </div>`;
       // 켬(수평): 설명(상단 전체폭, 우측정렬) + [1위 사진 | 금/은/동 1~3위 행(이름 좌·기록 우)]
-      const photos = g1.members.map(w => `<img style="width:${psH}px;height:${psH}px" src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');
+      const photos = g1.members.map(w => `<img src="${w.img}" alt="${escapeHtml(w.name)}">`).join('');   // 크기는 CSS(.hall-photos img 단독 64 · .co 공동 48, 좁은 카드는 28)
+      // 공동 이름 사이 '·'는 앞 이름에 붙는다(최근 활동 묶음 이름줄과 같은 규칙, 2026-09-24) — 좁은 폭에서 '·'만 한 줄에 남거나 줄 머리에 오던 것
       const row = (g, cls) => g ? `
             <div class="hall-row ${cls}">
-              <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join(' · ')}</span>
+              <span class="hall-r-name">${g.members.map(w => `<span style="color:${w.color}">${escapeHtml(w.name)}</span>`).join('&nbsp;· ')}</span>
               <span class="hall-r-val">${cat.fmt(g.value)}</span>
             </div>` : '';
       const hLayout = `
           <div class="hall-h">
             <div class="hall-desc">${cat.desc}</div>
             <div class="hall-h-body">
-              <div class="hall-photos">${photos}</div>
+              <div class="hall-photos${isSolo ? '' : ' co'}">${photos}</div>
               <div class="hall-data">
                 ${row(g1, 'm1')}${row(g2, 'm2')}${row(g3, 'm3')}
               </div>
@@ -10982,11 +11306,12 @@ function renderProfileMember(body, memberId) {
     quickHtml += `<button class="profile-quick-btn" id="profileGoLinks" title="관련 링크">${SVG_ICONS.link}</button>`;
   }
 
+  const titlesHtml = titleBadgesHtml(info ? info.title : '', info ? info.titleImg : '');   // 자리는 fitProfileTitles가 잰다(그린 뒤 아래에서)
   const headerHtml = `
     <div class="profile-member-header">
       <img class="profile-member-avatar" src="${m.img}" alt="${escapeHtml(m.name)}" style="border-color:${m.color}">
       <div class="profile-member-info">
-        <div class="profile-member-name" style="color:${m.color}">${escapeHtml(m.name)}${titleBadgesHtml(info ? info.title : '', info ? info.titleImg : '')}</div>
+        <div class="profile-member-name" style="color:${m.color}">${escapeHtml(m.name)}${titlesHtml ? `<span class="profile-member-titles">${titlesHtml}</span>` : ''}</div>
         ${info ? `<div class="profile-member-eng">${escapeHtml(info.engName)}</div>` : ''}
       </div>
       ${quickHtml ? `<div class="profile-member-quick">${quickHtml}</div>` : ''}
@@ -11027,6 +11352,7 @@ function renderProfileMember(body, memberId) {
     </div>
   `;
   bindVideoStrips(body);
+  fitProfileTitles();
 
   const goLinksBtn = document.getElementById('profileGoLinks');
   if (goLinksBtn) goLinksBtn.addEventListener('click', () => { switchPage('links'); syncHash(true); });

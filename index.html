@@ -701,6 +701,7 @@
   .sch-item-title {
     font-size: 14px; color: var(--text); font-weight: 700;
     text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-width: 0;   /* gap 4(구 6): 종류 그림끼리·그림-제목 사이가 넓어 보였다(2026-09-03 Crenop) */
+    overflow-wrap: anywhere;   /* 칸보다 긴 한 낱말(띄어쓰기 없는 영문 등)만 글자 단위로 — break-word(전역)는 최소 폭에 안 들어가 얼굴·D-day 위로 넘쳤다(2026-09-24 가짜 자료, 1280px에서도) */
   }
   a.sch-item-title:hover { color: var(--accent); }
   .sch-item-title svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
@@ -762,6 +763,27 @@
        좌우로 밀렸다. 가장 넓은 'D-DAY' 기준으로 바닥을 깔고 오른쪽 정렬 — 'D-999'까지 여유 있게 들어간다. */
     min-width: 44px; text-align: right;
   }
+  /* 좁은 목록(2026-09-24e Crenop '일정모달도 모바일에서 배치가 박살난다'): [날짜 (요일) 시각 ··· D-day] / [제목 — 행 폭 전부] / [얼굴(오른쪽 붙임)].
+     넓은 배치 [날짜·제목 | 얼굴 | D-day]는 휴대폰에서 제목 칸이 얼굴(최대 152)·D-day(44)에 밀려 360px 66~132px — 제목이 최대 6줄·날짜가 3줄로 꺾였고,
+     320px에선 가장 긴 낱말보다 좁아진 제목이 얼굴 위로 넘쳤다(2026-09-24 실제 일정 8건 실측). 얼굴 오른쪽 붙임 = 넓은 배치·컨텐츠 좁은 카드와 같은 자리.
+     기준 404: 넓은 배치에서 얼굴이 가장 많은 행(13명 2줄 152)도 제목 칸이 가장 긴 날짜 줄('2026년 12월 30일 (수) 23:59' 153)만큼 남는 목록 폭은
+     405 = 좌우 여백 32 + 153 + 간격 12 + 152 + 간격 12 + D-day 44. 창으로는 446 이하(휴대폰 세로)만 좁은 배치 — 태블릿·PC(목록 548~558)는 그대로.
+     컨테이너는 행이 아니라 목록 상자(.sch-list, openScheduleList가 행과 끝 표시를 같이 감싼다) — 컨테이너 조회는 컨테이너 자신의 배치를 못 바꾼다. */
+  .sch-list { container: sch-list / inline-size; }
+  @container sch-list (max-width: 404px) {
+    .sch-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 3px 12px; min-height: 0; }   /* 줄 사이 3 = 넓은 배치의 날짜~제목 간격. 높이 = 내용(얼굴 없는 행에 빈 얼굴 줄을 두지 않는다) */
+    .sch-item-main { display: contents; }   /* 날짜·제목을 행 격자의 칸으로 풀어 D-day를 날짜 줄에 세운다 */
+    .sch-item-when { grid-row: 1; grid-column: 1; }
+    .sch-item-dday { grid-row: 1; grid-column: 2; }
+    .sch-item-title { grid-row: 2; grid-column: 1 / -1; }
+    /* 제목~얼굴 6(줄 사이 3 + 3). 얼굴은 줄 폭 전부를 써 들어가는 만큼 한 줄에 — 7명+를 반반 2줄로 좁히는 인라인 max-width(membersRowStyle)는
+       얼굴이 제목 옆 좁은 칸에 설 때의 규칙이다. min-width가 max-width를 이긴다(CSS 규칙) — 인라인 스타일을 !important 없이 넘는다 */
+    .sch-item-members { grid-row: 3; grid-column: 1 / -1; margin-top: 3px; min-width: 100%; }
+  }
+  /* 한 줄에 안 들어가는 인원만 반반 2줄(인라인 max-width)로 되돌린다 — 11 + 2처럼 끝에 두셋만 남지 않게. n명 한 줄 = 22n − 2 + 행 좌우 여백 32.
+     창 320(목록 278) 이상에선 11명 이하는 늘 한 줄이라 12·13명만 둔다(360px 휴대폰부터는 13명도 한 줄). 멤버가 늘면 한 명당 한 줄(기준 +22). */
+  @container sch-list (max-width: 315px) { .sch-item-members:has(> :nth-child(13)) { min-width: 0; } }   /* 13명 = 284 + 32 */
+  @container sch-list (max-width: 293px) { .sch-item-members:has(> :nth-child(12)) { min-width: 0; } }   /* 12명 = 262 + 32 */
   .celebration-box {
     display: flex;
     align-items: center;
@@ -2341,6 +2363,7 @@
     object-fit: cover;
     border: 1px solid var(--border);
   }
+  .content-card-members.hall-off img { filter: grayscale(1); }   /* 명전 제외 현수막(F열) — 흐림 없이 흑백만(기둥의 꺼진 멤버는 흐림 0.25 + 흑백). 뜻은 이름 글상자 '(명전 제외)'가 말한다(2026-09-24 Crenop) */
   /* 좁은 카드(500px 미만, 2026-09-24 Crenop '날짜줄로 내려서 충분하면 그렇게, 아니면 날짜줄 아래로'): [제목 — 카드 폭 전부] / [날짜 ··· 얼굴].
      날짜와 얼굴이 한 줄에 안 들어가면 얼굴이 날짜 줄 아래(오른쪽 붙임)로 꺾인다(flex-wrap).
      넓은 배치(제목·날짜 | 얼굴)에선 제목 칸 = 카드 − 34 − 얼굴(최대 152)이라 좁은 카드에서 제목이 잘렸다(360px 컨텐츠 30/73·현수막 23/49).
@@ -2834,7 +2857,7 @@
     border: 1px solid var(--border);
     padding: 24px;
     display: flex; align-items: center; gap: var(--pm-gap);
-    --pm-av: 72px; --pm-gap: 20px;   /* 사진 폭·칸 간격 — 좁은 카드 격자(아래 ≤400)의 첫 칸·칸 간격도 이 둘 */
+    --pm-av: 72px; --pm-gap: 20px;   /* 사진 폭·칸 간격 — 좁은 카드 격자(아래 ≤393)의 첫 칸·칸 간격도 이 둘 */
   }
   .profile-member-avatar {
     width: var(--pm-av); height: var(--pm-av);
@@ -2852,7 +2875,7 @@
   .profile-member-title { display: inline-block; margin-left: 10px; vertical-align: -3.3px; }
   button.profile-member-title { all: unset; display: inline-block; margin-left: 10px; vertical-align: -3.3px; cursor: pointer; }   /* M열 이미지가 있는 칭호(2026-09-10) — 모양은 span과 같고 누를 수 있다 */
   button.profile-member-title:hover svg { filter: brightness(1.25); }
-  /* 칭호 자리: 넓은 카드는 fitProfileTitles가 정보 칸 폭을 재서 이름 옆(기본) 또는 이름 아래(.pt-below), 좁은 카드(≤400)는 늘 이름 아래(아래 좁은 카드 규칙).
+  /* 칭호 자리: 넓은 카드는 fitProfileTitles가 정보 칸 폭을 재서 이름 옆(기본) 또는 이름 아래(.pt-below), 좁은 카드(≤393)는 늘 이름 아래(아래 좁은 카드 규칙).
      이름 아래로 내려갈 때 왼쪽 여백 10을 없앤다 — 종전엔 인라인으로 꺾여 명패가 이름보다 10px 안쪽에서 시작했다.
      약식 명패(양끝 그림을 뺀 짧은 판, 24c)는 철회(2026-09-24 Crenop — 폭이 극단적으로 좁으면 짧은 판도 의미가 없다, 배치만 챙긴다). */
   .pt-below .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
@@ -2894,14 +2917,18 @@
   /* 좁은 머리 카드(≤393 — 휴대폰·기둥 편 태블릿, 2026-09-24 Crenop '배치만 신경쓰자'): [사진 | 이름 / 칭호 / 영문 이름 / 링크 버튼 한 줄] — 칭호·버튼이 모두
      이름 선에서 시작하고, 버튼 가로 자리는 멤버와 무관하게 같다. 종전엔 [사진 | 정보 | 버튼 2×2]에서 정보 칸이 남는 폭만 받아 240px 창에서 글자 한 자 폭도 안 남아
      이름·영문 이름이 한 글자씩 쌓이고(CHUNYANG 8줄) 칭호가 카드 밖으로 54px 나갔다. 좌우 여백 16(크루 소개 ≤700과 같은 값)·칸 간격 12·사진 60 → 오른쪽 칸 = 카드 − 106.
-     393 = 넓은 배치의 정보 칸(카드 − 240: 테두리 2·여백 48·사진 72·간격 40·버튼 2×2 78)이 칭호 표에서 가장 긴 명패(긴급소집 꼴등 153.07)를 이름 아래에 담는 가장 좁은 카드(394) 바로 아래 —
+     393 = 넓은 배치의 정보 칸(카드 − 240: 테두리 2·여백 48·사진 72·간격 40·버튼 2×2 78)이 칭호 표에서 가장 긴 명패(긴급소집 노쇼 153.07)를 이름 아래에 담는 가장 좁은 카드(394) 바로 아래 —
      종전 400은 768 태블릿에서 기둥을 접으면(프로필이 [사진 | 본문] 2열이 되어 카드 394) 오히려 휴대폰 배치가 됐다('기둥을 접으면 넓은 UI'와 거꾸로).
      칭호 그림은 칸보다 넓을 때만 비율대로 준다(휴대폰 카드 = 창 − 48 → 가장 긴 명패 153은 창 307px 아래에서). 이름·영문 이름은 낱말 안에서 꺾지 않는다 —
-     영문 이름은 칸보다 긴 한 낱말이면 꺾는다(카드 밖으로 나가지 않게 — 실제 멤버는 240px 창의 MOONMOMO만 'MOONMOM / O'). 사진은 첫 줄에만 둔다 —
-     두 줄에 걸치면 칭호 없는 멤버는 사진 아래 끝이 버튼 줄 위로 4px 걸쳤다. 버튼 줄은 늘 사진·글 아래에서 시작한다 */
+     영문 이름은 칸보다 긴 한 낱말이면 꺾는다(카드 밖으로 나가지 않게 — 실제 멤버는 240px 창의 MOONMOMO만 'MOONMOM / O').
+     버튼 줄은 영문 이름 바로 아래 4(정보 칸 안 줄 간격과 같은 값), 사진은 오른쪽 덩어리 전체[이름 / 칭호 / 영문 이름 / 버튼]의 세로 가운데 — 넓은 배치(align-items: center)와
+     같은 문법(2026-09-24e Crenop '칭호자리를 비워두는것 안이쁘지 않나?'). 24d는 사진을 첫 줄에만 둬 첫 줄이 사진 높이(60)로 늘었고, 칭호 없는 멤버는 영문 이름과 버튼 사이가
+     28px 비어 빈 칭호 자리처럼 보였다(360px 나나문 — 칭호 있는 멤버는 12). 그래서 칭호 없는 멤버의 버튼은 칭호 있는 멤버보다 위에서 시작한다(가로 자리는 같다) */
   @container (max-width: 393px) {
-    .profile-member-header { display: grid; grid-template-columns: var(--pm-av) minmax(0, 1fr); gap: 12px var(--pm-gap); align-items: start; padding: 24px 16px; --pm-av: 60px; --pm-gap: 12px; }
-    .profile-member-avatar { grid-row: 1; }
+    .profile-member-header { display: grid; grid-template-columns: var(--pm-av) minmax(0, 1fr); gap: 4px var(--pm-gap); align-items: start; padding: 24px 16px; --pm-av: 60px; --pm-gap: 12px; }
+    .profile-member-avatar { grid-row: 1 / span 2; align-self: center; }
+    .profile-member-header:not(:has(> .profile-member-quick)) { align-items: center; }   /* 링크 버튼 줄이 없을 때(링크 시트 도착 전·실패·시트에 없는 멤버) — 빈 둘째 줄이 줄 간격 4만큼 아래를 벌리고 글이 위에 붙었다 */
+    .profile-member-header:not(:has(> .profile-member-quick)) .profile-member-avatar { grid-row: 1; }
     .profile-member-quick { grid-column: 2; justify-self: start; margin-left: 0; display: flex; }   /* 위 ≤520 2×2보다 뒤에 있어야 이긴다(같은 특이도) */
     .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
     .profile-member-titles .profile-member-title { margin-left: 0; max-width: 100%; }
@@ -3486,7 +3513,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-24d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-24e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4140,7 +4167,7 @@ function titleBadgesHtml(titleCell, imgCell) {
   return titles.map((t, i) => titleBadgeHtml(t, imgs[i] || '')).join('');
 }
 // 칭호 자리(CSS '칭호 자리' 곁 주석): 넓은 머리 카드의 정보 칸 폭을 재서 이름과 칭호가 한 줄에 다 들어가면 이름 옆, 아니면 이름 아래(.pt-below).
-// 폭은 명패 그림의 width(그린 크기 그대로)와 이름 글자 폭으로 잰다. 좁은 카드(≤400)는 CSS가 늘 이름 아래에 둬서 이 판정이 화면을 바꾸지 않는다.
+// 폭은 명패 그림의 width(그린 크기 그대로)와 이름 글자 폭으로 잰다. 좁은 카드(≤393)는 CSS가 늘 이름 아래에 둬서 이 판정이 화면을 바꾸지 않는다.
 // 그린 뒤(renderProfileMember)와 프로필 본문 폭이 바뀔 때(#profileBody 관찰자) 다시 잰다.
 function fitProfileTitles() {
   const hd = document.querySelector('#profileBody .profile-member-header');
@@ -4188,8 +4215,12 @@ let blackoutDismissed = false;
 let lastLiveCount = null;   // 직전 폴링의 방송 중 인원 — 탭 재진입 때 재조회 없이 정전 판정에 재사용
 let blackoutStats = null;   // { n, min_ms, avg_ms, max_ms } — 완료된 정전 구간 통계(진행 중 제외). 월 통계(첫 달~현재, 13명)에서 계산(computeBlackoutStats)
 let blackoutStatsFor = '';  // 계산에 쓴 자료 표식(달 수·세션 수) — 같으면 다시 계산하지 않는다
-let lastServerDetect = null;   // 서버 감지 심장박동(/ 응답 last_detect_at) — 클라이언트 fetch 시각과 별개(worker가 응답해도 감지 계층이 죽어 있을 수 있음)
+let lastServerDetect = null;   // 서버 감지 심장박동(/feed 응답 last_detect_at) — 클라이언트 fetch 시각과 별개(worker가 응답해도 감지 계층이 죽어 있을 수 있음)
 const DETECT_STALE_MS = 5 * 60 * 1000;   // 정상 겉보기 나이 최대 ~3분(감지 10s + Cron 폴백 60s + KV 콜로캐시·전파 ≤120s) 위 마진
+// 감지 지연의 나이 = detectLagMs + (보이는 채로 연달아 실패한 시간)(2026-09-24e). 종전 '지금 − 심장박동'은 휴대폰에서 브라우저를 켜 둔 채 나갔다
+// 돌아오면 잠든 시간까지 지연으로 세어, 새 응답 전에 머리 줄을 다시 그리는 순간(재개 직후 첫 요청 실패·통계 응답·탭 전환)마다 '감지 지연 중'을 띄웠다(Crenop 발견, 목업 재현).
+let detectLagMs = 0;        // 마지막 성공 /feed를 '요청한 순간'의 심장박동 나이 — 잠들기 전에 보낸 요청이 깨어난 뒤 도착해도 잠든 시간이 섞이지 않는다
+let feedFailSince = null;   // 화면에 보이는 채로 /feed가 연달아 실패하기 시작한 시각 — 성공하거나 화면이 숨거나 다시 보이면 비운다(잠든 시간은 실패로 안 센다)
 let lastEventsUpdate = null;
 let lastStatsUpdate = null;
 let lastChemistryUpdate = null;
@@ -5526,11 +5557,12 @@ function openScheduleList() {
   modalPanel(null);   // 옛 일정 모달과 같은 기본 패널
   const items = visibleSchedule();
   head.innerHTML = `<span style="color:var(--accent)">${SVG_ICONS.calendar}다가오는 천타버스 일정</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  body.innerHTML = items.length ? items.map(renderScheduleItem).join('') + SCH_END_HTML : '<div class="lr-msg">예정된 일정이 없습니다.</div>';
+  body.innerHTML = items.length ? '<div class="sch-list">' + items.map(renderScheduleItem).join('') + SCH_END_HTML + '</div>' : '<div class="lr-msg">예정된 일정이 없습니다.</div>';   // .sch-list = 좁은 목록 배치의 기준 폭(@container sch-list). 끝 표시까지 안에 둬야 마지막 행 밑선이 산다(:last-child)
   showModal();
 }
 // 목록 행 — 2026-08-31a까지 쓰던 renderScheduleItem 그대로(레포 판본에서 복원, 2026-09-02). 제목 앞에 종류 그림만 붙었다.
 // [날짜 (요일) 시간 / 제목(링크면 바깥 화살표)] · 참가 멤버 아바타(7명+는 2행) · D-day. CSS(.sch-item 계열·.sch-end)는 지운 적이 없어 그대로 산다.
+// 좁은 목록(목록 404 이하, 2026-09-24e)은 같은 마크업을 CSS(@container sch-list)만으로 [날짜 ··· D-day] / [제목] / [얼굴 — 들어가는 만큼 한 줄]로 세운다.
 const SCH_END_HTML = '<div class="sch-end">이후 예정된 일정이 없습니다</div>';   // 격식체(세션 70) — 69번에 옛 목록을 복원하며 명사형이 따라 들어왔던 것
 function renderScheduleItem(item) {
   const [schY, schMo, schD] = item.date.split('-').map(Number);
@@ -5544,13 +5576,12 @@ function renderScheduleItem(item) {
   const titleEl = item.link
     ? `<a class="sch-item-title" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${inner}</a>`
     : `<span class="sch-item-title">${inner}</span>`;
-  // 참가 멤버 아바타 — 컨텐츠 카드와 동일 스타일. 6명 초과 시 max-width+wrap으로 2행(membersRowStyle 공용).
+  // 참가 멤버 아바타 — 컨텐츠 카드와 동일 스타일. 6명 초과 시 max-width+wrap으로 2행(membersRowStyle 공용 — 넓은 배치. 좁은 목록은 CSS가 한 줄로 푼다).
   // 멤버 없는 행은 div 자체를 생략 — 빈 div가 끼면 flex gap(12px)이 이중으로 붙어 제목~D-day 간격이 벌어짐.
-  const memberImgs = (item.members || []).map(name => {
-    const m = MEMBERS.find(x => x.name === name);
-    return m ? `<img src="${m.img}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}">` : '';
-  }).join('');
-  const membersEl = memberImgs ? `<div class="sch-item-members"${membersRowStyle(item.members.length)}>${memberImgs}</div>` : '';
+  // 줄 나눔 폭은 '그려지는 얼굴 수'로 센다(컨텐츠 카드와 같음, 2026-09-24e) — 시트 이름 칸에 멤버가 아닌 이름(게스트 등)이 끼면 그리지 않는 칸까지 세어 반반 2줄이 한 칸 어긋났다
+  const known = (item.members || []).map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
+  const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
+  const membersEl = memberImgs ? `<div class="sch-item-members"${membersRowStyle(known.length)}>${memberImgs}</div>` : '';
   return `<div class="sch-item"><div class="sch-item-main"><span class="sch-item-when">${when}</span>${titleEl}</div>${membersEl}<span class="sch-item-dday">${ddayText(item)}</span></div>`;
 }
 
@@ -5948,7 +5979,8 @@ function updateHeaderCenter() {
   }
   // 감지 지연 경고: 심장박동(last_detect_at)이 임계 이상 늙으면 감지가 시간 단위로 도는 4탭의 주기 문구를 교체.
   // 시각도 클라이언트 fetch 시각 대신 서버 마지막 감지 시각으로(감지가 죽어도 fetch는 성공해 시각이 계속 새것처럼 보이는 문제 방지).
-  const detectWarn = !!lastServerDetect && (Date.now() - lastServerDetect.getTime() > DETECT_STALE_MS)
+  // 나이는 받아 온 순간 기준 + 보이는 채로 실패한 시간(선언부 detectLagMs 주석) — 지금 시계와 비교하지 않는다(잠든 시간이 지연으로 세어진다).
+  const detectWarn = !!lastServerDetect && (detectLagMs + (feedFailSince === null ? 0 : Date.now() - feedFailSince) > DETECT_STALE_MS)
     && ['live', 'recent', 'stats', 'chemistry'].includes(currentPage);
   if (detectWarn) {
     topLine = '감지 지연 중 · ' + lastServerDetect.toLocaleTimeString('ko-KR') + ' 기준';
@@ -6925,6 +6957,7 @@ loadLikeRankBtn();   // 좋아요 순위 버튼 — 활성 대회 유무·버튼
 window.addEventListener('hashchange', () => { applyHash(parseHash(location.hash)); });
 
 document.addEventListener('visibilitychange', () => {
+  feedFailSince = null;   // 연속 실패 시계는 한 번 보이는 동안만 잰다 — 숨어 있던(잠든) 시간은 실패로 안 센다(2026-09-24e)
   if (document.visibilityState === 'visible') {
     if (currentPage === 'recent') stopTitleFlash();
   }
@@ -8785,6 +8818,7 @@ function renderLiveGrid(infoMap, sorted) {
 
 async function loadFeed() {
   let data = null;
+  const askedAt = Date.now();   // 감지 지연은 이 순간 기준(선언부 detectLagMs)
   try {
     const res = await fetch(WORKER_URL + '/feed');
     if (!res.ok) throw new Error('no feed');
@@ -8801,7 +8835,9 @@ async function loadFeed() {
       if (tl) tl.innerHTML = '<div class="timeline-empty">이벤트 데이터를 불러올 수 없습니다</div>';
     }
     console.error(e);
-    updateHeaderCenter();   // fetch 자체가 죽어도 10초마다 감지 지연 판정이 다시 그려지게(성공 경로에만 있으면 경고가 안 뜸)
+    // fetch 자체가 죽어도 경고가 뜨게 — 보이는 채로 실패가 이어진 시간이 지연에 더해진다(첫 실패 시각은 요청 시각이 아니라 지금: 잠들기 전 요청이 깨어나 실패해도 잠든 시간이 안 섞인다)
+    if (feedFailSince === null && document.visibilityState === 'visible') feedFailSince = Date.now();
+    updateHeaderCenter();
     return;
   }
   // ── 생방송 카드(구 loadLive 본문) ──
@@ -8835,6 +8871,9 @@ async function loadFeed() {
   }
   lastLiveUpdate = new Date();
   if (data.last_detect_at) lastServerDetect = new Date(data.last_detect_at);
+  if (lastServerDetect) detectLagMs = Math.max(0, askedAt - lastServerDetect.getTime());   // 값이 빠진 응답(워커 KV 읽기 실패)엔 직전 심장박동의 나이가 계속 는다(종전과 같다).
+  // 0 아래로 내리지 않는다 — 잠들기 전 보낸 요청의 응답이 깨어난 뒤 심장박동을 싣고 늦게 오면 음수가 되어, 그 뒤 실패가 이어져도 경고가 (잠든 시간 + 5분) 늦게 떴다(2026-09-24e 점검)
+  feedFailSince = null;
   // 누가 켜면 정전 타이머 해제 상태도 푼다 — 그 방송이 끝나면 새 정전이라 다시 떠야 한다.
   if (liveCount > 0) blackoutDismissed = false;
   lastLiveCount = liveCount;
@@ -9382,7 +9421,8 @@ const POLLERS = [
 ];
 const pollTimers = new Map();
 
-// runNow: 정지돼 있던 폴러만 재가동 직전에 1회 즉시 실행 — 없으면 복귀 직후 최대 한 주기만큼 낡은 화면을 본다.
+// runNow: 보이게 될 때 1회 즉시 실행 — 정지돼 있던 폴러는 재가동 직전에, 숨김 중에도 돌던 폴러(알림 ON의 loadFeed)도 그대로 1회.
+// 없으면 복귀 직후 최대 한 주기만큼 낡은 화면을 본다(알림 ON 쪽은 2026-09-24e 추가 — 종전엔 숨김 중 타이머의 다음 차례를 기다렸다).
 function likePollingState(runNow) {
   const hidden = document.visibilityState === 'hidden';
   for (const p of POLLERS) {
@@ -9391,6 +9431,8 @@ function likePollingState(runNow) {
     if (want && !running) {
       if (runNow) p.fn();
       pollTimers.set(p.fn, setInterval(p.fn, p.ms));
+    } else if (want && runNow && !hidden) {
+      p.fn();
     } else if (!want && running) {
       clearInterval(pollTimers.get(p.fn));
       pollTimers.delete(p.fn);
@@ -9739,7 +9781,9 @@ function contentCardHtml(c, withVods) {
   // 폭 산식·렌더 모두 '그려지는 멤버'(등록 이름) 기준(2026-08-24): 미등록 이름 셀(게스트·탈퇴 멤버 등)이 개수에 끼면
   // 렌더는 안 되면서 행폭만 부풀어 줄바꿈이 어긋난다 — 현수막 6+4 vs 컨텐츠 5+5 실측(스크린샷 픽셀 판독)의 실원인.
   const known = c.members.map(name => MEMBERS.find(x => x.name === name)).filter(Boolean);
-  const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}">`).join('');
+  // 현수막 시트 F열 명전 제외(hallOff) 카드: 얼굴 흑백 + 이름 글상자에 '(명전 제외)'(2026-09-24 Crenop — 참여는 했지만 '천타버스의 위상을 드높인'엔 세지 않는 현수막)
+  const off = c.hallOff ? ' (명전 제외)' : '';
+  const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}${off}">`).join('');
   const imgTag = c.url ? `<img src="${escapeHtml(c.url)}" alt="${escapeHtml(c.title || '')}" loading="lazy">` : '';   // 지난 일정에서 온 컨텐츠는 그림이 없다 — 빈 src는 깨진 그림이 되므로 칸만 비운다
   // 카드를 누르면(2026-09-06 Crenop): 참여 멤버(G~)의 그날 다시보기를 자동으로 모아 고르기 모달에 담는다 — 수동 링크(C열)는 유튜브 편집본만 적으면 된다.
   // [왜 상자에 직접 넣지 않고 모달인가] 어느 다시보기가 어느 컨텐츠인지는 시스템이 모른다(같은 날 두 컨텐츠에 참여한 멤버의 다시보기는 양쪽에 다 든다 —
@@ -9772,7 +9816,7 @@ function contentCardHtml(c, withVods) {
           <span class="content-card-title">${tagIconsHtml(c.tags)}${escapeHtml(c.title || '')}</span>
           <span class="content-card-date">${c.date?.display || ''}</span>
         </div>
-        <div class="content-card-members"${membersRowStyle(known.length)}>${memberImgs}</div>
+        <div class="content-card-members${c.hallOff ? ' hall-off' : ''}"${membersRowStyle(known.length)}>${memberImgs}</div>
       </div>
     </${cardTag}>
   `;

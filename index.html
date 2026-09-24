@@ -692,7 +692,7 @@
   .sch-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 16px;
-    min-height: 66px;   /* 아바타 최대 2행(42) + 상하 패딩 24 — 멤버 0·1·2행 무관 행 높이 고정(content-card-info와 동일 사유) */
+    min-height: 66px;   /* 아바타 최대 2행(42) + 상하 패딩 24 — 멤버 0·1·2행 무관 행 높이 고정 */
     border-bottom: 1px solid var(--border);
   }
   .sch-item:last-child { border-bottom: none; }
@@ -1201,7 +1201,7 @@
   @media (max-width: 480px) {
     .event-time-abs .ev-abs-d { display: block; }
   }
-  /* 채팅 묶음: 같은 채널에서 감지 주기 연속(25초 이내)으로 이어진 대화를 한 아이템으로. 내부는 과거→최신, 클릭 없이 전체 노출 */
+  /* 채팅 묶음: 같은 채널에서 CHAT_BUNDLE_GAP_MS(60초) 안쪽으로 이어진 대화를 한 아이템으로. 내부는 과거→최신, 클릭 없이 전체 노출 */
   .chat-bundle-rows {
     margin-top: 6px;
     display: flex; flex-direction: column; gap: 3px;
@@ -2264,13 +2264,20 @@
     gap: 16px;
   }
   .content-card {
-    container: cc-card / inline-size;   /* 좁은 카드 배치의 기준 = 카드 자신의 폭(아래 @container cc-card) */
     background: var(--surface);
     border: 1px solid var(--border);
     overflow: hidden;
     transition: border-color 0.15s, box-shadow 0.15s;
-    display: flex;
-    flex-direction: column;
+    /* [그림][하단바] 두 칸을 바깥 격자의 행 두 줄에 맡긴다(subgrid, 2026-09-24d Crenop) — 하단바 높이 = 같은 행 카드 중 가장 큰 하단바.
+       얼굴이 1줄뿐인 행은 하단바가 줄고, 2줄 카드가 하나라도 있는 행은 그 높이로 맞춰 제목·날짜가 행 안에서 같은 선에 선다.
+       그림 칸도 같은 행에선 가장 큰 그림 높이로 같다(종전 flex: 1과 같은 결과). 1열(휴대폰)은 카드 하나가 한 행이라 제 높이.
+       row-gap 0: 격자 간격(16·모달 12)은 카드와 카드 사이만 — 카드 안 그림·하단바 사이 간격은 subgrid가 자기 값(0)으로 바꾼다.
+       카드에 컨테이너(container-type)를 걸면 안 된다 — 레이아웃 격리가 따라와 subgrid가 꺼진다(카드마다 제 높이). 좁은 배치의 기준은 하단바가 진다.
+       넓은 배치(글을 얼굴 묶음 가운데에 맞춤)는 카드 500 이상 = 늘 혼자 한 행이라(격자 하한 280 — 2열이면 카드 428 미만) 행 안 정렬과 부딪히지 않는다. */
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    row-gap: 0;
     text-decoration: none;
     color: inherit;
   }
@@ -2279,8 +2286,6 @@
   button.content-card { padding: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
   .content-card-title .cal-tag { margin-right: 4px; }   /* 종류 그림(F열) — 일정 목록 제목 앞과 같은 그림, 카드 제목 앞 */
   .content-card-img {
-    flex: 1;
-    height: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2294,11 +2299,13 @@
     display: block;
   }
   .content-card-info {
+    container: cc-card / inline-size;   /* 좁은 카드 배치의 기준 = 하단바 폭(아래 @container cc-card) */
+    align-self: start;   /* 높이 = 내용(얼굴 줄 수에 따라). 행 높이(같은 행 가장 큰 하단바)로 늘이지 않는다 — 제목·날짜 줄이 위에 붙어 행 안에서 같은 선이고, 남는 칸은 카드 바탕이 채운다 */
     padding: 10px 12px;
-    min-height: 62px;   /* 아바타 최대 2행(20+2+20=42) + 상하 패딩 20 — 멤버 0·1·2행 무관 하단바 높이 고정(현수막 탭도 이 카드 공용) */
     display: flex;
+    flex-wrap: wrap;   /* 실제로 꺾이는 건 좁은 배치뿐 — 넓은 배치는 글 칸이 flex: 1(기준 0)이라 한 줄 */
     align-items: center;
-    gap: 8px;
+    gap: 4px 8px;   /* 줄 사이 4(좁은 배치) · 칸 사이 8 */
   }
   .content-card-text {
     flex: 1;
@@ -2310,6 +2317,7 @@
   .content-card-title {
     font-size: 13px;
     font-weight: 700;
+    line-height: 16px;   /* 줄 높이를 못 박는다 — 제목에 이모지가 섞이면 'normal'이 15 → 17로 늘어 그 카드만 하단바가 2px 컸다(하단바 높이 = 내용이라 넓은 배치도) */
     color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2337,14 +2345,15 @@
      날짜와 얼굴이 한 줄에 안 들어가면 얼굴이 날짜 줄 아래(오른쪽 붙임)로 꺾인다(flex-wrap).
      넓은 배치(제목·날짜 | 얼굴)에선 제목 칸 = 카드 − 34 − 얼굴(최대 152)이라 좁은 카드에서 제목이 잘렸다(360px 컨텐츠 30/73·현수막 23/49).
      500 = 넓은 배치에 지금 제목이 전부 들어가는 카드 폭(필요 폭 최대: 현수막 499·컨텐츠 490, 2026-09-24 실측) — 그보다 좁으면 좁은 배치가 늘 덜 잘린다.
-     얼굴 칸은 2줄 높이(42)를 늘 잡는다 — 하단바 높이가 멤버 수(0·1·2줄)와 무관하게 같다(넓은 배치 min-height 62와 같은 취지). 날짜 줄 높이 20 = 얼굴 첫 줄과 가운데가 맞는다.
+     날짜 줄 높이 20 = 얼굴 첫 줄과 가운데가 맞는다(날짜·얼굴 위 맞춤). 종전엔 얼굴 칸이 2줄 높이(42)를 늘 잡아 모든 하단바가 82였다(2026-09-24d 행마다 맞춤으로).
+     기준 473 = 하단바의 내용 폭(컨테이너 조회는 내용 폭을 잰다) = 카드 499 − 테두리 2 − 좌우 패딩 24. 컨테이너가 카드가 아니라 하단바라(위 .content-card 참조)
+     하단바 자신의 규칙(꺾기·줄 사이 4)은 기본 규칙에 두고 여기선 자식만 바꾼다 — 컨테이너 조회는 컨테이너 자신에게 걸리지 않는다.
      정기 활동 모아보기 모달(.cc-collect-grid)도 같은 카드라 같은 규칙을 탄다. */
-  @container cc-card (max-width: 499px) {
-    .content-card-info { flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+  @container cc-card (max-width: 473px) {
     .content-card-text { display: contents; }
-    .content-card-title { flex: 0 0 100%; line-height: 16px; }   /* 줄 높이를 못 박는다 — 제목에 이모지가 섞이면 'normal'이 15 → 17로 늘어 그 카드만 하단바가 2px 컸다 */
-    .content-card-date { line-height: 20px; }
-    .content-card-members { margin-left: auto; min-height: 42px; align-content: flex-start; }
+    .content-card-title { flex: 0 0 100%; }
+    .content-card-date { line-height: 20px; align-self: flex-start; }
+    .content-card-members { margin-left: auto; align-self: flex-start; }
   }
 
   /* === 컨텐츠·현수막 탭 === 좌 = 카드 격자(.cc-main) / 우 = 필터 기둥(.filter-panel — 최근 활동과 같은 부품, 2026-09-24 Crenop) */
@@ -2825,7 +2834,7 @@
     border: 1px solid var(--border);
     padding: 24px;
     display: flex; align-items: center; gap: var(--pm-gap);
-    --pm-av: 72px; --pm-gap: 20px;   /* 사진 폭·칸 간격 — 칭호 제 줄(.pt-own)이 이름 선에 맞출 때 같이 쓴다 */
+    --pm-av: 72px; --pm-gap: 20px;   /* 사진 폭·칸 간격 — 좁은 카드 격자(아래 ≤400)의 첫 칸·칸 간격도 이 둘 */
   }
   .profile-member-avatar {
     width: var(--pm-av); height: var(--pm-av);
@@ -2843,17 +2852,12 @@
   .profile-member-title { display: inline-block; margin-left: 10px; vertical-align: -3.3px; }
   button.profile-member-title { all: unset; display: inline-block; margin-left: 10px; vertical-align: -3.3px; cursor: pointer; }   /* M열 이미지가 있는 칭호(2026-09-10) — 모양은 span과 같고 누를 수 있다 */
   button.profile-member-title:hover svg { filter: brightness(1.25); }
-  /* 칭호 자리(2026-09-24 Crenop '짧게'): fitProfileTitles가 정보 칸 폭을 재서 들어가는 첫 모양을 고른다 — 이름 옆(기본) → 이름 아래(.pt-below) →
-     약식(.pt-short: 양끝 그림을 뺀 짧은 명패, 이름 아래) → 제 줄(.pt-own: 버튼 아래 한 줄, 이름 선에 맞춤 — 약식도 안 들어갈 때만).
-     이름 아래로 내려갈 때 왼쪽 여백 10을 없앤다 — 종전엔 인라인으로 꺾여 명패가 이름보다 10px 안쪽에서 시작했다. */
-  .pt-below .profile-member-titles, .pt-short .profile-member-titles, .pt-own > .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; }
-  .pt-below .profile-member-titles, .pt-short .profile-member-titles { margin-top: 4px; }
-  .pt-below .profile-member-title, .pt-short .profile-member-title, .pt-own .profile-member-title { margin-left: 0; }
-  .pt-below .profile-member-title svg, .pt-short .profile-member-title svg, .pt-own .profile-member-title svg { display: block; }
-  .profile-member-title svg.pt-s, .pt-short .profile-member-title svg:not(.pt-s) { display: none; }
-  .pt-short .profile-member-title svg.pt-s { display: block; }
-  .profile-member-header.pt-own { flex-wrap: wrap; row-gap: 12px; }
-  .pt-own > .profile-member-titles { flex: 0 0 100%; padding-left: calc(var(--pm-av) + var(--pm-gap)); }
+  /* 칭호 자리: 넓은 카드는 fitProfileTitles가 정보 칸 폭을 재서 이름 옆(기본) 또는 이름 아래(.pt-below), 좁은 카드(≤400)는 늘 이름 아래(아래 좁은 카드 규칙).
+     이름 아래로 내려갈 때 왼쪽 여백 10을 없앤다 — 종전엔 인라인으로 꺾여 명패가 이름보다 10px 안쪽에서 시작했다.
+     약식 명패(양끝 그림을 뺀 짧은 판, 24c)는 철회(2026-09-24 Crenop — 폭이 극단적으로 좁으면 짧은 판도 의미가 없다, 배치만 챙긴다). */
+  .pt-below .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
+  .pt-below .profile-member-title { margin-left: 0; }
+  .pt-below .profile-member-title svg { display: block; }
   .title-img-panel { width: fit-content; max-width: min(960px, calc(100vw - 32px)); }
   .title-img-wrap img { display: block; max-width: 100%; max-height: 80vh; }
   .profile-member-eng {
@@ -2887,16 +2891,30 @@
   .profile-quick-btn.quick-naver:hover { background: rgba(3,199,90,0.22); }
   .profile-quick-btn svg { width: 16px; height: 16px; display: block; }
   @container (max-width: 520px) { .profile-member-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 정보 컬럼 ≤520px면(폰/태블릿 2단 무관) 이름 우측 버튼 2×2 */
-  /* 좁은 머리 카드(2026-09-24): 좌우 여백 16(크루 소개 ≤700과 같은 값)·칸 간격 12·사진 60. 400 = 칭호 표에서 가장 긴 전체 명패(긴급소집 꼴등 153)가
-     종전 간격의 정보 칸(카드 − 240)에 들어가는 폭(393) 바로 위 — 이보다 넓으면 종전 간격으로도 전체 명패가 이름 아래에 든다(좁아질수록 명패가 커지는 역전 없음).
-     360px(카드 302)에서 정보 칸 62 → 106: 가장 긴 영문 이름(MOONMOMO 88)과 태양·태앙 약식(103)이 든다 */
-  @container (max-width: 400px) { .profile-member-header { padding: 24px 16px; --pm-av: 60px; --pm-gap: 12px; } }
+  /* 좁은 머리 카드(≤393 — 휴대폰·기둥 편 태블릿, 2026-09-24 Crenop '배치만 신경쓰자'): [사진 | 이름 / 칭호 / 영문 이름 / 링크 버튼 한 줄] — 칭호·버튼이 모두
+     이름 선에서 시작하고, 버튼 가로 자리는 멤버와 무관하게 같다. 종전엔 [사진 | 정보 | 버튼 2×2]에서 정보 칸이 남는 폭만 받아 240px 창에서 글자 한 자 폭도 안 남아
+     이름·영문 이름이 한 글자씩 쌓이고(CHUNYANG 8줄) 칭호가 카드 밖으로 54px 나갔다. 좌우 여백 16(크루 소개 ≤700과 같은 값)·칸 간격 12·사진 60 → 오른쪽 칸 = 카드 − 106.
+     393 = 넓은 배치의 정보 칸(카드 − 240: 테두리 2·여백 48·사진 72·간격 40·버튼 2×2 78)이 칭호 표에서 가장 긴 명패(긴급소집 꼴등 153.07)를 이름 아래에 담는 가장 좁은 카드(394) 바로 아래 —
+     종전 400은 768 태블릿에서 기둥을 접으면(프로필이 [사진 | 본문] 2열이 되어 카드 394) 오히려 휴대폰 배치가 됐다('기둥을 접으면 넓은 UI'와 거꾸로).
+     칭호 그림은 칸보다 넓을 때만 비율대로 준다(휴대폰 카드 = 창 − 48 → 가장 긴 명패 153은 창 307px 아래에서). 이름·영문 이름은 낱말 안에서 꺾지 않는다 —
+     영문 이름은 칸보다 긴 한 낱말이면 꺾는다(카드 밖으로 나가지 않게 — 실제 멤버는 240px 창의 MOONMOMO만 'MOONMOM / O'). 사진은 첫 줄에만 둔다 —
+     두 줄에 걸치면 칭호 없는 멤버는 사진 아래 끝이 버튼 줄 위로 4px 걸쳤다. 버튼 줄은 늘 사진·글 아래에서 시작한다 */
+  @container (max-width: 393px) {
+    .profile-member-header { display: grid; grid-template-columns: var(--pm-av) minmax(0, 1fr); gap: 12px var(--pm-gap); align-items: start; padding: 24px 16px; --pm-av: 60px; --pm-gap: 12px; }
+    .profile-member-avatar { grid-row: 1; }
+    .profile-member-quick { grid-column: 2; justify-self: start; margin-left: 0; display: flex; }   /* 위 ≤520 2×2보다 뒤에 있어야 이긴다(같은 특이도) */
+    .profile-member-titles { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
+    .profile-member-titles .profile-member-title { margin-left: 0; max-width: 100%; }
+    .profile-member-title svg { display: block; max-width: 100%; height: auto; }
+    .profile-member-name { overflow-wrap: normal; }
+  }
+  @container (max-width: 267px) { .profile-member-quick { display: grid; grid-template-columns: repeat(2, auto); } }   /* 버튼 한 줄(36×4 + 6×3 = 162)이 오른쪽 칸(카드 − 106)에 안 들 때만 2×2 */
   .profile-info-section {
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 20px 24px;
   }
-  @container (max-width: 400px) { .profile-info-section { padding: 20px 16px; } }   /* 머리 카드(≤400 여백 16)와 같게 — 머리만 줄이면 두 상자의 글 시작선이 8px 어긋났다. 기본 규칙 뒤에 둬야 이긴다 */
+  @container (max-width: 393px) { .profile-info-section { padding: 20px 16px; } }   /* 머리 카드(≤393 여백 16)와 같게 — 머리만 줄이면 두 상자의 글 시작선이 8px 어긋났다. 기본 규칙 뒤에 둬야 이긴다 */
   .profile-info-title {
     font-size: 12px; font-weight: 700;
     color: var(--muted); letter-spacing: 1px;
@@ -3468,7 +3486,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-24c';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-24d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4070,26 +4088,24 @@ const badgeGid = (label, k) => k + [...label].reduce((a, c) => (a * 31 + c.charC
 const badgeGradV = (gid, color, a0, a1) => `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="${a0}"/><stop offset="1" stop-color="${color}" stop-opacity="${a1}"/></linearGradient></defs>`;
 const badgeText = (L, color) => `<g fill="${color}" transform="translate(0 ${L.yBase.toFixed(3)}) scale(${L.s} ${-L.s})">${L.paths}</g>`;
 // 가족 1 — 반장·부반장: 양끝 뾰족 윙 + 다이아 악센트(2026-08-24 V2). 좌우 여백 20 = 윙 깊이 8 + 패딩 12
-// short = 약식(2026-09-24 Crenop '짧게' — 프로필 머리 카드에 자리가 모자랄 때 fitProfileTitles가 쓴다): 세 가족 모두 양끝 그림을 빼고 여백을 줄인다. 글자·색·몸통 모양은 그대로.
-//   윙 12(깊이 8 + 4) · 해 상자 10 · 꼬리표 10(파임 5 + 5). 그라데이션 id는 전체 명패와 갈라 둔다(한 명패 안에 둘이 같이 있다)
-function ornateTitleBadgeSvg(label, color, short) {
-  const pad = short ? 12 : 20, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, P = 8, gid = badgeGid(label, short ? 'tbs' : 'tb');
+function ornateTitleBadgeSvg(label, color) {
+  const L = badgeTextLayout(label, 20, 20), { W, H, m } = L, P = 8, gid = badgeGid(label, 'tb');
   const body = `M${P} 0.75H${(W - P).toFixed(2)}L${(W - 0.75).toFixed(2)} ${m}L${(W - P).toFixed(2)} ${H - 0.75}H${P}L0.75 ${m}Z`;
   const dia = (x) => `M${x.toFixed(1)} ${m - 2.6}L${(x + 2.6).toFixed(1)} ${m}L${x.toFixed(1)} ${m + 2.6}L${(x - 2.6).toFixed(1)} ${m}Z`;
-  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${short ? '' : `<path d="${dia(P + 3.4)}${dia(W - P - 3.4)}" fill="${color}"/>`}${badgeText(L, color)}</svg>`;
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/><path d="${dia(P + 3.4)}${dia(W - P - 3.4)}" fill="${color}"/>${badgeText(L, color)}</svg>`;
 }
 // 가족 2 — 태양·태앙(2026-09-10 Crenop 안 7): 반듯한 상자, 양끝 안쪽에 각진 해(팔각 원반 + 8방 빛살). 둥근 데 없음(각진 정책)
-function sunTitleBadgeSvg(label, color, short) {
-  const pad = short ? 10 : 32, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, gid = badgeGid(label, short ? 'tss' : 'ts');
+function sunTitleBadgeSvg(label, color) {
+  const L = badgeTextLayout(label, 32, 32), { W, H, m } = L, gid = badgeGid(label, 'ts');
   const body = `M0.75 0.75H${(W - 0.75).toFixed(2)}V${H - 0.75}H0.75Z`;
   const oct = (cx, r) => { const pts = []; for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; pts.push(`${(cx + Math.cos(a) * r).toFixed(2)},${(m + Math.sin(a) * r).toFixed(2)}`); } return `<polygon points="${pts.join(' ')}" fill="${color}"/>`; };
   const rays = (cx) => { let d = ''; for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; d += `M${(cx + Math.cos(a) * 4.6).toFixed(2)} ${(m + Math.sin(a) * 4.6).toFixed(2)}L${(cx + Math.cos(a) * 7.2).toFixed(2)} ${(m + Math.sin(a) * 7.2).toFixed(2)}`; } return `<path d="${d}" stroke="${color}" stroke-width="1.3"/>`; };
   const sun = (cx) => oct(cx, 3) + rays(cx);
-  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.18, 0.04)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${short ? '' : sun(15) + sun(W - 15)}${badgeText(L, color)}</svg>`;
+  return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.18, 0.04)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5"/>${sun(15)}${sun(W - 15)}${badgeText(L, color)}</svg>`;
 }
 // 가족 3 — 긴급소집(2026-09-10 Crenop C2): 좌우대칭 꼬리표(양끝이 안으로 파인 제비꼬리, 깊이 5), 표식 없음 — 색이 1등·꼴등·노쇼를 가른다
-function tagTitleBadgeSvg(label, color, short) {
-  const pad = short ? 10 : 16, L = badgeTextLayout(label, pad, pad), { W, H, m } = L, n = 5, gid = badgeGid(label, short ? 'tts' : 'tt');
+function tagTitleBadgeSvg(label, color) {
+  const L = badgeTextLayout(label, 16, 16), { W, H, m } = L, n = 5, gid = badgeGid(label, 'tt');
   const body = `M0.75 0.75H${(W - 0.75).toFixed(2)}L${(W - n).toFixed(2)} ${m}L${(W - 0.75).toFixed(2)} ${H - 0.75}H0.75L${n} ${m}Z`;
   return `<svg width="${W.toFixed(2)}" height="${H}" viewBox="0 0 ${W.toFixed(2)} ${H}" aria-hidden="true">${badgeGradV(gid, color, 0.16, 0.03)}<path d="${body}" fill="url(#${gid})" stroke="${color}" stroke-width="1.5" stroke-linejoin="miter"/>${badgeText(L, color)}</svg>`;
 }
@@ -4123,36 +4139,18 @@ function titleBadgesHtml(titleCell, imgCell) {
   const imgs = String(imgCell || '').split(/[,|\n]/).map(x => x.trim());
   return titles.map((t, i) => titleBadgeHtml(t, imgs[i] || '')).join('');
 }
-// 칭호 자리(2026-09-24 Crenop '짧게', CSS '칭호 자리' 곁 주석): 프로필 머리 카드의 정보 칸 폭을 재서 ① 이름 옆 ② 이름 아래 ③ 약식(이름 아래)
-// ④ 제 줄(버튼 아래) 중 들어가는 첫 모양. 폭은 명패 그림의 width(그린 크기 그대로)와 이름 글자 폭으로 잰다. 약식 그림은 처음 필요할 때 명패 안에 한 번 그려 둔다.
+// 칭호 자리(CSS '칭호 자리' 곁 주석): 넓은 머리 카드의 정보 칸 폭을 재서 이름과 칭호가 한 줄에 다 들어가면 이름 옆, 아니면 이름 아래(.pt-below).
+// 폭은 명패 그림의 width(그린 크기 그대로)와 이름 글자 폭으로 잰다. 좁은 카드(≤400)는 CSS가 늘 이름 아래에 둬서 이 판정이 화면을 바꾸지 않는다.
 // 그린 뒤(renderProfileMember)와 프로필 본문 폭이 바뀔 때(#profileBody 관찰자) 다시 잰다.
 function fitProfileTitles() {
   const hd = document.querySelector('#profileBody .profile-member-header');
   const tt = hd && hd.querySelector('.profile-member-titles');
   if (!tt) return;
-  const info = hd.querySelector('.profile-member-info'), nm = hd.querySelector('.profile-member-name');
-  const have = info.getBoundingClientRect().width + 0.5;   // 0.5 = 소수 폭 반올림 여유
+  const have = hd.querySelector('.profile-member-info').getBoundingClientRect().width + 0.5;   // 0.5 = 소수 폭 반올림 여유
   if (have < 1) return;   // 안 보이는 탭(폭 0)에선 재지 않는다
-  hd.classList.remove('pt-below', 'pt-short', 'pt-own');
-  if (tt.parentNode !== nm) nm.appendChild(tt);
-  const badges = [...tt.querySelectorAll('.profile-member-title')];
-  const wOf = svg => parseFloat(svg.getAttribute('width')) || 0;
-  const full = badges.map(b => wOf(b.querySelector('svg')));
-  const rg = document.createRange(); rg.selectNodeContents(nm.firstChild);   // 이름 글자(명패 앞 글자 마디)
-  if (rg.getBoundingClientRect().width + full.reduce((a, w) => a + 10 + w, 0) <= have) return;   // ① 10 = 명패 왼쪽 여백
-  if (Math.max(...full) <= have) { hd.classList.add('pt-below'); return; }
-  const short = badges.map(b => {
-    let s = b.querySelector('svg.pt-s');
-    if (!s) {
-      const t = b.dataset.tname || b.getAttribute('aria-label') || '';   // 이미지 있는 명패(button)는 aria-label에 안내가 붙어 data-tname이 문구
-      const [fam, color] = TITLE_BADGE_STYLES[t] || ['wing', TITLE_BADGE_FALLBACK];
-      b.insertAdjacentHTML('beforeend', TITLE_BADGE_DRAW[fam](t, color, true));
-      s = b.lastElementChild; s.classList.add('pt-s');
-    }
-    return wOf(s);
-  });
-  if (Math.max(...short) <= have) { hd.classList.add('pt-short'); return; }
-  hd.classList.add('pt-own'); hd.appendChild(tt);
+  const rg = document.createRange(); rg.selectNodeContents(hd.querySelector('.profile-member-name').firstChild);   // 이름 글자(명패 앞 글자 마디)
+  const need = [...tt.querySelectorAll('.profile-member-title svg')].reduce((a, s) => a + 10 + (parseFloat(s.getAttribute('width')) || 0), rg.getBoundingClientRect().width);   // 10 = 명패 왼쪽 여백
+  hd.classList.toggle('pt-below', need > have);
 }
 // 칭호 이미지 모달 — 사이트 공통 패널, 제목 자리에 칭호, 본문에 이미지 한 장(원본 비율, 패널 폭에 맞춤)
 function openTitleImageModal(name, url) {
@@ -7322,10 +7320,11 @@ function renderEvent(e, allEvents) {
   return `<div class="event" data-time="${eventTime}">${inner}</div>`;
 }
 
-// 채팅 묶음 gap — "감지 주기 연속" 규칙의 시간 근사: 같은 채널의 직전 채팅과 이 간격 이내면 같은 대화, 넘으면 종결.
-// 채팅 시각은 Oracle 수신 순간 기준이고 폴링(10초) 배치 경계는 클라이언트가 알 수 없어, 배치 규칙
-// "다음 감지에 이어지면 붙이고 빈 주기가 나오면 종결"을 시간으로 옮기면 10~20초 범위지만 짧은 쉼까지 넉넉히 묶으려 25초.
-const CHAT_BUNDLE_GAP_MS = 25 * 1000;
+// 채팅 묶음 gap — 같은 채널의 직전 채팅과 이 간격 이내면 같은 대화, 넘으면 종결(채팅 시각 = Oracle 수신 순간).
+// 60초(2026-09-24 실측, 종전 25초 = 감지 주기 10초를 시간으로 옮긴 값): 피드 1000건(채팅 807건·약 55시간)에서 같은 채널 연속 채팅
+//   사이 25~60초로 끊긴 31곳이 읽어 보면 거의 다 같은 흐름이었다(한 말을 쉬었다 잇기·질문과 답). 60초로 채팅 항목 242→211, 묶음 최대 20줄·최장 3분 8초.
+//   90~120초는 최대 24~30줄·최장 4분 42초~7분 31초가 되고, 줄에 시각이 없어(2026-09-24) 그 안의 1~2분 쉼이 안 보여 멈춤. 10~30초 사이는 차이가 작다
+const CHAT_BUNDLE_GAP_MS = 60 * 1000;
 
 // 채팅류(chat/chat_emoticon/donation)를 채널 단위로 묶어 타임라인 아이템 목록을 만든다.
 // 같은 채널의 직전 채팅과 CHAT_BUNDLE_GAP_MS 이내면 같은 묶음 — 사이에 낀 다른 채널 채팅·비채팅 이벤트는 묶음을 끊지 않음(채널별 독립).
@@ -8889,6 +8888,7 @@ async function loadStatsMonth(yyyymm) {
     const monthData = data.stats || {};
     statsState.data[yyyymm] = monthData;
     statsState.failAt[yyyymm] = 0;   // 받았으면 백오프 해제
+    { const tl = document.getElementById('timeline'); if (tl) applyVodLinks(tl); }   // 세션 스냅샷이 왔다 — 최근 목록(/vods)이 먼저 와서 '없음'으로 굳힌 다시보기 링크를 바로잡는다(2026-09-24: 첫 방문 4번 중 3번 문모모 방송 21줄이 '다시보기가 없습니다'로 남았다)
     syncDataVersion(data.dataVersion, yyyymm);   // 자료 판이 바뀌었으면 굳혀 둔 지난달을 버린다(방금 받은 이 달은 새 것이라 남김)
     // 미종료 세션(end 없음)이 하나라도 있으면 캐시 보류 — 자정 걸친 방송이 끝나기 전에 월이 바뀌어 이 달을 받으면
     // '진행 중' 상태로 영구 동결됨(그 사용자 화면에서 방송 시간 누락 + 명전 정전위원회 최대 48h 오염).
@@ -9822,7 +9822,8 @@ function renderContent() {
 }
 
 // ── 컨텐츠·현수막 필터 기둥(2026-09-24 Crenop) — 최근 활동 필터(.filter-panel)의 복제: 멤버 13칸 + 종류(카드 제목 앞 종류 그림).
-// 종류 칸은 그 탭 자료에 실제로 있는 종류만, 별칭표(CAL_TAG_ICON) 차례로. 이름표는 별칭표의 첫 표기(영문은 대문자 — VRC).
+// 종류 칸은 그 탭 자료에 실제로 있는 종류만, 탭마다 정한 차례(CC_KIND_ORDER)로 — 목록에 없는 종류가 자료에 새로 생기면 그 뒤에 별칭표(CAL_TAG_ICON) 차례로 붙는다.
+// 별칭표에 없는 종류(그림 없음)는 칸이 생기지 않고 그 카드는 늘 보인다 — 새 종류를 칸으로 쓰려면 그림과 별칭표 줄을 먼저 만든다. 이름표는 별칭표의 첫 표기(영문은 대문자 — VRC).
 // 카드 판정(ccVisible): 등록 멤버 중 하나라도 켜져 있으면 보인다(케미 N인·최근 활동 채팅의 '말한 사람 또는 방송 주인'과 같은 '하나라도').
 //   종류도 아는 종류 중 하나라도 켜져 있으면. 등록 멤버가 없는 카드·아는 종류가 없는 카드는 그 필터와 무관하게 보인다(걸러낼 근거가 없다).
 // 누르면 탭을 통째로 다시 그린다(케미 필터와 같은 방식) — 기둥의 켬/끔·'모두 선택/해제' 글자가 카드와 한 번에 맞는다.
@@ -9833,13 +9834,19 @@ function ccVisible(tab, c) {
   const ks = ccCardKinds(c);
   return (!ids.length || ids.some(id => !f.mOff.has(id))) && (!ks.length || ks.some(k => !f.kOff.has(k)));
 }
+// 탭별 종류 칸 차례(2026-09-24 Crenop 지정 — 기둥 3칸씩 한 줄): 현수막 VRC 풀트 음악 / 천타 왁타 스팀 / 마크 잔디 옵치 / 롤 배그 와우, 컨텐츠 VRC 풀트 모캡 / 천타 마크 스팀 / 롤 배그 음악
+const CC_KIND_ORDER = {
+  banner: ['vrchat', 'fulltrack', 'music', 'chuntaverse', 'wak', 'steam', 'minecraft', 'soccer', 'overwatch', 'lol', 'pubg', 'wow'],
+  content: ['vrchat', 'fulltrack', 'mocap', 'chuntaverse', 'minecraft', 'steam', 'lol', 'pubg', 'music'],
+};
 function ccFilterKey(tab) { const f = ccFilter[tab]; return [...f.mOff].sort().join(',') + '|' + [...f.kOff].sort().join(','); }
 function renderCcFilter(tab, items) {
   const panel = document.getElementById(tab + 'Filter');
   if (!panel) return;
   const f = ccFilter[tab];
   const present = new Set(items.flatMap(ccCardKinds));
-  const kinds = Object.keys(CAL_TAG_ICON).filter(k => present.has(k));
+  const order = CC_KIND_ORDER[tab] || [];
+  const kinds = [...order, ...Object.keys(CAL_TAG_ICON).filter(k => !order.includes(k))].filter(k => present.has(k));
   const kindLabel = k => { const n = CAL_TAG_ICON[k][0]; return /^[a-z]+$/.test(n) ? n.toUpperCase() : n; };
   const mAll = MEMBERS.every(m => !f.mOff.has(m.id)), kAll = kinds.every(k => !f.kOff.has(k));
   panel.innerHTML = `

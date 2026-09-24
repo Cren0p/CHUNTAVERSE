@@ -1732,12 +1732,15 @@
     color: var(--ev-yellow); font-weight: 700;
   }
   .day-session-change-icon svg { width: 16px; height: 16px; display: block; }
-  /* 좁은 방송 행(2026-09-24 Crenop — 휴대폰 달력 하루 모달·통계 방송 목록): 변경 줄을 [시각 ⏱ 경과 그림] / [변경 내용]으로 — 한 줄에 두면 내용 칸이 눌려 여러 줄로 쌓였다.
-     기준 440 = 행 폭(PC 하루 모달은 넓어져 한 줄 그대로) */
+  /* 좁은 방송 행(2026-09-24 Crenop — 휴대폰 달력 하루 모달·통계 방송 목록): 변경 줄을 [시각 ⏱ 경과 그림 이름] / [구 → 새]로 — 한 줄에 두면 내용 칸이 눌려 여러 줄로 쌓였다.
+     이름('방송 제목' 등)은 그림 오른쪽(2026-09-24g Crenop — 둘째 줄에 두면 그림과 이름이 다른 줄로 갈렸다): .chg-text를 풀어(contents) 이름은 첫 줄 칸, 값(.chg-val)만 둘째 줄 전폭.
+     풀린 .chg-text의 overflow-wrap(아래 규칙)은 상속으로 값에 간다. 기준 440 = 행 안쪽 폭 — 하루 모달은 PC에서도 방송당 다시보기 2장 이하면 좁고(모달 440~448·행 378~386) 3장부터 넓다, 통계 목록은 768 좁음·900 넓음(실측).
+     넓을 땐 .chg-val이 글줄 안 span이라 종전과 같다 */
   .day-session { container-type: inline-size; container-name: ds-row; }
   @container ds-row (max-width: 440px) {
     .day-session-change { flex-wrap: wrap; row-gap: 2px; }
-    .day-session-change .chg-text { flex-basis: 100%; }
+    .day-session-change .chg-text { display: contents; }
+    .day-session-change .chg-val { flex-basis: 100%; min-width: 0; }
   }
   .day-session-change .chg-text { min-width: 0; overflow-wrap: anywhere; }   /* 띄어쓰기 없이 붙인 긴 제목('천타버스VS버인협회VS…')도 칸 안에서 꺾는다 — 종전엔 방송 상자 테두리 밖 30px까지 나갔다(2026-09-24 전 탭 점검, 360px) */
 
@@ -3513,7 +3516,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-24e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-24g';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -6769,6 +6772,9 @@ function switchPage(page, opts) {
     ensureContentSheet();  // 크루 활동 행의 '컨텐츠 모아보기'가 컨텐츠 시트를 쓴다 — 부팅에서 안 받으므로 여기서
     // 시트(크루활동·멤버정보·휴방) 첫 로드 실패 상태면 재진입을 재시도 기회로 — 배너·컨텐츠와 동일 패턴(진입당 1회)
     if (crewActs.length === 0 && crewSheetsDone) { crewSheetsDone = false; loadCrewSheets(); }
+    // 기둥의 선택 표시도 본문과 같은 멤버로(2026-09-24f, Crenop 신고) — 위에서 최애로 되돌린 상태를 본문만 그리고 기둥은 첫 진입(initProfileTabs)에서만 맞춰,
+    // 다른 멤버를 골랐다 나갔다 오면 본문은 최애·기둥은 마지막으로 고른 멤버였다. 통계·달력·음악은 그리기에서 기둥까지 다시 맞춘다(실측)
+    syncSubTabActive('.profile-tab', profileState.selectedTab || defaultSubTab('profile'));
     renderProfileBody();
   }
   if (page === 'recent') {
@@ -10542,7 +10548,7 @@ function sessionRowHtml(s, memberId, ym, dateLabel) {
       // v4: 절대시각 옆에 방송 시작 기준 경과를 병기 — 최근 이벤트 탭의 event-elapsed 문법 그대로(Crenop 지정)
       const chElMs = new Date(c.time).getTime() - new Date(s.start).getTime();
       const chElHtml = (!isNaN(chElMs) && chElMs >= 0) ? `<span class="event-elapsed">${SVG_ICONS.clockTime} ${formatDuration(chElMs)}</span>` : '';
-      return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span>${chElHtml}<span class="day-session-change-icon">${icon}</span><span class="chg-text"><b>${label}</b> ${valHtml}</span></div>`;
+      return `<div class="day-session-change"><span class="day-session-change-time">${formatHHMM(c.time)}</span>${chElHtml}<span class="day-session-change-icon">${icon}</span><span class="chg-text"><b>${label}</b><span class="chg-val"> ${valHtml}</span></span></div>`;   // 이름 뒤 공백은 값 칸 안 — 따로 떼면 글자 노드가 쪼개져 넓은 행의 값이 0.02px 밀렸다(좁은 행에선 줄 첫 공백이라 사라진다)
     }).join('')}</div>`;
   }
   // 종료 방송 행(2026-09-06 Crenop): 다시보기 슬롯(타일·'없습니다' 줄, 2026-08-29~09-05)을 빼고 행 자체를 최근 활동 탭의 다시보기 직결과

@@ -2510,6 +2510,7 @@
     overflow: hidden;
     background: var(--surface2);
   }
+  .content-card-img img:not([src]) { display: none; }   /* 차례를 기다리는 그림(orderCardImages) — src가 없으면 alt 글자가 칸에 찍힌다 */
   .content-card-img img {
     max-width: 100%;
     max-height: 100%;
@@ -3790,7 +3791,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-26d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-26e';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7380,6 +7381,73 @@ function preloadImages(srcs) {
   else setTimeout(run, 1500);
 }
 
+// 컨텐츠·현수막 카드 그림은 위에서부터 차례로 보인다(2026-09-26 Crenop '일괄 로딩되니까 안이뻐' — 두 탭은 최신이 위라 최신부터, 모아보기 모달은 과거가 위라 과거부터).
+// 종전 loading="lazy"는 화면 근처 그림을 한꺼번에 받아 먼저 온 것부터 제각각 떴다. 받기는 화면 근처(위아래 800px)에 온 것만 CARD_IMG_PARALLEL장씩 동시에,
+// 보이기는 차례대로 — 앞 그림이 아직이면 뒤 그림은 받아 놓고 기다린다(받아 둔 것은 src를 넣는 순간 캐시에서 바로 그려진다).
+// 한 장이 CARD_IMG_WAIT_MS를 넘기면 그 자리는 src만 넣고(받는 대로 뜬다) 다음으로 넘어간다 — 큰 그림 하나·끊긴 요청 하나에 아래가 통째로 비지 않게.
+// 카드 HTML은 src 대신 data-src(contentCardHtml) — 그리는 곳(현수막·컨텐츠 탭, 모아보기 모달)은 그린 뒤 이것을 부른다.
+// 알고 둔 것(2026-09-26 검토):
+//  · 이 페이지에서 한 번 보인 그림(cardImgShown)은 다시 그릴 때 차례 없이 바로 넣는다 — 필터를 누르거나 시트가 다시 와 격자를 새로 그리면 그림 칸이
+//    한순간 모두 접혀(칸 높이 = 그림) 페이지가 짧아지고 스크롤이 잘려, 보던 카드에서 17~50장 아래로 튀었다. 캐시에 있는 그림은 같은 프레임에 그려진다.
+//  · 스크롤 상자 안(모아보기 모달 #lrBody)은 그 상자를 관찰 기준으로 삼는다 — 창 기준이면 800px 앞서 받기가 상자에 잘려 작동하지 않았다.
+//  · 줄만 서고 아직 받기 시작하지 않은 그림이 화면 근처를 벗어나면 줄에서 뺀다 — 빨리 내리면 위의 대기 그림이 아래 보이는 칸을 오래 막았다.
+//  · 다시 그리면 앞 판은 관찰을 끊고 받기 줄도 멈춘다(dead).
+//  · 받기에 실패한 그림은 칸에 src를 넣을 때 한 번 더 요청된다 — 깨진 그림 모양을 내려면 필요하다(같은 출처의 캐시되는 404는 브라우저 캐시가 받는다).
+const CARD_IMG_PARALLEL = 3, CARD_IMG_WAIT_MS = 4000;
+const cardImgRuns = new WeakMap();   // 담는 요소 → { io, dead }
+const cardImgShown = new Set();   // 이 페이지에서 이미 보인 그림 주소
+function orderCardImages(root) {
+  const prev = cardImgRuns.get(root);
+  if (prev) { prev.io.disconnect(); prev.dead = true; }
+  const imgs = [...root.querySelectorAll('img[data-src]')];
+  if (!imgs.length) return;
+  const run = { io: null, dead: false };
+  const state = imgs.map(() => 0);   // 0 화면 밖 · 1 받을 차례 대기 · 2 받는 중 · 3 받음(또는 기다림 끝) · 4 보임
+  const queue = [];
+  let active = 0;
+  const show = () => {   // 줄 선 그림을 위에서부터 — 받는 중인 그림에서 멈춘다(화면 밖이라 줄에 안 선 그림은 건너뛴다)
+    if (run.dead) return;
+    for (let i = 0; i < imgs.length; i++) {
+      if (state[i] === 0 || state[i] === 4) continue;
+      if (state[i] !== 3) break;
+      imgs[i].src = imgs[i].dataset.src;
+      cardImgShown.add(imgs[i].dataset.src);
+      state[i] = 4;
+    }
+  };
+  const boxes = imgs.map(im => im.closest('.content-card-img') || im);   // 그림은 src 전엔 display: none이라 크기가 없다 — 칸을 본다
+  const pump = () => {
+    while (!run.dead && active < CARD_IMG_PARALLEL && queue.length) {
+      const i = queue.shift();
+      state[i] = 2;
+      run.io.unobserve(boxes[i]);
+      active++;
+      const im = new Image();
+      const done = () => { if (run.dead || state[i] !== 2) return; state[i] = 3; active--; show(); pump(); };
+      im.onload = im.onerror = done;
+      setTimeout(done, CARD_IMG_WAIT_MS);
+      im.src = imgs[i].dataset.src;
+    }
+  };
+  const at = new Map(boxes.map((b, i) => [b, i]));   // 관찰하는 칸 → 그림 차례
+  const scroller = /(auto|scroll)/.test(getComputedStyle(root).overflowY) ? root : null;   // 모아보기 모달(#lrBody)은 제 스크롤 상자가 기준
+  run.io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const i = at.get(e.target);
+      if (i === undefined) continue;
+      if (e.isIntersecting && state[i] === 0) { state[i] = 1; queue.push(i); }
+      else if (!e.isIntersecting && state[i] === 1) { state[i] = 0; queue.splice(queue.indexOf(i), 1); }   // 받기 전에 벗어나면 줄에서 뺀다(다시 오면 새로 선다)
+    }
+    queue.sort((a, b) => a - b);
+    pump();
+  }, { root: scroller, rootMargin: '800px 0px' });
+  imgs.forEach((im, i) => {
+    if (cardImgShown.has(im.dataset.src)) { im.src = im.dataset.src; state[i] = 4; return; }   // 이미 보인 그림 — 다시 그릴 때 자리가 접히지 않게 바로
+    run.io.observe(boxes[i]);
+  });
+  cardImgRuns.set(root, run);
+}
+
 function preloadProfileSet() {
   if (profilePreloaded) return;
   profilePreloaded = true;
@@ -10127,6 +10195,7 @@ function renderBanners() {
   body.innerHTML = items.length
     ? `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`   // 2026-09-08: 컨텐츠 카드와 같은 갈래(하나면 직행 · 둘 이상 모달 — 게시글·유튜브·B열 날짜의 다시보기)
     : '<div class="loading"><div>필터 조건에 맞는 현수막이 없습니다</div></div>';
+  orderCardImages(body);
   bindLinkPicks(body);
 }
 
@@ -10266,7 +10335,7 @@ function contentCardHtml(c, withVods) {
   // 현수막 시트 F열 명전 제외(hallOff) 카드: 얼굴 흑백 + 이름 글상자에 '(명전 제외)'(2026-09-24 Crenop — 참여는 했지만 '천타버스의 위상을 드높인'엔 세지 않는 현수막)
   const off = c.hallOff ? ' (명전 제외)' : '';
   const memberImgs = known.map(m => `<img src="${m.img}" alt="${escapeHtml(m.name)}" title="${escapeHtml(m.name)}${off}">`).join('');
-  const imgTag = c.url ? `<img src="${escapeHtml(sheetImgSrc(c.url))}" alt="${escapeHtml(c.title || '')}" loading="lazy">` : '';   // 지난 일정에서 온 컨텐츠는 그림이 없다 — 빈 src는 깨진 그림이 되므로 칸만 비운다
+  const imgTag = c.url ? `<img data-src="${escapeHtml(sheetImgSrc(c.url))}" alt="${escapeHtml(c.title || '')}">` : '';   // src는 orderCardImages가 위에서부터 차례로 채운다(그리는 곳이 그린 뒤 부른다)   // 지난 일정에서 온 컨텐츠는 그림이 없다 — 빈 src는 깨진 그림이 되므로 칸만 비운다
   // 카드를 누르면(2026-09-06 Crenop): 참여 멤버(G~)의 그날 다시보기를 자동으로 모아 고르기 모달에 담는다 — 수동 링크(C열)는 유튜브 편집본만 적으면 된다.
   // [왜 상자에 직접 넣지 않고 모달인가] 어느 다시보기가 어느 컨텐츠인지는 시스템이 모른다(같은 날 두 컨텐츠에 참여한 멤버의 다시보기는 양쪽에 다 든다 —
   //   9/4에 상자 안 타일을 뺀 이유). 모달은 '이 컨텐츠 날 이 사람들의 다시보기'로만 뜻을 좁혀 두어 그 난잡함이 카드 격자로 번지지 않는다.
@@ -10324,6 +10393,7 @@ function openContentCollect(key) {
   body.innerHTML = items.length
     ? `<div class="cc-collect-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
     : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없습니다${contentData.length === 0 ? ' — 컨텐츠 데이터를 불러오는 중이거나 불러오지 못했습니다' : ''}</div>`;
+  orderCardImages(body);
   bindLinkPicks(body, () => openContentCollect(key));   // 링크 둘 이상인 카드 → 고르기 모달(컨텐츠 탭과 같은 배선) — 닫으면 이 목록으로 복귀(2026-09-14)
   showModal();
 }
@@ -10344,6 +10414,7 @@ function renderContent() {
   body.innerHTML = items.length
     ? `<div class="content-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
     : '<div class="loading"><div>필터 조건에 맞는 컨텐츠가 없습니다</div></div>';
+  orderCardImages(body);
   bindLinkPicks(body);   // 카드 → 고르기 모달(수동 링크 + 관련 다시보기)
 }
 

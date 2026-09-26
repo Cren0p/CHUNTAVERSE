@@ -104,6 +104,14 @@
     --focus-ring: var(--accent);            /* 키보드 포커스 선(:focus-visible) — 어두운 화면은 민트 그대로. 라이트 모드는 짙은 색(아래 라이트 표 — 2026-09-26 Crenop D7 F '나') */
     --hover-mint: rgba(97,255,236,0.18);    /* 라이트 모드 hover의 옅은 민트 바탕(원래 민트 18% — 2026-09-26 Crenop D7 H '나'). 어두운 화면은 쓰지 않는다(hover = 민트 글자 그대로) */
     --sel-mint: rgba(97,255,236,0.5);       /* 라이트 모드 선택 표시 바탕(원래 민트 50% — 2026-09-27 Crenop D9 Q1·Q3 '다'). 어두운 화면은 쓰지 않는다(선택 = 민트 테두리·글자) */
+    /* 칸 바탕 네 자리(2026-09-27 Crenop D10 'Q1다 Q2나' — '라이트모드인데 칙칙한게 싫은거야'): 어두운 --surface2는 어디 놓이든 한 단 밝게 뜨는 층인데,
+       라이트 표의 --surface2(#E7EBF2)는 흰 카드보다도 바탕(#F2F4F8)보다도 어두워 움푹·칙칙했다. 어두운 화면은 넷 다 --surface2 그대로(화소까지 같음), 라이트 값은 아래 라이트 표 */
+    --raised: var(--surface2);              /* 바탕 위에 바로 놓인 행·칸(통계 방송 목록·클립 방송 머리·달력 칸) — 라이트 흰 카드 */
+    --cell: var(--surface2);                /* 흰 판(카드·띠·모달) 안의 칸·버튼(관련 링크 이름 칸·버튼, 목록 머리 버튼, 좋아요 묶음 머리·순위 버튼, 종·방송 수 칩, 서랍 버튼, 하루 모달 행) — 라이트 흰색, 선으로만 가른다.
+                                               테두리 없는 칸(방송 0일 때 방송 수 칩)은 모양이 사라지는 것을 알고 골랐다(D10 다의 대가) */
+    --row-hover: var(--surface2);           /* 흰 판 안 줄 hover·현재 줄 띠(최근 활동·좋아요 요청 줄, 통계 값, 크루 활동·프로필 모아보기 줄, 위 탭 줄) — 라이트 바탕색 */
+    --pill-panel: var(--surface2);          /* 기둥의 안 고른 버튼(기간·종류·범위·멤버·종류 칸·모두 선택·스위치)이 흰 판(서랍·모달) 위일 때 — 라이트 바탕색(테두리가 없어 흰색이면 안 보인다).
+                                               PC 기둥(바탕 위)은 --raised — 기둥 상자가 --pill로 준다(D10 Q2 '나'). 버튼 규칙은 var(--pill, var(--pill-panel)) */
     --on-accent: #070a14;                   /* 고유 색(민트) 칸 위에 올린 글자 — 탭 새 글 배지 숫자. 두 모드 같은 값(라이트 모드도 원래 민트라 짙은 글자) */
     --accent-solid: #61FFEC;                /* 원래 민트를 면으로 칠하는 곳 — 라이트 모드의 굵은 막대(로딩·케미 줄머리 3px)·명패 기본색(TITLE_BADGE_FALLBACK). 선택 표시 바탕은 50% 겹(--sel-mint).
                                                라이트 표가 --accent를 한 톤 낮춘 민트로 바꾸므로(D6 S 나) 원래 값은 이 이름으로 읽는다. 어두운 화면은 --accent와 같은 값 */
@@ -237,6 +245,10 @@
                                         멤버 색으로 채운 최애·기념일 버튼은 문모모 3.87·모카 4.04(잰 자리 모두 3 이상 — 시트 버튼 색은 시트가 정해 더 낮을 수 있다) */
     --surface: #FFFFFF;
     --surface2: #E7EBF2;
+    --raised: #FFFFFF;          /* = --surface: 바탕 위 행·칸은 흰 카드(D10 Q1 '다') */
+    --cell: #FFFFFF;            /* 흰 판 안 칸·버튼도 흰색 — 선(--border)으로만 가른다 */
+    --row-hover: #F2F4F8;       /* = --bg: 흰 판 안 줄 hover·현재 줄 */
+    --pill-panel: #F2F4F8;      /* = --bg: 서랍·모달 속 기둥 버튼(D10 Q2 '나') */
     --border: #CDD4E0;
     --text: #0F172A;
     --text2: #334155;
@@ -379,7 +391,7 @@
     transition: color 0.15s, background 0.15s, border-color 0.15s;
     position: relative;
   }
-  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item:hover { color: var(--text); background: var(--row-hover); }
   /* 새 좋아요 요청 표시 — 구 보조바 버튼의 점을 탭으로 옮긴 것(2026-08-31). 생방송 점과 같은 자리·크기 */
   .nav-item.has-new::after {
     content: ''; position: absolute; top: 4px; right: 6px;
@@ -418,7 +430,7 @@
     align-items: center;
     gap: 5px;
     padding: 2px 8px;
-    background: var(--surface2);
+    background: var(--cell);
     min-height: 17px;   /* 구 높이 앵커 — 텍스트 라인박스(11px×lh normal≈13)+패딩4가 만들던 17px을, 숫자가 SVG(≈8px)로 바뀌며 명시값으로 대체 */
     color: var(--muted);
     transition: color 0.15s;
@@ -454,7 +466,7 @@
     /* 상자(2026-09-03 Crenop): 같은 줄의 다른 버튼(.page-title-link)과 같은 옷 — 테두리는 앰버로 고정, 켬/끔은 종 색과 바탕색(무채↔앰버 반투명) */
     padding: 5px 8px;
     --btn-rgb: var(--amber-rgb);   /* 앰버 — 테두리 비율(40%)은 다른 버튼과 공통 */
-    background: var(--surface2);   /* 끔: 무채 바탕(Crenop 지정) */
+    background: var(--cell);   /* 끔: 무채 바탕(Crenop 지정) */
     border: 1px solid rgba(var(--btn-rgb), var(--btn-a-border));
     font-size: 12px; line-height: 16px;   /* .page-title-link과 같은 글줄 → 상자 높이가 같다(아래 ::after의 빈 글줄이 높이를 만든다) */
   }
@@ -496,7 +508,7 @@
     position: relative;
     width: 36px;
     height: 20px;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid var(--border);
     cursor: pointer;
     transition: all 0.15s;
@@ -558,7 +570,7 @@
   .drawer-close {
     display: none; align-items: center; justify-content: center;
     width: 34px; height: 34px; flex-shrink: 0; margin-left: 10px;
-    background: var(--surface2); border: 1px solid var(--border);
+    background: var(--cell); border: 1px solid var(--border);
     color: var(--muted); cursor: pointer;
   }
   .drawer-close svg { width: 22px; height: 22px; display: block; }   /* ☰·체크박스와 같은 22px(2026-09-13 상자 안 아이콘 통일) */
@@ -621,7 +633,7 @@
   .drawer-btn {
     display: none; align-items: center; justify-content: center;
     width: 34px; height: 34px; flex-shrink: 0;
-    background: var(--surface2); border: 1px solid var(--border);
+    background: var(--cell); border: 1px solid var(--border);
     color: var(--muted); cursor: pointer; position: relative;
     transition: color 0.15s, border-color 0.15s;
   }
@@ -848,7 +860,7 @@
     display: flex; align-items: center;
     padding: 10px 16px 10px 14px;          /* 1줄 고정: 줄높이 17 + 상하 10 + 테두리 2 = 39px 균일 */
     border-left: 4px solid transparent;    /* 행의 신규 표시 자리(4px)와 좌변 통일 — 헤더·행 글 시작점 = 18px 일치 */
-    background: var(--surface2);
+    background: var(--cell);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     font-size: 12px; font-weight: 700; color: var(--text2);
@@ -861,7 +873,7 @@
     border-left: 4px solid transparent;    /* 신규(안읽음) 표시 자리 — 이벤트 탭 .event.unread와 동일 방식 */
   }
   .lrq-row + .lrq-row { border-top: 1px solid var(--divider); }
-  .lrq-row:hover { background: var(--surface2); }
+  .lrq-row:hover { background: var(--row-hover); }
   .lrq-row.unread { border-left-color: var(--ev-unread); background: var(--unread-bg); box-shadow: inset 4px 0 12px -4px var(--unread-glow); }
   .lrq-row.unread:hover { background: var(--unread-bg-hover); }
   .lrq-link {
@@ -885,7 +897,7 @@
     color: transparent; cursor: pointer;    /* 체크 글리프는 상시 렌더·미체크 땐 투명 — 토글이 행 클래스 하나로 끝난다 */
   }
   .lrq-check svg { width: 14px; height: 14px; display: block; }
-  .lrq-check:hover { background: var(--surface2); border-color: var(--muted); }
+  .lrq-check:hover { background: var(--row-hover); border-color: var(--muted); }
   .lrq-row.checked .lrq-check { border-color: var(--like-check-border); background: var(--like-check-bg); color: var(--like-text); }
   .lrq-row.checked .lrq-link { opacity: 0.5; }   /* 처리한 요청은 살짝 가라앉힘(목록엔 남음) */
   /* 다가오는 일정: 버튼 카운트다운 + 모달 리스트(좋아요 모달의 lr-overlay 골격 재사용) */
@@ -1266,7 +1278,7 @@
   .filter-toggle-all {
     width: 38px;
     flex-shrink: 0;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid var(--border);
     color: var(--accent);
     cursor: pointer;
@@ -1288,7 +1300,7 @@
   .filter-member {
     position: relative;
     aspect-ratio: 1;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid var(--border);
     cursor: pointer; overflow: hidden;
     transition: all 0.15s; padding: 0;
@@ -1311,7 +1323,7 @@
     color: var(--text);   /* 이 규칙에만 색 선언이 빠져 있어 버튼의 UA 기본색(검정)이 나왔다. 같은 판의 다른 글자 버튼(모두 해제)은 색을 갖고 있어 멀쩡했다 */
     aspect-ratio: 1;
     min-height: 0; overflow: hidden;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid var(--border);
     cursor: pointer; transition: all 0.15s;
   }
@@ -1346,7 +1358,7 @@
     border-left: 4px solid transparent;
     position: relative;
   }
-  .event:hover { background: var(--surface2); }
+  .event:hover { background: var(--row-hover); }
   .event + .event { border-top: 1px solid var(--border); }
   .event.unread {
     border-left-color: var(--ev-unread);
@@ -1544,7 +1556,7 @@
     align-items: center;
     gap: 6px;
     padding: 5px 10px;
-    background: var(--surface2);
+    background: var(--cell);
     border: 1px solid var(--border);
     color: var(--muted);
     cursor: pointer;
@@ -1563,7 +1575,7 @@
     align-items: center;
     gap: 6px;
     padding: 5px 10px;
-    background: var(--surface2);
+    background: var(--cell);
     border: 1px solid var(--border);
     color: var(--muted);
     cursor: pointer;
@@ -1605,7 +1617,7 @@
   .stats-period-row .stats-month-btn { width: 38px; height: auto; align-self: center; }
 
   .stats-period-btn {
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid transparent;
     color: var(--muted);
     font-family: inherit; font-size: 12px; font-weight: 700;
@@ -1618,7 +1630,7 @@
   .cal-tab {   /* .cal-tab = 달력 탭 멤버 스트립(2026-09-02). 같은 클래스를 쓰면 selectStatsTab이 문서 전체 .stats-tab의 활성을 갈아 끼운다 */
     position: relative;
     aspect-ratio: 1;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid transparent;
     cursor: pointer;
     overflow: hidden;
@@ -1638,6 +1650,7 @@
   .cal-tab:not(.active) { border-color: transparent; }
   .cal-tab.active { border-color: var(--accent); }
   .cal-tab:hover { border-color: var(--accent); }
+  @media (min-width: 1151px) { :is(.side-pick, .filter-panel, .chem-filter-panel) { --pill: var(--raised); } }   /* PC 기둥은 바탕 위 — 안 고른 버튼 흰색(라이트, D10 Q2 '나'). 서랍(≤1150)·모달은 --pill-panel */
 
   /* 통계 상단(2026-09-18 3차, Crenop 피드백): 좌 = 지표 8행 목록(사진·이름 없음) · 우 = 시간 통계 다섯 값 + 시간대 그래프. 두 상자는 같은 행에서 높이를 맞춘다(stretch).
      좁으면(≤860) 위아래. 시간 관련 숫자는 그래프 옆에 두어 묶음이 보이게 한다. */
@@ -1664,7 +1677,7 @@
   .stats-time-row { display: flex; justify-content: center; align-items: center; gap: 8px 20px; }
   /* 항목/값 부품(좌 지표 8 · 우 시간 통계 5 공용, 2026-09-18 4차): 항목 위·값 아래, 클릭 = 추이 모달, hover 민트 테두리 */
   .stats-kv { display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; padding: 2px 6px; margin: -3px -7px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
-  .stats-kv:hover { background: var(--surface2); border-color: var(--accent); }
+  .stats-kv:hover { background: var(--row-hover); border-color: var(--accent); }
   .stats-kv-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
   .stats-kv-value { font-size: 13px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .stats-kv-value .hl { color: var(--kv-hl); }   /* 시간대·주중주말 구성에서 가장 큰 항목 */
@@ -1710,7 +1723,7 @@
   .calendar-weekday.sat { color: var(--day-sat); }
   .calendar-day {
     aspect-ratio: 1;
-    background: var(--surface2);
+    background: var(--raised);
     border: 1.5px solid transparent;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -1865,7 +1878,7 @@
     display: flex;
     gap: 10px;
     padding: 8px 10px;
-    background: var(--surface2);
+    background: var(--cell);
     border: 1px solid var(--border);
     margin-bottom: 6px;
     text-decoration: none;
@@ -1900,11 +1913,12 @@
 
   /* (.day-detail 컨테이너 CSS는 v2에서 제거 — 패널이 사라지고 내용물은 .cal-week-detail 확장 슬롯 안에서 렌더) */
   .day-session {
-    background: var(--surface2);
+    background: var(--cell);
     border: 1px solid var(--border);
     padding: 10px 12px; margin-bottom: 8px;
     display: block; text-decoration: none; color: inherit;
   }
+  .stats-sessions .day-session, #clipsBody .day-session { background: var(--raised); }   /* 바탕 위 방송 행 — 흰 판(하루 모달) 속 행은 위 --cell(D10) */
   .day-session:hover { border-color: var(--accent); }
   button.day-session { width: 100%; font: inherit; text-align: left; color: inherit; cursor: pointer; }   /* 2개↑ 다시보기 → 선택 모달(2026-09-06) — <a> 행과 같은 모양 */
   .day-session-time {
@@ -2035,7 +2049,7 @@
   .links-table th:last-child, .links-table td:last-child { border-right: none; }
   .links-table tr:last-child td { border-bottom: none; }
   .links-table th {
-    background: var(--surface2);
+    background: var(--cell);
     font-size: 12px;
     font-weight: 700;
     padding: 10px 6px;
@@ -2065,7 +2079,7 @@
     justify-content: center;
     gap: 4px;
     padding: 6px 8px;
-    background: var(--surface2);
+    background: var(--cell);
     border: 1px solid var(--border);
     color: var(--text);
     text-decoration: none;
@@ -2670,7 +2684,7 @@
   .stats-kind { display: grid; gap: 6px; margin-bottom: 12px; }
   .stats-kind-btn {
     font-family: inherit; font-size: 12px; font-weight: 600;
-    padding: 8px 10px; background: var(--surface2);
+    padding: 8px 10px; background: var(--pill, var(--pill-panel));
     border: 1.5px solid transparent; color: var(--muted);
     cursor: pointer; transition: all 0.15s; text-align: center;
   }
@@ -2695,7 +2709,7 @@
   .stats-bar { display: flex; align-items: center; gap: 8px; }
   .stats-bar-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--muted); user-select: none; }   /* .filter-title과 같은 규격 — 둘 다 '이 묶음이 무엇인가'를 말하는 층. 13px은 가독성 우선(Crenop) */
   .stats-range { display: flex; gap: 4px; flex-wrap: wrap; }
-  .stats-range-btn { font-family: inherit; font-size: 12px; font-weight: 600; padding: 5px 10px; background: var(--surface2); border: 1.5px solid transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }   /* inherit 없으면 버튼은 UA 기본 폰트라 Pretendard를 못 받는다 — 통계 탭 .stats-period-btn과 동일 처리(2026-08-10) */
+  .stats-range-btn { font-family: inherit; font-size: 12px; font-weight: 600; padding: 5px 10px; background: var(--pill, var(--pill-panel)); border: 1.5px solid transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }   /* inherit 없으면 버튼은 UA 기본 폰트라 Pretendard를 못 받는다 — 통계 탭 .stats-period-btn과 동일 처리(2026-08-10) */
   /* 문법 통일(2026-08-31): 같은 '기간 고르기'인데 여기만 평소 테두리 있음·hover=테두리·선택=배경교체라
      통계 기간 버튼과 다른 옷이었다. .stats-period-btn 문법에 맞춘다 — hover=글씨, 선택=테두리+글씨. */
   .stats-range-btn:hover { color: var(--accent); }
@@ -2863,7 +2877,7 @@
   .profile-tab {
     position: relative;
     aspect-ratio: 1;
-    background: var(--surface2);
+    background: var(--pill, var(--pill-panel));
     border: 1.5px solid transparent;
     cursor: pointer;
     overflow: hidden;
@@ -2976,7 +2990,7 @@
   .lrg-rank-btn {
     display: inline-flex; align-items: center; gap: 4px; flex: none; margin-left: auto;
     padding: 5px 12px; font-family: inherit; font-size: 12px; font-weight: 600;
-    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    background: var(--cell); border: 1px solid var(--border); color: var(--muted);
     cursor: pointer; transition: color 0.15s, border-color 0.15s;
   }
   .lrg-rank-btn:hover { border-color: var(--accent); }   /* 테두리가 있는 요소 → 테두리색 (상호작용 신호 규칙 ①) */
@@ -3077,7 +3091,7 @@
     padding: 2px 6px; margin: -2px -6px;   /* hover 링이 글자를 살짝 감싸도록 — 음수 마진으로 행 리듬은 그대로([data-mi] 기법) */
     transition: background 0.15s, box-shadow 0.15s;
   }
-  .crew-act-link:hover { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent); }
+  .crew-act-link:hover { background: var(--row-hover); box-shadow: inset 0 0 0 1px var(--accent); }
   .crew-act-link svg { width: 12px; height: 12px; display: inline-block; vertical-align: -1px; margin-left: 3px; color: var(--muted); }
   .crew-act-link .lk { white-space: nowrap; }   /* 행 내 인라인 아이콘은 무채색 — 시계 아이콘 규약(2026-07-17)과 통일 */
   /* 모아보기 모달: 폭은 그래프 모달과 동급(740px — 2열이 컨텐츠 탭 카드 크기에 근접), 카드는 컨텐츠 탭 재사용 */
@@ -3259,13 +3273,13 @@
     cursor: pointer; padding-left: 6px; padding-right: 6px; margin-left: -6px; margin-right: -6px;
     transition: background 0.15s, box-shadow 0.15s;
   }
-  .profile-info-row[data-mi]:hover, .profile-info-row-full[data-mi]:hover { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent); }
+  .profile-info-row[data-mi]:hover, .profile-info-row-full[data-mi]:hover { background: var(--row-hover); box-shadow: inset 0 0 0 1px var(--accent); }
   .mi-collect-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
   .mi-collect-row:last-child { border-bottom: none; }
   .mi-collect-row img { width: 26px; height: 26px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
   .mi-collect-name { font-size: 13px; font-weight: 700; flex-shrink: 0; }
   .mi-collect-val { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--text); text-align: right; }
-  .mi-collect-row.me { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }   /* 현재 보던 멤버 강조 — 좌측 민트 바 */
+  .mi-collect-row.me { background: var(--row-hover); box-shadow: inset 2px 0 0 var(--accent); }   /* 현재 보던 멤버 강조 — 좌측 민트 바 */
 
   /* 프로필/통계 상단 셀렉터: 1행(14칸, max-width 980 공통)이 폭 좁아지면 버튼이 작아짐. 메인 사이드바가 상단으로 가는 700px보다 앞서, 1100px부터 2행으로 전환(버튼 크게 유지). 멤버/통계=크루(일반 크기)+13을 7열 2행(줄바꿈: 카푸|캬앙) */
   @media (max-width: 1100px) {
@@ -3935,7 +3949,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-27c';   // 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-27d';   // 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';

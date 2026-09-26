@@ -103,8 +103,9 @@
     --warn: #FFA94D;                        /* 감지 지연 경고 */
     --focus-ring: var(--accent);            /* 키보드 포커스 선(:focus-visible) — 어두운 화면은 민트 그대로. 라이트 모드는 짙은 색(아래 라이트 표 — 2026-09-26 Crenop D7 F '나') */
     --hover-mint: rgba(97,255,236,0.18);    /* 라이트 모드 hover의 옅은 민트 바탕(원래 민트 18% — 2026-09-26 Crenop D7 H '나'). 어두운 화면은 쓰지 않는다(hover = 민트 글자 그대로) */
-    --on-accent: #070a14;                   /* 고유 색(민트) 칸 위에 올린 글자 — 탭 새 글 배지 숫자 · 라이트 모드 선택 표시(원래 민트 채움)의 글자·그림. 두 모드 같은 값(라이트 모드도 원래 민트라 짙은 글자) */
-    --accent-solid: #61FFEC;                /* 원래 민트를 면으로 칠하는 곳 — 라이트 모드의 선택 표시 채움·굵은 막대(탭 밑줄·로딩·케미 줄머리 3px)·명패 기본색(TITLE_BADGE_FALLBACK).
+    --sel-mint: rgba(97,255,236,0.5);       /* 라이트 모드 선택 표시 바탕(원래 민트 50% — 2026-09-27 Crenop D9 Q1·Q3 '다'). 어두운 화면은 쓰지 않는다(선택 = 민트 테두리·글자) */
+    --on-accent: #070a14;                   /* 고유 색(민트) 칸 위에 올린 글자 — 탭 새 글 배지 숫자. 두 모드 같은 값(라이트 모드도 원래 민트라 짙은 글자) */
+    --accent-solid: #61FFEC;                /* 원래 민트를 면으로 칠하는 곳 — 라이트 모드의 굵은 막대(로딩·케미 줄머리 3px)·명패 기본색(TITLE_BADGE_FALLBACK). 선택 표시 바탕은 50% 겹(--sel-mint).
                                                라이트 표가 --accent를 한 톤 낮춘 민트로 바꾸므로(D6 S 나) 원래 값은 이 이름으로 읽는다. 어두운 화면은 --accent와 같은 값 */
     /* 보조바 버튼(.page-title-link 비율표) — 버튼은 --btn-rgb(세 값)만 주고 바탕·테두리·호버 비율은 여기 */
     --btn-a-bg: 0.12;
@@ -226,7 +227,7 @@
      사이트 고유 색은 어두운 화면 값 그대로 둔다(2026-09-25 Crenop '멤버 기본 색처럼 사이트 내에서 고유의 색을 가지고 있던 것들은 유지하면서 N2 같은 효과로 구분감'):
      멤버 색·민트 겹 색·생방송 빨강·활동 종류·모드 배지·앰버·좋아요·플레이리스트·칭호 명패·종류 그림·통계 그림·그래프·요일·대결·경고·브랜드와 링크·시트 버튼 색·메달.
      민트만 예외(2026-09-26 Crenop D6 S '나' — 번짐을 깔아도 원래 민트 글자는 흰 바탕에서 안 읽혔다): 글자·그림·선·테두리는 번짐 없이 한 톤 낮춘 민트(--accent 아래 값),
-     원래 민트는 선택 표시의 채움과 굵은 막대로만(--accent-solid — 아래 '라이트 모드 전용 규칙').
+     원래 민트는 굵은 막대(--accent-solid)와 선택 표시 바탕(50% 겹 --sel-mint)으로만 — 아래 '라이트 모드 전용 규칙'.
      구분감은 아래 '라이트 모드 전용 규칙'의 N3(그 색과 같은 색상의 아주 진한 색 세 겹 번짐 — 이 표 끝의 --이름-glow) — 고유 색으로 칠한 글자·그림·선·점·얇은 테두리(2px 이하)의 색이
      천양(#43EAF6)만큼 옅거나 더 옅을 때만(상대 휘도 ≥ 천양). 옅은 바탕 칠(겹 색)엔 효과 없음.
      새 토큰: 고유 색이면 여기 넣지 않는다(그 색의 상대 휘도가 천양 이상이면 번짐 색 --이름-glow만 이 표 끝에 같은 식으로 더하고 N3 목록에). 구조용 무채색이면 여기에 밝은 값. */
@@ -258,7 +259,7 @@
     --graph-bar-text: #000000;                  /* 쌓은 막대 안 숫자의 짙은 쪽 — 라이트 모드는 칸마다 이것과 흰색(--surface) 중 대비 큰 쪽(drawTimeGraph). 검정이라야 중간 칸(밝기 .58·.72)에서도 4.7 이상(#0F172A면 4.27) */
     --heat-empty: #E7EBF2;
     --accent: #00C2B1;               /* 민트 전경(글자·그림·선·얇은 테두리 — 2026-09-26 Crenop D6 S '나'): 번짐 대신 원래 민트 색상 그대로 밝기만 낮춘 값 = 프로필 관련 링크 버튼(--quick-link-light)과 같은 값
-                                        (흰 카드 대비 2.25). 선택 표시는 원래 민트 채움 + 짙은 글자(--accent-solid·--on-accent), 굵은 막대도 원래 민트 */
+                                        (흰 카드 대비 2.25). 선택 표시는 원래 민트 50% 바탕 + 보통 글자(--sel-mint — D9), 굵은 막대는 원래 민트(--accent-solid) */
     /* N3 번짐 색(2026-09-25 Crenop '대비를 위해 적용하기로 한 효과가 N3면 나머지도 전부 N3') — 천양만큼 옅은 고유 색마다 하나. 그 색과 같은 색상, OKLCH 밝기 0.35,
        채도 max(C, 0.05)(채도가 사실상 0인 흰색·회색은 0)·sRGB 색역 안 — 멤버 번짐(LIGHT_GLOW)·시트 색(n3Shade)과 같은 식(스위트가 다시 계산해 대조).
        글자·테두리 = 이 색 세 겹(1·2·3px), 그림 = ensureGlowDefs가 만드는 #n3-이름 필터(같은 색 — N3_TOKENS). 민트는 2026-09-26부터 번짐 없음(위 --accent).
@@ -1977,7 +1978,7 @@
   .clip-stack::after { top: 4px; left: 8px; right: 8px; opacity: 0.6; }
   .clip-same { position: absolute; left: 6px; bottom: 6px; display: inline-flex; align-items: center; height: 22px; padding: 0 7px; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap; color: var(--text); background: var(--surface); border: 1px solid var(--border); }
   .clip-stack .ds-vod:hover .clip-same { border-color: var(--accent); }
-  /* 묶음(구간 모름·원본 방송 없음)은 흐름 한 줄을 통째로 — 머리는 방송 순의 원본 방송 머리와 같은 부품 */
+  /* 묶음(구간 모름·원본 방송 없음)은 흐름 한 줄을 통째로 — 머리는 방송순의 원본 방송 머리와 같은 부품 */
   .clip-block { grid-column: 1 / -1; min-width: 0; padding-top: 8px; }
   .clip-bc { margin: 8px 0 0; }
   .clip-block > .clip-bc { margin-top: 0; }
@@ -1987,7 +1988,7 @@
   .clip-bc-n, .clip-np { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
   .clip-np-row { grid-column: 1 / -1; min-width: 0; padding-top: 14px; line-height: 16px; }   /* 섞인 방송의 구간 모르는 클립 이름표 줄(clipBroadHtml) — 흐름 한 줄을 통째로 */
   .clip-bc .nav-live-badge { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 1px 6px; min-height: 0; white-space: nowrap; }   /* 상단바 생방송 수와 같은 옷 */
-  .clip-bc-ext { font-size: 13px; font-weight: 600; color: var(--text3); }   /* '크루 밖 방송'·'원본 방송 없음' — 제목이 없는 머리의 이름 자리 */
+  .clip-bc-ext { font-size: 13px; font-weight: 600; color: var(--text3); }   /* '외부인 방송'·'원본 방송 없음' — 제목이 없는 머리의 이름 자리 */
   .clip-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
   /* 목록 끝 줄: 하루 더 불러오는 중 / 실패 / 창 끝 — 화면에 가까워지면 다음 날(clipObserve) */
   .clip-more { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; }
@@ -3481,19 +3482,23 @@
      JS가 인라인으로 칠하는 고유 색(통계·명전 그림)은 토큰 이름으로 고르고, 시트가 주는 색은 n3Mark·n3Glow가 붙인 --n3(번짐 색)·--n3f(필터 주소)로.
      새 고유 색 전경을 만들면: 그 색의 상대 휘도가 천양 이상이면 번짐 색 토큰(같은 식)과 그 색의 목록에 넣고, 아니면 넣지 않는다(verify_lightmode_20260924h 9절이 토큰 표와 두 방향으로 대조). */
   /* 민트(2026-09-26 Crenop D6 S '나' — 25g~26의 '원래 민트 + N3 번짐'은 번짐을 깔아도 가독성이 떨어졌다): 번짐 없음, 두 가지로만 칠한다.
-     ① 선택 표시(고른 탭·기간·종류·정렬·순위 버튼 · 켠 종류 칸 · 켠 스위치 · 고른 사진 칸) = 원래 민트로 채우고(바탕·테두리 --accent-solid) 글자·그림은 짙게(--on-accent).
-        원래 민트 글자는 회색 버튼 바탕(#E7EBF2) 위 대비 1.03이라 번짐 덕에만 읽혔다 — 채우면 16.0. 사진 칸은 오려낸 그림이라 칸 바탕이 캐릭터 뒤로 보인다(글자 없음).
-        종류 칸의 제 색 그림(채팅 보라 등)은 제 색 그대로, 스위치 손잡이는 짙게.
+     ① 선택 표시(고른 탭·기간·종류·정렬·순위 버튼 · 켠 종류 칸 · 켠 스위치 · 고른 사진 칸) = 원래 민트 50% 바탕(--sel-mint) + 보통 글자(--text), 테두리는 끈 상태 그대로
+        (없던 칸은 없음 — 위 탭 밑줄도 없다 · 회색이던 종류 칸·정렬·순위 버튼·스위치는 회색 --border). 2026-09-27 Crenop D9 'Q1다 Q3다' — 종전(D6 S 나) 원래 민트 꽉 채움 + 짙은 글자는
+        켠 칸이 많은 기둥이 민트 면으로 가득해 무거웠다. 원래 민트 글자는 회색 버튼 바탕(#E7EBF2) 위 대비 1.03이라 글자는 민트로 칠하지 않는다(50% 바탕 위 보통 글자 15.0 — 서랍 15.7).
+        알고 둔 것: 회색 버튼(기간·종류·범위)의 hover도 민트 깔기(원래 민트 18%)라 선택과는 진하기로만 갈린다(ΔE 10.5 — 비교 D9에서 알고 고름).
+        사진 칸은 오려낸 그림이라 바탕이 캐릭터 뒤로 보인다(글자 없음). 종류 칸의 제 색 그림(채팅 보라 등)은 제 색 그대로, 스위치 손잡이는 한 톤 낮춘 민트(--accent — 어두운 화면과 같은 규칙).
      ② 나머지 민트 글자·그림·선·얇은 테두리(hover·키보드 포커스 윤곽선 포함) = 라이트 표의 --accent(원래 민트 색상 그대로 한 톤 낮춘 #00C2B1 — 프로필 관련 링크 버튼과 같은 값).
         규칙 없이 토큰으로 따라온다.
-     굵은 막대(탭 밑줄 3px — ①의 채움과 한 덩어리 · 로딩 3px · 케미 줄머리 3px)는 원래 민트, 안 읽음 표시(4px 막대·탭 배지 — --ev-unread)도 원래 민트. 탭 새 글 점(8px)은 작은 표시라 ②.
+     굵은 막대(로딩 3px · 케미 줄머리 3px)는 원래 민트, 안 읽음 표시(4px 막대·탭 배지 — --ev-unread)도 원래 민트. 탭 새 글 점(8px)은 작은 표시라 ②.
      새 선택 상태(.active·.on으로 민트를 칠하는 것)를 만들면 ① 목록에 넣는다(verify_lightmode_20260924h S절이 어두운 규칙과 대조) */
-  :root[data-theme="light"] .nav-item.active, :root[data-theme="light"] .stats-period-btn.active, :root[data-theme="light"] .stats-kind-btn.active, :root[data-theme="light"] .stats-range-btn.active, :root[data-theme="light"] .sort-toggle.active, :root[data-theme="light"] .lrg-rank-btn.on, :root[data-theme="light"] .filter-type.on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--on-accent); }
-  :root[data-theme="light"] .filter-member.on, :root[data-theme="light"] .cal-tab.active, :root[data-theme="light"] .profile-tab.active, :root[data-theme="light"] .notify-switch.on { background: var(--accent-solid); border-color: var(--accent-solid); }
-  :root[data-theme="light"] .notify-switch.on::after { background: var(--on-accent); }
-  /* 고른 천타버스 칸(클립 crew·음악 all·프로필 크루 탭): 로고가 원래 민트라 민트 채움에 묻혀 빈 네모였다 → 로고를 짙게(선택 문법 '민트 채움 + 짙은 그림' 그대로, 새 그림 파일 없음 — 2026-09-26 Crenop D8 Q1 '나').
-     로고의 별은 투명이라 채움이 비친다. 대비 17.02. 꺼진 칸·어두운 화면은 그대로 */
-  :root[data-theme="light"] :is(.cal-tab[data-member="crew"], .cal-tab[data-member="all"], .profile-tab-crew).active img { filter: brightness(0); }
+  :root[data-theme="light"] .nav-item.active, :root[data-theme="light"] .stats-period-btn.active, :root[data-theme="light"] .stats-kind-btn.active, :root[data-theme="light"] .stats-range-btn.active { background: var(--sel-mint); border-color: transparent; color: var(--text); }
+  :root[data-theme="light"] .sort-toggle.active, :root[data-theme="light"] .lrg-rank-btn.on, :root[data-theme="light"] .filter-type.on { background: var(--sel-mint); border-color: var(--border); color: var(--text); }
+  :root[data-theme="light"] .filter-member.on, :root[data-theme="light"] .cal-tab.active, :root[data-theme="light"] .profile-tab.active { background: var(--sel-mint); border-color: transparent; }
+  :root[data-theme="light"] .notify-switch.on { background: var(--sel-mint); border-color: var(--border); }
+  /* 천타버스 칸(클립 crew·음악 all·프로필 크루 탭) 로고: 원래 민트라 민트 바탕에 묻히고, 꺼지면 흑백 25%가 거의 흰 회색이라 안 보였다(칸 대비 1.04) →
+     켜짐·꺼짐 모두 #5B5B5B(Title-L 글자와 같은 회색 — brightness(0) 뒤 invert(0.357): 0.357 × 255 = 91 = 0x5B), 꺼짐은 멤버 사진과 같은 25%(:not(.active) 규칙 그대로 — 칸 대비 약 1.4).
+     켠 칸은 50% 민트 위 5.7(PC 기둥)·6.0(서랍)(2026-09-27 Crenop D9 Q2 '나' — 종전 D8의 켠 칸 검정은 무거웠다). 로고의 별은 투명이라 바탕이 비친다. 어두운 화면은 그대로 */
+  :root[data-theme="light"] :is(.cal-tab[data-member="crew"], .cal-tab[data-member="all"], .profile-tab-crew) img { filter: brightness(0) invert(0.357); }
   :root[data-theme="light"] .spinner { border-top-color: var(--accent-solid); }
   :root[data-theme="light"] .chem-track-title::before { background: var(--accent-solid); }
   :root[data-theme="light"] .nav-item.has-new::after { background: var(--accent); }
@@ -3825,7 +3830,7 @@
     </div>
   </div>
 
-  <!-- 클립 탭(2026-09-26 Crenop): 고른 사람의 숲 클립·캐치를 두 칸으로 — [본인 방송 | 언급], 천타버스 칸은 [크루 방송 | 크루 밖 방송]. renderClipsTab()이 채운다.
+  <!-- 클립 탭(2026-09-26 Crenop): 고른 사람의 숲 클립·캐치를 두 칸으로 — [본인 방송 | 타인 방송], 천타버스 칸은 [멤버 방송 | 외부인 방송](2026-09-27 Crenop — 종전 [본인 방송 | 언급]·[크루 방송 | 크루 밖 방송]). renderClipsTab()이 채운다.
        기둥 = 멤버 스트립(천타버스 + 13명, 하나만 — 달력·통계·음악과 같은 .member-strip·.cal-tab). -->
   <div class="page" id="page-clips">
     <div class="stats-wrap">
@@ -3930,7 +3935,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-26i';   // 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송 순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 올라온 순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-27c';   // 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7245,12 +7250,13 @@ function renderCalSide() {
 }
 
 // ══ 클립 탭 (2026-09-26 Crenop) ═══════════════════════════════════════════════
-// 숲 클립·캐치(둘을 가르지 않는다)를 고른 사람 기준 두 칸으로 — [본인 방송 | 언급], 천타버스 칸은 [크루 방송 | 크루 밖 방송]. 휴대폰도 두 칸(360px에서 타일 약 150 — Crenop 수용).
+// 숲 클립·캐치(둘을 가르지 않는다)를 고른 사람 기준 두 칸으로 — [본인 방송 | 타인 방송], 천타버스 칸은 [멤버 방송 | 외부인 방송](이름 2026-09-27 Crenop). 휴대폰도 두 칸(360px에서 타일 약 150 — Crenop 수용).
 // 자료 = 워커 GET /clips?member=&col=own|men&day=(워커 clipsRoute 곁 주석). 응답 한 장은 등록일(KST)을 통째로 담는다 — (next, day] 또는 [창 첫날, day](complete),
-//   truncated면 그 하루의 일부. 칸마다 받은 날(cov)을 기억하고 두 칸이 다 받은 날만 화면에 연다(depth) — 한 칸만 앞서 가면 두 칸의 날짜가 어긋나 보인다.
-//   목록 끝의 '불러오는 중' 줄이 화면에 가까워지면(IntersectionObserver) 하루 더. pending > 0이면 retry_after초 뒤 같은 날을 다시(CLIP_RETRY_MAX번까지) —
+//   truncated면 그 하루의 일부. 칸마다 받은 날(cov)과 연 날 수(depth[칸])를 따로 둔다 — 칸마다 끝에 '불러오는 중' 줄이 있고 그 줄이 화면에 가까워지면
+//   (IntersectionObserver) 그 칸만 하루 더(2026-09-27 Crenop — 종전엔 두 칸이 다 받은 날만 열고 목록 맨 아래 한 줄이라, 짧은 칸은 긴 칸 끝까지 내려가야 채워졌다.
+//   대가: 두 칸이 연 날짜가 서로 다를 수 있다 — 칸마다 날짜 머리가 있어 읽는 데는 문제없다). pending > 0이면 retry_after초 뒤 같은 날을 다시(CLIP_RETRY_MAX번까지) —
 //   원본 구간·외부 방송인 목록을 워커가 응답 뒤에 채운다.
-// 정렬 둘(같은 버튼을 다시 누르면 거꾸로 — 통계 방송 목록과 같은 화살표): 올라온 순(등록 시각) · 방송 순(원본 방송 — 새 방송부터, 켜져 있는 방송은 맨 위,
+// 정렬 둘(같은 버튼을 다시 누르면 거꾸로 — 통계 방송 목록과 같은 화살표): 등록순(등록 시각) · 방송순(기본 — 2026-09-27 Crenop. 원본 방송 — 새 방송부터, 켜져 있는 방송은 맨 위,
 //   방송 안은 잘라 낸 자리 순). 거꾸로(과거부터)는 창 첫날부터 하루씩 연다 — 최신부터 받은 목록 위에 옛 날을 끼워 넣으면 읽던 자리가 밀린다.
 //   알고 둔 것: 거꾸로에선 응답 한 장이 새로 덮는 날이 요청한 그날 하나라, 창 앞쪽에 빈 날이 이어지면 빈 날마다 요청이 한 번씩 곧바로 나간다(칸마다 최대 30 —
 //   기본 방향은 한 장이 빈 날을 한꺼번에 덮는다). 지난 날은 워커 엣지 캐시 1일이라 숲 검색은 칸·날마다 하루 한 번까지.
@@ -7258,8 +7264,8 @@ function renderCalSide() {
 //   겹친 카드 한 장 + '같은 장면 N', 누르면 다시보기 선택 모달 틀에 전부(개수가 보이면 2개 이상은 모달 — 클릭 규칙). 대표 = 가장 긴 것.
 // 기본 제목(올린 사람이 제목을 안 쓴 것) 거르기: 크루 방송 것은 여기서 — 그 방송이 가졌던 제목(/stats 세션의 첫 제목·제목 변경·다시보기 제목)과
 //   같으면(exact·core·숫자 꼬리, 2026-09-26 R1 규칙) 뺀다. 외부 방송·닉뿐인 제목은 워커가 이미 뺐다. 개수는 남긴 것만 센다.
-// 구간을 아직 모르는 것은 원본 방송별로 모은다(방송 중 / 다시보기 대기 / 다시보기 없음 / 크루 밖 방송) — 올라온 순도 하나뿐이어도 묶음(방송 순과 같은 이름표).
-//   원본 방송 번호도 모르는 것(열쇠 u)은 모을 방송이 없어 올라온 순에선 한 장씩. 원본 방송이 없는 캐치(no_source)는 그날 아래 '원본 방송 없음'.
+// 구간을 아직 모르는 것은 원본 방송별로 모은다(방송 중 / 다시보기 대기 / 다시보기 없음 / 외부인 방송) — 등록순도 하나뿐이어도 묶음(방송순과 같은 이름표).
+//   원본 방송 번호도 모르는 것(열쇠 u)은 모을 방송이 없어 등록순에선 한 장씩. 원본 방송이 없는 캐치(no_source)는 그날 아래 '원본 방송 없음'.
 // 갱신: 폴링 없음 — 탭에 다시 들어오거나 멤버를 고를 때 오늘 몫이 5분 넘었으면 오늘을 다시 받는다(워커 엣지 캐시도 오늘 5분).
 // 다시 그리기: 응답이 연 날을 건드렸을 때만 목록을 통째로(아직 안 연 날·실패는 끝 줄만 — 통째 다시 쓰기는 휴대폰에서 날이 쌓일수록 수백 ms~수 초),
 //   통째로 그릴 땐 보던 타일의 화면 높이와 목록 안 초점을 되돌린다(clipKeep).
@@ -7269,9 +7275,9 @@ const CLIP_REFRESH_MS = 5 * 60 * 1000;  // 오늘 몫 다시 받기
 const CLIP_FAIL_WAIT_MS = 30 * 1000;    // 실패한 날은 30초 동안 다시 묻지 않는다(통계·달력 로더와 같은 값)
 const CLIP_OVERLAP = 0.5;               // 워커 CLIP_OVERLAP과 같은 값
 const CLIP_PFX = /^\s*\[\s*(클립|캐치)\s*\]\s*/;   // 숲이 미리 채우는 말머리 — 둘을 가르지 않으므로 떼고 보인다
-const CLIP_SORTS = [{ key: 'reg', label: '올라온 순', ic: 'clockTime' }, { key: 'broad', label: '방송 순', ic: 'soop' }];
-// member: 'crew' | 멤버 id (null = 아직 안 골랐다 — 들어올 때 최애, 없으면 천타버스) · depth: 읽는 차례로 연 날 수 · stores: 'member|col' → 칸 자료 · groups: 그린 같은 장면(모달이 읽는다)
-const clipState = { member: null, sort: 'reg', asc: false, depth: 0, stores: {}, groups: new Map(), io: null };
+const CLIP_SORTS = [{ key: 'reg', label: '등록순', ic: 'clockTime' }, { key: 'broad', label: '방송순', ic: 'soop' }];   // 표기: 명사 + 접미사 '-순' 붙여 씀(다른 탭 '시간순'·'날짜순'과 같다)
+// member: 'crew' | 멤버 id (null = 아직 안 골랐다 — 들어올 때 최애, 없으면 천타버스) · depth: 칸마다 읽는 차례로 연 날 수 · stores: 'member|col' → 칸 자료 · groups: 그린 같은 장면(모달이 읽는다)
+const clipState = { member: null, sort: 'broad', asc: false, depth: { own: 0, men: 0 }, stores: {}, groups: new Map(), io: null };
 
 function clipToday() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
 function clipAddDays(d, n) { return new Date(Date.parse(d + 'T00:00:00Z') + n * 86400e3).toISOString().slice(0, 10); }
@@ -7366,17 +7372,17 @@ function clipFetch(st, day, attempt) {
       clipRedraw(st, []);
     });
 }
-// 연 날 = 읽는 차례로 depth일까지 중 두 칸이 다 가진 앞부분(k일) · target = 다음에 열 날(창 끝이면 null)
-function clipOpenDays() {
-  const seq = clipSeq(clipToday(), clipState.asc), stores = ['own', 'men'].map(c => clipStore(clipState.member, c));
-  const lim = Math.min(clipState.depth, seq.length);
-  let k = 0; while (k < lim && stores.every(st => st.cov.has(seq[k]))) k++;
-  return { seq, stores, k, shown: new Set(seq.slice(0, k)), target: k < seq.length ? seq[k] : null };
+// 한 칸의 연 날 = 읽는 차례로 depth[칸]일까지 중 그 칸이 받은 앞부분(k일) · target = 그 칸이 다음에 열 날(창 끝이면 null)
+function clipOpenDays(col) {
+  const seq = clipSeq(clipToday(), clipState.asc), st = clipStore(clipState.member, col);
+  const lim = Math.min(clipState.depth[col], seq.length);
+  let k = 0; while (k < lim && st.cov.has(seq[k])) k++;
+  return { seq, st, k, shown: new Set(seq.slice(0, k)), target: k < seq.length ? seq[k] : null };
 }
-// 응답이 담은 날(days — 실패는 빈 배열) 중 연 날이 있으면 목록을 다시, 없으면 끝 줄만(두 칸 중 먼저 온 쪽·아직 안 연 날·실패는 보이는 항목이 그대로다)
+// 응답이 담은 날(days — 실패는 빈 배열) 중 그 칸의 연 날이 있으면 목록을 다시, 없으면 그 칸 끝 줄만(아직 안 연 날·실패는 보이는 항목이 그대로다)
 function clipRedraw(st, days) {
   if (currentPage !== 'clips' || st.member !== clipState.member) return;
-  const o = clipOpenDays();
+  const o = clipOpenDays(st.col);
   if (days.some(d => o.shown.has(d))) renderClips(true);
   else clipMoreRow(o);
   updateHeaderCenter();
@@ -7386,29 +7392,27 @@ function clipLastAt() {   // 상단 띠의 '기준' 시각 — 지금 멤버 두
   const a = clipStore(clipState.member, 'own').todayAt, b = clipStore(clipState.member, 'men').todayAt;
   return a && b ? new Date(Math.min(a, b)) : null;
 }
-// 목록 끝 줄이 화면 근처에 오면: 다음 날을 두 칸이 다 가졌으면 연다, 아니면 없는 칸만 받는다
-function clipMore() {
-  if (currentPage !== 'clips') return;
-  const { stores, k, target } = clipOpenDays();
+// 칸 끝 줄이 화면 근처에 오면: 그 칸이 다음 날을 가졌으면 연다, 아니면 받는다
+function clipMore(col) {
+  if (currentPage !== 'clips' || !clipState.member) return;
+  const { st, k, target } = clipOpenDays(col);
   if (target === null) return;
-  const miss = stores.filter(st => !st.cov.has(target));
-  if (miss.length) { miss.forEach(st => clipFetch(st, target)); return; }
-  clipState.depth = k + 1;
+  if (!st.cov.has(target)) { clipFetch(st, target); return; }
+  clipState.depth[col] = k + 1;
   renderClips(true);
 }
 function clipObserve() {
-  if (!clipState.io) clipState.io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) clipMore(); }, { rootMargin: '0px 0px 600px 0px' });
-  clipState.io.disconnect();   // 그릴 때마다 줄이 새로 생긴다 — 새 줄을 관찰하면 첫 판정이 바로 온다(여전히 화면 근처면 하루 더)
-  const el = document.querySelector('#clipsBody .clip-more[data-more]');
-  if (el) clipState.io.observe(el);
+  if (!clipState.io) clipState.io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) clipMore(e.target.closest('.clip-col').dataset.col); }, { rootMargin: '0px 0px 600px 0px' });
+  clipState.io.disconnect();   // 그릴 때마다 줄이 새로 생긴다 — 새 줄을 관찰하면 첫 판정이 바로 온다(여전히 화면 근처면 그 칸 하루 더)
+  document.querySelectorAll('#clipsBody .clip-more[data-more]').forEach(el => clipState.io.observe(el));
 }
 function clipKick() {
-  const el = document.querySelector('#clipsBody .clip-more[data-more]');
-  if (currentPage === 'clips' && el && clipState.io) { clipState.io.unobserve(el); clipState.io.observe(el); }
+  if (currentPage !== 'clips' || !clipState.io) return;
+  document.querySelectorAll('#clipsBody .clip-more[data-more]').forEach(el => { clipState.io.unobserve(el); clipState.io.observe(el); });
 }
-// 구간이 없는 항목의 이름표(방송 순 머리·올라온 순 묶음 머리)
+// 구간이 없는 항목의 이름표(방송순 머리·등록순 묶음 머리)
 function clipNoPosLabel(x, hit, nowMs) {
-  if (x.source_bj === 'external') return '크루 밖 방송';
+  if (x.source_bj === 'external') return '외부인 방송';
   const s = hit && hit.s;
   if (s && !s.end) return '방송 중';
   if (s && s.vods && s.vods.length) return '다시보기 대기';   // 사이트엔 다시보기가 있는데 숲이 아직 구간을 안 줬다(워커가 10~15분 뒤 다시 묻는다)
@@ -7473,7 +7477,7 @@ function clipSecMeta(key, arr, ctx) {
   return { kind: ext ? 'ext' : 'crew', src: x0.source_bj, hit, first, live, label, bno: key.slice(1) };
 }
 const clipRegCmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
-// 올라온 순의 단위: one(한 장) · group(같은 장면) · block(구간 모름 — 원본 방송마다·원본 방송 없는 캐치는 하루마다, 하나라도 · 방송 번호도 모르면(u) 한 장씩). 자리 = 읽는 차례로 첫 항목의 등록 시각
+// 등록순의 단위: one(한 장) · group(같은 장면) · block(구간 모름 — 원본 방송마다·원본 방송 없는 캐치는 하루마다, 하나라도 · 방송 번호도 모르면(u) 한 장씩). 자리 = 읽는 차례로 첫 항목의 등록 시각
 function clipRegUnits(items, gidOf, groups, ctx) {
   const units = [], blocks = new Map();
   for (const [gid, arr] of groups) units.push({ kind: 'group', gid, arr });
@@ -7494,8 +7498,8 @@ function clipRegUnits(items, gidOf, groups, ctx) {
   }
   return units.sort((a, b) => cmpX(a.at, b.at));
 }
-// 방송 순: 원본 방송마다 한 묶음 — 켜져 있는 방송 먼저, 그다음 방송 번호가 큰(나중) 방송부터(거꾸로면 전부 뒤집는다).
-// 방송 번호를 모르는 것(구간만 있는 외부 캐치·구간도 모르는 것)과 원본 방송 없는 캐치는 방향과 무관하게 뒤. 묶음 안은 잘라 낸 자리 순, 자리를 모르는 것은 그 뒤 올라온 순
+// 방송순: 원본 방송마다 한 묶음 — 켜져 있는 방송 먼저, 그다음 방송 번호가 큰(나중) 방송부터(거꾸로면 전부 뒤집는다).
+// 방송 번호를 모르는 것(구간만 있는 외부 캐치·구간도 모르는 것)과 원본 방송 없는 캐치는 방향과 무관하게 뒤. 묶음 안은 잘라 낸 자리 순, 자리를 모르는 것은 그 뒤 등록순
 function clipBroadSections(items, gidOf, groups, ctx) {
   const units = [];
   for (const [gid, arr] of groups) units.push({ kind: 'group', gid, arr });
@@ -7533,9 +7537,10 @@ function clipShownItems(st, shown, idx) {
   }
   return out;
 }
-// 타일 = 사이트 표준 타일(vodTileHtml — 그림 위, [이름 · 시계 길이] / 제목 한 줄). 이름은 원본 방송이 크루일 때만(모르면 비움 — tileTextHtml 규칙)
+// 타일 = 사이트 표준 타일(vodTileHtml — 그림 위, [이름 · 시계 길이] / 제목 한 줄). 이름 = 원본 방송을 한 사람 — 크루면 멤버(멤버 색),
+//   크루 밖이면 워커가 준 그 방송인의 닉(ext_nick — 클립을 올린 시청자가 아니다, 멤버 아닌 이름 색 --name-fallback — 2026-09-27 Crenop '누구 건지 떠야'), 모르면 비움(tileTextHtml 규칙)
 function clipTileInner(x) {
-  const m = x.source_bj !== 'external' ? MEMBER_BY_ID[x.source_bj] : null;
+  const m = x.source_bj !== 'external' ? MEMBER_BY_ID[x.source_bj] : (x.ext_nick ? { name: x.ext_nick, color: 'var(--name-fallback)' } : null);
   return vodTileHtml({ title_no: x.title_no, href: x.url, thumb: x.thumb, grade: x.grade, auth_no: x.subs ? 107 : 0, duration_ms: x.dur_ms, title: clipTitle(x.title) }, m);
 }
 // data-clipno = 이 칸이 보이는 항목 번호(같은 장면 카드는 전부, 칸으로 구분) — 다시 그린 뒤 보던 타일·초점을 되찾는 열쇠(clipKeep)
@@ -7553,7 +7558,7 @@ function clipBcHeadHtml(sec, n, ctx) {
   const firstDay = escapeHtml(calDateLabel(sec.first.slice(0, 10)));
   if (sec.kind === 'nosrc') return `<div class="day-session clip-bc"><div class="day-session-row-head"><span class="clip-bc-ext">원본 방송 없음</span><span class="day-session-date">${escapeHtml(calDateLabel(sec.day))}</span>${nTxt}</div></div>`;
   if (sec.kind === 'unknown') return `<div class="day-session clip-bc"><div class="day-session-row-head">${icon}<span class="clip-bc-ext">원본 방송 확인 중</span>${nTxt}</div></div>`;
-  if (sec.kind === 'ext') return `<div class="day-session clip-bc"><div class="day-session-row-head">${icon}<span class="clip-bc-ext">크루 밖 방송</span><span class="day-session-date">${firstDay} 처음 올라옴</span>${nTxt}</div></div>`;
+  if (sec.kind === 'ext') return `<div class="day-session clip-bc"><div class="day-session-row-head">${icon}<span class="clip-bc-ext">외부인 방송</span><span class="day-session-date">${firstDay} 처음 올라옴</span>${nTxt}</div></div>`;
   const m = MEMBER_BY_ID[sec.src];
   const name = ctx.showName && m ? `<span class="clip-bc-name" style="color: ${m.color}${memberGlow(m.color)}">${escapeHtml(m.name)}</span>` : '';
   const lab = sec.label === '방송 중' ? '<span class="nav-live-badge on"><span class="nav-live-dot"></span><span>방송 중</span></span>' : (sec.label ? `<span class="clip-np">${sec.label}</span>` : '');
@@ -7584,7 +7589,7 @@ function clipRegHtml(units, st, ctx) {
     + `<div class="clip-flow">${g.units.map(u => clipUnitHtml(u, ctx)).join('')}</div></section>`).join('');
 }
 // 섞인 방송(구간을 아는 클립과 모르는 클립이 한 방송에 — 숲이 일부 클립의 구간만 늦게 줄 때): 머리엔 이름표가 없으므로 모르는 쪽 첫 칸 앞에 이름표 줄
-//   ('다시보기 대기 2' 등 — 올라온 순 묶음 머리와 같은 말, 2026-09-26 Crenop D8 Q2 '가'). 새 줄에서 시작하므로 아는 쪽이 홀수면 그 위 줄 끝이 빈다
+//   ('다시보기 대기 2' 등 — 등록순 묶음 머리와 같은 말, 2026-09-26 Crenop D8 Q2 '가'). 새 줄에서 시작하므로 아는 쪽이 홀수면 그 위 줄 끝이 빈다
 function clipBroadHtml(secs, ctx) {
   return secs.map(sec => {
     const k = (sec.kind === 'crew' || sec.kind === 'ext') && !sec.label ? sec.units.findIndex(u => !(u.arr[0].pos && u.arr[0].pos.state === 'ok')) : -1;
@@ -7594,19 +7599,19 @@ function clipBroadHtml(secs, ctx) {
 }
 // 목록 끝 줄 — 다음에 열 날을 불러오는 중 / 불러오지 못함(30초 뒤 다시) / 창 끝
 function clipMoreHtml(o, nowMs) {
-  const t = o.target;
+  const t = o.target, st = o.st;
   if (t === null) return `<div class="clip-more">최근 ${CLIP_WINDOW_DAYS}일의 클립을 모두 불러왔습니다.</div>`;
-  const fail = o.stores.some(st => !st.cov.has(t) && !st.busy.has(t) && nowMs - (st.failAt[t] || 0) < CLIP_FAIL_WAIT_MS);
+  const fail = !st.cov.has(t) && !st.busy.has(t) && nowMs - (st.failAt[t] || 0) < CLIP_FAIL_WAIT_MS;
   return `<div class="clip-more" data-more="1">${fail ? `${escapeHtml(calDateLabel(t))} 클립을 불러오지 못했습니다. 잠시 후 다시 시도합니다.` : `<div class="spinner"></div><span>${escapeHtml(calDateLabel(t))} 클립 불러오는 중...</span>`}</div>`;
 }
-// 끝 줄만 바꾸고 다시 관찰(새 줄의 첫 판정이 곧 온다 — 여전히 화면 근처면 clipMore)
+// 그 칸의 끝 줄만 바꾸고 다시 관찰(새 줄의 첫 판정이 곧 온다 — 여전히 화면 근처면 clipMore)
 function clipMoreRow(o) {
-  const el = document.querySelector('#clipsBody .clip-more');
+  const el = document.querySelector(`#clipsBody .clip-col[data-col="${o.st.col}"] .clip-more`);
   if (!el) return;
   el.outerHTML = clipMoreHtml(o, Date.now());
   clipObserve();
 }
-// 다시 그려도 보던 자리 그대로(2026-09-26 검토): 목록을 통째로 다시 쓰면(innerHTML) 브라우저 스크롤 앵커가 붙을 요소가 사라져, 방송 순에서 다음 날을 열면
+// 다시 그려도 보던 자리 그대로(2026-09-26 검토): 목록을 통째로 다시 쓰면(innerHTML) 브라우저 스크롤 앵커가 붙을 요소가 사라져, 방송순에서 다음 날을 열면
 //   그날 클립이 위쪽 방송들에 끼어 읽던 타일이 수천 px 밀렸고, 응답마다 초점이 <body>로 떨어졌다(키보드로는 목록 끝 너머 기둥에 못 갔다).
 //   그리기 전: 화면 안 타일 중 가장 위(온전히 보이는 것 먼저)의 칸·항목 번호·높이와 목록 안 초점 요소를 적고, 그린 뒤: 같은 항목을 보이는 타일
 //   (같은 장면 카드에 들었으면 그 카드)을 같은 높이로, 초점도 같은 요소로. 맨 위(스크롤 0)에선 붙잡지 않는다 — 위에 새로 올라온 것이 보이게.
@@ -7654,11 +7659,12 @@ function renderClips(keep) {
   if (!body) return;
   const kept = keep ? clipKeep(body) : null;
   const member = clipState.member, crew = member === 'crew', today = clipToday(), nowMs = Date.now();
-  const o = clipOpenDays(), { stores, k, shown, target } = o;
   const idx = clipSessionIndex(statsState.data, clipWindowMonths(today));
   clipState.groups = new Map();
-  let total = 0;
-  const colsHtml = stores.map(st => {
+  let total = 0, anyOpen = false;
+  const colsHtml = ['own', 'men'].map(c => clipOpenDays(c)).map(o => {
+    const { st, k, shown, target } = o;
+    if (k) anyOpen = true;
     const items = clipShownItems(st, shown, idx);
     total += items.length;
     const ctx = { idx, nowMs, asc: clipState.asc, showName: crew || st.col === 'men', vodMap: clipVodMap(items) };
@@ -7667,16 +7673,15 @@ function renderClips(keep) {
       const hit = arr.map(x => clipSessHits(x, idx)[0]).find(Boolean);
       clipState.groups.set(gid, { arr, dk: hit ? isoToKstDateKey(hit.s.start) : arr.reduce((m, x) => (x.reg < m ? x.reg : m), arr[0].reg).slice(0, 10) });
     }
-    const label = crew ? (st.col === 'own' ? '크루 방송' : '크루 밖 방송') : (st.col === 'own' ? '본인 방송' : '언급');
+    const label = crew ? (st.col === 'own' ? '멤버 방송' : '외부인 방송') : (st.col === 'own' ? '본인 방송' : '타인 방송');
     const inner = !items.length ? (k ? `<div class="clip-empty">${target === null ? `최근 ${CLIP_WINDOW_DAYS}일 동안 클립이 없습니다.` : '불러온 날짜에는 클립이 없습니다.'}</div>` : '')
       : clipState.sort === 'broad' ? clipBroadHtml(clipBroadSections(items, gidOf, groups, ctx), ctx) : clipRegHtml(clipRegUnits(items, gidOf, groups, ctx), st, ctx);
-    return `<div class="clip-col" data-col="${st.col}"><div class="clip-col-head"><span>${label}</span>${k ? `<span class="n">${items.length}개</span>` : ''}</div>${inner}</div>`;   // 개수는 연 날이 생긴 뒤부터(첫 응답 전 '0개'는 틀린 말)
+    return `<div class="clip-col" data-col="${st.col}"><div class="clip-col-head"><span>${label}</span>${k ? `<span class="n">${items.length}개</span>` : ''}</div>${inner}${clipMoreHtml(o, nowMs)}</div>`;   // 개수는 연 날이 생긴 뒤부터(첫 응답 전 '0개'는 틀린 말) · 끝 줄은 칸마다
   }).join('');
-  const more = clipMoreHtml(o, nowMs);
   // 목록 상단바 — 통계 방송 목록과 같은 부품(sticky): 왼쪽 '클립 N개', 오른쪽 맨 위로·맨 아래로 + 정렬 둘
   const sortBtns = CLIP_SORTS.map(o => `<button class="sort-toggle${o.key === clipState.sort ? ' active' : ''}" data-clipsort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === clipState.sort && clipState.asc)}</button>`).join('');
-  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">${k ? `클립 ${total}개` : '클립'}</span></div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" data-clipscroll="top" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" data-clipscroll="bottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div><div class="tl-group"><div class="tl-pair">${sortBtns}</div></div></div></div>`;
-  body.innerHTML = bar + `<div class="clip-cols">${colsHtml}</div>` + more;
+  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">${anyOpen ? `클립 ${total}개` : '클립'}</span></div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" data-clipscroll="top" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" data-clipscroll="bottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div><div class="tl-group"><div class="tl-pair">${sortBtns}</div></div></div></div>`;
+  body.innerHTML = bar + `<div class="clip-cols">${colsHtml}</div>`;
   body.querySelectorAll('[data-clipsort]').forEach(b => b.addEventListener('click', () => clipSortClick(b.dataset.clipsort)));
   body.querySelectorAll('[data-clipscroll]').forEach(b => b.addEventListener('click', () => window.scrollTo({ top: b.dataset.clipscroll === 'top' ? 0 : document.body.scrollHeight, behavior: 'smooth' })));
   body.querySelectorAll('a[data-clipgroup]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); openClipGroupModal(a.dataset.clipgroup); }));
@@ -7690,8 +7695,8 @@ function renderClips(keep) {
 }
 // 정렬 버튼: 다른 버튼 = 그 정렬(기본 방향), 고른 버튼을 다시 = 거꾸로(통계 방송 목록과 같다). 방향이 바뀌면 읽는 차례의 첫날이 바뀌어 처음부터 연다
 function clipSortClick(key) {
-  if (key === clipState.sort) { clipState.asc = !clipState.asc; clipState.depth = 0; }
-  else { clipState.sort = key; if (clipState.asc) { clipState.asc = false; clipState.depth = 0; } }
+  if (key === clipState.sort) { clipState.asc = !clipState.asc; clipState.depth = { own: 0, men: 0 }; }
+  else { clipState.sort = key; if (clipState.asc) { clipState.asc = false; clipState.depth = { own: 0, men: 0 }; } }
   renderClips();
 }
 function openClipGroupModal(gid) {
@@ -7716,7 +7721,7 @@ function renderClipsSide() {
 }
 function clipSetMember(id) {
   const next = id === 'crew' || MEMBER_BY_ID[id] ? id : 'crew';
-  if (next !== clipState.member) { clipState.member = next; clipState.depth = 0; }
+  if (next !== clipState.member) { clipState.member = next; clipState.depth = { own: 0, men: 0 }; }
 }
 function selectClipMember(id) {
   if (id === clipState.member) return;

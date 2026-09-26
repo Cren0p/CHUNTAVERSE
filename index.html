@@ -1985,6 +1985,7 @@
   .clip-bc .day-session-title { margin-bottom: 0; overflow-wrap: anywhere; }
   .clip-bc-name { font-size: 13px; font-weight: 700; white-space: nowrap; }
   .clip-bc-n, .clip-np { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .clip-np-row { grid-column: 1 / -1; min-width: 0; padding-top: 14px; line-height: 16px; }   /* 섞인 방송의 구간 모르는 클립 이름표 줄(clipBroadHtml) — 흐름 한 줄을 통째로 */
   .clip-bc .nav-live-badge { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 1px 6px; min-height: 0; white-space: nowrap; }   /* 상단바 생방송 수와 같은 옷 */
   .clip-bc-ext { font-size: 13px; font-weight: 600; color: var(--text3); }   /* '크루 밖 방송'·'원본 방송 없음' — 제목이 없는 머리의 이름 자리 */
   .clip-empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
@@ -3490,6 +3491,9 @@
   :root[data-theme="light"] .nav-item.active, :root[data-theme="light"] .stats-period-btn.active, :root[data-theme="light"] .stats-kind-btn.active, :root[data-theme="light"] .stats-range-btn.active, :root[data-theme="light"] .sort-toggle.active, :root[data-theme="light"] .lrg-rank-btn.on, :root[data-theme="light"] .filter-type.on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--on-accent); }
   :root[data-theme="light"] .filter-member.on, :root[data-theme="light"] .cal-tab.active, :root[data-theme="light"] .profile-tab.active, :root[data-theme="light"] .notify-switch.on { background: var(--accent-solid); border-color: var(--accent-solid); }
   :root[data-theme="light"] .notify-switch.on::after { background: var(--on-accent); }
+  /* 고른 천타버스 칸(클립 crew·음악 all·프로필 크루 탭): 로고가 원래 민트라 민트 채움에 묻혀 빈 네모였다 → 로고를 짙게(선택 문법 '민트 채움 + 짙은 그림' 그대로, 새 그림 파일 없음 — 2026-09-26 Crenop D8 Q1 '나').
+     로고의 별은 투명이라 채움이 비친다. 대비 17.02. 꺼진 칸·어두운 화면은 그대로 */
+  :root[data-theme="light"] :is(.cal-tab[data-member="crew"], .cal-tab[data-member="all"], .profile-tab-crew).active img { filter: brightness(0); }
   :root[data-theme="light"] .spinner { border-top-color: var(--accent-solid); }
   :root[data-theme="light"] .chem-track-title::before { background: var(--accent-solid); }
   :root[data-theme="light"] .nav-item.has-new::after { background: var(--accent); }
@@ -3926,7 +3930,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-26h';   // 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-26i';   // 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송 순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 올라온 순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7579,8 +7583,14 @@ function clipRegHtml(units, st, ctx) {
     + `<span class="clip-day-n">${g.units.reduce((s, u) => s + u.arr.length, 0)}개${st.trunc.has(g.day) ? ' · 일부' : ''}</span></div>`
     + `<div class="clip-flow">${g.units.map(u => clipUnitHtml(u, ctx)).join('')}</div></section>`).join('');
 }
+// 섞인 방송(구간을 아는 클립과 모르는 클립이 한 방송에 — 숲이 일부 클립의 구간만 늦게 줄 때): 머리엔 이름표가 없으므로 모르는 쪽 첫 칸 앞에 이름표 줄
+//   ('다시보기 대기 2' 등 — 올라온 순 묶음 머리와 같은 말, 2026-09-26 Crenop D8 Q2 '가'). 새 줄에서 시작하므로 아는 쪽이 홀수면 그 위 줄 끝이 빈다
 function clipBroadHtml(secs, ctx) {
-  return secs.map(sec => `<section class="clip-sec">${clipBcHeadHtml(sec, sec.items.length, ctx)}<div class="clip-flow">${sec.units.map(u => clipUnitHtml(u, ctx)).join('')}</div></section>`).join('');
+  return secs.map(sec => {
+    const k = (sec.kind === 'crew' || sec.kind === 'ext') && !sec.label ? sec.units.findIndex(u => !(u.arr[0].pos && u.arr[0].pos.state === 'ok')) : -1;
+    const np = k > 0 ? `<div class="clip-np-row"><span class="clip-np">${clipNoPosLabel(sec.units[k].arr[0], sec.hit, ctx.nowMs)} ${sec.units.slice(k).reduce((n, u) => n + u.arr.length, 0)}</span></div>` : '';
+    return `<section class="clip-sec">${clipBcHeadHtml(sec, sec.items.length, ctx)}<div class="clip-flow">${sec.units.map((u, i) => (i === k ? np : '') + clipUnitHtml(u, ctx)).join('')}</div></section>`;
+  }).join('');
 }
 // 목록 끝 줄 — 다음에 열 날을 불러오는 중 / 불러오지 못함(30초 뒤 다시) / 창 끝
 function clipMoreHtml(o, nowMs) {

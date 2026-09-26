@@ -1037,7 +1037,7 @@
      흐림은 .grid에만 건다. #app에 걸면 문구까지 같이 흐려진다(문구는 .grid의 형제).
      문구를 sticky로 두는 이유: 카드 13장이 한 화면을 넘게 이어져서(여러 열은 두 화면 넘게, 1열 휴대폰은 오프라인 띠라 약 1,100px),
      오버레이 한가운데에 두면 스크롤 안 한 첫 화면에서는 문구가 화면 밖에 있다. sticky면 어디를 보고 있든 화면 중앙에 붙는다.
-     1열에서는 어제 다시보기 상자가 띠 격자보다 길어지는 날이 잦다 — 그땐 bv-flow가 페이지를 늘린다(흐린 배경 아래는 맨 바탕). */
+     1열에서는 어제·오늘 다시보기 상자가 띠 격자보다 길어지는 날이 잦다 — 그땐 bv-flow가 페이지를 늘린다(흐린 배경 아래는 맨 바탕). */
   #app { position: relative; }
   .grid.blackout { filter: blur(5px) grayscale(0.35); }
   .blackout-overlay { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
@@ -1063,9 +1063,9 @@
     .blackout-time { font-size: 22px; }
     .blackout-sub { flex: 0 0 100%; }
   }
-  /* 어제 다시보기(2026-09-20 Crenop): 라이브가 없으니 찬밥이라도 데워 먹는 자리 — 타이머와 한 몸이라 치우면 같이 사라진다.
+  /* 어제·오늘 다시보기(2026-09-20 Crenop): 라이브가 없으니 찬밥이라도 데워 먹는 자리 — 타이머와 한 몸이라 치우면 같이 사라진다.
      타일 속은 생방송 카드 문법 그대로(썸네일 → [이름 · 시간] → 제목)라 .card-* 를 그대로 쓴다.
-     [접어서 전부 보인다] 어제 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만' 고를 근거가 없다(Crenop) — 그래서 가로 스크롤도,
+     [접어서 전부 보인다] 어제·오늘 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만' 고를 근거가 없다(Crenop) — 그래서 가로 스크롤도,
      높이 상한도, 안쪽 스크롤도 두지 않는다. 대신 한 줄에 놓는 장수를 화면에 맞춰 고른다(syncBlackoutVods).
      타일 폭 200px은 다시보기 모달과 같은 값이고, 하한 160px은 그 모달이 휴대폰에서 쓰는 반폭(calc(50% - 6px))이다 —
      200은 위 한계, 160은 읽히는 하한. 열 수와 폭은 JS가 px로 써넣는다(퍼센트는 fit-content 상자 안에서 폭을 못 정한다). */
@@ -2385,7 +2385,7 @@
   .cal-grid-form { display: none; max-width: 1450px; }   /* 200px 칸 ×7 + 간격 24 + .calendar 패딩 24 + 테두리 2(옛 폼 상한과 같은 값) — 본문이 더 넓어도 칸은 200에서 멈춘다 */
   .cal-list-form { display: block; }
   /* 타일 흐름(2026-09-06 Crenop): 기록이 있는 날만 날짜순, 빈 날 없음. 타일 = 7열의 칸과 같은 부품(위 [날짜 | 칩], 아래 16:9 그림).
-     최소 폭 160(2026-09-24 Crenop: 열 수는 썸네일 크기로 정한다 — 160은 정전 '어제 다시보기'의 읽히는 하한, 종전 200) — 흐름 폭 328 이상(창 약 386px~)이면 2열:
+     최소 폭 160(2026-09-24 Crenop: 열 수는 썸네일 크기로 정한다 — 160은 정전 '어제·오늘 다시보기'의 읽히는 하한, 종전 200) — 흐름 폭 328 이상(창 약 386px~)이면 2열:
      412px 휴대폰 2열(타일 173), 360px은 1열(302 — 2열이면 147). 그림(타일 − 12)은 가장 작아도 148로, 1366 노트북 7열 칸의 그림(119)보다 크다.
      주(일~토)가 바뀌는 첫 타일은 새 줄에서 시작(.wk-first) — 주 단위 리듬을 남기고
      빈 자리는 각 주의 끝에만 생긴다(빈 날마다 상자를 두는 것보다 싸다). 기록이 없는 주는 줄이 안 생긴다(아쉬우면 주 표시 한 줄을 붙일 수 있다). */
@@ -3790,7 +3790,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-26a';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-26d';   // 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -8573,7 +8573,7 @@ function vodBadges(v) {
   return b;
 }
 // ── 썸네일 타일의 글자(2026-09-22 Crenop): 생방송 카드 규칙 — 썸네일 아래 1행 [이름(멤버 색) · 시계 시간], 2행 제목(회색 한 줄).
-//    생방송 카드·정전 '어제 다시보기'·모달 타일(다시보기·클립·유튜브 — 컨텐츠·현수막·케미·달력 하루·다시보기 선택)이 이 함수 하나를 쓰고,
+//    생방송 카드·정전 '어제·오늘 다시보기'·모달 타일(다시보기·클립·유튜브 — 컨텐츠·현수막·케미·달력 하루·다시보기 선택)이 이 함수 하나를 쓰고,
 //    사진 타일은 글자 없이 그림만(mediaTileHtml bare, 2026-09-22 Crenop).
 //    글자 모양은 .card-name-row·.card-name·.card-btime·.card-title 한 벌이다. 이름을 모르면(멤버가 아닌 영상) 이름 자리만 비운다.
 //    영상 줄(프로필·음악·크루 핫클립)은 시트 자료가 제목뿐(이름·시간 없음)이라 이 규칙 밖(Crenop 2026-09-22 2-제외) — 제목(.vs-title)만, 한 줄 말줄임(2026-09-24 Crenop).
@@ -9473,7 +9473,7 @@ function tickBlackout() {
   if (!el) return;
   const t = lastEndTime();
   if (t !== null) el.textContent = formatBlackout(Date.now() - t);
-  // 달이 늦게 도착했으면 꼬리(평균·최대 · 어제 다시보기)를 그 초에 채운다 — 다음 폴링(최대 10초)까지 기다리지 않는다.
+  // 달이 늦게 도착했으면 꼬리(평균·최대 · 어제·오늘 다시보기)를 그 초에 채운다 — 다음 폴링(최대 10초)까지 기다리지 않는다.
   //   2026-09-22 실측: 이번 달 자료는 0.03초에 왔는데 목록은 5.4초에 붙었다(다음 /feed 폴링이 끝난 순간). 종전엔 이 틱이 평균·최대만 채우고
   //   목록은 applyBlackout(10초 폴링)에만 걸려 있었다. 둘 중 하나라도 비어 있을 때만 확인한다 — 다 붙은 뒤의 변화는 폴링 몫.
   const ov = document.getElementById('blackoutOverlay');
@@ -9518,35 +9518,50 @@ function blackoutSubHtml() {
   if (!b || !b.n) return '';
   return `<span class="blackout-sub">평균 ${formatSpanCoarse(b.avg_ms)} · 최대 ${formatSpanCoarse(b.max_ms)}</span>`;   // 최소는 뺐다(2026-09-08 Crenop): 한 사람이 끄자마자 다른 사람이 켠 몇 초짜리 교대가 늘 0분으로 잡힌다
 }
-// 어제 다시보기(2026-09-20 Crenop) — 정전 타이머 아래. 라이브가 없으니 찬밥이라도 데워 먹는 자리다.
-// 어제(KST)에 '시작한' 방송만 센다. 자정을 넘겨 끝난 방송도 어제 것 — 세션의 시작월 귀속과 같은 규칙이다.
+// 어제·오늘 다시보기(2026-09-20 Crenop '어제 다시보기' → 2026-09-26 Crenop 건의로 오늘까지) — 정전 타이머 아래. 라이브가 없으니 찬밥이라도 데워 먹는 자리다.
+// 화면 제목은 '찬밥 데워 먹기'(2026-09-26 Crenop — 표준 띄어쓰기. 종전 '어제 다시보기'·'어제·오늘 다시보기'). 이 파일 주석의 '어제·오늘 다시보기'는 이 상자를 가리킨다.
+// 어제·오늘(KST)에 '시작한' 방송을 센다. 자정을 넘겨 끝난 방송은 시작한 날의 것 — 세션의 시작월 귀속과 같은 규칙이다.
+//   종전 '어제만'은 새벽에 켜고 끈 방송(오늘 시작)이 정전 화면에 안 떴다(마다옴이 새벽 1시에 켠 방송이 5시 정전에 빠짐). 녹화 월 통계로 8/1~9/24 정전 57구간을
+//   5분 간격으로 흉내 내 보니 지난 12시간 안에 끝난 방송을 빠뜨린 시간이 49.4% → 0.5%, 타일은 중앙·90%·최대 11·16·20 → 12·17·20(정전은 대개 아침이라 '오늘' 몫이 작다).
+//   '지난 정전 이후 방송'은 정전 중 잠깐 켠 테스트 방송 하나로 목록이 날아가 기각(Crenop), '지난 24시간 안에 끝난 방송'은 보는 동안 타일이 하나씩 사라져 택하지 않았다.
 // 다시보기가 아직 안 잡혔거나(종료 후 포착 대기) 구독 전용이라 못 잡는 방송도 줄을 남기고 그 멤버 VOD 목록으로 보낸다:
-//   방송 종료는 잡혀 있어 '어제 켰다'는 사실이 확실하므로, 이 자리가 비어 있다는 것은 '어제 휴방'이라는 뜻이어야 한다(Crenop).
-// 한 멤버가 여럿이면 전부 — 파트로 나뉜 방송, 하루에 두 번 켠 날. 자료는 정전 통계가 이미 받아 둔 월 통계라 추가 요청이 없다.
+//   방송 종료는 잡혀 있어 '그날 켰다'는 사실이 확실하므로, 이 자리가 비어 있다는 것은 '어제·오늘 휴방'이라는 뜻이어야 한다(Crenop).
+// 한 멤버가 여럿이면 전부 — 파트로 나뉜 방송, 하루에 두 번 켠 날. '다시보기가 없으면 대표 한 줄'은 멤버의 날짜마다 따로 판단한다 —
+//   멤버 단위로 보면 어제 다시보기가 있는 멤버의, 오늘 막 끝나 포착 대기인 방송이 통째로 빠진다(2026-09-26). 자료는 정전 통계가 이미 받아 둔 월 통계라 추가 요청이 없다.
 let blackoutVodsSig = '';   // 방금 그린 목록의 자료 지문 — 다시 그릴지 판정에 쓴다(HTML 문자열 비교는 못 쓴다, applyBlackout 곁 주석)
 function blackoutVodsHtml() {
   blackoutVodsSig = '';
-  const ymd = new Date(kstNow().getTime() - 86400000).toISOString().slice(0, 10);
-  const ym = ymd.slice(0, 7);
-  if (!statsState.data[ym]) { loadStatsMonth(ym); return ''; }   // 달이 바뀐 1일엔 어제가 지난달 — 도착하면 다음 판(≤10초)의 applyBlackout이 그린다
+  const now = kstNow().getTime();
+  const days = [new Date(now - 86400000).toISOString().slice(0, 10), new Date(now).toISOString().slice(0, 10)];   // [어제, 오늘] KST
+  // 달 자료: 보통 한 달, 1일엔 지난달·이번 달. 안 와 있는 달은 불러 두고 와 있는 날만 먼저 그린다 — 1일 자정에 이번 달이 오기 전까지 어제 몫까지
+  //   목록이 통째로 사라지지 않게(2026-09-26 검토). 도착하면 지문이 바뀌어 다음 판(≤10초)의 applyBlackout·1초 틱이 오늘 몫을 더한다
+  days.map(d => d.slice(0, 7)).filter((ym, i, a) => a.indexOf(ym) === i && !statsState.data[ym]).forEach(ym => loadStatsMonth(ym));
+  const have = days.filter(d => statsState.data[d.slice(0, 7)]);
+  if (!have.length) return '';
   const kstDay = (iso) => { const t = new Date(iso).getTime(); return isNaN(t) ? '' : new Date(t + 9 * 3600 * 1000).toISOString().slice(0, 10); };
   const rows = [];
   MEMBERS.forEach((m, mi) => {   // mi = 사이트 멤버 고정 순서(정렬 첫 축)
-    const mine = [];
-    let longest = null;   // 다시보기가 하나도 없는 멤버의 대표 줄 — 어제 가장 길게 켠 방송
-    for (const s of ((statsState.data[ym][m.id] || {}).sessions || [])) {
-      if (kstDay(s.start) !== ymd) continue;
-      const at = new Date(s.start).getTime();
-      const ms = s.end ? new Date(s.end).getTime() - at : 0;
-      if (!longest || ms > longest.ms) longest = { m, mi, at, part: 0, href: `https://www.sooplive.com/station/${m.id}/vod`, thumb: '', title: s.title || '다시보기', ms };
-      for (const v of (sessionVods(s) || [])) mine.push({ m, mi, at, part: v.part || 0, href: vodPlayerUrl(v), thumb: v.thumb || '', title: v.title || s.title || '다시보기', ms: v.duration_ms || 0 });
+    // 같은 다시보기는 한 장만: 달이 바뀌는 자정을 넘겨 다시 연결된 방송은 두 달에 한 세션씩 남고 다시보기는 방송 번호로 양쪽에 붙는다
+    //   (2026-01-01 나나문 — 어제·오늘을 같이 보면 같은 두 장이 두 번 섰다, 2026-09-26 검토). 날짜 순(어제 → 오늘)으로 도니 먼저 선 쪽을 남긴다
+    const seen = new Set();
+    for (const ymd of have) {
+      const mine = [];
+      let longest = null;   // 그날 다시보기가 하나도 없는 멤버의 대표 줄 — 그날 가장 길게 켠 방송
+      for (const s of ((statsState.data[ymd.slice(0, 7)][m.id] || {}).sessions || [])) {
+        if (kstDay(s.start) !== ymd) continue;
+        const at = new Date(s.start).getTime();
+        const ms = s.end ? new Date(s.end).getTime() - at : 0;
+        if (!longest || ms > longest.ms) longest = { m, mi, at, part: 0, href: `https://www.sooplive.com/station/${m.id}/vod`, thumb: '', title: s.title || '다시보기', ms };
+        for (const v of (sessionVods(s) || [])) mine.push({ m, mi, at, part: v.part || 0, href: vodPlayerUrl(v), thumb: v.thumb || '', title: v.title || s.title || '다시보기', ms: v.duration_ms || 0 });
+      }
+      // 그날 다시보기가 있으면 그것만 전부. 하나도 없으면(포착 대기·구독 전용) 대표 한 줄로 '그날 켰다'는 사실만 남긴다 —
+      // 안 그러면 제목만 바꾼 몇 분짜리 켜짐(대기방 등)까지 다 서서 목록이 잡음으로 찬다(2026-09-20 실측: 14장 중 3장이 0분).
+      rows.push(...(mine.length ? mine.filter(r => !seen.has(r.href) && seen.add(r.href)) : longest ? [longest] : []));
     }
-    // 다시보기가 있으면 그것만 전부. 하나도 없으면(포착 대기·구독 전용) 대표 한 줄로 '어제 켰다'는 사실만 남긴다 —
-    // 안 그러면 제목만 바꾼 몇 분짜리 켜짐(대기방 등)까지 다 서서 목록이 잡음으로 찬다(2026-09-20 실측: 14장 중 3장이 0분).
-    rows.push(...(mine.length ? mine : longest ? [longest] : []));
   });
   if (!rows.length) return '';
   // 순서 = 멤버 고정 순서 → 시작 시각 → 파트(2026-09-22 Crenop): 생방송 카드·컨텐츠 모달과 같은 사이트 순서(달력 하루 모달의 '시각 → 파트'는 이 순서에서 멤버 축만 뺀 것).
+  //   한 멤버 안에선 시작 시각이 날짜를 품으므로 어제 것 → 오늘 것.
   //   종전의 시작 시각 순은 타일에 시작 시각이 없어 화면에서 읽히지 않았고, 한 멤버의 여러 판이 다른 멤버 사이로 흩어졌다.
   rows.sort((a, b) => a.mi - b.mi || a.at - b.at || a.part - b.part);
   blackoutVodsSig = rows.map(r => `${r.m.id}|${r.at}|${r.href}|${r.ms}|${r.title}`).join('||');
@@ -9556,10 +9571,10 @@ function blackoutVodsHtml() {
       + `<div class="card-thumb">${thumb}</div>`
       + tileTextHtml({ name: r.m.name, color: r.m.color, time: r.ms >= 60000 ? formatDuration(r.ms) : '', title: r.title }) + '</a>';   // 1분 미만은 시간을 안 적는다 — '0분'으로 읽히느니 비우는 게 낫다(제목만 바꾼 짧은 켜짐)
   }).join('');
-  return `<div class="blackout-vods"><div class="bv-sec">${SVG_ICONS.soop}<span>어제 다시보기</span></div>`
+  return `<div class="blackout-vods"><div class="bv-sec">${SVG_ICONS.soop}<span>찬밥 데워 먹기</span></div>`
     + `<div class="bv-grid">${tiles}</div></div>`;   // 열 수·타일 폭은 syncBlackoutVods가 실측으로 정한다
 }
-// 꼬리(평균·최대 + 어제 다시보기)를 지금 자료에 맞춘다 — 폴링(applyBlackout)과 1초 틱(tickBlackout)이 같이 쓴다.
+// 꼬리(평균·최대 + 어제·오늘 다시보기)를 지금 자료에 맞춘다 — 폴링(applyBlackout)과 1초 틱(tickBlackout)이 같이 쓴다.
 // 둘은 한 덩어리로 비교·교체해야 순서가 안 뒤집힌다(하나만 다시 붙이면 뒤로 간다).
 // 판정은 HTML 문자열이 아니라 자료 지문으로 한다(2026-09-20 실사고): 소스의 <path …/>를 DOM은 <path …></path>로 다시 적어
 //   문자열 비교가 영영 불일치했다 → 10초마다 목록이 통째로 갈렸다. 지문이 같으면 아무것도 안 건드린다.
@@ -9588,7 +9603,7 @@ function applyBlackout() {
     return;
   }
   grid.classList.add('blackout');
-  if (existing) {   // 이미 떠 있으면 숫자만 갱신 — 꼬리(부가 정보·어제 다시보기)는 자료가 바뀌었을 때만 갈아끼운다
+  if (existing) {   // 이미 떠 있으면 숫자만 갱신 — 꼬리(부가 정보·어제·오늘 다시보기)는 자료가 바뀌었을 때만 갈아끼운다
     tickBlackout();
     syncBlackoutTail(existing);
     return;
@@ -9609,7 +9624,7 @@ function applyBlackout() {
   app.appendChild(ov);
   syncBlackoutVods(ov);
 }
-// 다시보기 격자 자리잡기(2026-09-20 Crenop): 어제 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만'을 고를 근거가 없다 —
+// 다시보기 격자 자리잡기(2026-09-20 Crenop): 어제·오늘 것들 사이에는 먼저·나중이 없어서 '앞의 몇 개만'을 고를 근거가 없다 —
 //   그래서 전부 한 화면에 보이게 '한 줄에 몇 장'을 실측으로 고른다. 타일은 200px(다시보기 모달과 같은 크기)을 넘지 않고,
 //   160px(그 모달이 휴대폰에서 쓰는 반폭) 아래로도 안 내려간다. 200은 위 한계, 160은 읽히는 하한이다.
 // 폭의 출처는 창(100vw)이 아니라 흐린 카드 격자의 실측 폭이다 — 태블릿 좌 기둥 300px과 html의 scrollbar-gutter가 저절로 빠진다.
@@ -9628,7 +9643,7 @@ function syncBlackoutVods(ov) {
   const grid = vods && vods.querySelector('.bv-grid');
   const host = app && app.querySelector('.grid');
   const n = grid ? grid.children.length : 0;
-  if (!n || !host || !host.clientWidth) {   // 목록이 없거나(어제 휴방) 안 보이는 탭에서 잰 값
+  if (!n || !host || !host.clientWidth) {   // 목록이 없거나(어제·오늘 휴방) 안 보이는 탭에서 잰 값
     if (!vods) { msg.style.top = ''; msg.classList.remove('bv-flow'); if (app) app.style.minHeight = ''; }
     return;
   }
@@ -9907,7 +9922,7 @@ function likePollingState(runNow) {
   }
 }
 likePollingState(false);   // 부트 직후 — 위에서 4개를 이미 1회씩 호출했으므로 즉시 재실행 불필요
-setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간. tickSchedule은 순수 로컬 연산. tickBlackout은 오버레이에 부가 정보나 어제 다시보기가 아직 없으면 syncBlackoutTail→blackoutSubHtml·blackoutVodsHtml로 빠진 달을 loadStatsMonth에 요청할 수 있다(네트워크 있음 — 달별 30초 백오프로 매초 재요청은 안 함. 2026-09-19 정정: 종전 '전부 순수 로컬, 네트워크 없음'은 틀렸다)
+setInterval(() => { tickSchedule(); tickBlackout(); }, 1000);   // D-time 초 카운트다운 + 임박 일정 경과/소멸 감지 + 정전 경과 시간. tickSchedule은 순수 로컬 연산. tickBlackout은 오버레이에 부가 정보나 어제·오늘 다시보기가 아직 없으면 syncBlackoutTail→blackoutSubHtml·blackoutVodsHtml로 빠진 달을 loadStatsMonth에 요청할 수 있다(네트워크 있음 — 달별 30초 백오프로 매초 재요청은 안 함. 2026-09-19 정정: 종전 '전부 순수 로컬, 네트워크 없음'은 틀렸다)
 
 // ── 텍스트 잉크 세로중심 실측(캔버스 픽셀 스캔) — calibrateBadgeValign()의 제목 잉크 계측용 ──
 // (구 모드 배지 내부 보정(--badge-vnudge)은 2026-07-13 SVG 전환으로 소멸 — 지금은 줄 정렬 축만 이 함수를 씀)

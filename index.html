@@ -2003,6 +2003,12 @@
   .clip-stack::after { top: 4px; left: 8px; right: 8px; opacity: 0.6; }
   .clip-same { position: absolute; left: 6px; bottom: 6px; display: inline-flex; align-items: center; height: 22px; padding: 0 7px; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap; color: var(--text); background: var(--surface); border: 1px solid var(--border); }
   .clip-stack .ds-vod:hover .clip-same { border-color: var(--accent); }
+  /* 클립 타일 제목은 두 줄(2026-09-28 D12 Q1 '나' — 클립 그림은 대개 방송 화면 그대로라 고르는 근거가 제목이다. 한 줄이면 360에서 첫 12개 중 11개가 잘렸다 → 7).
+     짧은 제목도 두 줄 자리를 잡아 줄마다 타일 높이가 같다(카드 크기 규칙). 같은 장면 모달(.clip-vods)도 — 같은 장면끼리는 제목으로 고른다.
+     줄바꿈은 모달 글 줄(.day-item-title)과 같은 처방(어절 단위, 긴 토큰만 비상 분절). 사이트의 다른 타일은 한 줄 그대로(tileTextHtml 곁 주석) */
+  #clipsBody .card-title, .clip-vods .card-title { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; min-height: calc(1.3em * 2); }
+  /* 본 클립(2026-09-28 D12 Q2 '나') — 누른 클립을 좋아요 요청 '확인함'과 같은 50%로 가라앉힌다(clipSeen 곁 주석). 격자는 칸 전체(겹친 카드의 두 줄까지), 모달은 타일 */
+  .clip-item.clip-seen, .clip-vods .ds-vod.clip-seen { opacity: 0.5; }
   /* 묶음(구간 모름·원본 방송 없음)은 흐름 한 줄을 통째로 — 머리는 방송순의 원본 방송 머리와 같은 부품 */
   .clip-block { grid-column: 1 / -1; min-width: 0; padding-top: 8px; }
   .clip-bc { margin: 8px 0 0; }
@@ -3967,7 +3973,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-27i';   // 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-28b';   // 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -5997,10 +6003,10 @@ async function loadLikeReqForDot() {
   refreshLikeDot();
 }
 // 체크 토글(구 ✕ 대체) — '확인함/좋아요 눌러줌'을 요청 키 단위로 localStorage 저장. 행은 목록에 남고 재클릭으로 해제(✕의 캐시 삭제 없인 복구 불가 문제 해소).
-// 해당 행만 제자리 갱신(전체 재렌더 없음 — 스크롤 위치 보존).
-function toggleLikeReqChecked(key, row, btn) {
+// 해당 행만 제자리 갱신(전체 재렌더 없음 — 스크롤 위치 보존). on = true면 켜기만(줄 링크를 눌렀을 때 — onLikeReqOpen), 없으면 뒤집기(체크 칸).
+function toggleLikeReqChecked(key, row, btn, on) {
   const s = lsKeySet(LS_LIKE_CHECKED);
-  if (s.has(key)) s.delete(key); else s.add(key);
+  if (on ?? !s.has(key)) s.add(key); else s.delete(key);
   lsSet(LS_LIKE_CHECKED, JSON.stringify([...s]));
   row.classList.toggle('checked', s.has(key));
   if (s.has(key)) { row.classList.remove('unread'); likeReqNewSet.delete(key); }   // 체크 = 그 자리에서 읽음 처리(2026-08-10) — 모달을 나가지 않아도 신규 표시가 꺼진다. 체크 해제로 되살리진 않음(읽음은 단방향)
@@ -6037,6 +6043,17 @@ document.addEventListener('click', (e) => {
   const row = c.closest('.lrq-row');
   if (row && row.dataset.lrkey) toggleLikeReqChecked(row.dataset.lrkey, row, c);
 });
+// 요청 줄 링크를 누르면 체크를 켠다(2026-09-28 Crenop '나' — 클립의 '누른 클립 흐리게'와 같은 태도, 한 번 더 누르는 수고를 던다).
+//   체크 칸은 남긴다: 줄을 누른 것은 '글에 가 봄'이지 '좋아요 누름'이 아니라(로그인이 풀렸거나 안 누르고 닫음) 칸을 다시 눌러 풀 수 있어야 하고,
+//   숲 앱에서 이미 누른 요청은 링크를 열지 않고 칸으로 표시한다. 누르기 = 클릭·Enter·가운데 버튼(새 탭). 묶음 머리(글 전체) 링크는 켜지 않는다.
+function onLikeReqOpen(e) {
+  if (e.type === 'auxclick' && e.button !== 1) return;
+  const a = e.target.closest && e.target.closest('.lrq-link');
+  const row = a && a.closest('.lrq-row');
+  if (row && row.dataset.lrkey) toggleLikeReqChecked(row.dataset.lrkey, row, row.querySelector('.lrq-check'), true);
+}
+document.addEventListener('click', onLikeReqOpen);
+document.addEventListener('auxclick', onLikeReqOpen);
 
 // ── 다가오는 일정 (구글 시트 gid=2043421724 — 컨텐츠와 통합 시트) ──
 // 열: A=YYYY-MM-DD(또는 YYMMDD) / B=HH:MM(빈칸 가능) / C=링크(빈칸 가능) / D=간략제목(버튼용·빈칸 가능) / E=상세제목(모달용) / F~=참가 멤버 이름(컨텐츠 행과 동일 열·빈칸 가능 — 모달에서 아바타로 표시). D·E 중 하나라도 있으면 행 유지(버튼=D 우선, 모달=E 우선, 한쪽 비면 다른 쪽). 모든 시각은 KST 기준.
@@ -7648,18 +7665,49 @@ function clipShownItems(st, shown, idx) {
 }
 // 타일 = 사이트 표준 타일(vodTileHtml — 그림 위, [이름 · 시계 길이] / 제목 한 줄). 이름 = 원본 방송을 한 사람 — 크루면 멤버(멤버 색),
 //   크루 밖이면 워커가 준 그 방송인의 닉(ext_nick — 클립을 올린 시청자가 아니다, 멤버 아닌 이름 색 --name-fallback — 2026-09-27 Crenop '누구 건지 떠야'), 모르면 비움(tileTextHtml 규칙)
-function clipTileInner(x) {
+// data-clipseen = 누르면 '본 클립'으로 기억할 번호(clipSeen) — 같은 장면 카드의 대표 링크는 모달을 여는 것이라 기억하지 않는다(data-clipgroup)
+function clipTileInner(x, cls) {
   const m = x.source_bj !== 'external' ? MEMBER_BY_ID[x.source_bj] : (x.ext_nick ? { name: x.ext_nick, color: 'var(--name-fallback)' } : null);
-  return vodTileHtml({ title_no: x.title_no, href: x.url, thumb: x.thumb, grade: x.grade, auth_no: x.subs ? 107 : 0, duration_ms: x.dur_ms, title: clipTitle(x.title) }, m);
+  return vodTileHtml({ title_no: x.title_no, href: x.url, thumb: x.thumb, grade: x.grade, auth_no: x.subs ? 107 : 0, duration_ms: x.dur_ms, title: clipTitle(x.title) }, m)
+    .replace('<a class="ds-vod"', `<a class="ds-vod${cls || ''}" data-clipseen="${escapeHtml(x.title_no)}"`);
 }
+// 본 클립(2026-09-28 D12 Q2 '나', Crenop '봤던 클립 표시'): 사이트에서 누른 클립 번호를 이 브라우저에 기억해 50%로 가라앉힌다 — 좋아요 요청은 누르는 곳이
+//   숲이라 사이트가 몰라 체크 칸을 두지만, 클립은 사이트 타일을 눌러 여는 순간이 곧 보는 순간이다. 누르기 = 클릭·Enter·가운데 버튼(새 탭).
+//   알고 둔 것: 다른 기기·브라우저와 공유 안 됨, 숲 앱 등 사이트 밖에서 본 것과 길게 눌러 '새 탭에서 열기'는 모른다, 되돌리기 없음(창이 30일이라 기록도 30일 뒤 지움).
+//   같은 장면 카드는 그 안의 클립 하나라도 봤으면 가라앉힌다(같은 장면을 본 것 — 모달 안 타일은 각자).
+const LS_CLIP_SEEN = 'chuntaverse_clip_seen_v1';   // { 클립 번호: 누른 시각 ms }
+let clipSeenMap = null;
+function clipSeen() {
+  if (clipSeenMap) return clipSeenMap;
+  let o = {};
+  try { o = JSON.parse(lsGet(LS_CLIP_SEEN, '{}')) || {}; } catch (e) { o = {}; }
+  const cut = Date.now() - CLIP_WINDOW_DAYS * 86400000;
+  for (const k of Object.keys(o)) if (!(o[k] > cut)) delete o[k];
+  return (clipSeenMap = o);
+}
+function markClipSeen(no) {
+  const o = clipSeen();
+  o[no] = Date.now();
+  lsSet(LS_CLIP_SEEN, JSON.stringify(o));
+  document.querySelectorAll(`#clipsBody .clip-item[data-clipno~="${no}"]`).forEach(el => el.classList.add('clip-seen'));   // 같은 장면 카드는 번호 목록에 들어 있으면
+  document.querySelectorAll(`.clip-vods a.ds-vod[data-clipseen="${no}"]`).forEach(el => el.classList.add('clip-seen'));
+}
+function onClipOpen(e) {
+  if (e.type === 'auxclick' && e.button !== 1) return;
+  const a = e.target.closest && e.target.closest('a[data-clipseen]');
+  if (!a || a.dataset.clipgroup) return;
+  markClipSeen(a.dataset.clipseen);
+}
+document.addEventListener('click', onClipOpen);
+document.addEventListener('auxclick', onClipOpen);
 // data-clipno = 이 칸이 보이는 항목 번호(같은 장면 카드는 전부, 칸으로 구분) — 다시 그린 뒤 보던 타일·초점을 되찾는 열쇠(clipKeep)
-function clipTileHtml(x) { return `<div class="clip-item" data-clipno="${escapeHtml(x.title_no)}">${clipTileInner(x)}</div>`; }
+function clipTileHtml(x) { return `<div class="clip-item${clipSeen()[x.title_no] ? ' clip-seen' : ''}" data-clipno="${escapeHtml(x.title_no)}">${clipTileInner(x)}</div>`; }
 // 같은 장면 겹친 카드 — 대표(가장 긴 것, 같으면 먼저 올라온 것)의 타일 위에 두 줄을 비치고 그림 왼쪽 아래에 '같은 장면 N'(배지는 오른쪽 위라 안 겹친다). 누르면 모달
 function clipStackHtml(gid, arr) {
   const rep = arr.slice().sort((a, b) => (b.dur_ms - a.dur_ms) || clipRegCmp(a.reg, b.reg))[0];
   const h = clipTileInner(rep).replace('<a class="ds-vod"', `<a class="ds-vod" data-clipgroup="${escapeHtml(gid)}"`)
     .replace('<span class="ds-vod-thumb">', `<span class="ds-vod-thumb"><span class="clip-same">같은 장면 ${arr.length}</span>`);
-  return `<div class="clip-item clip-stack" data-clipno="${escapeHtml(arr.map(x => x.title_no).join(' '))}">${h}</div>`;
+  return `<div class="clip-item clip-stack${arr.some(x => clipSeen()[x.title_no]) ? ' clip-seen' : ''}" data-clipno="${escapeHtml(arr.map(x => x.title_no).join(' '))}">${h}</div>`;
 }
 // 원본 방송 머리 — 통계 방송 목록 행의 부품(그림·날짜·시각·길이·모드 배지·제목), 시청자·변경 기록은 뺀다. 누르면 그 행과 같은 곳(켜져 있으면 생방송·다시보기 1개 직행·2개 이상 모달·모름은 VOD 목록)
 function clipBcHeadHtml(sec, n, ctx) {
@@ -7819,7 +7867,7 @@ function openClipGroupModal(gid) {
   if (!g || !head || !body) return;
   modalPanel('vod-pick-panel');
   head.innerHTML = `<span>같은 장면 ${g.arr.length}개${g.dk ? ` — ${escapeHtml(calDateLabel(g.dk))}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  body.innerHTML = `<div class="ds-vods">${g.arr.map(clipTileInner).join('')}</div>`;
+  body.innerHTML = `<div class="ds-vods clip-vods">${g.arr.map(x => clipTileInner(x, clipSeen()[x.title_no] ? ' clip-seen' : '')).join('')}</div>`;
   showModal();
 }
 // 기둥 — 천타버스 칸(음악 탭과 같은 Favicon) + 13명, 하나만 고른다(달력·통계 스트립과 같은 .cal-tab). 버튼은 한 번만 만들고 켜짐만 바꾼다

@@ -83,7 +83,7 @@
        겹 색(rgba)은 값 그대로 둔 전용 토큰이다 — color-mix(… N%, transparent)는 크롬에서 화소가 같았지만(2026-09-24 실측)
        사파리 16.2·크롬 111 미만에서 무효가 되면 바탕·테두리가 통째로 사라져 쓰지 않았다. 세 값(-rgb) 토큰은 rgba(var(--x-rgb), a)로 섞는 곳
        (보조바 버튼 --btn-rgb·모달 --rk-rgb·시간대 격자) 전용이라 같은 색의 hex 토큰과 짝으로 바꾼다.
-       값을 그대로 두는 것: 멤버 고유색(MEMBERS[].color)과 거기서 계산한 값, 시트가 주는 색(상단바 E열·좋아요 순위 G열),
+       값을 그대로 두는 것: 멤버 고유색(MEMBERS[].color)과 거기서 계산한 값, 시트가 주는 색(상단바 E열),
        SVG 마스크의 white/black(칠이 아니라 가림 판정), 글자 잉크 측정용 캔버스, <meta name="theme-color">(var() 불가 — 테마를 바꾸는 코드가 같이 바꾼다).
        JS가 실값이 필요한 곳(명패 그라데이션·상단바 기본색의 hex 계산)은 cssVar()로 이 표를 읽는다 — 테마를 바꾸면 그 그림은 다시 그려야 따라온다. */
     /* 겹 색·그림자 */
@@ -820,12 +820,10 @@
   .rk-row.rk-teamcont { padding-top: 0; margin-top: -1px; }
   .rk-grp { color: var(--muted); font-size: 12px; }
   .rk-rank, .rk-like, .rk-gap { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; justify-self: end; }
-  /* 순위·컷은 대회 색을 따르지 않는다 — '안정권이냐 탈락권이냐'가 한눈에 보여야 하므로 고정 의미색을 쓴다.
-     대회 색(--rk-c)은 정체성 표시(테두리·헤더·제목)에만 쓴다. 둘을 섞으면 색이 두 가지 뜻을 갖게 된다. */
+  /* 순위·컷은 고정 의미색 — '안정권이냐 탈락권이냐'가 한눈에 보여야 한다. */
   .rk-rank { font-weight: 700; color: var(--text); }
   .rk-row.in .rk-rank, .rk-row.in .rk-gap { color: var(--rk-in); }
   .rk-row.out .rk-rank, .rk-row.out .rk-gap { color: var(--rk-out); }
-  .rk-ev-title { color: var(--rk-c, var(--text)); }
   .rk-head-right { display: inline-flex; align-items: center; gap: 10px; }
   /* 순위 모달일 때만 패널 테두리·헤더가 대회 색을 따른다(좋아요 요청·일정 모달은 기존 에메랄드 유지) */
   /* 테두리는 다른 모달과 같은 40% 강도로 — 원색 100%는 화면을 압도한다(2026-08-04 지적).
@@ -2613,6 +2611,10 @@
        안 골랐을 때 뜨던 '고르면 나옵니다' 상자도 이 규칙으로 같이 사라진다. */
     body .like-side { display: none; }   /* 뒤에 오는 기본 규칙의 display:flex를 이겨야 한다(같은 특이도면 나중 선언이 이긴다) */
     .like-rank-slot { margin: 12px; }
+    /* 여기선 순위가 그 글 묶음 머리 바로 아래라, 머리와 같은 글인 순위 칸 제목(likeRankTitleOf)은 빼고 'N위 컷 기준'만 둔다(2026-09-28 Crenop '나').
+       정원이 없는 글은 남는 게 없어 머리 줄째 뺀다 */
+    .like-rank-slot .rk-ev-title { display: none; }
+    .like-rank-slot .rk-ev-head:not(:has(.rk-ev-sub)) { display: none; }
   }
 
   /* 열 수 = 격자 실제 폭에 카드 하한 280 + 간격 16이 몇 번 드느냐 — 식 하나(2026-09-24: 필터 기둥이 생겨 격자가 좁아진 만큼 하한 300 → 280).
@@ -3557,7 +3559,7 @@
      옅은 바탕 칠(겹 색)·굵은 막대(안 읽음 4px)는 효과 없음. 멤버 색은 위 멤버 번짐이 맡고(여기 없음), 명전 금·동은 효과 없음(아래).
      글자 = text-shadow(안쪽 글자에 상속 — 회색 자식은 따로 끈다), 그림 = SVG 필터 #n3-이름(ensureGlowDefs — 번짐 색마다 하나), 테두리·점 = 바깥 box-shadow(제 그림자가 있는 상태는 합쳐 적는다).
      색이 둘인 그림(곡괭이 = 다이아 + 나무 자루 · 옵치 = 흰 몸통 + 주황 고리)은 옅은 쪽 색의 번짐 하나로 그림 전체를 두른다.
-     JS가 인라인으로 칠하는 고유 색(통계·명전 그림)은 토큰 이름으로 고르고, 시트가 주는 색은 n3Mark·n3Glow가 붙인 --n3(번짐 색)·--n3f(필터 주소)로.
+     JS가 인라인으로 칠하는 고유 색(통계·명전 그림)은 토큰 이름으로 고르고, 시트가 주는 색은 n3Glow가 붙인 --n3(번짐 색)·--n3f(필터 주소)로.
      새 고유 색 전경을 만들면: 그 색의 상대 휘도가 천양 이상이면 번짐 색 토큰(같은 식)과 그 색의 목록에 넣고, 아니면 넣지 않는다(verify_lightmode_20260924h 9절이 토큰 표와 두 방향으로 대조). */
   /* 민트(2026-09-26 Crenop D6 S '나' — 25g~26의 '원래 민트 + N3 번짐'은 번짐을 깔아도 가독성이 떨어졌다): 번짐 없음, 두 가지로만 칠한다.
      ① 선택 표시(고른 탭·기간·종류·정렬·순위 버튼 · 켠 종류 칸 · 켠 스위치 · 고른 사진 칸) = 원래 민트 50% 바탕(--sel-mint) + 보통 글자(--text), 테두리는 끈 상태 그대로
@@ -3593,9 +3595,9 @@
   /* 정전 위원회 해 노랑(통계 그림 — JS 인라인 color:var(--ic-sun)) */
   :root[data-theme="light"] [style*="color:var(--ic-sun)"], :root[data-theme="light"] [style*="color: var(--ic-sun)"] { text-shadow: 0 0 1px var(--ic-sun-glow), 0 0 2px var(--ic-sun-glow), 0 0 3px var(--ic-sun-glow); }
   :root[data-theme="light"] [style*="color:var(--ic-sun)"] svg, :root[data-theme="light"] [style*="color: var(--ic-sun)"] svg { filter: url(#n3-ic-sun); }
-  /* 시트 색(시트 모달 머리 · 좋아요 순위 G열): n3Glow·n3Mark가 번짐 색(--n3)과 그 색의 필터 주소(--n3f)를 인라인으로 준다 — 천양만큼 옅을 때만.
+  /* 시트 색(시트 모달 머리): n3Glow가 번짐 색(--n3)과 그 색의 필터 주소(--n3f)를 인라인으로 준다 — 천양만큼 옅을 때만.
      보조바 시트 버튼(E열)은 2026-09-26부터 제 색 꽉 채움이라 번짐이 없다(아래 '보조바 버튼') */
-  :root[data-theme="light"] .lr-panel.tbm-modal[style*="--n3:"] .lr-head, :root[data-theme="light"] .rk-ev[style*="--n3:"] .rk-ev-title { text-shadow: 0 0 1px var(--n3), 0 0 2px var(--n3), 0 0 3px var(--n3); }
+  :root[data-theme="light"] .lr-panel.tbm-modal[style*="--n3:"] .lr-head { text-shadow: 0 0 1px var(--n3), 0 0 2px var(--n3), 0 0 3px var(--n3); }
   :root[data-theme="light"] .lr-panel.tbm-modal[style*="--n3:"] .lr-head .lr-close { text-shadow: none; }
   :root[data-theme="light"] .lr-panel.tbm-modal[style*="--n3f:"] .lr-head svg { filter: var(--n3f); }
   /* 명전·통계 순위(2026-09-25 Crenop '명전의 경우 금/동은 효과 빼줘'): 금(1위 값·1위 사진 테두리·금 트로피)·동(3위 값·동 트로피)은 원래 색 그대로 효과 없음, 은(2위 값·은 트로피)은 원래 색 + 은 번짐
@@ -4016,7 +4018,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-28j';   // 2026-09-28j: 워커를 Pages 앞문(서울)으로 부른다 — WORKER_URL 곁 주석 — 2026-09-28i: 최근 활동 — 방송을 켠 직후 '방송 시작' 줄이 방송국 VOD 목록 링크로 굳던 것(목록 다시 그리기 판단에 방송 상태를 넣음) — 2026-09-28h: 클립 탭 D20(Crenop 'Q1나 Q2나 Q3가' — 검토 확정 7건 포함) — 칸 끝은 버튼으로 하루씩(첫 날·빈 날은 저절로 이어서) · 받은 날은 원본 방송 확인이 다 끝난 뒤 한 번에(끝 줄에 남은 수) · 끝내 못 한 것은 '원본 방송 확인 안 됨' 묶음(탭에 다시 들어오면 다시) · 클립에서 자른 외부 캐치의 머리를 방송인 머리로(종전 '원본 방송 확인 중'이 분류가 끝났는데도 붙었다) — 2026-09-28g: 클립 두 칸 — 칸 양 끝 타일의 마우스 테두리·키보드 초점 링이 칸 경계에서 잘리던 것(칸 안쪽 여백 4 · 바깥 여백 −4) — 2026-09-28f: 클립 탭 — 넓으면 두 칸이 각자 상단바(이름·개수·맨 위/아래·정렬)와 각자 스크롤, 좁으면(칸이 타일 둘을 못 담는 폭 — 휴대폰·기둥 편 태블릿) 한 목록 + 상단바 토글(D19 '라') — 2026-09-28e: 라이트 모드 번짐 멤버에 플리·달타(D16 '나' — 흰 카드 대비 2 미만 아홉 명) · 클립 같은 장면 카드를 가운데 버튼으로 열면(대표 클립이 새 탭) 본 클립으로 기억 — 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-28l';   // 2026-09-28l: 좋아요 순위 칸 제목은 좁은 화면(≤1100 — 순위가 묶음 바로 아래)에서 빼고 'N위 컷 기준'만(바로 위 묶음 머리와 같은 글이 두 번 — Crenop '나') — 2026-09-28k: 좋아요 시트 한 탭(요청 숨김 + 순위 설정 — 숨김 B: 비움 보임·날짜까지 보임·글자 바로 숨김, 숲 글 묶음이면 순위 버튼 상시, 기본 갱신 10초, 순위 칸 제목 = 묶음 머리 문구) · 클립 방송 중 같은 장면(D20 Q4 '나') — 워커가 채팅 시각으로 묶어 준 lg도 같은 장면 겹친 카드·모달로(clipGroupItems 곁 주석), 등록순에선 그 방송 묶음 안에 — 2026-09-28j: 워커를 Pages 앞문(서울)으로 부른다 — WORKER_URL 곁 주석 — 2026-09-28i: 최근 활동 — 방송을 켠 직후 '방송 시작' 줄이 방송국 VOD 목록 링크로 굳던 것(목록 다시 그리기 판단에 방송 상태를 넣음) — 2026-09-28h: 클립 탭 D20(Crenop 'Q1나 Q2나 Q3가' — 검토 확정 7건 포함) — 칸 끝은 버튼으로 하루씩(첫 날·빈 날은 저절로 이어서) · 받은 날은 원본 방송 확인이 다 끝난 뒤 한 번에(끝 줄에 남은 수) · 끝내 못 한 것은 '원본 방송 확인 안 됨' 묶음(탭에 다시 들어오면 다시) · 클립에서 자른 외부 캐치의 머리를 방송인 머리로(종전 '원본 방송 확인 중'이 분류가 끝났는데도 붙었다) — 2026-09-28g: 클립 두 칸 — 칸 양 끝 타일의 마우스 테두리·키보드 초점 링이 칸 경계에서 잘리던 것(칸 안쪽 여백 4 · 바깥 여백 −4) — 2026-09-28f: 클립 탭 — 넓으면 두 칸이 각자 상단바(이름·개수·맨 위/아래·정렬)와 각자 스크롤, 좁으면(칸이 타일 둘을 못 담는 폭 — 휴대폰·기둥 편 태블릿) 한 목록 + 상단바 토글(D19 '라') — 2026-09-28e: 라이트 모드 번짐 멤버에 플리·달타(D16 '나' — 흰 카드 대비 2 미만 아홉 명) · 클립 같은 장면 카드를 가운데 버튼으로 열면(대표 클립이 새 탭) 본 클립으로 기억 — 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -4066,7 +4068,7 @@ const MEMBER_BIRTHDAYS = {
 // ══ 화면 모드(라이트 모드, 2026-09-24h) ══════════════════════════════════════════════
 // 기본은 기기 설정(prefers-color-scheme). 보조바의 전환 버튼(#themeBtn — 사용 가이드 링크 자리, 2026-09-24 Crenop)으로 바꾸면 그 선택을 이 브라우저에 기억한다(LS_THEME).
 // 첫 그림 전 적용은 <head>의 작은 스크립트가 하고, 여기는 그 뒤: 로고·버튼 글자·번짐 필터 정의(applyTheme), 전환 때 색을 구워 그린 곳만 다시 그리기(rerenderForTheme).
-// 색은 거의 전부 CSS 토큰(:root[data-theme="light"])이라 속성만 바꾸면 따라온다. JS가 실값을 굽는 곳 — 명패(cssVar)·시트 색 글자(toneForText — 보조바·좋아요 순위)·시트 색 N3 표시(n3Mark — 좋아요 순위)·
+// 색은 거의 전부 CSS 토큰(:root[data-theme="light"])이라 속성만 바꾸면 따라온다. JS가 실값을 굽는 곳 — 명패(cssVar)·시트 색 글자(toneForText — 보조바)·
 // 그래프 모달(열린 채로는 버튼을 못 누른다) — 을 새로 만들면 rerenderForTheme에 넣는다.
 const LS_THEME = 'chuntaverse_theme';
 const THEME_META = { dark: '#070a14', light: '#FFFFFF' };   // 주소창 색 — 어두운 값은 종전 그대로, 밝은 값은 상단 띠(--surface). 머리 스크립트와 같게
@@ -4117,8 +4119,8 @@ function memberGlow(color) { const p = paleOf(color); return p ? `;--mg:${p.glow
 // WCAG 2.x 상대 휘도(N3 판정 — n3Glow)·대비(막대 안 숫자)
 function relLum(hex) { const h = hex.replace('#', ''); const c = [0, 2, 4].map(i => { const v = parseInt(h.substr(i, 2), 16) / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
 function contrastRatio(a, b) { const x = relLum(a), y = relLum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
-// 시트가 주는 색(상단바 E열·좋아요 순위 G열)을 글자에 쓸 때: 어두운 화면은 밝혀서(lightenForText), 라이트 모드는 시트에 적힌 그대로
-// (2026-09-25 Crenop '시트 버튼색도 고유의 색인 경우가 많으니 자동 조절되면 안될듯' — 25b의 자동 어둡게는 뺐다). 천양만큼 옅으면 n3Mark가 번짐 표시를 붙인다.
+// 시트가 주는 색(상단바 E열)을 글자에 쓸 때: 어두운 화면은 밝혀서(lightenForText), 라이트 모드는 시트에 적힌 그대로
+// (2026-09-25 Crenop '시트 버튼색도 고유의 색인 경우가 많으니 자동 조절되면 안될듯' — 25b의 자동 어둡게는 뺐다). 천양만큼 옅으면 n3Glow가 번짐 표시를 붙인다(시트 모달 머리).
 function toneForText(hex) { return isLightTheme() ? hex : lightenForText(hex); }
 // N3 번짐 색 — 같은 색상, OKLCH 밝기 0.35, 채도 max(C, 0.05)(C < 0.002 — 흰색·순수 회색 — 은 0)·sRGB 색역 안(넘으면 채도를 줄인다). 2026-09-26 Crenop D7 G '나'(N다, 종전 0.40·max(C, 0.09)).
 // LIGHT_GLOW·라이트 표의 --이름-glow와 같은 식(Björn Ottosson OKLab). 시트 색처럼 미리 모르는 색을 그릴 때 계산한다(n3Glow).
@@ -4134,12 +4136,10 @@ function n3Shade(hex) {
   return '#' + rgb(Math.min(C0 < 0.002 ? 0 : Math.max(C0, 0.05), lo)).map(v => { v = Math.max(0, Math.min(1, v)); v = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055; return Math.round(v * 255).toString(16).padStart(2, '0'); }).join('').toUpperCase();
 }
 // 라이트 모드에서 색 hex가 천양(#43EAF6)만큼 옅거나 더 옅으면(상대 휘도 ≥ 천양 — CSS N3 목록과 같은 기준, 2026-09-25 Crenop '천양 기준') 그 색의 N3 번짐 { c: 번짐 색, f: 필터 주소 },
-// 아니면 null. 바탕과 무관한 색 하나의 기준이다(25c~d는 제 바탕 대비 3 미만). 시트가 주는 색(시트 모달 머리·좋아요 순위 G열)에 쓴다 —
+// 아니면 null. 바탕과 무관한 색 하나의 기준이다(25c~d는 제 바탕 대비 3 미만). 시트가 주는 색(시트 모달 머리)에 쓴다 —
 // 보조바 시트 버튼(상단바 E열)은 2026-09-26부터 제 색 꽉 채움이라 번짐이 없다(btnInk). 규칙은 CSS '라이트 모드 전용 규칙'.
-// 모드를 바꾸면 그린 곳을 다시 그린다(rerenderForTheme — 좋아요 순위. 모달은 열린 채로는 전환 버튼을 못 누른다).
+// 시트 모달은 열린 채로는 전환 버튼을 못 누른다 — 모드를 바꿔도 다시 그릴 곳이 없다.
 function n3Glow(hex) { if (!isLightTheme() || !(relLum(hex) >= relLum('#43EAF6'))) return null; const c = n3Shade(hex); return { c, f: glowFilterUrl(c) }; }
-// 인라인 style 끝에 붙일 N3 표시: ';--n3:번짐 색;--n3f:필터 주소', 아니면 ''
-function n3Mark(hex) { const g = n3Glow(hex); return g ? `;--n3:${g.c};--n3f:${g.f}` : ''; }
 // 보조바 버튼(제 색 꽉 채움 — 라이트 모드, 2026-09-26 Crenop D6 B '나')의 글자·그림 색과 가장자리를 채움색 hex 하나로 정해 인라인 표시로 돌려준다.
 // 색만으로 정해져 모드와 무관하다(규칙이 라이트 모드에만 있어 어두운 화면에선 아무 일도 안 한다 — 모드를 바꿔도 다시 그릴 필요가 없다).
 //  글자·그림: 흰 글자 대비가 3.5 이상이면 흰색(';--btn-ink:var(--btn-ink-light)'), 아니면 짙은 쪽(CSS 기본). 2026-09-26 Crenop D7 Y '나' — 유튜브 빨강 버튼을 흰 글자·그림으로
@@ -4215,7 +4215,6 @@ function applyTheme(t, save) {
 function rerenderForTheme() {
   updatePageTitle();   // 보조바: 시트 버튼 글자색(toneForText — 어두운 화면만 밝힘. 라이트 모드는 채움 위 잉크가 규칙으로 이긴다)
   if (currentPage === 'profile') rethemeProfile();
-  if (currentPage === 'like' && likeRankEvents) { const rb = document.getElementById('likeRankBody'); if (rb && rb.querySelector('.rk-ev')) rb.innerHTML = likeRankEvents.map(renderRankEvent).join(''); }   // 좋아요 순위 대회 색(G열 — toneForText·n3Mark). 자리(.like-rank-slot)는 옮겨 적기가 따라온다
 }
 // 프로필은 본문을 다시 쓰지 않고 모드로 달라지는 두 곳만 바꾼다 — 명패(cssVar로 구운 그라데이션)·크루 소개 로고(crewLogoSrc).
 // 본문을 통째로 다시 쓰면 스크롤이 맨 위로 튀었다(2026-09-25 검토: 360px 크루 화면 700 → 0).
@@ -5518,42 +5517,6 @@ async function openSheetModal(gid) {
   }
 }
 
-// 좋아요 순위 버튼 — 시트를 프론트에서도 읽는다.
-// 이유: 버튼 색(G열)과 '진행 중인 대회가 있는지'는 모달을 열기 전에 알아야 하는데, /like-ranking은 열 때만 호출하기 때문.
-// 워커도 같은 시트를 읽지만 용도가 다르다(워커=수집 대상, 여기=버튼 표시). 활성 행 판정 기준(글번호 숫자·마감일)은 양쪽 동일하게 유지할 것.
-const LIKE_RANK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=1784349823';
-const LS_LIKERANK_CACHE = 'chuntaverse_like_rank_btn_v1';
-// 활성 대회 목록. 대회마다 버튼이 하나씩 생기고, 버튼은 자기 대회만 연다.
-// (한 버튼에 전부 담으면 한 번 열 때 모든 대회를 긁게 되고, 버튼 이름도 하나만 적을 수 없어 구분이 안 된다)
-let likeRankBtns = [];
-
-function parseLikeRankBtnRows(rows) {
-  const k = new Date(Date.now() + 9 * 3600 * 1000);   // KST 오늘(YYYY-MM-DD) — 워커의 마감 판정과 같은 기준
-  const today = `${k.getUTCFullYear()}-${String(k.getUTCMonth() + 1).padStart(2, '0')}-${String(k.getUTCDate()).padStart(2, '0')}`;
-  return rows
-    .filter(r => (r[0] || '').trim() && /^\d+$/.test((r[1] || '').trim()) && (!(r[5] || '').trim() || (r[5] || '').trim() >= today))
-    .map(r => ({
-      titleNo: (r[1] || '').trim(),
-      label: (r[2] || '').trim() || '천타버스 멤버들의',
-      hex: /^#[0-9a-fA-F]{6}$/.test((r[6] || '').trim()) ? (r[6] || '').trim() : '#f0abfc',   // G열 미지정 시 기본색(연보라 — 기존 버튼들과 겹치지 않는 계열)
-      // I열: 갱신 주기(초). 워커의 캐시 TTL과 같은 값을 써야 한다 — 폴링이 더 빠르면 캐시에 막혀 헛요청만 늘고,
-      // 더 느리면 캐시가 놀아 신선도를 못 살린다. 범위 밖·미지정은 워커와 같은 기본값.
-      refresh: (() => { const n = parseInt(r[8], 10); return (n >= RANK_REFRESH_MIN && n <= RANK_REFRESH_MAX) ? n : RANK_REFRESH_DEFAULT; })(),
-    }));
-}
-
-async function loadLikeRankBtn() {
-  try { const c = JSON.parse(lsGet(LS_LIKERANK_CACHE, 'null')); if (c) { likeRankBtns = parseLikeRankBtnRows(c); updatePageTitle(); } } catch (e) {}
-  try {
-    const res = await fetch(LIKE_RANK_SHEET_URL);
-    if (!res.ok) throw new Error('no data');
-    const rows = parseCSV(await res.text());
-    lsSet(LS_LIKERANK_CACHE, JSON.stringify(rows));
-    likeRankBtns = parseLikeRankBtnRows(rows);
-    updatePageTitle();
-  } catch (e) {}   // 실패 시 캐시본 유지 — 상단바 링크 시트와 동일 정책
-}
-
 // ── 좌상단 로고 교체(2026-08-19) — 상단바 시트에 A열 예약어 'title' 행 하나로 제어 ─────────
 // 로고 파일은 그대로 두고 표시만 전환한다: B열=이미지 주소, G열=만료일(버튼과 동일 규칙 — 지나면 기본 로고 복귀). 모드별 짝(-D/-L)은 syncLogo.
 // 주소는 https:// 또는 레포 상대경로(이미지 확장자)만 허용. '//호스트' 형태(프로토콜 상속 외부행)와 javascript: 류는 형식에서 차단.
@@ -5710,10 +5673,13 @@ function updatePageTitle() {
 }
 
 // ── 좋아요 요청 모아보기 모달 ──
-// 좋아요 요청 숨김 목록 — 시트 A열에 게시글 URL(# 앞부분)을 적으면 해당 글의 요청이 모두 숨김.
-// 댓글 단위가 아닌 게시글(컨텐츠) 단위 차단 — 같은 글의 추가 요청 댓글도 함께 숨겨짐.
-const LIKE_HIDE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=66286785';
-const LS_LIKEHIDE_CACHE = 'chuntaverse_like_hide_v3';   // v3: u에 댓글 앵커(#comment_noti) 보존 — v2(앵커 제거)와 저장 의미 달라 무효화. A=URL, B=만료일(YYYY-MM-DD) → {u,d} 객체배열로 캐시
+// 좋아요 시트(2026-09-28 Crenop D21 — 종전 요청 숨김 탭·순위 탭을 한 탭으로). 헤더 없음, 1행부터. 1행 = 글 하나(댓글 주소면 그 요청 하나).
+// 열: A 글 주소(숲·카페 — 앵커 없는 글 주소는 그 글의 요청 전부를 숨긴다) · B 숨김(likeHideActiveOn) · C 갱신 주기(초 — 순위 폴링, likeRankRefreshOf)
+//     · D 전형 규칙 · E 정원 · F 수동 분류 · G 팀 신청. 여기는 A~C만 읽는다 — C~G로 순위를 만드는 건 워커(parseLikeSheetRows, 같은 탭). 열을 바꾸면 워커도 같이.
+const LIKE_SHEET_GID = '300855777';   // 워커 LIKE_SHEET_GID와 같은 값
+const LIKE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HfDukpvqq9UfFYpT0JMTlX6V0UK95kimxP8EuABERr4/export?format=csv&gid=' + LIKE_SHEET_GID;
+const LS_LIKESHEET_CACHE = 'chuntaverse_like_sheet_v1';   // parseLikeSheetRows 결과({u, h, r, s} 배열). 옛 숨김 사본(like_hide_v3)은 'B 비움 = 숨김'이라 새 뜻과 반대 — 키를 바꿔 버린다
+let likeSheetRows = null;   // 마지막으로 받은 시트(loadLikeHideSet) — 순위 폴링 주기용. 아직 못 받았으면 사본
 const normLikeUrl = (u) => (u || '').split('#')[0].trim().replace(/\/$/, '');
 // dedup·✕·빨간점 키용: 댓글 앵커(#comment_noti…) 보존 — 같은 글이라도 서로 다른 댓글/링크는 별개 요청으로 취급(이벤트 탭과 동일). CSV 숨김은 앵커 있으면 그 댓글만(fullLikeUrl 매칭), 앵커 없으면 글 전체(normLikeUrl 매칭) 숨김.
 const fullLikeUrl = (u) => (u || '').trim().replace(/\/$/, '');
@@ -5726,23 +5692,48 @@ let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계�
 const likeReqKey = (e) => `${e.member_id || ''}|${fullLikeUrl(e.url)}`;   // dedup과 동일 키(멤버+전체 URL, 댓글 앵커 포함). dismiss·seen·빨간점이 '같은 링크'를 시간 무관 동일 취급 → X했거나 본 링크는 재요청돼도 다시 안 켜짐
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
 function lsKeyAdd(key, keys) { const s = lsKeySet(key); let ch = false; keys.forEach(k => { if (!s.has(k)) { s.add(k); ch = true; } }); if (ch) lsSet(key, JSON.stringify([...s])); }
-// 좋아요 숨김 B열(만료일) 판정: B 비었거나 형식 밖이면 즉시 숨김, 날짜면 그날(KST)까지 노출하고 지나면 숨김.
-// 2026-08-19: 해석을 kstExpiryMs 공통 파서로 위임 — 'YYYY-MM-DD HH:mm'도 받는다(그 분까지 노출). 날짜만 적으면 종전과 동일한 자정 경계.
-function likeHideActiveOn(dateRaw, nowMs) {
-  const ex = kstExpiryMs(dateRaw);
+// 좋아요 시트 B열(숨김) 판정: 비우면 보임, 날짜면 그 시각까지 보이고 지나면 숨김(kstExpiryMs — 날짜만 = 그날 KST 자정, 'YYYY-MM-DD HH:mm' = 그 분),
+// 날짜로 읽히지 않는 글자('숨김' 등)는 바로 숨김. 2026-09-28 뜻 바뀜 — 종전 숨김 탭은 비움 = 바로 숨김(합친 탭엔 순위 설정만 적고 숨기지 않는 줄이 있다).
+function likeHideActiveOn(raw, nowMs) {
+  if (!String(raw || '').trim()) return false;
+  const ex = kstExpiryMs(raw);
   return ex === null || nowMs > ex;
 }
-// 캐시 엔트리({u: 정규화URL, d: 만료일})에서 "지금 숨겨야 할" URL Set 생성. 호출 시점마다 재평가(자정·지정 시각을 넘기면 자동 반영).
+// 시트 줄({u: 주소, h: B 숨김})에서 "지금 숨겨야 할" URL Set 생성. 호출 시점마다 재평가(자정·지정 시각을 넘기면 자동 반영).
 function buildLikeHideSet(entries) {
   const nowMs = Date.now();
   const s = new Set();
   for (const e of (entries || [])) {
-    if (e && e.u && likeHideActiveOn(e.d, nowMs)) s.add(e.u);
+    if (e && e.u && likeHideActiveOn(e.h, nowMs)) s.add(e.u);
   }
   return s;
 }
-function lsHideSet() {
-  try { return buildLikeHideSet(JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]'))); } catch (e) { return new Set(); }
+function lsLikeSheet() {
+  try { const v = JSON.parse(lsGet(LS_LIKESHEET_CACHE, '[]')); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+}
+function lsHideSet() { return buildLikeHideSet(lsLikeSheet()); }
+// 숲 글 주소 → {station, titleNo}. 댓글 앵커·쿼리는 무시, 숲 글이 아니면(카페 글 등) null. 워커 likePostOf와 같은 규칙(도메인 .com·.co.kr).
+function likePostOf(u) {
+  const m = /sooplive\.(?:com|co\.kr)\/station\/([^\/?#\s]+)\/post\/(\d+)/i.exec(String(u || ''));
+  return m ? { station: m[1], titleNo: m[2] } : null;
+}
+// 시트 줄 → {u: 주소(앵커 보존 — 앵커 있으면 그 댓글만 fullLikeUrl, 없으면 글 전체 normLikeUrl로 대조), h: B 숨김, r: C 갱신 주기(범위 밖·비움 null),
+//   s: 순위 설정 칸(C 숫자·D~G)이 적힌 줄 — C의 메모 글자는 설정이 아니다(워커 likeSheetEntry set과 같은 규칙)}
+// 워커가 읽는 숲 글 줄(likePostOf — 'https://' 없이 적은 주소 포함)은 여기서도 남긴다 — 빠지면 폴링 주기가 워커 캐시 TTL과 어긋난다.
+function parseLikeSheetRows(rows) {
+  return rows
+    .map(r => {
+      const n = parseInt(r[2], 10);
+      return { u: fullLikeUrl(r[0]), h: String(r[1] || '').trim(), r: (n >= RANK_REFRESH_MIN && n <= RANK_REFRESH_MAX) ? n : null, s: !isNaN(n) || r.slice(3, 7).some(v => String(v || '').trim() !== '') };
+    })
+    .filter(e => e.u.startsWith('http') || likePostOf(e.u));
+}
+// 순위 폴링 주기(초) — 그 글의 설정 줄(설정 칸이 적힌 첫 줄, 없으면 그 글의 첫 줄 — 워커 pickLikeSheetEntry와 같은 규칙)의 C열, 없으면 기본.
+// 워커는 같은 값을 그 글 응답의 엣지 캐시 TTL로 쓴다 — 어긋나면 폴링이 캐시에 막혀 헛요청이 늘거나 캐시가 논다.
+function likeRankRefreshOf(titleNo) {
+  const same = (likeSheetRows || lsLikeSheet()).filter(e => { const p = likePostOf(e.u); return p && p.titleNo === titleNo; });
+  const row = same.find(e => e.s) || same[0];
+  return (row && row.r) || RANK_REFRESH_DEFAULT;
 }
 // 같은 멤버가 같은 링크에 보낸 좋아요 요청만 dedup: 멤버 + fullLikeUrl(댓글 앵커 #comment_noti 포함) 기준 최신 1건(과거 건 숨김). 한 글에 링크 여러 개면 각각 별개 요청으로 모두 유지(이벤트 탭과 동일).
 // 다른 멤버가 같은 링크를 요청한 건은 별개 요청이므로 각각 유지(달타·캬앙이 같은 컨텐츠 좋아요를 요청한 경우 둘 다 노출).
@@ -5755,18 +5746,18 @@ function dedupeLikeReqs(list) {
   }
   return [...byKey.values()].sort((a, b) => new Date(b.time) - new Date(a.time));
 }
+// 좋아요 시트를 받아 숨김 Set을 돌려준다(순위 폴링 주기용 줄은 likeSheetRows에). 실패하면 마지막 사본으로.
 async function loadLikeHideSet() {
   let entries = [];
   try {
-    const res = await fetch(LIKE_HIDE_SHEET_URL);
+    const res = await fetch(LIKE_SHEET_URL);
     if (!res.ok) throw new Error('no data');
-    entries = parseCSV(await res.text())
-      .map(r => ({ u: fullLikeUrl((r[0] || '').trim()), d: (r[1] || '').trim() }))   // 앵커 보존: 앵커 있으면 그 댓글만, 없으면 글 URL(글단위 매칭은 대조 시 normLikeUrl로)
-      .filter(e => e.u.startsWith('http'));
-    lsSet(LS_LIKEHIDE_CACHE, JSON.stringify(entries));
+    entries = parseLikeSheetRows(parseCSV(await res.text()));
+    lsSet(LS_LIKESHEET_CACHE, JSON.stringify(entries));
   } catch (e) {
-    try { entries = JSON.parse(lsGet(LS_LIKEHIDE_CACHE, '[]')); } catch (e2) { entries = []; }
+    entries = lsLikeSheet();
   }
+  likeSheetRows = entries;
   return buildLikeHideSet(entries);
 }
 
@@ -5818,14 +5809,13 @@ function renderLikeReqBody() {
   const checked = lsKeySet(LS_LIKE_CHECKED);
   body.innerHTML = buildLikeReqGroups(likeReqShown).map(g => {
     const title = escapeHtml(likeReqGroupTitle(g.entries));
-    // 순위 버튼은 '그 글의 순위 집계가 시트에 있을 때만' 붙는다 — 없는 컨텐츠에 빈 순위를 열게 하지 않는다.
-    // 매칭은 시트의 글번호가 그 묶음 주소에 들어 있는지로 본다. 카페 글은 숲 글번호가 없어 자연히 버튼이 안 생긴다
-    // (네이버 카페 좋아요 수를 받아올 수 있는지는 미확인 — 가능해지면 여기 조건을 넓히면 된다).
-    const rb = likeRankBtns.find(b => b.titleNo && g.url && g.url.includes('/' + b.titleNo));
+    // 순위 버튼(2026-09-28 순위 상시 — Crenop D21): 숲 글 묶음이면 모두 붙는다. 시트로 숨긴 요청은 이미 목록에 없고, 카페 글은 숲 글 번호가 없어 버튼이 없다
+    // (네이버 카페 좋아요 수를 받아올 수 있는지는 미확인 — 가능해지면 여기 조건을 넓히면 된다). 전형·정원 등 설정은 워커가 좋아요 시트에서 찾는다(없으면 전체 순위).
+    const post = likePostOf(g.url);
     // 시트 색을 버튼에 입히던 것 폐지(2026-09-01): 색으로 대회를 구분하던 건 모바일에서 이름을 못 넣던 시절의 방편이고,
     // 이제 각 묶음 머리에 이름이 붙어 있어 색이 할 일이 없다. 사이트 공통 버튼 문법으로 통일한다.
-    const rankBtn = rb
-      ? `<button class="lrg-rank-btn${likeRankPost === rb.titleNo ? ' on' : ''}" type="button" data-post="${escapeHtml(rb.titleNo)}" title="좋아요 순위 보기">${SVG_ICONS.barChart}<span>순위</span></button>`
+    const rankBtn = post
+      ? `<button class="lrg-rank-btn${likeRankPost === post.titleNo ? ' on' : ''}" type="button" data-post="${escapeHtml(post.titleNo)}" title="좋아요 순위 보기">${SVG_ICONS.barChart}<span>순위</span></button>`
       : '';
     const head = `<div class="lrg-head">` + (g.url
       ? `<a class="lrg-head-txt" href="${escapeHtml(g.url)}" target="_blank" rel="noopener">${title}</a>`
@@ -5845,7 +5835,7 @@ function renderLikeReqBody() {
         + `<button class="lrq-check" type="button" aria-label="확인 표시" aria-pressed="${checked.has(key)}">${LRQ_CHECK_SVG}</button></div>`;
     }).join('');
     // 좁은 폭에서 이 묶음의 순위를 보는 중이면, 댓글 자리에 순위 자리를 대신 찍는다(다른 묶음의 댓글은 그대로).
-    const rankHere = window.matchMedia('(max-width: 1100px)').matches && rb && likeRankPost === rb.titleNo;
+    const rankHere = window.matchMedia('(max-width: 1100px)').matches && post && likeRankPost === post.titleNo;
     return head + (rankHere ? '<div class="like-rank like-rank-slot"></div>' : rows);
   }).join('');
 }
@@ -5930,12 +5920,11 @@ function syncBodyScrollLock() {
 
 // ── 좋아요 순위 모달 (2026-08-04) ────────────────────────────────────────────
 // 워커 /like-ranking은 호출될 때 그 자리에서 숲을 긁는다(상시 수집 없음). 그래서 신선도 = 이 폴링 주기.
-// 열려 있을 때만 10초로 돌리고 닫으면 완전히 멈춘다 — 백그라운드에서 볼 사람이 없는데 돌릴 이유가 없다.
-// 탭이 숨겨졌을 때도 건너뛴다(모달은 열려 있어도 화면에 없으면 마찬가지).
-// 갱신 주기는 시트 I열에서 온다(대회별). 아래는 워커와 맞춘 기본값·허용 범위 — 양쪽이 어긋나면 캐시와 폴링이 엇박이 난다.
-const RANK_REFRESH_DEFAULT = 30, RANK_REFRESH_MIN = 5, RANK_REFRESH_MAX = 600;
-let rankOpenPost = null;                  // 현재 모달이 보고 있는 대회(글번호). 폴링이 같은 대회를 계속 갱신하도록 붙잡아 둔다
-let likeRankEvents = null;                // 마지막으로 그린 순위 — 모드를 바꾸면 rerenderForTheme가 이것으로 다시 그린다(대회 색을 모드별로 구워 그리므로)
+// 순위를 고른 동안만 돌리고 탭을 떠나면 완전히 멈춘다 — 백그라운드에서 볼 사람이 없는데 돌릴 이유가 없다.
+// 탭이 숨겨졌을 때도 건너뛴다(탭은 열려 있어도 화면에 없으면 마찬가지).
+// 갱신 주기는 좋아요 시트 C열에서 온다(글별 — likeRankRefreshOf), 기본 10초(Crenop 2026-09-28 — 종전 30초). 아래는 워커와 맞춘 기본값·허용 범위 — 양쪽이 어긋나면 캐시와 폴링이 엇박이 난다.
+const RANK_REFRESH_DEFAULT = 10, RANK_REFRESH_MIN = 5, RANK_REFRESH_MAX = 600;
+let rankOpenPost = null;                  // 지금 보고 있는 글(글번호). 폴링이 같은 글을 계속 갱신하도록 붙잡아 둔다
 
 
 async function loadLikeRanking() {
@@ -5947,7 +5936,6 @@ async function loadLikeRanking() {
     const res = await fetch(WORKER_URL + '/like-ranking' + (rankOpenPost ? `?post=${encodeURIComponent(rankOpenPost)}` : ''), { cache: 'no-store' });
     const data = await res.json();
     const events = data.events || [];
-    likeRankEvents = events;
     if (events.length === 0) { body.innerHTML = '<div class="lr-msg">진행 중인 순위 집계가 없습니다.</div>'; return; }
     body.innerHTML = events.map(renderRankEvent).join('');
   } catch (err) {
@@ -5957,6 +5945,14 @@ async function loadLikeRanking() {
   }
 }
 
+// 순위 칸 제목 = 그 글 묶음 머리와 같은 문구(likeReqGroupTitle — 'OOO 컨텐츠 - "글제목"'). 옛 순위 탭에서 손으로 적던 버튼 이름(C열)을 대신한다
+//   (2026-09-28 좋아요 시트 합치기 — 합친 탭엔 이름 칸이 없다, 제목 색 칸도 없어져 제목은 보통 글자색). 그 글의 요청이 목록에 없으면 '좋아요 순위'
+//   순위가 묶음 안에 펼쳐지는 좁은 화면(≤1100 .like-rank-slot)에선 바로 위 머리와 같은 글이라 CSS가 숨긴다(2026-09-28 Crenop '나')
+function likeRankTitleOf(titleNo) {
+  const re = new RegExp('/post/' + String(titleNo || '').replace(/\D/g, '') + '(?!\\d)');
+  const entries = titleNo ? (likeReqShown || []).filter(e => re.test(normLikeUrl(e.url))) : [];
+  return entries.length ? likeReqGroupTitle(entries) : '좋아요 순위';
+}
 function renderRankEvent(ev) {
   // ★ 사이트 고유 멤버 순서가 아니라 좋아요 순으로 정렬 — 순위표에서 의미 있는 배열은 성적순이다.
   //   (워커가 이미 좋아요 순으로 내려주지만, 순서를 응답에 의존하지 않는다.)
@@ -6013,8 +6009,7 @@ function renderRankEvent(ev) {
   // 상단에는 기준(몇 위까지 뽑는지)만. 전형별 컷 숫자는 각 멤버 행으로 내려갔다.
   const sub = ev.quota ? `${ev.quota}위 컷 기준` : '';
   const note = ev.unclassified > 0 ? `<div class="rk-note">전형을 판별하지 못한 신청 ${ev.unclassified}건이 있어 실제 순위가 조금 더 낮을 수 있습니다.</div>` : '';
-  const tone = ev.color ? ` style="--rk-c:${toneForText(ev.color)}${n3Mark(ev.color)}"` : '';   // 시트 G열 색을 제목·순위에 반영(글자라 보정본 사용 — 라이트 모드는 그대로 + 천양만큼 옅으면 N3)
-  return `<div class="rk-ev${grouped ? '' : ' no-group'}"${tone}><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(ev.label || '좋아요 순위')}</span>`
+  return `<div class="rk-ev${grouped ? '' : ' no-group'}"><div class="rk-ev-head"><span class="rk-ev-title">${escapeHtml(likeRankTitleOf(ev.titleNo))}</span>`
     + (sub ? `<span class="rk-ev-sub">${escapeHtml(sub)}</span>` : '')
     + `</div>` + rows + note + `</div>`;
 }
@@ -6040,9 +6035,9 @@ function refreshLikeDot() {
 // 숨김 사본을 한 번도 받은 적 없으면(처음 온 사람) 캐시로 먼저 켜지 않는다 — 숨김 없이 세면 거의 반드시 헛점이 잠깐 켜졌다 꺼진다.
 async function loadLikeReqForDot() {
   try { likeReqCache = dedupeLikeReqs(JSON.parse(lsGet(LS_LIKEREQ_CACHE, '[]'))); } catch (e) { likeReqCache = []; }
-  if (lsGet(LS_LIKEHIDE_CACHE, null) !== null) refreshLikeDot();
+  if (lsGet(LS_LIKESHEET_CACHE, null) !== null) refreshLikeDot();
   try {
-    const [res] = await Promise.all([fetch(WORKER_URL + '/like-requests'), loadLikeHideSet()]);   // loadLikeHideSet이 숨김 사본(LS_LIKEHIDE_CACHE)을 최신으로 바꿔 둔다 — 실패하면 옛 사본 그대로
+    const [res] = await Promise.all([fetch(WORKER_URL + '/like-requests'), loadLikeHideSet()]);   // loadLikeHideSet이 시트 사본(LS_LIKESHEET_CACHE)을 최신으로 바꿔 둔다 — 실패하면 옛 사본 그대로
     const data = await res.json();
     likeReqCache = dedupeLikeReqs(data.like_requests || []);
     lsSet(LS_LIKEREQ_CACHE, JSON.stringify(likeReqCache));
@@ -7730,6 +7725,19 @@ function clipGroupItems(items, prefix) {
     groups.set(id, arr);
     for (const x of arr) gidOf.set(x.title_no, id);
   }
+  // 방송 중(다시보기 전) 같은 장면(2026-09-28 D20 Q4 '나'): 워커가 채팅 시각으로 묶어 준 lg(clipGroupLive) — 구간이 없어 묶음 안 차례는 등록 시각.
+  //   다시보기가 생겨 구간이 오면 워커가 lg를 빼고 위 구간 묶기가 넘겨받는다.
+  //   알고 둠: 워커는 크루 기본 제목 클립(여기 오기 전에 clipShownItems가 뺀다)까지 사슬로 묶는다 — 뺀 클립이 두 클립을 잇던 다리였으면 직접 겹치지 않는 둘이 한 묶음으로 보인다
+  //   (다시보기가 생기면 위 구간 묶기가 보이는 것만으로 다시 가른다). 끝난 방송 4개 정답 묶음 30개의 묶음 안 겹침은 최소 0.93 — 약한 다리는 본 적 없다(2026-09-28)
+  const live = new Map();
+  for (const x of items) if (x.lg && !(x.pos && x.pos.state === 'ok')) (live.get(x.lg) || live.set(x.lg, []).get(x.lg)).push(x);
+  for (const [lg, arr] of live) {
+    if (arr.length < 2) continue;
+    arr.sort((a, b) => clipRegCmp(a.reg, b.reg) || clipRegCmp(a.title_no, b.title_no));
+    const id = `${prefix}:${lg}`;
+    groups.set(id, arr);
+    for (const x of arr) gidOf.set(x.title_no, id);
+  }
   return { groups, gidOf };
 }
 // 다시보기 번호 → 방송 번호(같은 칸에서 둘 다 가진 항목으로) — 방송 번호 없이 구간만 있는 외부 캐치를 그 방송에 붙인다
@@ -7769,23 +7777,29 @@ function clipSecMeta(key, arr, ctx) {
 }
 const clipRegCmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 // 등록순의 단위: one(한 장) · group(같은 장면) · block(구간 모름 — 원본 방송마다·원본 방송 없는 캐치는 하루마다, 하나라도 · 방송 번호도 모르면(u) 한 장씩). 자리 = 읽는 차례로 첫 항목의 등록 시각
+//   방송 중 같은 장면(구간 없는 묶음 — lg)은 그 방송 묶음 안에 겹친 카드로(u.parts — 방송순에서 그 방송 머리 아래에 서는 것과 같게, 머리의 '클립 N개'도 묶음 안 클립까지)
 function clipRegUnits(items, gidOf, groups, ctx) {
   const units = [], blocks = new Map();
-  for (const [gid, arr] of groups) units.push({ kind: 'group', gid, arr });
+  const toBlock = (k, part) => { const b = blocks.get(k) || blocks.set(k, []).get(k); b.push(part); };
+  for (const [gid, arr] of groups) {
+    if (arr[0].pos && arr[0].pos.state === 'none') toBlock(clipBroadKey(arr[0], ctx), { gid, arr });
+    else units.push({ kind: 'group', gid, arr });
+  }
   for (const x of items) {
     if (gidOf.has(x.title_no)) continue;
-    if (x._nosrc || (x.pos && x.pos.state === 'none')) { const k = clipBroadKey(x, ctx); (blocks.get(k) || blocks.set(k, []).get(k)).push(x); continue; }
+    if (x._nosrc || (x.pos && x.pos.state === 'none')) { toBlock(clipBroadKey(x, ctx), { arr: [x] }); continue; }
     units.push({ kind: 'one', arr: [x] });
   }
-  for (const [key, arr] of blocks) {
-    if (key[0] !== 'w') units.push({ kind: 'block', key, arr });
-    else for (const x of arr) units.push({ kind: 'one', arr: [x] });
+  for (const [key, parts] of blocks) {
+    if (key[0] !== 'w') units.push({ kind: 'block', key, arr: parts.flatMap(p => p.arr), parts });
+    else for (const p of parts) units.push(p.gid ? { kind: 'group', gid: p.gid, arr: p.arr } : { kind: 'one', arr: p.arr });
   }
   const dir = ctx.asc ? 1 : -1, cmpX = (a, b) => dir * (clipRegCmp(a.reg, b.reg) || clipRegCmp(a.title_no, b.title_no));
+  const firstOf = arr => arr.reduce((m, x) => (cmpX(x, m) < 0 ? x : m), arr[0]);
   for (const u of units) {
     const ord = u.arr.slice().sort(cmpX);
     u.at = ord[0];
-    if (u.kind === 'block') { u.arr = ord; u.sec = clipSecMeta(u.key, ord, ctx); }
+    if (u.kind === 'block') { u.arr = ord; u.sec = clipSecMeta(u.key, ord, ctx); u.parts.sort((a, b) => cmpX(firstOf(a.arr), firstOf(b.arr))); }
   }
   return units.sort((a, b) => cmpX(a.at, b.at));
 }
@@ -7908,7 +7922,7 @@ function clipBcHeadHtml(sec, n, ctx) {
 }
 function clipUnitHtml(u, ctx) {
   if (u.kind === 'group') return clipStackHtml(u.gid, u.arr);
-  if (u.kind === 'block') return `<div class="clip-block">${clipBcHeadHtml(u.sec, u.arr.length, ctx)}<div class="clip-flow">${u.arr.map(clipTileHtml).join('')}</div></div>`;
+  if (u.kind === 'block') return `<div class="clip-block">${clipBcHeadHtml(u.sec, u.arr.length, ctx)}<div class="clip-flow">${u.parts.map(p => (p.gid ? clipStackHtml(p.gid, p.arr) : clipTileHtml(p.arr[0]))).join('')}</div></div>`;
   return clipTileHtml(u.arr[0]);
 }
 function clipRegHtml(units, st, ctx) {
@@ -8220,7 +8234,7 @@ window.addEventListener('resize', () => { if (likeReqShown) renderLikeReqBody();
   if (src && window.MutationObserver) new MutationObserver(placeLikeRank).observe(src, { childList: true, subtree: true });
 })();
 
-// 순위를 안 골랐을 때 우측 칸 문구(2026-09-24 Crenop): 목록에 고를 순위 버튼이 없으면(요청 0건·집계 없는 글뿐) '고르면'이 말이 되지 않는다 — 무엇이 나오는 자리인지만 알린다
+// 순위를 안 골랐을 때 우측 칸 문구(2026-09-24 Crenop): 목록에 고를 순위 버튼이 없으면(요청 0건·카페 글뿐) '고르면'이 말이 되지 않는다 — 무엇이 나오는 자리인지만 알린다
 function likeRankIdleHtml() {
   return `<div class="lr-msg">${document.querySelector('#likeReqBody .lrg-rank-btn') ? '컨텐츠를 고르면 순위가 나옵니다.' : '순위가 나타나는 공간입니다.'}</div>`;
 }
@@ -8245,8 +8259,7 @@ function selectLikeRank(titleNo) {
   if (body) body.innerHTML = '<div class="lr-msg">불러오는 중…</div>';
   loadLikeRanking();
   stopLikePoll();
-  const btn = likeRankBtns.find(b => b.titleNo === titleNo);
-  const sec = (btn && btn.refresh) || RANK_REFRESH_DEFAULT;
+  const sec = likeRankRefreshOf(titleNo);
   // 탭이 화면에 없으면 멈춘다 — 모달 쪽 폴링이 '순위 모달이 떠 있는가'로 판단하는 것과 같은 역할.
   likeTimer = setInterval(() => {
     const p = document.getElementById('page-like');
@@ -8321,7 +8334,7 @@ function switchPage(page, opts) {
   if (page === 'stats') renderStats();   // 멤버 한 명의 지표·시간대·방송별 목록(2026-09-18 재편)
   if (page === 'hall') renderHallTab();
   // 좋아요: 탭을 떠나면 순위 갱신을 멈추고(안 보는 화면 때문에 숲을 긁지 않는다), 돌아오면 켜 두었던 순위를 즉시 다시 받고
-  // 시트 간격(I열)으로 갱신을 재개한다(2026-09-03 — 종전엔 멈추기만 하고 재개가 없어 낡은 순위가 남았다).
+  // 시트 간격(좋아요 시트 C열)으로 갱신을 재개한다(2026-09-03 — 종전엔 멈추기만 하고 재개가 없어 낡은 순위가 남았다).
   if (page === 'like') { renderLike(); if (likeRankPost) selectLikeRank(likeRankPost); } else stopLikePoll();
   if (page === 'profile' && !profileState.tabsInited) {
     initProfileTabs();
@@ -8594,7 +8607,6 @@ if (window.matchMedia) {   // 직접 고른 적이 없으면 기기 설정이 �
 updatePageTitle();
 syncFavBtn();        // 최애 설정 버튼 글자(설정됨이면 이름·민트)
 loadTopbarLinks();   // 상단바 링크 버튼 시트 — 캐시 선표시 후 최신화(완료 시 updatePageTitle 재호출)
-loadLikeRankBtn();   // 좋아요 순위 버튼 — 활성 대회 유무·버튼색만 판정(순위 데이터는 모달 열 때 /like-ranking에서)
 // (첫 화면을 실제로 여는 applyHash·syncHash는 스크립트 맨 끝으로 — 2026-09-02, 그 자리의 주석 참조)
 // 로고 클릭 → 생방송(홈). nav 클릭과 동일 경로(뒤로가기 한 칸 쌓임).
 {
@@ -8644,8 +8656,8 @@ function koDate(y, m, d) { return `${y}년 ${m}월 ${d}일`; }
 function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }   // 뷰어 TZ 무관 현재 KST — getUTC*로 읽음
 // ── 만료형 날짜 공통 파서(2026-08-19) ────────────────────────────────────────────
 // 시트의 만료·기한 칸을 한 곳에서 해석한다: 'YYYY-MM-DD' = 그날 KST 자정(23:59:59.999)까지, 'YYYY-MM-DD HH:mm' = 그 분까지.
-// 반환은 만료 시각 epoch ms, 형식 밖·빈 값은 null — "빈 칸을 어떻게 볼지"는 시트마다 달라(숨김=즉시 숨김, 상단바=무기한 노출,
-// 휴방=미표시) 여기서 정하지 않고 호출부가 정한다. 날짜부 관대 규칙은 종전 숨김 B열과 동일(. / 구분·한 자리 월일·구분자 주변 공백).
+// 반환은 만료 시각 epoch ms, 형식 밖·빈 값은 null — "빈 칸을 어떻게 볼지"는 시트마다 달라(좋아요 숨김=보임 — 2026-09-28 합친 탭, 상단바=무기한 노출,
+// 휴방=미표시) 여기서 정하지 않고 호출부가 정한다. 날짜부 관대 규칙은 좋아요 시트 B열과 같다(. / 구분·한 자리 월일·구분자 주변 공백).
 // 비교는 항상 Date.now() vs 반환값. +09:00 접미 ISO로 만들어 뷰어 TZ 무관(로컬 게터 미사용) — 워커에 이식해도 그대로 동작.
 function kstExpiryMs(raw) {
   const v = String(raw || '').trim().replace(/\s*([.\/-])\s*/g, '$1');

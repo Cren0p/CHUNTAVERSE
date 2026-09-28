@@ -2006,8 +2006,23 @@
   #clipsBody .timeline-header { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }   /* 상자 밖이라 양옆 선을 직접(통계 방송 목록과 같다) */
   .clip-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
   .clip-col { min-width: 0; container: clipcol / inline-size; }
-  .clip-col-head { display: flex; align-items: baseline; gap: 6px; margin: 0 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--text2); }
-  .clip-col-head .n { font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--muted); }
+  /* 두 칸(#clipsBody data-mode two — 칸마다 타일 둘이 드는 폭, CLIP_TWO_MIN): 칸마다 상단바 + 칸마다 따로 스크롤(2026-09-28 Crenop D19 '라' — '스크롤이 따로면 상단바도 따로').
+     높이 = 화면에 남는 높이(clipFitCols → --clip-h — 페이지는 스크롤되지 않는다). 칸 상단바는 그 칸 안에서 붙는다(top 0 — 목록 상단바의 사이트 머리 아래 자리·위 틈 가림막은
+     칸이 스크롤 상자라 필요 없다) */
+  #clipsBody[data-mode="two"] .clip-cols { height: var(--clip-h, 70vh); align-items: stretch; }
+  #clipsBody[data-mode="two"] .clip-col { overflow-y: auto; overscroll-behavior: contain; }
+  .clip-col-bar.timeline-header { top: 0; margin: 0 0 12px; }
+  .clip-col-bar.timeline-header::before { display: none; }
+  .clip-bar-n { margin-left: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  /* 한 목록(data-mode one — 칸 하나가 타일 둘을 못 담는 폭: 휴대폰·기둥 편 태블릿): 상단바 토글로 두 목록을 오가고 페이지가 스크롤한다. 첫 줄 [토글 | 맨 위로·맨 아래로(그림만 —
+     글자까지면 상단바가 세 줄)], 둘째 줄 [정렬]. 타일은 360에서도 한 줄 2장(목록 312 → 152 — 두 칸 시절 한 칸 150과 같은 크기, 160 하한 아래를 알고 둔 2026-09-26 결정 그대로) */
+  #clipsBody[data-mode="one"] .clip-cols { grid-template-columns: minmax(0, 1fr); }
+  #clipsBody[data-mode="one"] .clip-flow { grid-template-columns: repeat(auto-fill, minmax(min(150px, calc(50% - 4px)), 1fr)); }
+  .clip-one-bar.timeline-header { flex-wrap: wrap; row-gap: 8px; }
+  .clip-one-bar .timeline-bar-left { flex: 1 1 100%; justify-content: space-between; }
+  .clip-one-bar .timeline-scroll-btn > span { display: none; }
+  .clip-view-n { margin-left: 4px; font-weight: 600; color: var(--muted); }
+  .sort-toggle.active .clip-view-n { color: inherit; }
   .clip-day + .clip-day, .clip-sec + .clip-sec { margin-top: 24px; }
   .clip-day-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
   .clip-day-date { font-size: 13px; font-weight: 700; color: var(--text2); white-space: nowrap; }
@@ -2055,7 +2070,6 @@
     .clip-bc .day-session-date { margin-right: 0; }
     .clip-bc .clip-bct { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
   }
-  @media (max-width: 700px) { .clip-cols { gap: 12px; } }   /* 휴대폰: 두 칸 사이를 좁혀 칸 폭을 번다 */
 
   /* === 관련 링크 탭 === */
   .links-wrap {
@@ -3992,7 +4006,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-28e';   // 2026-09-28e: 라이트 모드 번짐 멤버에 플리·달타(D16 '나' — 흰 카드 대비 2 미만 아홉 명) · 클립 같은 장면 카드를 가운데 버튼으로 열면(대표 클립이 새 탭) 본 클립으로 기억 — 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-28f';   // 2026-09-28f: 클립 탭 — 넓으면 두 칸이 각자 상단바(이름·개수·맨 위/아래·정렬)와 각자 스크롤, 좁으면(칸이 타일 둘을 못 담는 폭 — 휴대폰·기둥 편 태블릿) 한 목록 + 상단바 토글(D19 '라') — 2026-09-28e: 라이트 모드 번짐 멤버에 플리·달타(D16 '나' — 흰 카드 대비 2 미만 아홉 명) · 클립 같은 장면 카드를 가운데 버튼으로 열면(대표 클립이 새 탭) 본 클립으로 기억 — 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -7481,13 +7495,16 @@ function renderCalSide() {
 }
 
 // ══ 클립 탭 (2026-09-26 Crenop) ═══════════════════════════════════════════════
-// 숲 클립·캐치(둘을 가르지 않는다)를 고른 사람 기준 두 칸으로 — [본인 방송 | 타인 방송], 천타버스 칸은 [멤버 방송 | 외부인 방송](이름 2026-09-27 Crenop). 휴대폰도 두 칸(360px에서 타일 약 150 — Crenop 수용).
+// 숲 클립·캐치(둘을 가르지 않는다)를 고른 사람 기준 두 칸으로 — [본인 방송 | 타인 방송], 천타버스 칸은 [멤버 방송 | 외부인 방송](이름 2026-09-27 Crenop).
+// 배치(2026-09-28 Crenop D19 '라'): 목록 폭이 칸마다 타일 둘(CLIP_TWO_MIN)을 담으면 두 칸이 각자 상단바 [이름 개수 · 맨 위로·맨 아래로 · 정렬]를 갖고 각자 스크롤,
+//   모자라면(휴대폰·기둥 편 태블릿) 한 목록만 — 상단바 토글 [본인 방송 N | 타인 방송 N]로 오가고 페이지가 스크롤(목록마다 읽던 자리 기억). 정렬은 칸마다 따로.
+//   알고 둔 것: 두 칸일 땐 본문 안 스크롤(사이트 첫 사례 — 모달·PC 기둥만 있었다)이라 두 칸 사이 틈에선 휠이 먹지 않는다, 태블릿은 왼쪽 기둥을 여닫으면 모양이 바뀐다.
 // 자료 = 워커 GET /clips?member=&col=own|men&day=(워커 clipsRoute 곁 주석). 응답 한 장은 등록일(KST)을 통째로 담는다 — (next, day] 또는 [창 첫날, day](complete),
 //   truncated면 그 하루의 일부. 칸마다 받은 날(cov)과 연 날 수(depth[칸])를 따로 둔다 — 칸마다 끝에 '불러오는 중' 줄이 있고 그 줄이 화면에 가까워지면
 //   (IntersectionObserver) 그 칸만 하루 더(2026-09-27 Crenop — 종전엔 두 칸이 다 받은 날만 열고 목록 맨 아래 한 줄이라, 짧은 칸은 긴 칸 끝까지 내려가야 채워졌다.
 //   대가: 두 칸이 연 날짜가 서로 다를 수 있다 — 칸마다 날짜 머리가 있어 읽는 데는 문제없다). pending > 0이면 retry_after초 뒤 같은 날을 다시(CLIP_RETRY_MAX번까지) —
 //   원본 구간·외부 방송인 목록을 워커가 응답 뒤에 채운다.
-// 정렬 둘(같은 버튼을 다시 누르면 거꾸로 — 통계 방송 목록과 같은 화살표): 등록순(등록 시각) · 방송순(기본 — 2026-09-27 Crenop. 원본 방송 — 새 방송부터, 켜져 있는 방송은 맨 위,
+// 정렬 둘(칸마다 따로 · 같은 버튼을 다시 누르면 거꾸로 — 통계 방송 목록과 같은 화살표): 등록순(등록 시각) · 방송순(기본 — 2026-09-27 Crenop. 원본 방송 — 새 방송부터, 켜져 있는 방송은 맨 위,
 //   방송 안은 잘라 낸 자리 순). 거꾸로(과거부터)는 창 첫날부터 하루씩 연다 — 최신부터 받은 목록 위에 옛 날을 끼워 넣으면 읽던 자리가 밀린다.
 //   알고 둔 것: 거꾸로에선 응답 한 장이 새로 덮는 날이 요청한 그날 하나라, 창 앞쪽에 빈 날이 이어지면 빈 날마다 요청이 한 번씩 곧바로 나간다(칸마다 최대 30 —
 //   기본 방향은 한 장이 빈 날을 한꺼번에 덮는다). 지난 날은 워커 엣지 캐시 1일이라 숲 검색은 칸·날마다 하루 한 번까지.
@@ -7508,8 +7525,11 @@ const CLIP_FAIL_WAIT_MS = 30 * 1000;    // 실패한 날은 30초 동안 다시 
 const CLIP_OVERLAP = 0.5;               // 워커 CLIP_OVERLAP과 같은 값
 const CLIP_PFX = /^\s*\[\s*(클립|캐치)\s*\]\s*/;   // 숲이 미리 채우는 말머리 — 둘을 가르지 않으므로 떼고 보인다
 const CLIP_SORTS = [{ key: 'reg', label: '등록순', ic: 'clockTime' }, { key: 'broad', label: '방송순', ic: 'soop' }];   // 표기: 명사 + 접미사 '-순' 붙여 씀(다른 탭 '시간순'·'날짜순'과 같다)
-// member: 'all'(전체 — 2026-09-28) | 'crew' | 멤버 id (null = 아직 안 골랐다 — 들어올 때 최애, 없으면 천타버스) · depth: 칸마다 읽는 차례로 연 날 수 · stores: 'member|col' → 칸 자료 · groups: 그린 같은 장면(모달이 읽는다)
-const clipState = { member: null, sort: 'broad', asc: false, depth: { own: 0, men: 0 }, stores: {}, groups: new Map(), io: null };
+// member: 'all'(전체 — 2026-09-28) | 'crew' | 멤버 id (null = 아직 안 골랐다 — 들어올 때 최애, 없으면 천타버스) · sort·asc·depth: 칸마다(정렬·방향·읽는 차례로 연 날 수)
+//   · mode: 'two'(두 칸) | 'one'(한 목록 — view 칸만) · viewY: 한 목록에서 칸마다 읽던 페이지 높이 · reset: 다음 그리기에서 맨 위로 되돌릴 칸(정렬·멤버를 바꿈)
+//   · stores: 'member|col' → 칸 자료 · groups: 그린 같은 장면(모달이 읽는다) · io: 끝 줄 관찰자들 · ro: 목록 폭 관찰
+const CLIP_TWO_MIN = 2 * 328 + 20;   // 두 칸의 최소 목록 폭 = 칸마다 160 타일 둘(160 + 8 + 160)·칸 사이 20 — 좁은 칸 규칙(@container clipcol 327px 이하)과 같은 경계
+const clipState = { member: null, sort: { own: 'broad', men: 'broad' }, asc: { own: false, men: false }, depth: { own: 0, men: 0 }, view: 'own', mode: '', viewY: { own: 0, men: 0 }, reset: new Set(), stores: {}, groups: new Map(), io: [], ro: null };
 
 function clipToday() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
 function clipAddDays(d, n) { return new Date(Date.parse(d + 'T00:00:00Z') + n * 86400e3).toISOString().slice(0, 10); }
@@ -7606,7 +7626,7 @@ function clipFetch(st, day, attempt, prevPending) {
 }
 // 한 칸의 연 날 = 읽는 차례로 depth[칸]일까지 중 그 칸이 받은 앞부분(k일) · target = 그 칸이 다음에 열 날(창 끝이면 null)
 function clipOpenDays(col) {
-  const seq = clipSeq(clipToday(), clipState.asc), st = clipStore(clipState.member, col);
+  const seq = clipSeq(clipToday(), clipState.asc[col]), st = clipStore(clipState.member, col);
   const lim = Math.min(clipState.depth[col], seq.length);
   let k = 0; while (k < lim && st.cov.has(seq[k])) k++;
   return { seq, st, k, shown: new Set(seq.slice(0, k)), target: k < seq.length ? seq[k] : null };
@@ -7634,15 +7654,20 @@ function clipMore(col) {
   renderClips(true);
 }
 function clipObserve() {
-  // 관찰 창 = 화면 아래 600px까지 + 화면 위 전부: 끝 줄이 화면 위로 지나간 칸(사람이 그 칸 끝을 지나 내려감 · 다른 칸이 열리며 보던 자리를 지키느라 밀림)도 이어서 연다 —
-  //   아래쪽만 보면 밀려 올라간 칸이 영영 안 열렸다(2026-09-27 점검: 360 천양 '맨 아래로'에서 본인 칸이 하루에서 멈춤)
-  if (!clipState.io) clipState.io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) clipMore(e.target.closest('.clip-col').dataset.col); }, { rootMargin: '1000000px 0px 600px 0px' });
-  clipState.io.disconnect();   // 그릴 때마다 줄이 새로 생긴다 — 새 줄을 관찰하면 첫 판정이 바로 온다(여전히 화면 근처면 그 칸 하루 더)
-  document.querySelectorAll('#clipsBody .clip-more[data-more]').forEach(el => clipState.io.observe(el));
+  // 관찰 창 = 보이는 곳 아래 600px까지 + 위 전부: 끝 줄이 위로 지나간 칸(사람이 그 칸 끝을 지나 내려감)도 이어서 연다 — 아래쪽만 보면 밀려 올라간 칸이 영영 안 열렸다
+  //   (2026-09-27 점검: 360 천양 '맨 아래로'에서 본인 칸이 하루에서 멈춤). 두 칸이면 보이는 곳 = 그 칸(스크롤 상자 — 화면을 기준으로 재면 칸 밖으로 잘린 줄은 늘 '안 보임')
+  //   이라 칸마다 관찰자를 둔다. 그릴 때마다 줄·칸이 새로 생긴다 — 새로 관찰하면 첫 판정이 바로 온다(여전히 가까우면 그 칸 하루 더)
+  clipState.io.forEach(o => o.disconnect());
+  clipState.io = [];
+  const cb = es => { for (const e of es) if (e.isIntersecting) clipMore(e.target.closest('.clip-col').dataset.col); };
+  document.querySelectorAll('#clipsBody .clip-more[data-more]').forEach(el => {
+    const io = new IntersectionObserver(cb, { root: clipState.mode === 'two' ? el.closest('.clip-col') : null, rootMargin: '1000000px 0px 600px 0px' });
+    io.observe(el); clipState.io.push(io);
+  });
 }
 function clipKick() {
-  if (currentPage !== 'clips' || !clipState.io) return;
-  document.querySelectorAll('#clipsBody .clip-more[data-more]').forEach(el => { clipState.io.unobserve(el); clipState.io.observe(el); });
+  if (currentPage !== 'clips' || !clipState.io.length) return;
+  clipObserve();
 }
 // 구간이 없는 항목의 이름표(방송순 머리·섞인 방송의 이름표 줄·등록순 묶음 머리). 외부인 방송도 같은 사유(2026-09-27 Crenop '나' — 머리 이름 자리가
 //   방송인 닉이 되며 종전 이름표 '외부인 방송'이 이름표 줄에만 남아 머리·등록순 머리와 말이 갈렸다, D8 Q2). 외부 방송은 사이트 세션이 없어(hit 없음) 등록 시각 24시간 규칙
@@ -7892,33 +7917,49 @@ function clipItemEl(body, col, nos) {
   for (const no of nos) { const el = body.querySelector(`.clip-col[data-col="${col}"] .clip-item[data-clipno~="${no}"]`); if (el) return el; }
   return null;
 }
+//   두 칸이면 칸마다(보이는 곳 = 그 칸의 상단바 아래), 한 목록이면 화면 기준. 모양이 바뀌는 그리기(폭이 변함)에선 붙잡지 않는다.
 function clipKeep(body) {
   const key = el => { const it = el.closest('.clip-item[data-clipno]'), c = el.closest('.clip-col'); return it && c ? { col: c.dataset.col, nos: it.dataset.clipno.split(' ') } : null; };
-  let anchor = null, focus = null;
-  if (window.scrollY > 0) {
-    const vh = window.innerHeight;
+  const pick = (els, lo, hi) => {   // lo~hi 안 타일 중 가장 위(온전히 보이는 것 먼저)
     let best = null, bestScore = Infinity;
-    for (const el of body.querySelectorAll('.clip-item[data-clipno]')) {
+    for (const el of els) {
       const r = el.getBoundingClientRect();
-      if (r.bottom <= 0 || r.top >= vh) continue;
-      const score = r.top >= 0 && r.bottom <= vh ? r.top : vh + Math.abs(r.top);
+      if (r.bottom <= lo || r.top >= hi) continue;
+      const score = r.top >= lo && r.bottom <= hi ? r.top : hi + Math.abs(r.top);
       if (score < bestScore) { best = el; bestScore = score; }
     }
     const k = best && key(best);
-    if (k) anchor = { ...k, top: best.getBoundingClientRect().top };
+    return k ? { ...k, top: best.getBoundingClientRect().top } : null;
+  };
+  const anchors = [];
+  let focus = null;
+  const same = body.dataset.mode === clipState.mode;
+  if (same && clipState.mode === 'two') {
+    for (const c of body.querySelectorAll('.clip-col')) {
+      if (c.scrollTop <= 0) continue;
+      const bar = c.querySelector('.clip-col-bar'), a = pick(c.querySelectorAll('.clip-item[data-clipno]'), bar ? bar.getBoundingClientRect().bottom : c.getBoundingClientRect().top, c.getBoundingClientRect().bottom);
+      if (a) anchors.push(a);
+    }
+  } else if (same && window.scrollY > 0) {
+    const a = pick(body.querySelectorAll('.clip-item[data-clipno]'), 0, window.innerHeight);
+    if (a) anchors.push(a);
   }
   const f = document.activeElement;
   if (f && f !== body && body.contains(f)) {
-    if (f.dataset.clipsort) focus = { sel: `[data-clipsort="${f.dataset.clipsort}"]` };
-    else if (f.dataset.clipscroll) focus = { sel: `[data-clipscroll="${f.dataset.clipscroll}"]` };
+    if (f.dataset.clipsort) focus = { sel: `[data-clipsort="${f.dataset.clipsort}"][data-col="${f.dataset.col}"]` };
+    else if (f.dataset.clipscroll) focus = { sel: `[data-clipscroll="${f.dataset.clipscroll}"][data-col="${f.dataset.col}"]` };
+    else if (f.dataset.clipview) focus = { sel: `[data-clipview="${f.dataset.clipview}"]` };
     else if (f.closest('.clip-item')) focus = key(f);
     else { const sec = f.closest('.clip-sec, .clip-block'), it = sec && sec.querySelector('.clip-item[data-clipno]'), k = it && key(it); if (k) focus = { ...k, head: true }; }   // 방송 머리 = 그 묶음 첫 항목의 묶음 머리
   }
-  return { anchor, focus };
+  return { anchors, focus };
 }
 function clipRestore(body, kept) {
-  const a = kept.anchor, el = a && clipItemEl(body, a.col, a.nos);
-  if (el) { const dy = el.getBoundingClientRect().top - a.top; if (Math.abs(dy) >= 1) window.scrollBy(0, dy); }
+  for (const a of kept.anchors) {
+    const el = clipItemEl(body, a.col, a.nos), dy = el ? el.getBoundingClientRect().top - a.top : 0;
+    if (Math.abs(dy) < 1) continue;
+    if (clipState.mode === 'two') el.closest('.clip-col').scrollTop += dy; else window.scrollBy(0, dy);
+  }
   const f = kept.focus;
   if (!f) return;
   let t = null;
@@ -7926,51 +7967,117 @@ function clipRestore(body, kept) {
   else { const it = clipItemEl(body, f.col, f.nos), sec = it && f.head ? it.closest('.clip-sec, .clip-block') : null; t = sec ? sec.querySelector('.clip-bc') : it && it.querySelector('a'); }
   if (t) t.focus({ preventScroll: true });
 }
-// keep = 자료가 와서 다시 그린다(보던 자리·초점 유지) · 없음 = 사람이 정렬·멤버를 바꿨다(처음부터)
+// keep = 자료가 와서 다시 그린다(보던 자리·초점 유지) · 없음 = 사람이 정렬·멤버·토글을 바꿨다. 두 칸은 칸 요소를 새로 쓰면 스크롤이 0이 되므로
+//   keep과 무관하게 칸마다 스크롤 자리를 되살린다(정렬·멤버를 바꾼 칸만 처음부터 — clipState.reset). 모양(두 칸·한 목록)은 그릴 때마다 목록 폭으로 정한다.
 function renderClips(keep) {
   const body = document.getElementById('clipsBody');
   if (!body) return;
+  const bw = body.getBoundingClientRect().width;
+  if (bw > 0) clipState.mode = bw >= CLIP_TWO_MIN ? 'two' : 'one';
+  else if (!clipState.mode) clipState.mode = 'one';   // 안 보이는 탭(폭 0)에선 앞 모양 그대로 — 보이면 폭 관찰(clipWatch)이 다시 잰다
+  const two = clipState.mode === 'two';
   const kept = keep ? clipKeep(body) : null;
+  const tops = {};
+  if (two && body.dataset.mode === 'two') body.querySelectorAll('.clip-col').forEach(c => { tops[c.dataset.col] = c.scrollTop; });
+  body.dataset.mode = clipState.mode;
   const member = clipState.member, crew = member === 'crew' || member === 'all', today = clipToday(), nowMs = Date.now();   // '전체'도 천타버스 칸과 같은 두 칸 [멤버 방송 | 외부인 방송]
   const idx = clipSessionIndex(statsState.data, clipWindowMonths(today));
+  const labelOf = col => crew ? (col === 'own' ? '멤버 방송' : '외부인 방송') : (col === 'own' ? '본인 방송' : '타인 방송');
+  // 상단바 부품 — 통계 방송 목록과 같은 부품(맨 위로·맨 아래로·정렬 둘), 칸마다(data-col). 한 목록에선 맨 위·아래가 그림만(CSS .clip-one-bar — 이름은 마우스를 올리면)
+  const scrollBtns = col => `<div class="tl-pair"><button class="timeline-scroll-btn" data-clipscroll="top" data-col="${col}" type="button" title="맨 위로">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button>`
+    + `<button class="timeline-scroll-btn" data-clipscroll="bottom" data-col="${col}" type="button" title="맨 아래로">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div>`;
+  const sortBtns = col => CLIP_SORTS.map(o => `<button class="sort-toggle${o.key === clipState.sort[col] ? ' active' : ''}" data-clipsort="${o.key}" data-col="${col}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === clipState.sort[col] && clipState.asc[col])}</button>`).join('');
   clipState.groups = new Map();
-  let total = 0, anyOpen = false;
+  const counts = {};
   const colsHtml = ['own', 'men'].map(c => clipOpenDays(c)).map(o => {
     const { st, k, shown, target } = o;
-    if (k) anyOpen = true;
     const items = clipShownItems(st, shown, idx);
-    total += items.length;
-    const ctx = { idx, nowMs, asc: clipState.asc, showName: crew || st.col === 'men', vodMap: clipVodMap(items) };
+    counts[st.col] = k ? items.length : null;   // 개수는 연 날이 생긴 뒤부터(첫 응답 전 '0개'는 틀린 말)
+    if (!two && st.col !== clipState.view) return '';   // 한 목록: 보이는 칸만 그린다(다른 칸 개수는 토글에)
+    const ctx = { idx, nowMs, asc: clipState.asc[st.col], showName: crew || st.col === 'men', vodMap: clipVodMap(items) };
     const { groups, gidOf } = clipGroupItems(items, st.col);
     for (const [gid, arr] of groups) {
       const hit = arr.map(x => clipSessHits(x, idx)[0]).find(Boolean);
       clipState.groups.set(gid, { arr, dk: hit ? isoToKstDateKey(hit.s.start) : arr.reduce((m, x) => (x.reg < m ? x.reg : m), arr[0].reg).slice(0, 10) });
     }
-    const label = crew ? (st.col === 'own' ? '멤버 방송' : '외부인 방송') : (st.col === 'own' ? '본인 방송' : '타인 방송');
     const inner = !items.length ? (k ? `<div class="clip-empty">${target === null ? `최근 ${CLIP_WINDOW_DAYS}일 동안 클립이 없습니다.` : '불러온 날짜에는 클립이 없습니다.'}</div>` : '')
-      : clipState.sort === 'broad' ? clipBroadHtml(clipBroadSections(items, gidOf, groups, ctx), ctx) : clipRegHtml(clipRegUnits(items, gidOf, groups, ctx), st, ctx);
-    return `<div class="clip-col" data-col="${st.col}"><div class="clip-col-head"><span>${label}</span>${k ? `<span class="n">${items.length}개</span>` : ''}</div>${inner}${!items.length && target === null ? '' : clipMoreHtml(o, nowMs)}</div>`;   // 개수는 연 날이 생긴 뒤부터(첫 응답 전 '0개'는 틀린 말) · 끝 줄은 칸마다
+      : clipState.sort[st.col] === 'broad' ? clipBroadHtml(clipBroadSections(items, gidOf, groups, ctx), ctx) : clipRegHtml(clipRegUnits(items, gidOf, groups, ctx), st, ctx);
+    const bar = two ? `<div class="timeline-header clip-col-bar"><div class="timeline-bar-left"><span class="stats-sess-head">${labelOf(st.col)}${k ? `<span class="clip-bar-n">${items.length}개</span>` : ''}</span></div>`
+      + `<div class="timeline-bar-right"><div class="tl-group">${scrollBtns(st.col)}</div><div class="tl-group"><div class="tl-pair">${sortBtns(st.col)}</div></div></div></div>` : '';
+    return `<div class="clip-col" data-col="${st.col}">${bar}${inner}${!items.length && target === null ? '' : clipMoreHtml(o, nowMs)}</div>`;   // 끝 줄은 칸마다
   }).join('');
-  // 목록 상단바 — 통계 방송 목록과 같은 부품(sticky): 왼쪽 '클립 N개', 오른쪽 맨 위로·맨 아래로 + 정렬 둘
-  const sortBtns = CLIP_SORTS.map(o => `<button class="sort-toggle${o.key === clipState.sort ? ' active' : ''}" data-clipsort="${o.key}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === clipState.sort && clipState.asc)}</button>`).join('');
-  const bar = `<div class="timeline-header"><div class="timeline-bar-left"><span class="stats-sess-head">${anyOpen ? `클립 ${total}개` : '클립'}</span></div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" data-clipscroll="top" type="button">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button><button class="timeline-scroll-btn" data-clipscroll="bottom" type="button">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div></div><div class="tl-group"><div class="tl-pair">${sortBtns}</div></div></div></div>`;
-  body.innerHTML = bar + `<div class="clip-cols">${colsHtml}</div>`;
-  body.querySelectorAll('[data-clipsort]').forEach(b => b.addEventListener('click', () => clipSortClick(b.dataset.clipsort)));
-  body.querySelectorAll('[data-clipscroll]').forEach(b => b.addEventListener('click', () => window.scrollTo({ top: b.dataset.clipscroll === 'top' ? 0 : document.body.scrollHeight, behavior: 'smooth' })));
+  // 한 목록의 상단바(sticky — 통계 방송 목록과 같은 자리): 첫 줄 [토글 | 맨 위로·맨 아래로], 둘째 줄 [정렬] — 버튼은 보이는 칸 몫
+  const v = clipState.view;
+  const oneBar = two ? '' : `<div class="timeline-header clip-one-bar"><div class="timeline-bar-left"><div class="tl-pair">${['own', 'men'].map(c => `<button class="sort-toggle${c === v ? ' active' : ''}" data-clipview="${c}" type="button" aria-pressed="${c === v}"><span>${labelOf(c)}</span>${counts[c] === null ? '' : `<span class="clip-view-n">${counts[c]}</span>`}</button>`).join('')}</div>${scrollBtns(v)}</div>`
+    + `<div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair">${sortBtns(v)}</div></div></div></div>`;
+  body.innerHTML = oneBar + `<div class="clip-cols">${colsHtml}</div>`;
+  body.querySelectorAll('[data-clipsort]').forEach(b => b.addEventListener('click', () => clipSortClick(b.dataset.clipsort, b.dataset.col)));
+  body.querySelectorAll('[data-clipscroll]').forEach(b => b.addEventListener('click', () => clipScrollTo(b.dataset.clipscroll, b.dataset.col)));
+  body.querySelectorAll('[data-clipview]').forEach(b => b.addEventListener('click', () => clipViewClick(b.dataset.clipview)));
   body.querySelectorAll('a[data-clipgroup]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); openClipGroupModal(a.dataset.clipgroup); }));
   body.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
     const mid = b.dataset.vodmember, ym = b.dataset.vodym;
     const sess = (((statsState.data[ym] || {})[mid] || {}).sessions || []).find(x => String(x.broad_no) === b.dataset.vodpick);
     openVodPickModal(sessionVods(sess) ?? (vodsForBroad(mid, ym, b.dataset.vodpick) || []), `https://www.sooplive.com/station/${mid}/vod`, MEMBER_BY_ID[mid], isoToKstDateKey(sess && sess.start));
   }));
+  if (two) {
+    clipFitCols(body);   // 칸 높이를 먼저 — 높이가 없으면 스크롤 자리가 0으로 잘린다
+    body.querySelectorAll('.clip-col').forEach(c => { const t = tops[c.dataset.col]; if (t && !clipState.reset.has(c.dataset.col)) c.scrollTop = t; });
+  }
+  clipState.reset.clear();
   if (kept) clipRestore(body, kept);
   clipObserve();
+  clipWatch(body);
 }
-// 정렬 버튼: 다른 버튼 = 그 정렬(기본 방향), 고른 버튼을 다시 = 거꾸로(통계 방송 목록과 같다). 방향이 바뀌면 읽는 차례의 첫날이 바뀌어 처음부터 연다
-function clipSortClick(key) {
-  if (key === clipState.sort) { clipState.asc = !clipState.asc; clipState.depth = { own: 0, men: 0 }; }
-  else { clipState.sort = key; if (clipState.asc) { clipState.asc = false; clipState.depth = { own: 0, men: 0 }; } }
+// 두 칸의 높이 = 화면에서 목록 위(사이트 머리 등)와 목록 아래 여백을 뺀 나머지 — 페이지는 스크롤되지 않고 칸 안만 스크롤된다. 너무 작은 창도 칸 320px은 둔다.
+//   아래 여백 = 조상들의 아래 안쪽 여백·테두리·바깥 여백 합(지금 .stats-wrap 20). 문서 끝까지의 거리로 재면 본문 최소 높이(화면 높이)로 늘어난 빈자리까지 세어
+//   칸이 첫 높이(70vh)에서 자라지 않았다(1280×800 실측 — 칸 아래 약 110px 빈 띠)
+function clipFitCols(body) {
+  const cols = body.querySelector('.clip-cols');
+  if (!cols) return;
+  let below = 0;
+  for (let e = cols.parentElement; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); below += (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0) + (parseFloat(cs.marginBottom) || 0); }
+  const top = cols.getBoundingClientRect().top + window.scrollY;
+  body.style.setProperty('--clip-h', Math.max(320, Math.floor(window.innerHeight - top - below)) + 'px');
+}
+// 목록 폭이 바뀌면(창 크기·태블릿 왼쪽 기둥 여닫기 — 창 신호만으론 기둥을 놓친다, §6) 모양을 다시 재고, 두 칸이면 높이를 다시 맞춘다. 한 번만 단다
+function clipWatch(body) {
+  if (clipState.ro) return;
+  const check = () => {
+    if (currentPage !== 'clips') return;
+    const w = body.getBoundingClientRect().width;
+    if (!w) return;
+    if ((w >= CLIP_TWO_MIN ? 'two' : 'one') !== clipState.mode) renderClips(true);
+    else if (clipState.mode === 'two') clipFitCols(body);
+  };
+  clipState.ro = new ResizeObserver(() => requestAnimationFrame(check));
+  clipState.ro.observe(body);
+  window.addEventListener('resize', () => requestAnimationFrame(check));
+}
+// 맨 위로·맨 아래로: 두 칸이면 그 칸만, 한 목록이면 페이지
+function clipScrollTo(dir, col) {
+  const box = clipState.mode === 'two' ? document.querySelector(`#clipsBody .clip-col[data-col="${col}"]`) : null;
+  if (box) box.scrollTo({ top: dir === 'top' ? 0 : box.scrollHeight, behavior: 'smooth' });
+  else window.scrollTo({ top: dir === 'top' ? 0 : document.body.scrollHeight, behavior: 'smooth' });
+}
+// 한 목록의 토글: 떠나는 목록의 읽던 높이를 두고, 오는 목록의 것을 되돌린다(처음이면 맨 위)
+function clipViewClick(v) {
+  if (v === clipState.view || (v !== 'own' && v !== 'men')) return;
+  clipState.viewY[clipState.view] = window.scrollY;
+  clipState.view = v;
+  renderClips(true);   // 초점을 누른 토글에 되돌린다(떠난 목록의 붙잡을 타일은 새 목록에 없어 넘어간다)
+  window.scrollTo(0, clipState.viewY[v] || 0);
+}
+// 정렬 버튼(칸마다): 다른 버튼 = 그 정렬(기본 방향), 고른 버튼을 다시 = 거꾸로(통계 방송 목록과 같다). 방향이 바뀌면 읽는 차례의 첫날이 바뀌어 처음부터 연다.
+//   바꾼 칸은 맨 위부터(두 칸이면 그 칸만 — 다른 칸은 읽던 자리 그대로)
+function clipSortClick(key, col) {
+  if (col !== 'own' && col !== 'men') return;
+  const s = clipState.sort, a = clipState.asc;
+  if (key === s[col]) { a[col] = !a[col]; clipState.depth[col] = 0; }
+  else { s[col] = key; if (a[col]) { a[col] = false; clipState.depth[col] = 0; } }
+  clipState.reset.add(col); clipState.viewY[col] = 0;
   renderClips();
+  if (clipState.mode === 'one') window.scrollTo(0, 0);
 }
 function openClipGroupModal(gid) {
   const g = clipState.groups.get(gid), head = document.getElementById('lrHead'), body = document.getElementById('lrBody');
@@ -7996,7 +8103,7 @@ function renderClipsSide() {
 }
 function clipSetMember(id) {
   const next = id === 'all' || id === 'crew' || MEMBER_BY_ID[id] ? id : 'all';
-  if (next !== clipState.member) { clipState.member = next; clipState.depth = { own: 0, men: 0 }; }
+  if (next !== clipState.member) { clipState.member = next; clipState.depth = { own: 0, men: 0 }; clipState.viewY = { own: 0, men: 0 }; clipState.reset = new Set(['own', 'men']); }
 }
 function selectClipMember(id) {
   if (id === clipState.member) return;

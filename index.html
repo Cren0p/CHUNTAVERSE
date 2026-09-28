@@ -3513,7 +3513,7 @@
   .graph-modal-panel .sg-nav { flex-shrink: 0; }
   .graph-modal-panel .sg-nav:disabled { color: var(--border); cursor: not-allowed; }
   /* ── 라이트 모드 전용 규칙(2026-09-24h · 2026-09-25c · 2026-09-26 D6) — 토큰만으로 안 되는 것. 어두운 화면에는 하나도 걸리지 않는다(전부 :root[data-theme="light"] 아래) ──
-     멤버 번짐(LIGHT_GLOW): 천양과 옅은 여섯 명(마다옴·나나문·임하밍·카푸·김웰로·체비) — N3, 같은 색상의 아주 진한 색(Crenop 6차 '중'. 천양은 2026-09-25 어두운 잉크 N2였다가 같은 날 N3로).
+     멤버 번짐(LIGHT_GLOW): 흰 카드 대비 2 미만 아홉 명(천양·마다옴·나나문·임하밍·카푸·김웰로·체비·플리·달타) — N3, 같은 색상의 아주 진한 색(Crenop 6차 '중'. 천양은 2026-09-25 어두운 잉크 N2였다가 같은 날 N3로).
      멤버 색을 칠하는 인라인 style 끝에 memberGlow(색)이 --mg(번짐 색)·--mgf(그림용 SVG 필터 주소)를 붙인다 — 다른 멤버·멤버 아닌 이름엔 아무것도 안 붙는다.
      글자 = text-shadow 세 겹(1·2·3px — 안쪽 글자에 상속). 사진 테두리·점·최애 강조 = 같은 세 겹 box-shadow. 그림 = SVG 필터(ensureGlowDefs — 흐림 0.5·1·1.5 = 1·2·3px 번짐과 같은 가우스).
      번짐 폭은 2026-09-25 Crenop D4 N '나'로 3·6 → 2·4px(넓으면 글자가 흐려 보여 가독성이 떨어진다), 2026-09-26 Crenop D7 G '나'로 1·2·3px 세 겹(N다 — 색도 더 진하게, 라이트 표
@@ -3578,7 +3578,7 @@
      (은 트로피는 인라인 색 규칙 [style*="color:var(--medal-silver)"] svg 한 겹 — 담는 span에 또 걸면 두 겹). 은 번짐도 다른 번짐과 같은 세 겹 1·2·3px, 트로피 필터는 #n3-medal-silver */
   :root[data-theme="light"] .hall-row.m2 .hall-r-val, :root[data-theme="light"] [style*="color:var(--medal-silver)"], :root[data-theme="light"] [style*="color: var(--medal-silver)"] { text-shadow: 0 0 1px var(--medal-silver-glow), 0 0 2px var(--medal-silver-glow), 0 0 3px var(--medal-silver-glow); }
   :root[data-theme="light"] [style*="color:var(--medal-silver)"] svg, :root[data-theme="light"] [style*="color: var(--medal-silver)"] svg { filter: url(#n3-medal-silver); }
-  /* 그래프: 쌓은 막대 안 숫자는 칸 밝기에 맞춘 글자색(JS)이라 바탕색 윤곽이 필요 없다. 선 그래프 값 글자도 번짐 멤버(여섯 명·천양)는 윤곽 대신 번짐(.pg) */
+  /* 그래프: 쌓은 막대 안 숫자는 칸 밝기에 맞춘 글자색(JS)이라 바탕색 윤곽이 필요 없다. 선 그래프 값 글자도 번짐 멤버(LIGHT_GLOW 아홉 명)는 윤곽 대신 번짐(.pg) */
   :root[data-theme="light"] .g-blabel, :root[data-theme="light"] .g-vlabel.pg { stroke: none; }
   /* 시간대 격자 칸(heatCell): 라이트 모드는 민트 색상의 밝기 단계(--hl, HEAT_LIGHT) — 투명도 단계는 흰 바탕에서 뭉개졌다(가장 옅은 칸이 빈 칸보다 밝음, 2026-09-25 검토) */
   :root[data-theme="light"] .toh-grid > div { background: var(--hl); }
@@ -3992,7 +3992,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-28d';   // 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
+const BUILD = '2026-09-28e';   // 2026-09-28e: 라이트 모드 번짐 멤버에 플리·달타(D16 '나' — 흰 카드 대비 2 미만 아홉 명) · 클립 같은 장면 카드를 가운데 버튼으로 열면(대표 클립이 새 탭) 본 클립으로 기억 — 2026-09-28d: 사이트 업데이트 알림(자동 — 문서 머리 확인·수동 — 워커 refresh, 10분 넘게 떠났다 돌아오면 조용히 새로고침 — showSiteUpdate 곁 주석) · 최근 활동 누른 알림만 읽음(evReadKey 곁 주석) · 클립 '전체' 칸 — 2026-09-28c: 따옴표만 다른 방송 제목 변경은 최근 활동·방송 행·알림에서 뺀다(titleQuoteOnly 곁 주석) — 2026-09-28b: 좋아요 요청 줄 링크를 누르면 체크가 켜진다(체크 칸은 남김 — 되돌리기·앱에서 누른 것 표시) — 2026-09-28a: 클립 타일 제목 두 줄(D12 Q1 '나') · 누른 클립은 흐리게(Q2 '나' — 이 브라우저가 30일 기억) — 2026-09-27i: 받는 중인 달을 부르면 그 요청을 같이 기다린다(명전·연간·그래프·달력 — 명전이 빠진 달 없이 먼저 더해 '아직 집계 전'으로 굳었다) · 명전은 실패한 달이 남으면 실패 문구(30초 뒤 다시 — 종전엔 쉬지 않고 다시 그려 페이지가 멈췄다) — 2026-09-27h: 뒤로 가기 = 위에 뜬 모달·서랍 닫기(탭은 그대로) · /feed는 브라우저 캐시 없이(다시 연 탭의 첫 응답이 몇 시간 묵은 캐시본이라 '감지 지연 중'이 떴다) — 2026-09-27g: 클립 외부인 방송의 구간 모름 이름표도 크루와 같은 사유(다시보기 대기·다시보기 없음) · 외부인 방송 머리에도 그 이름표([그림 · 닉] 한 덩어리) — 2026-09-27f: D11(Crenop 'Q1다 Q2나 Q3나 Q4나 Q5나') — 클립 외부인 방송 머리 = 방송인 닉·날짜 없음 · 컨텐츠·현수막·케미 모달 게시글·링크 줄 멤버 이름 = 멤버 색 13px · 좋아요 순위표 '컷' 글자 빼고 칸 폭 한 벌 · PC 보조바 시트 왼쪽 버튼 글자가 말줄임되면 오른쪽 묶음 맨 앞 · 달·연 평균 시청자에서 시청자 합 0인 방송 제외 — 2026-09-27e: 전체 자체 점검 고침 — 최근 활동 클릭 처리기 누적 · 평균 시청자순 값 없는 방송 · 클립 한 칸이 화면 위로 밀려 안 열리던 것 · 클립 빈 칸 문구 둘 · 최애 설정 모달 휴대폰 첫 열 잘림 · 11/30 기념일 상자 서랍 왼쪽 잘림 · 라이트 7열 달력 칸 경계 · 짧은 페이지 스크롤바 자리 띠 끊김 · 누를 수 없는 방송 머리 민트 hover · 자료 판 바뀐 뒤 클립 탭 지난달 · 변경 줄 값·좋아요 묶음 머리 13px · 격식체 두 문구 — 2026-09-27d: D10 답 'Q1다 Q2나' — 라이트 모드 칸 바탕: 바탕 위 행·칸과 흰 판 안 칸·버튼은 흰색(선으로만 가름), 흰 판 안 줄 hover는 바탕색, 기둥의 안 고른 버튼은 PC 흰색·서랍 바탕색(종전 회색 #E7EBF2가 흰 카드·바탕보다 어두워 칙칙했다). 어두운 화면 그대로 — 2026-09-27c: 클립 탭 — 크루 밖 방송 클립도 타일 1행에 원래 방송인 닉(워커 ext_nick, 없으면 비움) · 칸 이름 천타버스 [멤버 방송 | 외부인 방송]·멤버 [본인 방송 | 타인 방송] · 머리 이름표 '크루 밖 방송' → '외부인 방송' — 2026-09-27b: D9 답 'Q1다 Q2나 Q3다' — 라이트 모드 선택 표시(기둥·위 탭·정렬·순위 버튼)를 원래 민트 50% 바탕 + 보통 글자로(테두리는 끈 상태 그대로 — 탭 밑줄 없음) · 천타버스 칸 로고는 켜짐·꺼짐 모두 #5B5B5B(꺼짐은 사진과 같은 25%) — 2026-09-27a: 클립 탭 — 기본 정렬 방송순(최신 방송부터) · 정렬 이름 등록순·방송순(다른 탭 '시간순'·'날짜순'과 같은 붙여 쓰기 — 국립국어원: 명사 하나 뒤 접미사 '-순') · '불러오는 중' 줄을 두 칸 각각의 아래에(칸마다 따로 하루씩 연다 — 높이가 다른 두 칸에서 맨 아래 한 줄은 짧은 칸을 채우지 못했다) — 2026-09-26i: D8 답 'Q1나 Q2가' — 라이트 모드에서 고른 천타버스 칸(클립·음악·프로필)의 로고를 짙게(민트 채움 + 짙은 그림 — 고른 칸 모두 같은 모양) · 방송순에서 구간을 아는 클립과 모르는 클립이 섞인 방송은 모르는 쪽 앞에 이름표 줄('다시보기 대기 2' 등 — 등록순 묶음과 같은 말) — 2026-09-26h: 클립 탭(달력 오른쪽 13번째 — 숲 클립·캐치를 [본인 방송 | 언급] 두 칸으로, 하루씩 불러오기·같은 장면 묶기·기본 제목 거르기, PC 탭 칸 58·간격 3) — 배포 도장 — 이 파일을 고칠 때마다 갱신(같은 날 2회째부터 b,c…). 배포 확인 = F12 콘솔의 [build] 줄
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://chuntaverse.crenop.workers.dev';
 const BASE_TITLE = '천타버스';
@@ -4048,8 +4048,9 @@ function savedTheme() { const t = lsGet(LS_THEME, ''); return t === 'light' || t
 // 라이트 모드에서 번짐을 두르는 멤버: 멤버 id → 번짐 색. 옅은 여섯 명(Crenop 6차 — 흰 카드 대비 1.5 미만)과 천양(흰 카드 1.46 — 2026-09-25 Crenop '천양도 라이트모드에서 있는게 낫다')은
 // 번짐 색 = 멤버 색상 그대로 OKLCH 밝기 0.35, 채도 max(C, 0.05)(채도가 사실상 0인 체비 흰색은 0)·색역 안 — n3Shade·라이트 표의 --이름-glow와 같은 식(N다 — 2026-09-26 Crenop D7 G '나',
 // 종전 N3 밝기 0.40·채도 max(C, 0.09). 나나문처럼 색이 거의 없는 옅은 색은 N3 번짐도 회색이 되어 글자 윤곽이 녹았다).
-// 천양은 2026-09-25 어두운 잉크(N2)였다가 '나머지도 전부 N3'(Crenop)로 바꿨다. 플리(1.53)·달타(1.64)·빙밍·캬앙·모카·문모모는 효과 없음(같은 날 Crenop).
-const LIGHT_GLOW = { '243000': '#004348', madaomm: '#4C3700', nanamoon777: '#363754', imha22: '#4A2E51', kappuchan: '#552F1B', wellro314: '#294400', chebi2: '#3A3A3A' };
+// 천양은 2026-09-25 어두운 잉크(N2)였다가 '나머지도 전부 N3'(Crenop)로 바꿨다. 플리(1.53)·달타(1.64)는 2026-09-28 더했다(D16 Crenop '넣는걸로' — 읽히긴 해도 천양 1.46과
+// 거의 같은 옅음이고, 다음 빙밍 2.35와 간격이 커 '흰 카드 대비 2 미만 = 번짐' 한 줄이 된다). 빙밍(2.35)·캬앙·모카·문모모는 효과 없음.
+const LIGHT_GLOW = { '243000': '#004348', madaomm: '#4C3700', nanamoon777: '#363754', imha22: '#4A2E51', kappuchan: '#552F1B', wellro314: '#294400', chebi2: '#3A3A3A', plincess: '#123D5F', dalta20: '#4C3600' };
 // 시간대 분포·주중/주말 막대(통계 그래프 모달)의 라이트 모드 칸 색 — 투명도 단계는 흰 바탕에서 옅은 멤버의 네 칸이 한 색으로 뭉개져(1.06~1.11),
 // 같은 색상의 밝기 네 단계로 바꾼다(OKLCH 밝기 .86/.72/.58/.44 · 채도 max(C, .09) — 옅음 → 진함, 이웃 칸 대비 최소 1.609 — 천양 첫 두 칸). 칸 번호는 TIME_GRAPHS의 lv.
 // 멤버를 늘리면 같은 식으로 한 줄(체크리스트 ①).
@@ -4160,7 +4161,7 @@ function glowFilterUrl(c) {
 // 로고: 기본은 Title-D(어두운 판)·Title-L(밝은 판), 생일은 birthday/NAME-D.webp·NAME-L.webp(Crenop이 만들어 올린 단색 판 — -L은 흰 글자만 회색 #5B5B5B, 번짐은 이 페이지가 그린다).
 // Crenop 규칙: -L·-D가 붙은 그림은 모드별 짝, 안 붙은 그림은 모드와 무관. 생일 날짜는 MEMBER_BIRTHDAYS(KST). 시트 title 행(applyTitleOverride)이 있으면 그것이 이긴다 —
 // 주소가 -D/-L.webp로 끝나면 지금 모드의 짝으로 바꿔 쓰고(못 받으면 적힌 주소로), 표시가 없으면 적힌 그대로. 모드별 판을 못 받으면 한 번 원래 파일로(마크업 onerror).
-// 번짐 멤버(LIGHT_GLOW — 천양과 여섯 명, N3)의 생일 로고는 라이트 모드에서 #bdglow 번짐.
+// 번짐 멤버(LIGHT_GLOW 아홉 명, N3)의 생일 로고는 라이트 모드에서 #bdglow 번짐.
 let logoOverride = '';
 function syncLogo() {
   const el = document.getElementById('siteLogoImg');
@@ -6243,7 +6244,7 @@ function applyFavMark(root) {
     // 가로 표(관련 링크 PC)의 열은 칸마다 두르면 상자가 칸 수만큼 보인다(2026-09-04 Crenop) — 머리 칸부터 표 끝까지 하나의 큰 상자(덧그림)로 두른다(세로 배치의 멤버 상자와 같은 모양)
     const th = targets[0].tagName === 'TH' ? targets[0] : null;
     const marks = th ? [favColumnOverlay(th)] : targets;
-    const glow = paleOf(color);   // 라이트 모드의 번짐 멤버(천양과 여섯 명, N3): 강조 테두리 둘레에 번짐(CSS .fav-flash[style*="--fav-glow"])
+    const glow = paleOf(color);   // 라이트 모드의 번짐 멤버(LIGHT_GLOW 아홉 명, N3): 강조 테두리 둘레에 번짐(CSS .fav-flash[style*="--fav-glow"])
     marks.forEach(t => { t.style.setProperty('--fav-color', color); if (glow) t.style.setProperty('--fav-glow', glow.glow); t.classList.remove('fav-flash'); void t.offsetWidth; t.classList.add('fav-flash'); });   // 연타 시 강조 재시작(케미와 같은 수법)
     setTimeout(() => marks.forEach(t => { t.classList.remove('fav-flash'); t.style.removeProperty('--fav-color'); t.style.removeProperty('--fav-glow'); if (t.classList.contains('fav-col')) t.remove(); }), 1400);
   }, 0);
@@ -7773,7 +7774,8 @@ function clipShownItems(st, shown, idx) {
 }
 // 타일 = 사이트 표준 타일(vodTileHtml — 그림 위, [이름 · 시계 길이] / 제목 한 줄). 이름 = 원본 방송을 한 사람 — 크루면 멤버(멤버 색),
 //   크루 밖이면 워커가 준 그 방송인의 닉(ext_nick — 클립을 올린 시청자가 아니다, 멤버 아닌 이름 색 --name-fallback — 2026-09-27 Crenop '누구 건지 떠야'), 모르면 비움(tileTextHtml 규칙)
-// data-clipseen = 누르면 '본 클립'으로 기억할 번호(clipSeen) — 같은 장면 카드의 대표 링크는 모달을 여는 것이라 기억하지 않는다(data-clipgroup)
+// data-clipseen = 누르면 '본 클립'으로 기억할 번호(clipSeen) — 같은 장면 카드의 대표 링크(data-clipgroup)는 클릭·Enter면 모달이라 기억하지 않고,
+//   가운데 버튼이면 대표 클립을 새 탭에서 여니 그 번호를 기억한다(2026-09-28 Crenop — 모달 없이 휠클릭으로 연 카드가 안 흐려졌다)
 function clipTileInner(x, cls) {
   const m = x.source_bj !== 'external' ? MEMBER_BY_ID[x.source_bj] : (x.ext_nick ? { name: x.ext_nick, color: 'var(--name-fallback)' } : null);
   return vodTileHtml({ title_no: x.title_no, href: x.url, thumb: x.thumb, grade: x.grade, auth_no: x.subs ? 107 : 0, duration_ms: x.dur_ms, title: clipTitle(x.title) }, m)
@@ -7803,7 +7805,7 @@ function markClipSeen(no) {
 function onClipOpen(e) {
   if (e.type === 'auxclick' && e.button !== 1) return;
   const a = e.target.closest && e.target.closest('a[data-clipseen]');
-  if (!a || a.dataset.clipgroup) return;
+  if (!a || (a.dataset.clipgroup && e.type === 'click')) return;   // 같은 장면 카드의 클릭은 모달(renderClips의 data-clipgroup 처리)
   markClipSeen(a.dataset.clipseen);
 }
 document.addEventListener('click', onClipOpen);
@@ -9905,7 +9907,7 @@ function drawGraphChart(wrap, memberId, range, metric) {
   const ly = l => l.below ? l.y + 8 + vfs : l.y - 11;
   const hit = (a, b) => a.x0 < b.x0 + b.w && b.x0 < a.x0 + a.w && Math.abs(ly(a) - ly(b)) < vfs + 2;
   for (let k = 1; k < lab.length; k++) if (hit(lab[k], lab[k - 1])) lab[k].below = !lab[k].below;
-  // 라이트 모드의 번짐 멤버(2026-09-24h 여섯 명 · 25 천양): 선·점·값 글자에 번짐(LIGHT_GLOW 색) — 값 글자는 바탕색 윤곽(.g-vlabel stroke) 대신 번짐(.pg). 필터 영역은 그림 전체(선이 평평해도 안 잘리게)
+  // 라이트 모드의 번짐 멤버(2026-09-24h 여섯 명 · 25 천양 · 28 플리·달타): 선·점·값 글자에 번짐(LIGHT_GLOW 색) — 값 글자는 바탕색 윤곽(.g-vlabel stroke) 대신 번짐(.pg). 필터 영역은 그림 전체(선이 평평해도 안 잘리게)
   const pg = isLightTheme() && paleOf(color);
   const gdef = pg ? `<defs><filter id="gglow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="${W + 40}" height="${H + 40}" color-interpolation-filters="sRGB">${glowPrims(pg.glow)}</filter></defs>` : '';
   const gf = pg ? ' filter="url(#gglow)"' : '';

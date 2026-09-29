@@ -1413,7 +1413,12 @@
      펼침 = 위 ⌄⌄·아래 ⌃⌃(접기) · 접힘 = 위 ⌃⌃·아래 ⌄⌄(펴기). 사이 세로선은 화살표 칸(띠 색 바탕, 바깥 4px까지)이 덮어 두 화살표 사이만 보인다
      — 칸이 바깥 4px을 안 덮으면 화면 끝에 붙은 화살표 밖으로 선 끝이 삐져나왔다(목업 실측). 접힘 = 앞 3줄(CHAT_FOLD_SHOW) + '나머지 N줄 보기'.
      hover = 사이트 규칙 그대로: 어두운 화면은 화살표·선 민트, 라이트는 색 그대로 + 띠 옅은 민트(D7 H — hover 블록). */
-  .cb-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 24px; display: flex; flex-direction: column; justify-content: space-between; background: var(--rail-bg); color: var(--text3); cursor: pointer; z-index: 1; }
+  .cb-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 24px; background: var(--rail-bg); color: var(--text3); cursor: pointer; z-index: 1; }
+  /* 화살표마다 제 구역 안에서만 붙는다(sticky의 담는 상자) — 위 = 띠 맨 아래 28 제외, 아래 = 맨 위 28 제외. 한 상자에 둘을 두면 묶음이 화면 가장자리에
+     56px(화살표 두 칸) 미만만 걸칠 때 두 화살표가 겹쳐 반대쪽 끝의 화살표가 보였다(29i 실측). 이렇게 나누면 그때 화면에 걸친 끝의 화살표만 보인다 */
+  .cb-rw { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; }
+  .cb-rw-t { top: 0; bottom: 28px; }
+  .cb-rw-b { top: 28px; bottom: 0; justify-content: flex-end; }
   .cb-rail::after { content: ''; position: absolute; left: 11.5px; width: 1px; top: 28px; bottom: 28px; background: currentColor; opacity: 0.5; }   /* 선 = 화살표 색 50% — hover 색도 같이 따라간다 */
   .cb-ra { position: sticky; z-index: 1; display: flex; align-items: center; justify-content: center; width: 24px; height: 28px; background: var(--rail-bg); }
   .cb-ra-t { top: calc(var(--head-h, 0px) + 20px + var(--tl-bar-h, 0px)); padding-top: 4px; }
@@ -4113,7 +4118,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-29i';   // 2026-09-29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-09-29j';   // 2026-09-29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -9470,7 +9475,7 @@ function applyChatFold(tl) {
     const folded = chatFolded.has(key);
     el.dataset.fold = key;
     el.classList.toggle('folded', folded);
-    el.insertAdjacentHTML('afterbegin', `<div class="cb-rail" role="button" tabindex="0" aria-expanded="${!folded}" aria-label="채팅 ${n}줄 ${folded ? '펴기' : '접기'}"><span class="cb-ra cb-ra-t">${SVG_ICONS.chevronsDown}</span><span class="cb-ra cb-ra-b">${SVG_ICONS.chevronsDown}</span></div>`);
+    el.insertAdjacentHTML('afterbegin', `<div class="cb-rail" role="button" tabindex="0" aria-expanded="${!folded}" aria-label="채팅 ${n}줄 ${folded ? '펴기' : '접기'}"><span class="cb-rw cb-rw-t"><span class="cb-ra cb-ra-t">${SVG_ICONS.chevronsDown}</span></span><span class="cb-rw cb-rw-b"><span class="cb-ra cb-ra-b">${SVG_ICONS.chevronsDown}</span></span></div>`);
     el.querySelector('.chat-bundle-rows').insertAdjacentHTML('beforeend', `<button class="cb-more timeline-scroll-btn" type="button">${SVG_ICONS.chevronsDown}<span>나머지 ${n - CHAT_FOLD_SHOW}줄 보기</span></button>`);
   });
 }

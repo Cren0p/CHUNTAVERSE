@@ -4118,7 +4118,7 @@
 </main>
 
 <script>
-const BUILD = '2026-09-29j';   // 2026-09-29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-09-30a';   // 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -7723,7 +7723,7 @@ const CLIP_SORTS = [{ key: 'reg', label: '등록순', ic: 'clockTime' }, { key: 
 //   · seek: 칸마다 '새 클립이 보일 때까지 이어서 연다'의 기준 = 그때 연 날 수 — 그 뒤에 연 날에서 클립이 하나라도 보이면 멈춤(null = 멈춤, 멤버·정렬을 바꾸면 0).
 //     보이는 개수를 기준으로 하면 다른 줄기(오늘 다시 받기)가 기본 제목을 빼는 사이 한 번 누름에 여러 날이 열렸다(검토 F4)
 //   · base: 연 날 수를 센 날(자정을 넘기면 clipRebase가 옮긴다) · moreLast: 칸마다 마지막으로 그린 끝 줄 글(clipMoreRow가 같으면 건너뜀)
-//   · fresh: 칸마다 마지막 버튼 누름 { edge: 누르기 전 마지막으로 연 날, asc } — '방금 불러온' 클립 번호는 clipNewNos(clipFreshNos 곁 주석)
+//   · fresh: 칸마다 마지막 버튼 누름 { edge: 누르기 전 마지막으로 연 날, asc, hold: 끝 줄 붙잡기(clipHoldEnd) } — '방금 불러온' 클립 번호는 clipNewNos(clipFreshNos 곁 주석)
 const CLIP_TWO_MIN = 2 * 328 + 20;   // 두 칸의 최소 목록 폭 = 칸마다 160 타일 둘(160 + 8 + 160)·칸 사이 20 — 좁은 칸 규칙(@container clipcol 327px 이하)과 같은 경계
 const clipState = { member: null, sort: { own: 'broad', men: 'broad' }, asc: { own: false, men: false }, depth: { own: 1, men: 1 }, seek: { own: 0, men: 0 }, fresh: { own: null, men: null }, base: null, moreLast: {}, view: 'own', mode: '', viewY: { own: 0, men: 0 }, reset: new Set(), stores: {}, groups: new Map(), ro: null };
 
@@ -7873,9 +7873,9 @@ function clipMore(col) {
   if (currentPage !== 'clips' || !clipState.member || (col !== 'own' && col !== 'men')) return;
   const o = clipOpenDays(col);
   if (o.target === null) return;
-  if (o.k < clipState.depth[col]) { clipFetch(o.st, o.target, 0, 0, true); clipMoreRow(clipOpenDays(col)); return; }
+  if (o.k < clipState.depth[col]) { if (clipState.fresh[col]) clipState.fresh[col].hold = true; clipFetch(o.st, o.target, 0, 0, true); clipMoreRow(clipOpenDays(col)); return; }
   clipState.seek[col] = o.k;
-  clipState.fresh[col] = { edge: o.seq[o.k - 1], asc: clipState.asc[col] };   // 이번에 여는 날부터 '방금 불러온 클립'(clipFreshNos) — 앞 누름의 표시는 여기서 꺼진다
+  clipState.fresh[col] = { edge: o.seq[o.k - 1], asc: clipState.asc[col], hold: true };   // 이번에 여는 날부터 '방금 불러온 클립'(clipFreshNos) — 앞 누름의 표시는 여기서 꺼진다 · hold = 끝 줄 붙잡기(clipHoldEnd)
   clipState.depth[col] = o.k + 1;
   renderClips(true);
 }
@@ -8254,6 +8254,17 @@ function clipItemEl(body, col, nos) {
   return null;
 }
 //   두 칸이면 칸마다(보이는 곳 = 그 칸의 상단바 아래), 한 목록이면 화면 기준. 모양이 바뀌는 그리기(폭이 변함)에선 붙잡지 않는다.
+//   예외 — 끝 줄 붙잡기(clipHoldEnd): 끝 버튼을 누른 칸은 그 끝 줄이 보이는 동안 타일 대신 끝 줄을 같은 높이로(맨 위여도). 가장 위 타일을 붙잡으면
+//   새 클립이 그 위 방송들에 들어간 날 끝 줄 위 안내(clipFreshHtml)가 누른 버튼 자리에 와 칸 아래 끝에 잘리고 새 버튼은 칸 밖이었다(2026-09-30 Crenop —
+//   '안내가 잘려 첫 새 클립으로를 누르게 이끌지 못한다'). 끝 줄을 붙잡으면 안내가 그 바로 위에 온전히 서고, 위쪽 타일이 그만큼 올라간다.
+// 버튼을 누른 칸(fresh.hold)의 끝 줄이 lo~hi 안에 보이면 그 아래 끝 높이를 적는다(받는 중 줄 42px·버튼 줄 57px로 높이가 달라 위 끝을 붙잡으면 칸 끝에서 버튼이 15px 잘렸다) — 안 보이면(읽으러 떠났다) 붙잡기를 끄고 종전대로 가장 위 타일
+function clipHoldEnd(c, lo, hi) {
+  const col = c.dataset.col, f = clipState.fresh[col];
+  if (!f || !f.hold) return null;
+  const m = c.querySelector(':scope > .clip-more'), r = m && m.getBoundingClientRect();
+  if (!r || r.bottom <= lo || r.top >= hi) { f.hold = false; return null; }
+  return { col, end: true, bottom: r.bottom };
+}
 function clipKeep(body) {
   const key = el => { const it = el.closest('.clip-item[data-clipno]'), c = el.closest('.clip-col'); return it && c ? { col: c.dataset.col, nos: it.dataset.clipno.split(' ') } : null; };
   const pick = (els, lo, hi) => {   // lo~hi 안 타일 중 가장 위(온전히 보이는 것 먼저)
@@ -8272,13 +8283,17 @@ function clipKeep(body) {
   const same = body.dataset.mode === clipState.mode;
   if (same && clipState.mode === 'two') {
     for (const c of body.querySelectorAll('.clip-col')) {
+      const bar = c.querySelector('.clip-col-bar'), lo = bar ? bar.getBoundingClientRect().bottom : c.getBoundingClientRect().top, hi = c.getBoundingClientRect().bottom;
+      const e = clipHoldEnd(c, lo, hi);
+      if (e) { anchors.push(e); continue; }
       if (c.scrollTop <= 0) continue;
-      const bar = c.querySelector('.clip-col-bar'), a = pick(c.querySelectorAll('.clip-item[data-clipno]'), bar ? bar.getBoundingClientRect().bottom : c.getBoundingClientRect().top, c.getBoundingClientRect().bottom);
+      const a = pick(c.querySelectorAll('.clip-item[data-clipno]'), lo, hi);
       if (a) anchors.push(a);
     }
-  } else if (same && window.scrollY > 0) {
-    const a = pick(body.querySelectorAll('.clip-item[data-clipno]'), 0, window.innerHeight);
-    if (a) anchors.push(a);
+  } else if (same) {
+    const c = body.querySelector('.clip-col'), e = c && clipHoldEnd(c, 0, window.innerHeight);
+    if (e) anchors.push(e);
+    else if (window.scrollY > 0) { const a = pick(body.querySelectorAll('.clip-item[data-clipno]'), 0, window.innerHeight); if (a) anchors.push(a); }
   }
   const f = document.activeElement;
   if (f && f !== body && body.contains(f)) {
@@ -8294,7 +8309,7 @@ function clipKeep(body) {
 }
 function clipRestore(body, kept) {
   for (const a of kept.anchors) {
-    const el = clipItemEl(body, a.col, a.nos), dy = el ? el.getBoundingClientRect().top - a.top : 0;
+    const el = a.end ? body.querySelector(`.clip-col[data-col="${a.col}"] > .clip-more`) : clipItemEl(body, a.col, a.nos), dy = !el ? 0 : a.end ? el.getBoundingClientRect().bottom - a.bottom : el.getBoundingClientRect().top - a.top;
     if (Math.abs(dy) < 1) continue;
     if (clipState.mode === 'two') el.closest('.clip-col').scrollTop += dy; else window.scrollBy(0, dy);
   }

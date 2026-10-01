@@ -739,6 +739,7 @@
   .su-btn svg { width: 15px; height: 15px; }
   .su-btn:hover { background: var(--row-hover); }
   .su-x { width: 36px; padding: 0; justify-content: center; }
+  @media (min-width: 1151px) { #swipeHint { display: none; } }   /* 손짓 안내 띠는 손짓이 도는 폭에서만(swipeHintDone 곁 주석) */
   .lr-panel {
     background: var(--surface);
     border: 1px solid rgba(var(--rk-rgb, var(--accent-rgb)), 0.4);   /* 머리 글자와 한 벌 — 고유 색(modalTone)이 없으면 민트(2026-09-29 D25 Q2 가) */
@@ -4118,7 +4119,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-01b';   // 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-01c';   // 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -4596,7 +4597,7 @@ window.addEventListener('popstate', onOvHistPop);
   document.addEventListener('click', e => { if (e.target.closest('.filter-member, .filter-type, .filter-toggle-all')) setTimeout(syncDrawerFilterBtn, 0); });
   syncDrawerFilterBtn();
 
-  // 드래그는 보조 수단이다(표시가 없어 발견되지 않으므로 버튼이 주 경로).
+  // 드래그는 보조 수단이다(알리는 것은 처음 한 번 뜨는 안내 띠뿐이라 버튼이 주 경로 — 아래 손짓 안내 띠).
   // 가장자리 20px는 브라우저 뒤로가기 제스처에 양보하고, 가로 이동이 세로의 1.5배를 넘을 때만
   // 서랍으로 판정한다 — 그러지 않으면 세로로 훑다가 서랍이 튀어나온다.
   // [태블릿 복구 2026-09-20] 손짓은 태블릿(701~1150)에서도 돈다. 2026-09-01 손짓을 만들 때는 모드가 둘(PC·모바일)이고
@@ -4631,6 +4632,8 @@ window.addEventListener('popstate', onOvHistPop);
     if (innerWidth > 1150) return;   // 회전해서 PC 폭이 됐다 — 이 폭엔 기둥도 서랍도 없다
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const was = body.className;
+    setTimeout(() => { if (body.className !== was) swipeHintDone(); }, 0);   // 아래 판정이 서랍·기둥을 실제로 움직였을 때만(더 갈 곳 없는 손짓은 세지 않는다) — 태블릿 분기가 return으로 끝나 한 박자 뒤에 본다
     const openL = body.classList.contains('drawer-l'), openR = body.classList.contains('drawer-r');
     if (tabletPinned()) {
       // 태블릿에서 좌측은 서랍이 아니라 상시 기둥(side-off)이라 여기서 setDrawer('l', …)을 부르면 안 된다 —
@@ -4645,6 +4648,24 @@ window.addEventListener('popstate', onOvHistPop);
     // 우측 서랍이 없는 탭(버튼이 visibility:hidden)에서는 열지 않는다 — 종전엔 display만 봐서 가림막과 ✕만 떴다(2026-09-03 실사고)
     else { if (openL) setDrawer('l', false); else if (!openR && btnR && btnR.style.visibility !== 'hidden') setDrawer('r', true); }
   }, { passive: true });
+
+  // 손짓 안내 띠(2026-10-01 D34 Q1 '가'·Q2 '나' — Crenop '좌우 스와이프 기능이 있다는 건 사이트 내에서 알려 주는 장치가 있으면'): 손짓이 도는 폭(≤1150)의 터치 기기에
+  // 사이트 업데이트 알림과 같은 띠(.site-update)를 띄운다. [확인]을 누르거나 손짓으로 서랍·기둥이 움직이면 이 브라우저에 적고 다시 띄우지 않는다.
+  // 업데이트 알림과 자리가 같아 그 알림이 뜨면 숨는다(showSiteUpdate — 적지 않으므로 다음에 열 때 다시 뜬다). 폭은 열 때 한 번만 본다(회전으로 PC 폭이 되면 CSS가 가린다).
+  const LS_SWIPE_HINT = 'chuntaverse_swipe_hint_v1';
+  function swipeHintDone() {
+    const el = document.getElementById('swipeHint');
+    if (!el) return;
+    lsSet(LS_SWIPE_HINT, '1');
+    el.remove();
+  }
+  if (innerWidth <= 1150 && navigator.maxTouchPoints > 0 && lsGet(LS_SWIPE_HINT, '') !== '1') {
+    const el = document.createElement('div');
+    el.id = 'swipeHint'; el.className = 'site-update'; el.setAttribute('role', 'status');
+    el.innerHTML = '<span class="su-t">화면을 좌우로 밀면<br>양옆 메뉴가 열리고 닫힙니다.</span><button class="su-btn" type="button">확인</button>';
+    el.querySelector('.su-btn').addEventListener('click', swipeHintDone);
+    document.body.appendChild(el);
+  }
 })();
 
 // ══ 멤버 추가/탈퇴 체크리스트 — 한 명 변동 시 아래 전부 확인 (체비·플리 추가 때 전면 작업이었던 지점들) ══
@@ -6679,6 +6700,8 @@ function showSiteUpdate(tag) {
     el.querySelector('.su-x').addEventListener('click', () => { siteDismissedTag = siteUpdateTag; siteUpdateTag = ''; el.hidden = true; });
     document.body.appendChild(el);
   }
+  const hint = document.getElementById('swipeHint');
+  if (hint) hint.hidden = true;   // 손짓 안내 띠와 자리가 같다 — 이 알림이 먼저(swipeHintDone 곁 주석)
   el.hidden = false;
 }
 async function checkSiteVersion() {

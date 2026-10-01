@@ -475,9 +475,11 @@
     --btn-rgb: var(--amber-rgb);   /* 앰버 — 테두리 비율(40%)은 다른 버튼과 공통 */
     background: var(--cell);   /* 끔: 무채 바탕(Crenop 지정) */
     border: 1px solid rgba(var(--btn-rgb), var(--btn-a-border));
-    font-size: 12px; line-height: 16px;   /* .page-title-link과 같은 글줄 → 상자 높이가 같다(아래 ::after의 빈 글줄이 높이를 만든다) */
+    font-size: 12px; line-height: 16px;   /* .page-title-link과 같은 글줄 → 상자 높이가 같다 */
+    /* 종 + '알림' 글자(2026-10-02 D35 Q1 '가' — Crenop '다른 버튼과 문법이 같아지네'): 글자는 종 색을 따른다(끔 무채·켬 앰버), 굵기는 같은 줄 버튼과 같은 600.
+       틈 5·옆 여백 8이라 버튼 60px — 종이 놓인 칸이 PC 58px(탭 한 칸)·휴대폰·태블릿 86px라 탭 칸 폭에 맞춘 값(같은 줄 버튼의 10·10이면 72px로 PC에서 방송 수 배지에 붙는다) */
+    gap: 5px; font-weight: 600; white-space: nowrap;
   }
-  .nav-notify-bell::after { content: '\200B'; }   /* 글자 없는 상자에 글줄 하나를 세워 .page-title-link과 높이를 맞춘다(어느 배치에서나 같은 규칙으로 따라간다) */
   .nav-notify-bell svg { width: 16px; height: 16px; display: block; overflow: visible; margin-top: -1px; }   /* 16px(구 20): 상자 안 다른 아이콘과 같은 크기. -1px: .page-title-link svg와 같은 되감기 */
   /* ON/OFF를 색(앰버↔무채)·모양(웨이브 선 유무)으로 구별 + 켤 때 1회 애니메이션 */
   .nav-notify-bell .ring-wave { opacity: 0; }                   /* OFF: 양옆 웨이브 선 숨김 (모양 단서) */
@@ -1392,6 +1394,7 @@
     border-top: 1px solid var(--border);
     font-size: 12px; color: var(--muted); text-align: center;
   }
+  .filter-summary span { display: inline-block; }   /* 문장은 토막 사이에서만 줄이 바뀐다 — 낱말 하나만 다음 줄에 남지 않게(2026-10-02 Crenop '줄바꿈을 너무 안 이쁘게') */
   /* 왼쪽 여백 30 = 긴 채팅 묶음의 접기 띠 24(.cb-rail) + 틈 6 — 띠 없는 줄도 같은 선(2026-09-29 D29 Q1 가, 종전 안 읽음 막대 자리 4 + 18).
      안 읽음 막대는 줄 안이 아니라 목록 상자 테두리 바깥(.event.unread::before) — 띠와 두 줄로 붙지 않게(Crenop '민트를 바깥으로'). */
   .event {
@@ -4119,7 +4122,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-01c';   // 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-02a';   // 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '상단의 멤버/종류 필터는 알림에도 적용됩니다.'. 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -6828,11 +6831,9 @@ function sendBrowserNotification(ev) {
     case 'battle_notice': body = `${memberName} 대결미션 종료${ev.title ? ' — ' + ev.title : ''}`; break;
     default:           body = `${memberName} ${ev.type}`;
   }
+  const opt = { body, icon: 'Favicon.webp' + SITE_IMG_V, tag: `${ev.type}-${ev.member_id}-${ev.time}` };
   try {
-    const noti = new Notification(BASE_TITLE, {
-      body, icon: 'Favicon.webp' + SITE_IMG_V,
-      tag: `${ev.type}-${ev.member_id}-${ev.time}`,
-    });
+    const noti = new Notification(BASE_TITLE, opt);
     noti.onclick = () => {
       window.focus();
       history.replaceState(null, '', hashFor('recent'));
@@ -6840,8 +6841,28 @@ function sendBrowserNotification(ev) {
       noti.close();
     };
     setTimeout(() => { try { noti.close(); } catch (e) {} }, 5000);
-  } catch (e) {}
+  } catch (e) { swNotify(opt); }
 }
+// 휴대폰 알림(2026-10-01 Crenop '모바일 숫자는 늘어나는데 알림은 안 울리긴 하는 듯'): 휴대폰 브라우저는 new Notification이 TypeError를 던진다(MDN 'nearly all mobile browsers' —
+//   종전엔 위 catch가 삼켜 종을 켜도 조용했다). 그런 브라우저에서만 sw.js를 등록해 등록(registration)의 showNotification으로 띄운다 — PC는 등록하지 않는다.
+//   sw.js는 알림 누르기만 받는다(fetch를 가로채지 않아 캐시·오프라인과 무관). 누르면 sw.js가 창을 앞으로 가져오고 'notify-click'을 보낸다 → 최근 활동으로(PC의 onclick과 같은 일).
+//   5초 뒤 닫기도 PC와 같다. 알고 둔 것: 사이트가 돌고 있을 때만 울린다(PC와 같음 — 휴대폰은 화면을 끄거나 다른 앱으로 가면 페이지가 곧 멈춘다). 꺼져 있어도 울리려면 서버 푸시가 따로 필요.
+let swNotifyReg = null;
+function swNotify(opt) {
+  if (!('serviceWorker' in navigator)) return;
+  if (!swNotifyReg) {
+    swNotifyReg = navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready);
+    swNotifyReg.catch(() => { swNotifyReg = null; });   // 등록 실패(sw.js 없음 등)는 다음 알림 때 다시
+  }
+  swNotifyReg.then(reg => reg.showNotification(BASE_TITLE, opt).then(() => {
+    setTimeout(() => { reg.getNotifications({ tag: opt.tag }).then(list => list.forEach(n => n.close())).catch(() => {}); }, 5000);
+  })).catch(() => {});
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
+  if (e.data !== 'notify-click') return;
+  history.replaceState(null, '', hashFor('recent'));
+  switchPage('recent');
+});
 
 const NOTIFY_RECENT_MS = 10 * 60 * 1000;   // 알림 대상 = 발생 10분 이내 이벤트만 (재편입 폭주 가드 — 아래 주석)
 // [유튜브만 넓힘 · 2026-08-07] 다른 타입은 e.time이 감지 시각과 거의 같지만(방송 시작/종료) 유튜브는
@@ -6989,7 +7010,7 @@ function syncThemeBtn() {
     drawerBtnL: SVG_ICONS.menu, drawerBtnR: SVG_ICONS.checkbox,   // 우측 = 체크박스(2026-09-02, 깔때기 폐지)
     drawerClose: SVG_ICONS.close, drawerCloseR: SVG_ICONS.close,
     navStatsIcon: SVG_ICONS.barChart,   // 통계 탭(2026-08-31) — 트로피는 '명예의 전당'이던 시절의 그림
-    notifyBell: SVG_ICONS.bell,
+    notifyBell: SVG_ICONS.bell + '<span>알림</span>',
   };
   for (const [id, html] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -9870,7 +9891,8 @@ function applyFilter() {
   const scrollTopBtn = document.getElementById('scrollToTop');
   if (scrollTopBtn) scrollTopBtn.addEventListener('click', () => { window.scrollTo(0, 0); });
   const summary = document.getElementById('filterSummary');
-  if (summary) summary.textContent = '선택된 멤버/종류만 알림됩니다.';
+  // 2026-10-02 Crenop 문구 — 이 필터가 목록뿐 아니라 알림도 거른다는 것을 알린다(processNewEventsForNotification이 위 목록과 같은 판정). 두 토막은 줄이 넘칠 때 그 사이에서만 끊긴다(.filter-summary span)
+  if (summary) summary.innerHTML = '<span>상단의 멤버/종류 필터는</span> <span>알림에도 적용됩니다.</span>';
 
   refreshUnreadIndicator();
 }

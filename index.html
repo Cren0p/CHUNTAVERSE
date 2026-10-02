@@ -1446,11 +1446,11 @@
   }
   .event.unread::before { content: ''; position: absolute; top: -1px; bottom: 0; left: 0; width: 4px; background: var(--ev-unread); }   /* 줄 안쪽 왼쪽 끝 4(2026-10-02h — 종전 상자 바깥) · 위 -1 = 이웃 안 읽은 줄과 이어진 막대(줄 사이 선 1px 자리까지) */
   .event.unread:hover { background: var(--unread-bg-hover); }
-  /* 채팅 묶음 접기 띠(2026-09-29 Crenop D29 Q1 가 — 5줄부터(CHAT_FOLD_MIN 곁 주석), applyChatFold가 붙임). 목록 상자 테두리 바로 바깥, 폭 14(2026-10-02h —
+  /* 채팅 묶음 접기 띠(2026-09-29 Crenop D29 Q1 가 — 4줄부터(CHAT_FOLD_MIN 곁 주석), applyChatFold가 붙임). 목록 상자 테두리 바로 바깥, 폭 14(2026-10-02h —
      휴대폰은 상자 바깥이 16뿐이라 14 + 테두리 1이 한계: 화면 끝에서 2px. 태블릿 24~34 · PC 68, 잰 값). left -15 = 폭 14 + 테두리 1.
      두 겹 화살표는 보이는 띠의 위·아래 끝에 붙는다(sticky — 위 = 붙은 목록 머리 줄 바로 아래, 높이 --tl-bar-h는 syncTlBar가 잰다):
      펼침 = 위 ⌄⌄·아래 ⌃⌃(접기) · 접힘 = 위 ⌃⌃·아래 ⌄⌄(펴기). 사이 세로선은 화살표 칸(띠 색 바탕, 바깥 4px까지)이 덮어 두 화살표 사이만 보인다
-     — 칸이 바깥 4px을 안 덮으면 화면 끝에 붙은 화살표 밖으로 선 끝이 삐져나왔다(목업 실측). 접힘 = 앞 3줄(CHAT_FOLD_SHOW) + '나머지 N줄 보기'.
+     — 칸이 바깥 4px을 안 덮으면 화면 끝에 붙은 화살표 밖으로 선 끝이 삐져나왔다(목업 실측). 접힘 = 앞 3줄(CHAT_FOLD_SHOW), 셋째 줄 끝에 개수 표기(.cb-rest).
      hover = 사이트 규칙 그대로: 어두운 화면은 화살표·선 민트, 라이트는 색 그대로 + 띠 옅은 민트(D7 H — hover 블록). */
   .cb-rail { position: absolute; left: -15px; top: 0; bottom: 0; width: 14px; background: var(--rail-bg); color: var(--text3); cursor: pointer; z-index: 1; }
   /* 화살표마다 제 구역 안에서만 붙는다(sticky의 담는 상자) — 위 = 띠 맨 아래 28 제외, 아래 = 맨 위 28 제외. 한 상자에 둘을 두면 묶음이 화면 가장자리에
@@ -1466,9 +1466,12 @@
   .cb-ra-b svg, .event.chat-bundle.folded .cb-ra-t svg { transform: rotate(180deg); }
   .event.chat-bundle.folded .cb-ra-b svg { transform: none; }
   .cb-rail:hover { color: var(--accent); }   /* 라이트는 hover 블록(D7 H)에서 글자 색 그대로 + 옅은 민트 바탕 */
-  .event.chat-bundle .cb-more { display: none; }   /* .timeline-scroll-btn(뒤에 있는 inline-flex)을 이기게 묶음 안으로 좁힌다 — 펼친 묶음에도 버튼이 보였다(29i 실측) */
   .event.chat-bundle.folded .chat-bundle-row:nth-of-type(n+4) { display: none; }   /* n+4 = CHAT_FOLD_SHOW 3과 짝 */
-  .event.chat-bundle.folded .cb-more { display: inline-flex; align-self: flex-start; margin-top: 3px; }   /* 제 폭만(넓은 배치의 줄 목록은 세로 flex라 늘어났다 — 29i 실측) */
+  /* 접힌 묶음의 개수 표기(2026-10-02o D44 — Crenop '좁히고 나면 늘리는 방법이 두 가지라서 별로야. 펼쳤을 때 채팅 갯수는 마지막 채팅 옆에 별도로 표기하면 좁혀서 얻는 폭의 이득도 올라가'):
+     종전 [나머지 N줄 보기] 버튼(줄 하나 29px)을 없애고 펴는 길은 접기 띠 하나. 개수는 접혔을 때 마지막으로 보이는 채팅의 끝 글자 바로 뒤(메시지 칸 안 — 두 줄로 꺾여도 끝 글자 뒤, Q2 가)에
+     '+N' 상자로(Q1 가 — 글자만 두면 채팅 내용의 일부로 읽힌다). 누르는 것이 아니다(onRecentOpen이 줄 링크로 번지지 않게 막는다). 접힌 높이 실측: PC 145.5 → 113.5 · 휴대폰 167.5 → 138.5 */
+  .cb-rest { display: none; margin-left: 8px; padding: 0 6px; border: 1px solid var(--border); background: var(--cell); color: var(--muted); font-size: 12px; font-weight: 600; line-height: 16px; white-space: nowrap; cursor: default; }
+  .event.chat-bundle.folded .cb-rest { display: inline-block; }
   .event-icon {
     width: 32px; height: 32px;
     display: flex; align-items: center; justify-content: center;
@@ -3320,6 +3323,10 @@
   .cc-collect-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
   /* 1열 전환 700px — 탭(600px)보다 엄격: 모달은 오버레이 패딩 40 + 패널 테두리 2만큼 좁고, 모바일은 hover 불가라 말줄임 제목을 펼칠 수단이 없다(2026-08-24) */
   @media (max-width: 700px) { .cc-collect-grid { grid-template-columns: 1fr; } }
+  /* 한 건이면 한 칸 폭(2026-10-02n Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네' — 02d는 머리글만 고쳐 740 패널의 오른쪽 절반이 비었다): 카드는 두 칸 격자의 한 칸(351) 크기 그대로,
+     패널이 그 한 칸에 맞는다(377 = 351 + 안쪽 여백 12·12 + 테두리 2). 남는 폭은 카드 옆 빈칸이 아니라 모달 바깥(영상 고르기 모달 fitVodPickWidth와 같은 생각).
+     1열로 바뀌는 700 이하는 여러 건일 때와 같은 폭 그대로 */
+  @media (min-width: 701px) { .lr-panel.cc-modal.cc-one { max-width: 377px; } .cc-one .cc-collect-grid { grid-template-columns: 1fr; } }
   .cc-collect-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 28px 12px; }
 
   .profile-member {
@@ -4190,7 +4197,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-02m';   // 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-02o';   // 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -5241,10 +5248,10 @@ let allEvents = [];
 let liveInfoMap = {};   // 최신 폴링의 멤버별 생방송 상태(live·btime) — VOD 연결의 '생방송 중' 판정 진실원(v14)
 let eventSortAsc = false;
 // 채팅 묶음 접기(2026-09-29 Crenop D29 Q1 가, applyChatFold 곁 주석): 접으면 앞 3줄. 접힌 묶음은 이 페이지 동안만 기억(열쇠 = 묶음 첫 채팅의 읽음 열쇠)
-// 띠가 붙는 길이 = 5줄부터(2026-10-02 D37 Q1 '가' — Crenop '왜 10개냐, 9개는 왜 안 줄이는데 — 근본적인 대답'): 접는 것이 이득이 되기 시작하는 길이다.
-//   접힌 모습 = 앞 3줄 + [나머지 N줄 보기](버튼 줄 29px), 줄 하나 21.8px(잰 값) → 4줄은 접으면 7px 더 커지고(1줄 사라지고 버튼이 생긴다) 5줄부터 15px씩 줄어든다.
-//   종전 10(9/29 '10줄 넘는' → 10/2 '10줄부터')은 어림값이라 '하나 적으면 왜 안 되나'에 답이 없었다. CHAT_FOLD_SHOW나 줄·버튼 높이를 바꾸면 이 값도 다시 셈한다(SHOW + 2).
-const CHAT_FOLD_MIN = 5, CHAT_FOLD_SHOW = 3;   // CHAT_FOLD_SHOW는 CSS nth-of-type(n+4)와 짝
+// 띠가 붙는 길이 = 4줄부터(2026-10-02o D44 Q3 '가'). 원칙은 D37 그대로(Crenop '왜 10개냐, 9개는 왜 안 줄이는데 — 근본적인 대답') — 접는 것이 이득이 되기 시작하는 길이다.
+//   접힌 모습 = 앞 3줄(개수 표기는 셋째 줄 끝에 붙어 줄을 더하지 않는다), 줄 하나 21.8px(잰 값) → 4줄부터 접으면 한 줄씩 줄어든다.
+//   종전 5(10/2 D37)는 접힌 모습에 [나머지 N줄 보기] 버튼 줄(29px)이 있어 4줄을 접으면 7px 커지던 때의 값, 그 전 10은 어림값. CHAT_FOLD_SHOW를 바꾸면 이 값도 다시 셈한다(SHOW + 1).
+const CHAT_FOLD_MIN = 4, CHAT_FOLD_SHOW = 3;   // CHAT_FOLD_SHOW는 CSS nth-of-type(n+4)와 짝
 const chatFolded = new Set();
 let lastTimelineSig = null;   // 타임라인 직전 렌더의 입력 시그니처 — 10초 폴링에서 무변화면 innerHTML 재생성 스킵용
 
@@ -6724,7 +6731,8 @@ function onRecentOpen(e) {
   if (e.type === 'auxclick' && e.button !== 1) return;
   if (currentPage !== 'recent' || !e.target.closest) return;
   const a = e.target.closest('a[href], button');
-  if (!a || a.matches('.cb-more')) return;   // 채팅 묶음 '나머지 N줄 보기'는 떠나는 링크가 아니다
+  if (!a) return;
+  if (e.target.closest('.cb-rest')) { e.preventDefault(); return; }   // 접힌 채팅 묶음의 개수 표기는 누르는 것이 아니다(줄 링크 안에 있어 그대로 두면 그 채팅이 열리고 읽음이 찍힌다 — 가운데 버튼도)
   const el = e.target.closest('#timeline > .event[data-rk]');
   if (!el) {   // 줄 밖: 줄 버튼으로 연 모달 속 바깥 링크(다시보기 타일 등)만 유예 — 보조바 시트 버튼·일정 모달은 '그냥 떠남'(전부 읽음, 검토 확정)
     if (!a.closest('#lrOverlay')) eventRowModal = false;
@@ -6737,14 +6745,12 @@ function onRecentOpen(e) {
   refreshUnreadIndicator();
 }
 document.addEventListener('click', onRecentOpen);
-// 채팅 묶음 접기 띠·'나머지 N줄 보기'(applyChatFold 곁 주석) — 누르기·Enter·Space. 페이지에 한 번(목록을 그릴 때마다 붙이지 않는다 — §6)
+// 채팅 묶음 접기 띠(applyChatFold 곁 주석) — 누르기·Enter·Space. 페이지에 한 번(목록을 그릴 때마다 붙이지 않는다 — §6)
 document.addEventListener('click', (ev) => {
-  const b = ev.target.closest && ev.target.closest('#timeline .cb-rail, #timeline .cb-more');
+  const b = ev.target.closest && ev.target.closest('#timeline .cb-rail');
   if (!b) return;
   ev.preventDefault();
-  const el = b.closest('.event'), refocus = b.classList.contains('cb-more') && document.activeElement === b;
-  toggleChatFold(el);
-  if (refocus) { const r = el.querySelector('.cb-rail'); if (r) r.focus({ preventScroll: true }); }   // 편 뒤 사라지는 버튼 대신 띠로
+  toggleChatFold(b.closest('.event'));
 });
 document.addEventListener('keydown', (ev) => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('#timeline .cb-rail')) { ev.preventDefault(); toggleChatFold(ev.target.closest('.event')); }
@@ -9665,7 +9671,7 @@ function renderChatBundle(items, allEvents) {
   return `<div class="event chat-bundle" data-time="${new Date(last.time).getTime() || 0}">${inner}</div>`;
 }
 
-// 긴 채팅 묶음에 접기 띠(2026-09-29 Crenop D29 Q1 가 — 기본 펼침, 띠 어디를 눌러도 접고 편다). renderChatBundle은 그대로 두고 그린 뒤에 붙인다(applyVodLinks와 같은 처리 — 줄의 읽음 열쇠 data-rk를 쓴다).
+// 긴 채팅 묶음에 접기 띠(2026-09-29 Crenop D29 Q1 가 — 기본 펼침, 띠 어디를 눌러도 접고 편다. 펴는 길은 띠 하나 — 2026-10-02o D44). renderChatBundle은 그대로 두고 그린 뒤에 붙인다(applyVodLinks와 같은 처리 — 줄의 읽음 열쇠 data-rk를 쓴다).
 //   띠 모양·화살표 규칙은 CSS .cb-rail 곁 주석. 접힌 묶음은 다시 그려도 접힌 채(chatFolded).
 function applyChatFold(tl) {
   tl.querySelectorAll(':scope > .event.chat-bundle[data-rk]').forEach(el => {
@@ -9676,7 +9682,8 @@ function applyChatFold(tl) {
     el.dataset.fold = key;
     el.classList.toggle('folded', folded);
     el.insertAdjacentHTML('afterbegin', `<div class="cb-rail" role="button" tabindex="0" aria-expanded="${!folded}" aria-label="채팅 ${n}줄 ${folded ? '펴기' : '접기'}"><span class="cb-rw cb-rw-t"><span class="cb-ra cb-ra-t">${SVG_ICONS.chevronsDown}</span></span><span class="cb-rw cb-rw-b"><span class="cb-ra cb-ra-b">${SVG_ICONS.chevronsDown}</span></span></div>`);
-    el.querySelector('.chat-bundle-rows').insertAdjacentHTML('beforeend', `<button class="cb-more timeline-scroll-btn" type="button">${SVG_ICONS.chevronsDown}<span>나머지 ${n - CHAT_FOLD_SHOW}줄 보기</span></button>`);
+    const last = el.querySelector(`.chat-bundle-row:nth-of-type(${CHAT_FOLD_SHOW}) .cbr-msg`);   // 접혔을 때 마지막으로 보이는 줄의 메시지 칸 — 그 끝에 개수 표기(.cb-rest 곁 주석, 접혔을 때만 보인다). 읽어 주는 이름은 띠가 갖는다('채팅 N줄 펴기')
+    if (last) last.insertAdjacentHTML('beforeend', `<span class="cb-rest" aria-hidden="true">+${n - CHAT_FOLD_SHOW}</span>`);
   });
 }
 function toggleChatFold(el) {
@@ -12355,8 +12362,8 @@ function openContentCollect(key) {
   const head = document.getElementById('lrHead');
   const body = document.getElementById('lrBody');
   if (!ov || !head || !body) return;
-  modalPanel('cc-modal');   // 폭 740 — 원복은 다음 modalPanel 호출이 통째로 한다
   const items = contentCollectMatches(key).slice().reverse();
+  modalPanel(items.length === 1 ? 'cc-modal cc-one' : 'cc-modal');   // 폭 740(한 건이면 한 칸 377 — .cc-one) — 원복은 다음 modalPanel 호출이 통째로 한다
   const label = String(key).split(/[|,]/)[0].trim();
   // 한 건이면 머리글은 그 컨텐츠 제목만(2026-10-02 D36 Q1 '나' — 크루 연혁·대전 전적 줄처럼 한 건짜리 검색어: '… 모아보기 · 총 1회'는 맞지 않는다)
   const title = items.length === 1 ? (items[0].title || label) : `${label} 모아보기${items.length ? ` · 총 ${items.length}회` : ''}`;

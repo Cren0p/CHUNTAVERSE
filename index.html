@@ -137,9 +137,6 @@
     --sync-rgb: 56,189,248;
     --like-rgb: 52,211,153;                 /* 좋아요 요청 버튼·체크(에메랄드) */
     --like-text: #6ee7b7;
-    --like-check-border: rgba(52,211,153,0.7);
-    --like-check-bg: rgba(52,211,153,0.10);
-    --like-check-fill: rgba(52,211,153,0.5);    /* 라이트 모드 켜진 좋아요 요청 칸 바탕 — 좋아요 초록 50%(D23 Q2 '나': 선택 표시 문법 — 옅은 초록 체크가 흰 바탕에서 안 보였다) */
     --accent-rgb: 97,255,236;               /* --accent의 세 값 — 일정 버튼·결성 주년 상자 */
     --playlist: #FF3D3D;                    /* 음악 탭 플레이리스트 버튼 */
     --playlist-rgb: 255,61,61;
@@ -773,6 +770,7 @@
   /* 최애 고르기(세션 70): 프로필 기둥의 얼굴 칸(.profile-tab)을 그대로 7열로. 발 줄엔 해제 버튼 하나 */
   .fav-pick { display: grid; grid-template-columns: repeat(7, minmax(0, 52px)); gap: 6px; justify-content: center; padding: 8px 16px 12px; }   /* 좁으면 칸이 줄어든다(사진 칸은 정사각) — 52px 고정이면 휴대폰에서 첫 열이 본문 왼쪽 밖으로(2026-09-27 점검) */
   .fav-pick-foot { display: flex; justify-content: center; padding: 0 16px 16px; }
+  .fav-pick-foot .page-title-link { cursor: pointer; font-family: inherit; }   /* 다른 button.page-title-link과 같은 초기화 — 빠져 있어 브라우저 기본 글꼴·화살표 커서였다(2026-10-02r) */
   button.page-title-link#favBtn, button.page-title-link#themeBtn, button.page-title-link#syncBtn { cursor: pointer; font-family: inherit; }   /* 다른 button.page-title-link과 같은 초기화(.rank-btn·.tbm-btn 규칙과 동일). 빠지면 브라우저 기본 글꼴로 그려져 버튼이 3.8px 넓다(D40 목업의 흠) */
   /* 화면 모드 버튼 색 = 누르면 갈 모드의 그림 색(2026-10-02 Crenop D42 Q1 가 — 종전엔 색을 따로 받은 적 없이 기본 파랑): 어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라.
      기기 동기화 = 하늘(Q2 가). 밝은 화면에선 공통 규칙이 제 색으로 채우고 글자는 짙은 쪽(세 색 모두 흰 글자 대비 3.5 미만) */
@@ -957,9 +955,8 @@
   }
   .lrq-check svg { width: 16px; height: 16px; display: block; }
   .lrq-check:hover { background: var(--row-hover); border-color: var(--muted); }
-  .lrq-row.checked .lrq-check { border-color: var(--like-check-border); background: var(--like-check-bg); color: var(--like-text); }
-  :root[data-theme="light"] .lrq-row.checked .lrq-check { background: var(--like-check-fill); color: var(--text); border-color: var(--border); }   /* 라이트: 선택 표시 문법(좋아요 초록 50% 바탕 + 보통 글자색 체크 — D23 Q2 '나', 옅은 초록 체크가 흰 바탕에서 안 보였다) */
-  .lrq-row.checked .lrq-link { opacity: 0.5; }   /* 처리한 요청은 살짝 가라앉힘(목록엔 남음) */
+  .lrq-row.checked .lrq-check { color: var(--muted); }   /* 켜짐 = 무채 체크 — 클립의 확인 체크와 같은 옷(2026-10-02s Crenop '좋아요 요청을 수정해서 클립과 일치시켜야지' — 종전 초록 테두리·바탕·체크, 라이트는 초록 50% 바탕) */
+  .lrq-row.checked .lrq-link { opacity: 0.5; filter: grayscale(1); }   /* 확인한 요청은 가라앉힘(목록엔 남음) — 클립의 확인한 타일과 같은 50% + 흑백(2026-10-02s) */
   /* 좁은 목록(목록 상자 440 이하 — 휴대폰, 2026-09-29 Crenop Q7 가): 머리 [사진 20 · 이름 좋아요 요청 ··· 체크 칸] + 그 아래 댓글을 폭 전부로(체크 칸 아래까지 — 한 줄 말줄임 대신 꺾는다).
      넓은 배치 [사진 | 이름·댓글 | 체크 칸]은 360에서 댓글 칸이 좁아 대부분 말줄임된다. 시간 칸은 2026-10-01에 뺐다(Crenop — 요청만 모아 보는 목록에선 중요한 정보가 아니다, 종전엔 세 줄짜리 시간 칸이
      이름과 체크 칸 사이에 끼어 있었다) */
@@ -1399,6 +1396,7 @@
     background: var(--pill, var(--pill-panel));
     border: 1.5px solid var(--border);
     cursor: pointer; transition: all 0.15s;
+    font-family: inherit;   /* 버튼은 글꼴 상속이 끊긴다 — 이 줄이 없어 칩 글자가 브라우저 기본 글꼴(Arial 계열)로 그려졌다(2026-10-02r 일관성 점검) */
   }
   /* 케미 종류 = 아이콘 위 · 글자 아래. 아이콘은 '무엇 계열인지', 글자는 '정확히 무엇인지'를 맡는다 */
   /* 그림 위 · 글자 아래 버튼의 공통 규격(2026-09-08 Crenop: 종류 필터는 그림이 크고 글자와 붙어 보였고, 종류 버튼은 그림이 작았다):
@@ -2131,15 +2129,18 @@
   /* 전환 버튼(2026-10-02 D43 Crenop '안 이뻐 — 멤버 NN·외부인 NN의 폭도 일치시키는 게 맞겠고 … 박스 좌변~XX~NN~박스 우변 사이의 간격도 조율' → Q1 '다' 양 끝 맞춤 — '디자인의 목표는 이쁨'):
      두 버튼 폭은 넓은 쪽에 맞추고(같은 폭 두 칸 격자), 글자는 왼쪽 끝·숫자는 오른쪽 끝(양옆 10 + 테두리 1, 글자~숫자는 6 이상 — .sort-toggle의 gap).
      숫자 자리는 미리 잡아 두지 않는다. 모를 때만(첫 응답 전 — '0'으로 적지 않는다) 두 칸을 비워, 숫자가 뜰 때 폭이 크게 뛰지 않게 한다(9/29 A21은 세 칸을 늘 잡고 숫자를 왼쪽에 붙여 오른쪽이 비었다: 11 · 10 · 18.6).
-     숫자 = 확인한 개수/불러온 개수(2026-10-02p D45 Q4 '나' — clipViewN). 그만큼 버튼이 넓어져 전환 버튼 둘이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄(정렬 옆)로 넘긴다
-     (Crenop '폭이 좁을 때 … 맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네' — 02k의 '전환 버튼을 위아래로 쌓기'(머리 줄 안쪽 307 이하)를 대신한다):
+     숫자 = 확인한 개수/불러온 개수(2026-10-02p D45 Q4 '나' — clipViewN). 그만큼 버튼이 넓어져, 휴대폰 폭에서는 나란히 선 전환 버튼 둘 옆에 2×2 묶음이 못 선다.
      머리 줄은 줄이 바뀔 수 있고, 오른쪽 묶음의 바탕 폭을 2×2 한 덩이(112 = 52 + 8 + 52)로 준다 — 그 폭이 전환 버튼 옆에 들어가면 옆에 서서 2×2(넓으면 한 줄),
      안 들어가면 통째로 다음 줄로 내려가 네 버튼이 한 줄(232)로 선다. 어느 쪽이든 두 줄(78).
-     휴대폰 폭(머리 줄 안쪽 347 이하 = 화면 약 397 이하)에서는 늘 다음 줄로 — 들어가는지에만 맡기면 360 폭에서 확인 개수가 한 자리에서 두 자리로 넘어가는 순간(전환 버튼 86.5 → 94.2, 실측)
-     맨 위로·맨 아래로가 윗줄에서 아랫줄로 옮겨 갔다. 347 = 전환 버튼 109.6(세 자리/세 자리) × 2 + 틈 8 + 묶음 사이 8 + 2×2 묶음 112 − 1 */
+     휴대폰 폭(머리 줄 안쪽 347 이하 = 화면 약 397 이하)에서는 전환 버튼 둘을 위아래로 쌓고 오른쪽은 늘 2×2(2026-10-02t D46 Q1 '가' — 일관성 점검 ⑤ Crenop '줄바꿈이 필요해질 때 이동버튼과
+     정렬버튼 사이가 이쁘다고 판단한 건데 클립탭은 … 차이가 발생했음. 개선 가능할지?'): [맨 위로][맨 아래로]가 통계·넓은 휴대폰의 클립과 같이 윗줄 오른쪽, 정렬이 아랫줄. 높이 78 그대로.
+     내력: Crenop '폭이 부족하다면 2행을 활용하면 되겠고'(D43) → 02k = 나란히 안 들어가는 폭(안쪽 307 이하)에서만 쌓기(D43 Q2 '가' — Claude 추천, '늘 쌓기'는 (나)였다)
+     → 02p = 쌓기를 없애고 네 버튼을 아랫줄 한 줄로(D45 '맨위로/맨아래로 버튼을 다음 행으로') → 02t = 휴대폰 폭에서 늘 쌓기.
+     폭으로 고정하는 까닭: 들어가는지에만 맡기면 360 폭에서 확인 개수가 한 자리에서 두 자리로 넘어가는 순간(전환 버튼 86.5 → 94.2, 실측) 배치가 바뀌었다.
+     347 = 전환 버튼 109.6(세 자리/세 자리) × 2 + 틈 8 + 묶음 사이 8 + 2×2 묶음 112 − 1 */
   .clip-one-bar.timeline-header { flex-wrap: wrap; row-gap: 8px; }
   .clip-one-bar .timeline-bar-right { flex-basis: 112px; }
-  @container tlbar (max-width: 347px) { .clip-one-bar > .timeline-bar-right { flex-basis: 100%; } }
+  @container tlbar (max-width: 347px) { .clip-one-bar .clip-view-pair { grid-template-columns: 1fr; } .clip-one-bar > .timeline-bar-right { flex: 0 0 112px; } }
   .clip-view-pair { display: grid; grid-template-columns: 1fr 1fr; }
   .clip-view-pair > .sort-toggle { justify-content: space-between; }
   .clip-view-n { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
@@ -2239,11 +2240,11 @@
   .clip-more-btn:hover { border-color: var(--accent); }
   .clip-more-btn svg { width: 14px; height: 14px; display: block; flex-shrink: 0; color: var(--accent); }
   .clip-more .spinner { width: 18px; height: 18px; border-width: 2px; margin: 0; flex: none; }
-  /* 좁은 칸(160 타일 둘이 안 드는 폭 — 휴대폰·기둥 편 태블릿): 원본 방송 머리는 길이·개수를 빼고 제목 두 줄까지 */
+  /* 좁은 칸(160 타일 둘이 안 드는 폭 — 휴대폰·기둥 편 태블릿): 원본 방송 머리는 여백을 줄이고 제목 두 줄까지. 길이·개수는 빼지 않는다(2026-10-02s — 종전엔 이 폭에서 감췄다:
+     Crenop '특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'. 머리 첫 줄이 넘치면 줄이 바뀐다) */
   @container clipcol (max-width: 327px) {
     .clip-bc { padding: 8px 10px; }
     .clip-sec > .clip-check { top: 6px; }
-    .clip-bc .day-session-viewer, .clip-bc .clip-bc-n { display: none; }
     .clip-bc .day-session-row-head { column-gap: 6px; row-gap: 2px; }
     .clip-bc .day-session-date { margin-right: 0; }
     .clip-bc .clip-bct { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
@@ -3983,7 +3984,7 @@
         </span>
       </div>
       <div class="tab-aux" data-for="events" id="auxEvents">
-        <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="새 이벤트 알림 토글" title="최근 활동 알림"></span>
+        <span class="nav-notify-bell" id="notifyBell" role="button" tabindex="0" aria-label="최근 활동 알림 토글" title="최근 활동 알림"></span>
       </div>
       <div class="tab-aux" data-for="calendar"></div>
       <div class="tab-aux" data-for="clips"></div>
@@ -4009,7 +4010,7 @@
       <div id="profileBody">
         <div class="loading">
           <div class="spinner"></div>
-          <div>멤버 정보를 불러오는 중...</div>
+          <div>멤버 정보 불러오는 중...</div>
         </div>
       </div>
       <!-- 멤버 선택 스트립을 우측 기둥으로(2026-08-31). 좁은 폭에서는 우측 서랍으로 들어간다 —
@@ -4024,7 +4025,7 @@
     <div id="app">
       <div class="loading">
         <div class="spinner"></div>
-        <div>방송 정보를 불러오는 중...</div>
+        <div>방송 정보 불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -4032,7 +4033,7 @@
   <div class="page" id="page-recent">
     <div class="recent-wrap">
       <div class="timeline" id="timeline">
-        <div class="loading"><div class="spinner"></div><div>이벤트 불러오는 중...</div></div>
+        <div class="loading"><div class="spinner"></div><div>최근 활동 불러오는 중...</div></div>
       </div>
       <div class="filter-panel">
         <div class="filter-section">
@@ -4077,7 +4078,7 @@
     <div class="chem-wrap" id="chemistryBody">
       <div class="loading">
         <div class="spinner"></div>
-        <div>케미 데이터 불러오는 중...</div>
+        <div>케미 불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -4119,7 +4120,7 @@
       <div class="cc-main" id="contentBody">
         <div class="loading">
           <div class="spinner"></div>
-          <div>컨텐츠 데이터 불러오는 중...</div>
+          <div>컨텐츠 불러오는 중...</div>
         </div>
       </div>
       <div class="filter-panel" id="contentFilter"></div>
@@ -4135,7 +4136,7 @@
       <div class="cc-main" id="bannerBody">
         <div class="loading">
           <div class="spinner"></div>
-          <div>현수막 데이터 불러오는 중...</div>
+          <div>현수막 불러오는 중...</div>
         </div>
       </div>
       <div class="filter-panel" id="bannerFilter"></div>
@@ -4161,7 +4162,7 @@
       <div class="music-main" id="musicBody">
         <div class="loading">
           <div class="spinner"></div>
-          <div>디스코그래피 불러오는 중...</div>
+          <div>음악 불러오는 중...</div>
         </div>
       </div>
       <aside class="side-pick">
@@ -4193,7 +4194,7 @@
         <div id="hallBody">
           <div class="loading">
             <div class="spinner"></div>
-            <div>명예의 전당 불러오는 중...</div>
+            <div>명전 불러오는 중...</div>
           </div>
         </div>
       </div>
@@ -4205,7 +4206,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-02q';   // 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-02t';   // 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -5452,7 +5453,7 @@ let crewActs = [];       // [{section, date, text, tag, key}] — 시트 행 순
 // 목록 개수를 2개로 고정하지 않는 이유: 제목이 시트에 있으므로 3개든 1개든 시트가 정한다.
 let profileVideos = [];   // [{target, section, title, url, img}]
 let profVideoOk = false;   // 영상 시트(음악·프로필 영상 줄)를 한 번이라도 얻었나(저장본 포함) — 음악 탭의 불러오는 중·실패 구분(2026-09-29 전 탭 리뷰 A28)
-let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러올 수 없습니다' 구분
+let crewSheetsDone = false;   // 최초 fetch 시도 완료 여부 — 크루탭의 '불러오는 중'/'불러오지 못했습니다' 구분
 let MEMBER_INFO = {};    // { id: {engName, fanName, age, height, mbti, group, firstStream, soopDate, vote, election2026, title} }
 
 // 파서 3종(순수 함수 — verify_crew_sheets 스위트가 검증). 헤더 스킵은 행 위치가 아니라 내용 기반(케미 파서 관례) — 시트에 헤더 행이 없어도 첫 데이터 행을 삼키지 않음.
@@ -5522,7 +5523,7 @@ async function loadCrewSheets() {
     pull(LINKS_SHEET_URL, LS_LINKS_CACHE, rows => { MEMBER_LINKS = parseLinkRows(rows); renderLinks(); }),   // 관련 링크 표 — 도착하면 다시 그림(탭이 안 보여도 싸다)
   ]);
   crewSheetsDone = true;
-  if (!Object.keys(MEMBER_LINKS).length) renderLinks();   // 시트가 안 왔으면 '불러올 수 없습니다'로 바꿔 그린다
+  if (!Object.keys(MEMBER_LINKS).length) renderLinks();   // 시트가 안 왔으면 '불러오지 못했습니다'로 바꿔 그린다
   if (currentPage === 'profile') renderProfileBody();
   else if (currentPage === 'music') renderMusic();
   updatePageTitle();   // 상단바 축하 박스(N번째 생일·방송 N주년)가 MEMBER_INFO를 읽음 — 시트 도착 후 재구성
@@ -5756,7 +5757,7 @@ async function openSheetModal(gid) {
     if (!stillMine()) return;
     body.innerHTML = items.length ? tbModalHtml(items) : '<div class="lr-msg">표시할 내용이 없습니다.</div>';
   } catch (e) {
-    if (stillMine()) body.innerHTML = '<div class="lr-msg">내용을 불러올 수 없습니다.</div>';
+    if (stillMine()) body.innerHTML = '<div class="lr-msg">내용을 불러오지 못했습니다.</div>';
   }
 }
 
@@ -6200,7 +6201,7 @@ async function loadLikeRanking() {
   } catch (err) {
     // 폴링 중 실패는 화면을 비우지 않는다 — 직전 값을 두고 다음 주기를 기다린다(깜빡임 방지)
     if (body.querySelector('.rk-ev')) return;
-    body.innerHTML = '<div class="lr-msg">순위 데이터를 불러올 수 없습니다. 잠시 뒤 다시 시도합니다.</div>';
+    body.innerHTML = '<div class="lr-msg">순위를 불러오지 못했습니다. 잠시 뒤 다시 시도합니다.</div>';
   }
 }
 
@@ -6232,7 +6233,7 @@ function renderRankEvent(ev) {
       return `<div class="rk-row rk-cut-row">`
         + (grouped && m.group ? `<span class="rk-grp">${escapeHtml(m.group)}</span>` : '')
         + `<span class="rk-rank">${ev.quota ? ev.quota + '위' : '컷'}</span>`
-        + `<span class="rk-like">${m.cut.toLocaleString()}</span></div>`;
+        + `<span class="rk-like">${m.cut}</span></div>`;
     }
     const mem = findMember(m.member_id);
     const av = mem ? `<img class="rk-av" src="${mem.img}" alt="${escapeHtml(m.name)}">` : '';   // 사진 없는 줄(비멤버 대표 — 시트 G열 팀 신청)은 이름이 사진 칸까지(.rk-wide, 2026-09-29 Crenop D29 C5 가 — 오른쪽 붙임, 줄 높이는 사진과 같은 28). 줄 전체가 그 댓글 링크라 잘린 이름은 숲에서 전문
@@ -6243,7 +6244,7 @@ function renderRankEvent(ev) {
     // 안정/탈락은 행 단위 클래스로 — 순위와 컷이 같은 의미색을 공유해야 한 눈에 읽힌다
     const zone = m.gap === null ? '' : (m.gap >= 0 ? ' in' : ' out');
     // 컷 차이는 부호 숫자만(2026-09-27 D11 Q3 '나' — 종전 '컷 +1,114'는 휴대폰에서 두 줄로 꺾여 행 밖으로 11px). 뜻은 위 'N위 컷 기준'과 안정·탈락 색이 말한다 — 컷 경계 줄에 '컷'을 안 쓰는 것과 같은 이유
-    const gap = m.gap === null ? '' : `${m.gap >= 0 ? '+' : ''}${m.gap.toLocaleString()}`;
+    const gap = m.gap === null ? '' : `${m.gap >= 0 ? '+' : ''}${m.gap}`;
     // 워커가 그 멤버의 댓글 앵커(pCommentNo)를 실어 보내면 행 전체를 링크로. 못 실었으면 div 그대로.
     // [팀 병합 표시 · 2026-08-20 Crenop] 같은 팀의 연속 행(판정: 직전 행과 같은 대표 댓글 링크)은 한 덩어리로 —
     //   이어지는 행은 아바타·이름만 남기고 전형·순위·좋아요·컷차이를 비운다(숫자는 팀당 한 번, 첫 행에만).
@@ -6258,7 +6259,7 @@ function renderRankEvent(ev) {
       : `${av}${nm}`
         + (grouped ? `<span class="rk-grp">${m.group ? escapeHtml(m.group) : ''}</span>` : '')
         + `<span class="rk-rank">${m.rank}위</span>`
-        + `<span class="rk-like">${m.like.toLocaleString()}</span>`
+        + `<span class="rk-like">${m.like}</span>`
         + `<span class="rk-gap">${gap}</span>`;
     const rowCls = `rk-row${zone}${teamCont ? ' rk-teamcont' : ''}`;
     return m.url
@@ -6476,7 +6477,7 @@ function scheduleBtnHTML() {
   scheduleSig = h.sig;
   // 버튼 상시 노출 — 데이터 로드 전 첫 페인트 순간만 셸(일정이 비는 경우는 전제상 없음).
   if (!h.vis.length) {
-    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-shell">불러오는 중</span></button>`;
+    return `<button class="page-title-link sch-btn sch-line" id="schBtn" type="button" onclick="openScheduleList()">${SVG_ICONS.calendar}<span class="sch-line-shell">불러오는 중...</span></button>`;
   }
   const head = h.vis[0];
   // 단일 일정 — 가로 배치: 종류 그림 + 제목 + D-day. 세로 배치: 종류 그림 + D-day만(.sch-line-mb, CSS가 갈아 끼운다).
@@ -7035,7 +7036,7 @@ function refreshUnreadIndicator() {
     if (count > 0) {
       badge.style.display = '';
       badge.innerHTML = navBadgeSvg(count);
-      badge.setAttribute('aria-label', `새 이벤트 ${count}건`);
+      badge.setAttribute('aria-label', `새 활동 ${count}건`);
     } else {
       badge.style.display = 'none';
     }
@@ -7190,7 +7191,7 @@ function renderMusic() {
     const tail = placed ? '' : btn; placed = true;
     return `<section class="music-member"><h2 class="music-member-name"><span class="music-member-id"${t.id !== 'all' ? ` data-member="${t.id}"` : ''}><img src="${escapeHtml(t.img)}" alt="" onerror="this.style.display='none'"><span${color}>${escapeHtml(t.name)}</span></span>${tail}</h2>${strips}</section>`;
   }).join('');
-  const none = profVideoOk ? '<div class="lr-msg">등록된 곡이 없습니다.</div>' : crewSheetsDone ? '<div class="loading"><div>음악 데이터를 불러올 수 없습니다.</div></div>' : '<div class="loading"><div class="spinner"></div><div>음악 불러오는 중...</div></div>';
+  const none = profVideoOk ? '<div class="lr-msg">등록된 곡이 없습니다.</div>' : crewSheetsDone ? '<div class="loading"><div>음악을 불러오지 못했습니다.</div></div>' : '<div class="loading"><div class="spinner"></div><div>음악 불러오는 중...</div></div>';
   el.innerHTML = html || `<div class="music-head">${btn}</div>${none}`;   // 곡이 하나도 없을 때만 버튼이 홀로 선다
   bindVideoStrips(el);   // 좌우 화살표는 이 배선이 넘침을 재서 켠다 — 프로필에서 옮겨올 때 빠졌다(2026-09-01)
   fitBtnIcons(el);       // 우상단 플레이리스트 버튼도 같은 규칙
@@ -7276,7 +7277,7 @@ const calStatsFailAt = {};
 function ensureCalMonth() {
   const ym = calYm();
   if (!statsState.data[ym] && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {   // 받는 중이면 loadStatsMonth가 그 요청을 돌려줘 같이 기다린다(2026-09-27i — 종전엔 부르지 않아 도착해도 다시 안 그렸다)
-    loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) calStatsFailAt[ym] = Date.now(); queueCalRender(); });   // 실패도 다시 그려 '불러올 수 없습니다'를 띄운다 — 30초 안엔 위 조건이 다시 묻지 않아 맴돌지 않는다
+    loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) calStatsFailAt[ym] = Date.now(); queueCalRender(); });   // 실패도 다시 그려 '불러오지 못했습니다'를 띄운다 — 30초 안엔 위 조건이 다시 묻지 않아 맴돌지 않는다
   }
   if (calState.type === 'live' && monthNeedsVodList(calMember().id, ym)) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
 }
@@ -7494,7 +7495,7 @@ function renderCalendarTab() {
   for (let i = 0; i < cells.length; i += 7) weeks.push(`<div class="calendar-grid">${cells.slice(i, i + 7).join('')}</div>`);
   // 자료가 오는 중이면 요일 머리줄 위 오른쪽(흐름 폼은 타일 위)에 '불러오는 중...' — 달력은 막지 않는다(2026-09-02 Crenop 지정). 진행 표시 명사형 규칙.
   const noStats = !statsState.data[ym], statsFail = noStats && !calMonthLoading() && Date.now() - (calStatsFailAt[ym] || 0) <= 30000;
-  const loadingTag = calMonthLoading() ? '<div class="cal-loading">불러오는 중...</div>' : statsFail ? '<div class="cal-loading">통계 데이터를 불러올 수 없습니다.</div>' : '';
+  const loadingTag = calMonthLoading() ? '<div class="cal-loading">불러오는 중...</div>' : statsFail ? '<div class="cal-loading">통계를 불러오지 못했습니다.</div>' : '';
   const gridForm = `<div class="cal-grid-form"><div class="calendar">${loadingTag}`
     + `<div class="calendar-grid cal-head">${CAL_WD.map((w, i) => `<div class="calendar-weekday${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${w}</div>`).join('')}</div>`
     + weeks.join('') + `</div></div>`;
@@ -7657,7 +7658,7 @@ function manualLinkSections(links) {   // 구획별 HTML(머리 포함, 비면 '
       const hit = isSoopCatchUrl(u) ? null : findLoadedVod(vodNo);
       if (hit) { groups.vod.push(`<div class="cal-vod">${vodTileHtml(manual ? Object.assign({}, hit.v, { title: manual }) : hit.v, hit.m)}</div>`); return; }
       const info = vodInfoState.data[vodNo];
-      if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}">${mediaTileHtml({ href: u, thumb: '', member: sp.member, title: manual || '불러오는 중' })}</div>`); return; }
+      if (info === undefined) { ensureVodInfo(vodNo, isSoopCatchUrl(u)); groups.vod.push(`<div class="cal-vod" data-vodinfo="${vodNo}">${mediaTileHtml({ href: u, thumb: '', member: sp.member, title: manual || '불러오는 중...' })}</div>`); return; }
       // 멤버 이름은 위에서 한 번 뗀 sp(rawTitle 기준)를 쓴다 — 여기서 manual(이미 뗀 제목)에 다시 걸면 이름이 사라진다(2026-09-10 실사고: 캐치 뒤 '김웰로' 소실)
       const v = info ? vodInfoAsItem(vodNo, info, u, sp.rest) : { title_no: vodNo, title: sp.rest || '다시보기', thumb: '', duration_ms: 0, href: isSoopCatchUrl(u) ? u : undefined };
       const owner = sp.member || (info && MEMBER_BY_ID[info.member_id]);   // 시트 이름 우선(2026-09-10)
@@ -7723,7 +7724,7 @@ function openLinkPickModal(links, title, pick) {
     const r = pickVodTiles(pick);
     // 관련 다시보기가 없으면(시트가 뺐거나 애초에 없거나) 구획을 아예 안 그린다(2026-09-08 Crenop: '그날 다시보기가 없습니다'는 뜻이 어긋난다 — 그날 것이 있어도 관련 없는 건 시트로 뺀 것)
     const vodBody = r.html ? `<div class="ds-vods">${r.html}</div>`
-      : r.pending ? `<div class="vod-pick-empty">${gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중'}</div>` : '';
+      : r.pending ? `<div class="vod-pick-empty">${gaveUp ? '다시보기 목록을 불러오지 못했습니다.' : '다시보기 목록 불러오는 중...'}</div>` : '';
     const clipBody = r.clipsHtml ? `<div class="vod-pick-sec" data-kind="clip">${SVG_ICONS.soop}<span>클립</span></div><div class="ds-vods">${r.clipsHtml}</div>` : '';   // 2026-09-09(구획 이름 '클립·캐치' → '클립', 2026-09-10: 업로드 VOD까지 포함)
     const vodSec = vodBody ? `<div class="vod-pick-sec" data-kind="vod">${SVG_ICONS.soop}<span>다시보기</span></div>` + vodBody : '';
     // 순서 = 사진 · 게시글 · 유튜브 · 클립 · 다시보기 · 링크(2026-09-16). 컨텐츠 카드는 숲 주소를 pick.include로 넘기므로 sec.clip·sec.vod는 비어 있고 자동 구획이 그 칸을 채운다
@@ -8340,14 +8341,14 @@ function clipNewBadge(h, fr) {
 }
 // data-clipno = 이 칸이 보이는 항목 번호(같은 장면 카드는 전부, 칸으로 구분) — 다시 그린 뒤 보던 타일·초점을 되찾는 열쇠(clipKeep)
 function clipCheckHtml(on, label) { return `<button class="clip-check" type="button" aria-label="${label}" aria-pressed="${!!on}">${LRQ_CHECK_SVG}</button>`; }
-function clipTileHtml(x) { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="clip-item${on ? ' clip-seen' : ''}${fr && !on ? ' clip-new' : ''}" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x), fr)}${clipCheckHtml(on, '봄 표시')}</div>`; }
+function clipTileHtml(x) { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="clip-item${on ? ' clip-seen' : ''}${fr && !on ? ' clip-new' : ''}" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x), fr)}${clipCheckHtml(on, '확인 표시')}</div>`; }
 // 같은 장면 겹친 카드 — 대표(가장 긴 것, 같으면 먼저 올라온 것)의 타일 위에 두 줄을 비치고 그림 왼쪽 아래에 '같은 장면 N'(배지는 오른쪽 위라 안 겹친다). 누르면 모달
 function clipStackHtml(gid, arr) {
   const rep = arr.slice().sort((a, b) => (b.dur_ms - a.dur_ms) || clipRegCmp(a.reg, b.reg))[0];
   const h = clipTileInner(rep).replace('<a class="ds-vod"', `<a class="ds-vod" data-clipgroup="${escapeHtml(gid)}"`)
     .replace('<span class="ds-vod-thumb">', `<span class="ds-vod-thumb"><span class="clip-same">같은 장면 ${arr.length}</span>`);
   const on = arr.some(x => clipSeen()[x.title_no]), fr = arr.some(x => clipNewNos.has(x.title_no));
-  return `<div class="clip-item clip-stack${on ? ' clip-seen' : ''}${fr && !on ? ' clip-new' : ''}" data-clipno="${escapeHtml(arr.map(x => x.title_no).join(' '))}">${clipNewBadge(h, fr)}${clipCheckHtml(on, '같은 장면 모두 봄 표시')}</div>`;
+  return `<div class="clip-item clip-stack${on ? ' clip-seen' : ''}${fr && !on ? ' clip-new' : ''}" data-clipno="${escapeHtml(arr.map(x => x.title_no).join(' '))}">${clipNewBadge(h, fr)}${clipCheckHtml(on, '같은 장면 모두 확인 표시')}</div>`;
 }
 // 원본 방송 머리 — 통계 방송 목록 행의 부품(그림·날짜·시각·길이·모드 배지·제목), 시청자·변경 기록은 뺀다. 누르면 그 행과 같은 곳(켜져 있으면 생방송·다시보기 1개 직행·2개 이상 모달·모름은 VOD 목록)
 function clipBcHeadHtml(sec, n, ctx) {
@@ -8402,7 +8403,7 @@ function clipBroadHtml(secs, ctx) {
     const k = (sec.kind === 'crew' || sec.kind === 'ext') && !sec.label ? sec.units.findIndex(u => !(u.arr[0].pos && u.arr[0].pos.state === 'ok')) : -1;
     const np = k > 0 ? `<div class="clip-np-row"><span class="clip-np">${clipNoPosLabel(sec.units[k].arr[0], sec.hit, ctx.nowMs)} ${sec.units.slice(k).reduce((n, u) => n + u.arr.length, 0)}</span></div>` : '';
     const all = sec.items.every(x => clipSeen()[x.title_no]);   // 방송 머리 칸(D23) — 그 방송 클립이 전부 봄일 때만 켜짐
-    return `<section class="clip-sec" data-secnos="${escapeHtml(sec.items.map(x => x.title_no).join(' '))}">${clipBcHeadHtml(sec, sec.items.length, ctx)}${clipCheckHtml(all, '이 방송 클립 모두 봄 표시')}<div class="clip-flow">${sec.units.map((u, i) => (i === k ? np : '') + clipUnitHtml(u, ctx)).join('')}</div>${sec.units.length >= CLIP_SEC_END_MIN ? `<div class="clip-sec-end"><button class="clip-more-btn" type="button" data-clipseensec="1">${SVG_ICONS.checkAll}<span>이 방송 모두 확인함</span></button></div>` : ''}</section>`;
+    return `<section class="clip-sec" data-secnos="${escapeHtml(sec.items.map(x => x.title_no).join(' '))}">${clipBcHeadHtml(sec, sec.items.length, ctx)}${clipCheckHtml(all, '이 방송 클립 모두 확인 표시')}<div class="clip-flow">${sec.units.map((u, i) => (i === k ? np : '') + clipUnitHtml(u, ctx)).join('')}</div>${sec.units.length >= CLIP_SEC_END_MIN ? `<div class="clip-sec-end"><button class="clip-more-btn" type="button" data-clipseensec="1">${SVG_ICONS.checkAll}<span>이 방송 모두 확인함</span></button></div>` : ''}</section>`;
   }).join('');
 }
 // 목록 끝 줄 — 받는 중(정리 중이면 남은 수) / 받지 못함 + 다시 시도 / 하루 더 버튼 / 창 끝. 글은 구절마다 한 덩어리(.clip-more-txt — 좁으면 구절 사이에서만 꺾인다, D20 Q2)
@@ -8676,7 +8677,7 @@ function openClipGroupModal(gid) {
   modalPanel('vod-pick-panel');
   modalTone(cssVar('--ev-start'));   // 클립 = 숲 파랑(구획 그림 data-kind="clip"과 같은 색)
   head.innerHTML = `<span>같은 장면 ${g.arr.length}개${g.dk ? ` — ${escapeHtml(calDateLabel(g.dk))}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  body.innerHTML = `<div class="ds-vods clip-vods">${g.arr.map(x => { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="cal-vod clip-mt" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x, (on ? ' clip-seen' : '') + (fr && !on ? ' clip-new' : '')), fr)}${clipCheckHtml(on, '봄 표시')}</div>`; }).join('')}</div>`;   // 감싸개 = 링크 고르기(.cal-vod)와 같은 폭 규칙
+  body.innerHTML = `<div class="ds-vods clip-vods">${g.arr.map(x => { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="cal-vod clip-mt" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x, (on ? ' clip-seen' : '') + (fr && !on ? ' clip-new' : '')), fr)}${clipCheckHtml(on, '확인 표시')}</div>`; }).join('')}</div>`;   // 감싸개 = 링크 고르기(.cal-vod)와 같은 폭 규칙
   showModal();
 }
 // 기둥 — 필터(2026-10-01): 천타버스 칸(Favicon) + 13명을 켜고 끈다(.filter-member — 최근 활동·케미와 같은 부품). 버튼은 한 번만 만들고 켜짐만 바꾼다
@@ -8829,7 +8830,7 @@ function renderLike() {
       refreshLikeDot();
       lastLikeReqUpdate = new Date(); updateHeaderCenter();
     })
-    .catch(() => { if (likeReqTarget === 'likeReqBody' && !likeReqShown) body.innerHTML = '<div class="lr-msg">좋아요 데이터를 불러올 수 없습니다.</div>'; });
+    .catch(() => { if (likeReqTarget === 'likeReqBody' && !likeReqShown) body.innerHTML = '<div class="lr-msg">좋아요 요청을 불러오지 못했습니다.</div>'; });
 }
 
 document.addEventListener('click', e => {
@@ -8911,7 +8912,7 @@ function switchPage(page, opts) {
     // (bannerData 선언은 이 함수의 초기 호출보다 앞이라 TDZ 없음. 로드 성공 후 진짜 0건이면 loadBanners가 '없습니다'를 그림)
     if (bannerData.length === 0) {
       const body = document.getElementById('bannerBody');
-      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>현수막 데이터 불러오는 중...</div></div>';
+      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>현수막 불러오는 중...</div></div>';
       ensureBannerSheet();
     } else { renderBanners(); ensureBannerSheet(); }
   }
@@ -8928,7 +8929,7 @@ function switchPage(page, opts) {
     // 새로고침이나 다른 탭에 갔다 오면 다시 받는다. 캐시본이 있으면 먼저 그리고 도착분으로 다시 그린다(사이트 공통 '캐시 먼저').
     if (contentData.length === 0) {
       const body = document.getElementById('contentBody');
-      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>컨텐츠 데이터 불러오는 중...</div></div>';
+      if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div><div>컨텐츠 불러오는 중...</div></div>';
     } else renderContent();
     pullContentSheets();
   }
@@ -9268,7 +9269,7 @@ function formatDuration(ms) {
   const totalMin = Math.floor(ms / 60000);
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
-  if (h > 0) return `${h.toLocaleString('en-US')}시간 ${m}분`;   // 통산은 1,000시간을 넘는다 — 천 단위 쉼표
+  if (h > 0) return `${h}시간 ${m}분`;   // 통산은 1,000시간을 넘는다 — 숫자에 쉼표는 쓰지 않는다(2026-10-02s Crenop '숫자에 쉼표 사용은 없는 것으로, 앞으로도')
   return `${m}분`;
 }
 function escapeHtml(s) {
@@ -9966,8 +9967,8 @@ function applyFilter() {
   const headerHtml = `<div class="timeline-header"><div class="timeline-bar-left">${markReadBtn}</div><div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair"><button class="timeline-scroll-btn" id="scrollToTop" title="맨 위로">${scrollUpSvg}<span>맨 위로</span></button><button class="timeline-scroll-btn" id="scrollToBottom" title="맨 아래로">${scrollDownSvg}<span>맨 아래로</span></button></div></div><div class="tl-group"><div class="tl-pair">${sortBtnHtml}</div></div></div></div>`;   // 묶음 단위 줄바꿈(2026-09-19, 통계 상단바와 같은 문법)
   if (filtered.length === 0) {
     tl.innerHTML = headerHtml + (allEvents.length === 0
-      ? '<div class="timeline-empty">아직 기록된 이벤트가 없습니다.<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다.</div>'
-      : '<div class="timeline-empty">필터 조건에 맞는 이벤트가 없습니다.</div>');
+      ? '<div class="timeline-empty">아직 기록된 활동이 없습니다.<br><br>방송, 게시글, 유튜브 영상 등이 올라오면 여기에 표시됩니다.</div>'
+      : '<div class="timeline-empty">필터 조건에 맞는 활동이 없습니다.</div>');
   } else {
     const sorted = [...filtered].sort((a, b) => eventSortAsc
       ? new Date(a.time) - new Date(b.time)
@@ -10079,8 +10080,8 @@ const TIME_GRAPHS = [
   { key: 'tBands', label: '시간대 분포', ic: 'clockTime', icColor: 'var(--ev-start)', kind: 'stack', series: ['새벽', '오전', '오후', '야간'], alphas: [0.3, 0.5, 0.72, 1], lv: [0, 1, 2, 3], get: ts => ts.bands },
   { key: 'tWdWe',  label: '주중/주말',  ic: 'calendar',  icColor: 'var(--ev-start)', kind: 'stack', series: ['주중', '주말'], alphas: [0.5, 1], lv: [1, 3], get: ts => ts.wdwe },   // lv = 라이트 모드 밝기 단계 칸(LIGHT_STEPS) — 알파와 같은 자리
 ];
-function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v.toLocaleString() + '명' : '-'; }
-function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v.toLocaleString() + '명' : '-'; }
+function fanCellMonth(memberId, year, month1) { const v = fancntMonthEnd(memberId, year, month1); return v != null ? v + '명' : '-'; }
+function fanCellYear(memberId, year) { const v = fancntYearEnd(memberId, year); return v != null ? v + '명' : '-'; }
 
 // 메달 계산 — 월간 전체탭·멤버탭·연간탭 공용(과거 3중 복사 → 단일화). dense rank: 값 같으면 공동, 0은 무메달.
 // 표기는 트로피 SVG 3색(명전 순위색 재사용 — 금·은·동). 구 🥇🥈🥉 이모지는 이모지 배제 방침으로 교체(2026-07-13).
@@ -10623,7 +10624,7 @@ function drawGraphChart(wrap, memberId, range, metric) {
   };
   let pts = range.map(ym => valueOf(ym));
   if (metric.transform) pts = metric.transform(pts);   // 시각 축(시간대 그래프) — 창 안 값을 보고 축의 원점을 정한다
-  const showVal = (v) => metric.fmt ? metric.fmt(v) : (v.toLocaleString() + (metric.unit || ''));
+  const showVal = (v) => metric.fmt ? metric.fmt(v) : (v + (metric.unit || ''));
 
   // Y축: 데이터 min~max 기준으로 살짝 여유(변화폭 강조). 최소값이 0보다 높게 잡힐 수 있음.
   const vals = pts.filter(v => v != null);
@@ -11098,12 +11099,12 @@ async function loadFeed() {
     // 일시적 폴링 실패: 이미 그려진 화면은 유지. 한 번도 못 그린 탭에만 안내
     const app = document.getElementById('app');
     if (app && !app.querySelector('.grid')) {
-      app.innerHTML = '<div class="loading"><div>데이터를 불러올 수 없습니다. 잠시 뒤 다시 시도합니다.</div></div>';
+      app.innerHTML = '<div class="loading"><div>방송 정보를 불러오지 못했습니다. 잠시 뒤 다시 시도합니다.</div></div>';
     }
     lastLiveSig = null;   // 다음 성공 응답은 지문이 같아도 반드시 다시 그린다(안내 화면을 걷어내야 하므로)
     if (!allEvents || allEvents.length === 0) {
       const tl = document.getElementById('timeline');
-      if (tl) tl.innerHTML = '<div class="timeline-empty">이벤트 데이터를 불러올 수 없습니다. 잠시 뒤 다시 시도합니다.</div>';
+      if (tl) tl.innerHTML = '<div class="timeline-empty">최근 활동을 불러오지 못했습니다. 잠시 뒤 다시 시도합니다.</div>';
     }
     console.error(e);
     // fetch 자체가 죽어도 경고가 뜨게 — 보이는 채로 실패가 이어진 시간이 지연에 더해진다(첫 실패 시각은 요청 시각이 아니라 지금: 잠들기 전 요청이 깨어나 실패해도 잠든 시간이 안 섞인다)
@@ -11254,7 +11255,7 @@ async function loadStats() {
   } catch (e) {
     if (currentPage === 'stats') {
       const body = document.getElementById('statsTopBox');
-      if (body) body.innerHTML = '<div class="loading"><div>통계 데이터를 불러올 수 없습니다.</div></div>';
+      if (body) body.innerHTML = '<div class="loading"><div>통계를 불러오지 못했습니다.</div></div>';
     }
   }
 }
@@ -11523,7 +11524,7 @@ function renderLinks() {
   const body = document.getElementById('linksBody');
   if (!body) return;
   if (!Object.keys(MEMBER_LINKS).length) {   // 시트 도착 전(첫 방문) 또는 실패 — 캐시가 있으면 여기 안 온다
-    body.innerHTML = `<div class="loading">${crewSheetsDone ? '' : '<div class="spinner"></div>'}<div>${crewSheetsDone ? '관련 링크를 불러올 수 없습니다.' : '관련 링크 불러오는 중...'}</div></div>`;
+    body.innerHTML = `<div class="loading">${crewSheetsDone ? '' : '<div class="spinner"></div>'}<div>${crewSheetsDone ? '관련 링크를 불러오지 못했습니다.' : '관련 링크 불러오는 중...'}</div></div>`;
     return;
   }
   const memberHeader = MEMBERS.map(m => `
@@ -11868,7 +11869,7 @@ const syncCodeFmt = (c) => c.slice(0, 3) + ' ' + c.slice(3);
 let syncCodeTimer = 0;
 function syncAgo(s) {
   if (s.fail && s.fail >= (s.at || 0)) return s.why === 'full' ? '표시가 너무 많아 맞추지 못했습니다' : '맞추지 못했습니다|· 잠시 뒤 다시 맞춥니다';
-  if (!s.at) return '맞추는 중';
+  if (!s.at) return '맞추는 중...';
   const m = Math.floor((Date.now() - s.at) / 60000);
   return m < 1 ? '방금 맞춤' : m < 60 ? m + '분 전 맞춤' : Math.floor(m / 60) + '시간 전 맞춤';
 }
@@ -11921,7 +11922,7 @@ async function syncAct(act, box) {
   if (act === 'off-yes') { try { localStorage.removeItem(LS_SYNC); } catch (e) {} return syncScene('start'); }
   if (act === 'code') {
     const cur = syncLoad(), id = cur ? cur.id : [...crypto.getRandomValues(new Uint8Array(16))].map(x => x.toString(16).padStart(2, '0')).join('');
-    busy(true); say('코드를 만드는 중');
+    busy(true); say('코드를 만드는 중...');
     let j = null;
     try { j = await syncPost({ op: 'code', id }); } catch (e) {}
     if (!box.isConnected) return;   // 기다리는 사이 모달이 닫혔다
@@ -11932,7 +11933,7 @@ async function syncAct(act, box) {
   if (act === 'go') {
     const inp = box.querySelector('.sync-in'), code = (inp ? inp.value : '').replace(/\s+/g, '').toUpperCase();
     if (!/^[A-HJ-NP-Z2-9]{6}$/.test(code)) return say('코드 여섯 자리를 넣어 주세요.|(숫자 0·1과 글자 O·I는 쓰지 않습니다)');
-    busy(true); say('연결하는 중');
+    busy(true); say('연결하는 중...');
     let j = null, failed = false;
     try { j = await syncPost({ op: 'join', code }); } catch (e) { failed = true; }
     if (!box.isConnected) return;
@@ -12167,7 +12168,7 @@ async function loadBanners() {
     // 첫 방문(캐시·데이터 없음) + 시트 실패면 초기 스피너가 영구 고정 — 실패 메시지로 교체. 캐시 표시 중이면 그대로 둠
     if (bannerData.length === 0) {
       const body = document.getElementById('bannerBody');
-      if (body) body.innerHTML = '<div class="loading"><div>현수막 데이터를 불러올 수 없습니다.</div></div>';
+      if (body) body.innerHTML = '<div class="loading"><div>현수막을 불러오지 못했습니다.</div></div>';
     }
   }
 }
@@ -12176,7 +12177,7 @@ function renderBanners() {
   const body = document.getElementById('bannerBody');
   if (!body) return;
   if (bannerData.length === 0) {
-    body.innerHTML = '<div class="loading"><div>현수막 데이터가 없습니다.</div></div>';
+    body.innerHTML = '<div class="loading"><div>현수막이 없습니다.</div></div>';
     return;
   }
 
@@ -12321,7 +12322,7 @@ async function loadContent() {
     // 첫 방문(캐시·데이터 없음) + 시트 실패면 초기 스피너가 영구 고정 — 실패 메시지로 교체. 캐시 표시 중이면 그대로 둠
     if (contentData.length === 0) {
       const body = document.getElementById('contentBody');
-      if (body) body.innerHTML = '<div class="loading"><div>컨텐츠 데이터를 불러올 수 없습니다.</div></div>';
+      if (body) body.innerHTML = '<div class="loading"><div>컨텐츠를 불러오지 못했습니다.</div></div>';
     }
   }
 }
@@ -12394,7 +12395,7 @@ function openContentCollect(key) {
   head.innerHTML = `<span>${escapeHtml(title)}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
   body.innerHTML = items.length
     ? `<div class="cc-collect-grid">${items.map(c => contentCardHtml(c, true)).join('')}</div>`
-    : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없습니다${contentData.length === 0 ? ' — 컨텐츠 데이터를 불러오는 중이거나 불러오지 못했습니다' : ''}.</div>`;
+    : `<div class="cc-collect-empty">아직 모인 컨텐츠가 없습니다${contentData.length === 0 ? ' — 컨텐츠를 불러오는 중이거나 불러오지 못했습니다' : ''}.</div>`;
   orderCardImages(body);
   bindLinkPicks(body, () => openContentCollect(key));   // 링크 둘 이상인 카드 → 고르기 모달(컨텐츠 탭과 같은 배선) — 닫으면 이 목록으로 복귀(2026-09-14)
   showModal();
@@ -12408,7 +12409,7 @@ function renderContent() {
   const all = contentAll().sort((a, b) => (b.date?.sort || '').localeCompare(a.date?.sort || ''));   // 최신순(모아보기 모달의 과거순과 반대)
   renderCcFilter('content', all);
   if (all.length === 0) {
-    body.innerHTML = `<div class="loading"><div>${contentData.length === 0 ? '컨텐츠 데이터가 없습니다.' : '아직 지난 컨텐츠가 없습니다.'}</div></div>`;
+    body.innerHTML = `<div class="loading"><div>${contentData.length === 0 ? '컨텐츠가 없습니다.' : '아직 지난 컨텐츠가 없습니다.'}</div></div>`;
     return;
   }
   const items = all.filter(c => ccVisible('content', c));
@@ -12615,8 +12616,8 @@ function renderChemistry() {
           <span class="chem-member-name" style="color:${p.m1.color}${memberGlow(p.m1.color)}">${escapeHtml(p.m1.name)}</span>
         </div>
         <div class="chem-arrows">
-          <div class="chem-arrow-row"><span class="chem-chat-ico" style="color:${p.m1.color}${memberGlow(p.m1.color)}">${SVG_ICONS.chatBubble}</span><span class="chem-count">${p.c1.toLocaleString()}</span> →</div>
-          <div class="chem-arrow-row">← <span class="chem-count">${p.c2.toLocaleString()}</span><span class="chem-chat-ico" style="color:${p.m2.color}${memberGlow(p.m2.color)}">${SVG_ICONS.chatBubble}</span></div>
+          <div class="chem-arrow-row"><span class="chem-chat-ico" style="color:${p.m1.color}${memberGlow(p.m1.color)}">${SVG_ICONS.chatBubble}</span><span class="chem-count">${p.c1}</span> →</div>
+          <div class="chem-arrow-row">← <span class="chem-count">${p.c2}</span><span class="chem-chat-ico" style="color:${p.m2.color}${memberGlow(p.m2.color)}">${SVG_ICONS.chatBubble}</span></div>
         </div>
         <div class="chem-member">
           <img src="${p.m2.img}" alt="${escapeHtml(p.m2.name)}">
@@ -12705,7 +12706,7 @@ function renderChemistry() {
   body.innerHTML = `
     <div class="chem-content">
       <div class="chem-grid${chemShowDesc ? ' chem-show-desc' : ''}">
-        ${chemLoaded ? topHtml + botHtml : `<div class="loading">${chemFailAt ? '' : '<div class="spinner"></div>'}<div>${chemFailAt ? '케미 데이터를 불러올 수 없습니다. 잠시 뒤 다시 시도합니다.' : '케미 불러오는 중...'}</div></div>`}
+        ${chemLoaded ? topHtml + botHtml : `<div class="loading">${chemFailAt ? '' : '<div class="spinner"></div>'}<div>${chemFailAt ? '케미를 불러오지 못했습니다. 잠시 뒤 다시 시도합니다.' : '케미 불러오는 중...'}</div></div>`}
       </div>
     </div>
     <div class="chem-filter-panel">
@@ -12998,7 +12999,7 @@ const STATS_PERIODS = [
   { key: 'h2',    label: `<span class="pb-y">${HALL_YEAR_LABEL}</span><span class="pb-m">하반기</span>` },
 ];
 const hallChemCache = {};
-const hallChemFailAt = {};   // 채팅 수 받기 실패 시각(기간마다) — 명전 두 채팅 카드의 '불러올 수 없습니다'·30초 뒤 다시(2026-09-29 전 탭 리뷰 A9)
+const hallChemFailAt = {};   // 채팅 수 받기 실패 시각(기간마다) — 명전 두 채팅 카드의 '불러오지 못했습니다'·30초 뒤 다시(2026-09-29 전 탭 리뷰 A9)
 
 // 명전 기간 채팅 데이터 로드 — 통산=전체누적, h1=2026-01~06 합산, h2=2026-07~현재 합산. 기간별 캐시.
 async function loadHallChem(period) {
@@ -13010,7 +13011,7 @@ async function loadHallChem(period) {
     if (!res.ok) throw new Error('chat-counts ' + res.status);
     hallChemCache[period] = await res.json();
     delete hallChemFailAt[period];
-  } catch (e) { hallChemCache[period] = hallChemCache[period] || {}; hallChemFailAt[period] = Date.now(); }   // 실패도 캐시를 채워 스피너가 맴돌지 않게(아래 주석) — 두 채팅 카드는 '불러올 수 없습니다', 30초 뒤 다음 그리기에서 다시
+  } catch (e) { hallChemCache[period] = hallChemCache[period] || {}; hallChemFailAt[period] = Date.now(); }   // 실패도 캐시를 채워 스피너가 맴돌지 않게(아래 주석) — 두 채팅 카드는 '불러오지 못했습니다', 30초 뒤 다음 그리기에서 다시
 }
 
 // 탭 진입 시 현재 기간 재조회('열람 시 갱신') — loadHallChem을 재사용하지 않는 이유: 저 함수는 실패 시 캐시를 {}로
@@ -13099,8 +13100,8 @@ function sessionRowHtml(s, memberId, ym, dateLabel) {
   }
   const modeBadge = (s.mode && s.mode !== 'normal') ? modeParts(s.mode).map(p => `<span class="day-session-mode ${p}" role="img" aria-label="${MODE_LABEL[p] || ''}">${modeBadgeSvg(p)}</span>`).join('') : '';
   // 세션별 시청자(최고=viewer_peak, 평균=viewer_sum/viewer_count) — 표본 없는 세션(진행 중·감지 공백)은 항목 생략
-  const vp = s.viewer_peak > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ic-orange)">${SVG_ICONS.arrowUp}</span>${s.viewer_peak.toLocaleString()}명</span>` : '';
-  const va = s.viewer_count > 0 && s.viewer_sum > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ic-orange)">${SVG_ICONS.barChart}</span>${Math.round(s.viewer_sum / s.viewer_count).toLocaleString()}명</span>` : '';   // 합이 0이면 숨김(2026-09-24 전 탭 점검): 비번 방송은 표본이 있어도 시청자 0이라 최고는 숨고 평균 '0명'만 혼자 나왔다
+  const vp = s.viewer_peak > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ic-orange)">${SVG_ICONS.arrowUp}</span>${s.viewer_peak}명</span>` : '';
+  const va = s.viewer_count > 0 && s.viewer_sum > 0 ? `<span class="day-session-viewer"><span class="stats-row-icon" style="color:var(--ic-orange)">${SVG_ICONS.barChart}</span>${Math.round(s.viewer_sum / s.viewer_count)}명</span>` : '';   // 합이 0이면 숨김(2026-09-24 전 탭 점검): 비번 방송은 표본이 있어도 시청자 0이라 최고는 숨고 평균 '0명'만 혼자 나왔다
   let changesHtml = '';
   const changes = (s.changes || []).filter(c => !titleQuoteOnly(c));
   if (changes.length > 0) {
@@ -13173,8 +13174,8 @@ function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
     broadcastDays: mode === 'year' ? `${mv('sessions')}${sum.sessions}일` : `${mv('daysWithBroadcast')}${sum.daysWithBroadcast}일 / ${sum.totalDaysInMonth}일`,
     broadcastTime: `${mv('totalDurationMs')}${formatDuration(sum.totalDurationMs)}`,
     fan: mode === 'year' ? fanCellYear(memberId, year) : fanCellMonth(memberId, year, month),
-    peakViewer: sum.viewerPeak > 0 ? sum.viewerPeak.toLocaleString() + '명' : '-',
-    avgViewer: sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount).toLocaleString() + '명' : '-',
+    peakViewer: sum.viewerPeak > 0 ? sum.viewerPeak + '명' : '-',
+    avgViewer: sum.viewerCount > 0 ? Math.round(sum.viewerSum / sum.viewerCount) + '명' : '-',
     post: `${mv('postCount')}${sum.postCount}개`, cafe: `${mv('cafeCount')}${sum.cafeCount}개`, youtube: `${mv('youtubeCount')}${sum.youtubeCount}개`,
   };
   // 배치 2/3/3(2026-09-18 Crenop): 방송 2 | 시청자 3 | 게시 3 — 항목을 가운데로 모으고(시간 통계 줄과 같은 간격) 둘째·다섯째 뒤에서 줄을 끊는다.
@@ -13217,7 +13218,7 @@ function sortSessions(list, key, asc) {   // list = [{ s, ym, dk }] · asc=false
   });
 }
 const STATS_LOADING = '<div class="loading"><div class="spinner"></div><div>통계 불러오는 중...</div></div>';
-const STATS_FAILED = '<div class="loading"><div>통계 데이터를 불러올 수 없습니다.</div></div>';
+const STATS_FAILED = '<div class="loading"><div>통계를 불러오지 못했습니다.</div></div>';
 const statsFailAt = {};   // 실패한 달은 30초 동안 다시 묻지 않는다 — 달력 탭(calStatsFailAt)과 같은 태도. 종전 지난 활동은 실패 → 다시 그림 → 즉시 재요청이 맴돌았다(헤드리스 실측 2026-09-18)
 let statsFitAll = { num: [], time: [] };   // 지금 기간 13명의 8항목·다섯 값 줄 HTML — 모양 재기 재료(fitNumRow·fitTimeRow 곁 주석). renderStats가 기간·자료가 바뀔 때만 새로 만든다(statsFitSame)
 let statsFontGen = 0;   // 글꼴 도착 횟수(loadingdone마다 +1) — 잰 모양 기억의 열쇠 하나(fitTimeRow·fitNumRow)
@@ -13554,7 +13555,7 @@ function renderHall() {
     // 못 받은 달이 남으면 실패 문구, 30초 뒤 다음 그리기에서 다시(통계 탭과 같은 태도) — 종전엔 실패한 달을 부르면 30초 대기로 즉시 돌아와
     //   '다시 그리기 → 다시 부르기'가 쉬지 않고 돌아 페이지가 멈췄다(2026-09-27i 목업: 한 달 실패에 40초 동안 타이머 한 번도 못 돔)
     if (Date.now() - hallFailAt < 30000) { body.innerHTML = STATS_FAILED; return; }
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명예의 전당 불러오는 중...</div></div>';
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명전 불러오는 중...</div></div>';
     Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
       if (currentPage !== 'hall') return;
       if (monthsToLoad.some(ym => !statsState.data[ym])) { hallFailAt = Date.now(); body.innerHTML = STATS_FAILED; return; }
@@ -13566,7 +13567,7 @@ function renderHall() {
   // 기간(통산/2026 상반기/2026 하반기) 결정 + 채팅 기간 데이터 게이트
   const period = statsPeriod;
   if (!hallChemCache[period]) {
-    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명예의 전당 불러오는 중...</div></div>';
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명전 불러오는 중...</div></div>';
     loadHallChem(period).then(() => { if (currentPage === 'hall') renderHall(); });
     return;
   }
@@ -13677,8 +13678,8 @@ function renderHall() {
     { label: '천타버스 정전 방지 위원회',  desc: '아무도 없을 때 방송한 시간', icon: SVG_ICONS.moon,         color: 'var(--ic-sun)',     get: id => solo[id].ms,                                          fmt: v => formatDuration(v) },
     { label: '팬과 자주 소통하는',         desc: '숲·카페 게시글',     icon: SVG_ICONS.board,        color: 'var(--ev-post)',    icon2: SVG_ICONS.coffee, color2: 'var(--ev-cafe)', get: id => totalSums[id].postCount + totalSums[id].cafeCount, fmt: v => `${v}개` },
     { label: '유튜브도 놓치지 않는',       desc: '유튜브 업로드',      icon: SVG_ICONS.youtube,      color: 'var(--ev-youtube)', get: id => totalSums[id].youtubeCount,                          fmt: v => `${v}개` },
-    { fail: chemFail, label: '멤버들을 좋아하는',          desc: '다른 멤버 방송에서 보낸 채팅',  icon: SVG_ICONS.send,         color: 'var(--ev-chat)',    get: id => chemOut[id],                                          fmt: v => `${v.toLocaleString()}회` },
-    { fail: chemFail, label: '멤버들이 좋아하는',          desc: '본인 방송에서 받은 멤버 채팅',  icon: SVG_ICONS.heartBubble,  color: 'var(--ev-chat)',    get: id => chemIn[id],                                           fmt: v => `${v.toLocaleString()}회` },
+    { fail: chemFail, label: '멤버들을 좋아하는',          desc: '다른 멤버 방송에서 보낸 채팅',  icon: SVG_ICONS.send,         color: 'var(--ev-chat)',    get: id => chemOut[id],                                          fmt: v => `${v}회` },
+    { fail: chemFail, label: '멤버들이 좋아하는',          desc: '본인 방송에서 받은 멤버 채팅',  icon: SVG_ICONS.heartBubble,  color: 'var(--ev-chat)',    get: id => chemIn[id],                                           fmt: v => `${v}회` },
     { label: '천타버스에 충실한',          desc: '천타버스 컨텐츠 참여 횟수',    icon: SVG_ICONS.film,         color: 'var(--accent)',     get: id => contentCounts[id],                                    fmt: v => `${v}회` },
     { label: '천타버스의 위상을 드높인',    desc: '천타버스 현수막 게시 횟수',    icon: SVG_ICONS.flag,         color: 'var(--accent)',     get: id => bannerCounts[id],                                     fmt: v => `${v}회` },
   ];
@@ -13689,7 +13690,7 @@ function renderHall() {
     const ranks = ranksByCat[ci];
     let content;
     if (cat.fail) {
-      content = '<div class="hall-empty">채팅 데이터를 불러올 수 없습니다.</div>';
+      content = '<div class="hall-empty">채팅을 불러오지 못했습니다.</div>';
     } else if (ranks.length === 0) {
       content = '<div class="hall-empty">아직 집계 전입니다.</div>';
     } else {
@@ -13875,12 +13876,12 @@ function bindVideoStrips(root) {
 }
 
 function renderProfileCrew(body) {
-  // 데이터 없음 = 아직 로드 전('불러오는 중') 또는 실패('불러올 수 없습니다'). 재시도 발화는 switchPage(탭 진입)에서만 —
+  // 데이터 없음 = 아직 로드 전('불러오는 중') 또는 실패('불러오지 못했습니다'). 재시도 발화는 switchPage(탭 진입)에서만 —
   // 여기서 발화하면 로더 완료→재렌더→재발화의 무한 fetch 루프(시트 장애 지속 시).
   // 구획(연혁·정기·비정기·대전)마다 상자 하나 — 2열 격자(2026-09-18 Crenop: 우측 좁은 기둥 폐지, 폭이 아니라 배치를 바꿈)
   let actsGrid = '';
   if (crewActs.length === 0) {
-    actsGrid = `<div class="crew-act-sec"><div class="crew-act-li"><span>${crewSheetsDone ? '크루 활동을 불러올 수 없습니다.' : '크루 활동 불러오는 중...'}</span></div></div>`;
+    actsGrid = `<div class="crew-act-sec"><div class="crew-act-li"><span>${crewSheetsDone ? '크루 활동을 불러오지 못했습니다.' : '크루 활동 불러오는 중...'}</span></div></div>`;
   } else {
     const secs = [];   // [{ title, items: [html] }] — 시트 순서 유지
     crewActs.forEach(a => {

@@ -924,6 +924,7 @@
   .lrg-head:first-child { border-top: none; }   /* 첫 묶음은 모달 헤더 밑선과 겹선 방지 */
   .lrg-head-txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 17px; color: inherit; text-decoration: none; }   /* 1줄 말줄임(구 2줄 클램프 폐지 — 2026-08-10 확정) */
   a.lrg-head-txt:hover { color: var(--accent); }
+  .lrg-none { padding: 12px 16px 12px 18px; font-size: 13px; line-height: 18px; color: var(--muted); }   /* 요청 없이 순위만 내는 글(2026-10-03 D47 Q2 '나')의 머리 아래 한 줄 — 글 시작점 18(머리·행과 같음) */
   .lrq-row {
     position: relative;
     padding-left: 4px;                     /* 머리 줄(.lrg-head 왼쪽 4)과 글 시작점 18 맞춤 — 안 읽음 막대는 상자 바깥(최근 활동 .event.unread와 같은 문법, 2026-09-29) */
@@ -4206,7 +4207,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-02t';   // 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-03a';   // 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -5933,6 +5934,7 @@ const LS_LIKE_DISMISS = 'chuntaverse_like_dismiss_v1';    // (구) ✕ 숨김 �
 const LS_LIKE_CHECKED = 'chuntaverse_like_checked_v1';    // 유저가 '확인함/좋아요 눌러줌' 체크한 요청(멤버+URL 단위) — ✕와 달리 목록에 남고 재클릭으로 해제 가능
 const LS_LIKE_SEEN = 'chuntaverse_like_seen_v1';          // 유저가 모달에서 본 댓글(멤버+URL 단위, 빨간 점 끔용)
 const LS_LIKEREQ_CACHE = 'chuntaverse_like_req_cache_v1'; // 점 계산용 마지막 목록 캐시
+const LS_LIKEPOST_CACHE = 'chuntaverse_like_post_v1';     // 순위만 글의 이름({글 번호: {n: 방송국 이름, t: 글 제목}} — likeOnlyTitle). 시트에 남아 있는 글만 둔다
 let likeReqCache = [];   // 마지막으로 받은 like_requests(빨간 점 계산용)
 const likeReqKey = (e) => `${e.member_id || ''}|${fullLikeUrl(e.url)}`;   // dedup과 동일 키(멤버+전체 URL, 댓글 앵커 포함). dismiss·seen·빨간점이 '같은 링크'를 시간 무관 동일 취급 → X했거나 본 링크는 재요청돼도 다시 안 켜짐
 function lsKeySet(key) { try { return new Set(JSON.parse(lsGet(key, '[]'))); } catch (e) { return new Set(); } }
@@ -6038,6 +6040,67 @@ function likeReqGroupTitle(entries) {
   return [tn ? `${tn} 컨텐츠` : '', pt ? `"${pt}"` : ''].filter(Boolean).join(' - ') || '숲 게시글';
 }
 
+// ── 순위만 글(2026-10-03 Crenop D47 '좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서') ──
+// 좋아요 시트에 숨기지 않은 글 줄(댓글 앵커 없는 숲 글 주소 · B 비움 또는 날짜가 안 지남)이 있는데 보이는 요청 묶음이 없는 글 — 머리 줄 + [순위]만 낸다.
+// 워커는 시트에 줄이 있는 글이면 요청이 없어도 순위를 낸다(buildLikeRanking). 그 글의 글 줄 가운데 하나라도 숨김이면 내지 않는다(요청을 숨긴 글은 순위 버튼도 없다 — 종전 규칙 그대로).
+// row = 시트에서 읽은 줄 차례(아래일수록 나중에 적은 줄 = 최신). B 날짜가 지나면 요청과 같이 사라진다(그릴 때마다 다시 본다).
+function likeRankOnlyPosts(groups) {
+  const now = Date.now();
+  const have = new Set(groups.map(g => (likePostOf(g.url) || {}).titleNo).filter(Boolean));
+  const live = new Map(), dead = new Set();
+  (likeSheetRows || lsLikeSheet()).forEach((e, row) => {
+    const p = e.u.includes('#') ? null : likePostOf(e.u);
+    if (!p) return;
+    if (likeHideActiveOn(e.h, now)) dead.add(p.titleNo); else live.set(p.titleNo, { station: p.station, titleNo: p.titleNo, row });
+  });
+  return [...live.values()].filter(o => !dead.has(o.titleNo) && !have.has(o.titleNo));
+}
+// 목록 차례(D47 Q3 Crenop '기본적으로는 최신 요청이 상단에 오도록 … 시트에 하단에 있는 컨텐츠가 최신 컨텐츠니까 상단에 배치'): 요청 묶음은 종전대로 최근 요청 순.
+//   순위만 글은 시각이 없어 시트 줄로 끼운다 — 위에서부터 보아 시트에서 자기보다 위(먼저 적힌)인 첫 묶음 바로 앞. 그런 묶음이 없으면 맨 아래.
+//   시트에 줄이 없는 묶음(방금 온 요청 — 자동 줄은 30분마다 · 줄을 지운 글)은 기준으로 삼지 않는다. 순위만 글끼리는 아래 줄이 위.
+//   요청 차례와 시트 차례가 어긋날 때(옛 글에 새 요청이 와 맨 위로 올라온 때)는 그 옛 글 위에 선다. → [{ g: 요청 묶음 } | { only: 순위만 글 }]
+function likeListItems(groups) {
+  const rows = likeSheetRows || lsLikeSheet();
+  const rowOf = (g) => { const p = likePostOf(g.url); let r = Infinity; rows.forEach((e, i) => { const q = likePostOf(e.u); if (p ? (q && q.titleNo === p.titleNo) : normLikeUrl(e.u) === g.url) r = i; }); return r; };
+  const items = groups.map(g => ({ g, row: rowOf(g) }));
+  for (const o of likeRankOnlyPosts(groups).sort((a, b) => b.row - a.row)) {   // 아래 줄(최신)부터 끼운다 — 같은 자리에 다음 것(더 옛 것)을 끼우면 그 아래에 선다
+    const at = items.findIndex(it => it.g && it.row < o.row);
+    items.splice(at < 0 ? items.length : at, 0, { only: o });
+  }
+  return items;
+}
+// 순위만 글의 이름(D47 Q1 '나'): 워커 /like-post가 숲에서 받아 준 방송국 닉·글 제목을 요청 묶음과 같은 문구(likeReqGroupTitle)로. 받기 전·못 받았을 땐 방송국 아이디
+//   (요청 쪽과 같은 관용 — 닉을 모르면 아이디). 한 번 받은 이름은 브라우저에 두고 먼저 그린다. 묻는 것은 방문마다 글당 한 번(워커 엣지 캐시 하루).
+let likePostNames = null;
+const likePostAsked = new Set();
+function likePostNameMap() {
+  if (!likePostNames) { try { const v = JSON.parse(lsGet(LS_LIKEPOST_CACHE, '{}')); likePostNames = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; } catch (e) { likePostNames = {}; } }
+  return likePostNames;
+}
+function likeOnlyTitle(o) {
+  const c = likePostNameMap()[o.titleNo] || {};
+  return likeReqGroupTitle([{ target_name: c.n || o.station, post_title: c.t }]);
+}
+function ensureLikePostNames(onlys) {
+  for (const o of onlys) {
+    if (likePostAsked.has(o.titleNo)) continue;
+    likePostAsked.add(o.titleNo);
+    fetch(WORKER_URL + '/like-post?post=' + encodeURIComponent(o.titleNo)).then(r => r.json()).then(d => {
+      const p = d && d.post;
+      if (!p || !p.target_name) return;
+      const m = likePostNameMap(), was = m[o.titleNo] || {};
+      if (was.n === p.target_name && (was.t || '') === (p.post_title || '')) return;
+      m[o.titleNo] = { n: p.target_name, t: p.post_title || '' };
+      const keep = new Set((likeSheetRows || lsLikeSheet()).map(e => (likePostOf(e.u) || {}).titleNo).filter(Boolean));
+      for (const k of Object.keys(m)) if (!keep.has(k)) delete m[k];
+      lsSet(LS_LIKEPOST_CACHE, JSON.stringify(m));
+      if (likeReqShown) renderLikeReqBody();   // 머리 줄 이름
+      if (likeRankPost === o.titleNo) document.querySelectorAll('#likeRankBody .rk-ev-title').forEach(el => { el.textContent = likeOnlyTitle(o); });   // 보고 있는 순위 칸 제목(다음 폴링을 기다리지 않게)
+      placeLikeRank();
+    }).catch(() => {});
+  }
+}
+
 const LRQ_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><polyline points="4 12.5 10 18.5 20 6.5"/></svg>';
 
 // 렌더 대상(2026-08-31): 종전엔 공용 모달 본문(#lrBody)에 박혀 있었다. 컨텐츠 신청 탭이 같은 목록을
@@ -6047,21 +6110,29 @@ let likeRankTarget = 'lrBody';
 function renderLikeReqBody() {
   const body = document.getElementById(likeReqTarget);
   if (!body || !likeReqShown) return;
-  if (likeReqShown.length === 0) {
+  const items = likeListItems(buildLikeReqGroups(likeReqShown));
+  if (items.length === 0) {
     body.innerHTML = '<div class="lr-msg">좋아요 요청이 없습니다.</div>';
     return;
   }
+  ensureLikePostNames(items.filter(it => it.only).map(it => it.only));
   const checked = lsKeySet(LS_LIKE_CHECKED);
-  body.innerHTML = buildLikeReqGroups(likeReqShown).map(g => {
+  const rankBtnOf = (titleNo) => `<button class="lrg-rank-btn${likeRankPost === titleNo ? ' on' : ''}" type="button" data-post="${escapeHtml(titleNo)}" title="좋아요 순위 보기">${SVG_ICONS.barChart}<span>순위</span></button>`;
+  body.innerHTML = items.map(it => {
+    if (it.only) {
+      // 순위만 글(D47): 머리 줄(글 링크 + 순위 버튼) + 요청이 없다는 한 줄. 좁은 폭에서 이 글의 순위를 보는 중이면 그 줄 자리에 순위 자리(요청 묶음의 댓글 자리와 같은 규칙)
+      const o = it.only;
+      return `<div class="lrg-head"><a class="lrg-head-txt" href="${escapeHtml(`https://www.sooplive.com/station/${o.station}/post/${o.titleNo}`)}" target="_blank" rel="noopener">${escapeHtml(likeOnlyTitle(o))}</a>${rankBtnOf(o.titleNo)}</div>`
+        + (likeNarrow() && likeRankPost === o.titleNo ? '<div class="like-rank like-rank-slot"></div>' : '<div class="lrg-none">좋아요 요청이 없습니다.</div>');
+    }
+    const g = it.g;
     const title = escapeHtml(likeReqGroupTitle(g.entries));
     // 순위 버튼(2026-09-28 순위 상시 — Crenop D21): 숲 글 묶음이면 모두 붙는다. 시트로 숨긴 요청은 이미 목록에 없고, 카페 글은 숲 글 번호가 없어 버튼이 없다
     // (네이버 카페 좋아요 수를 받아올 수 있는지는 미확인 — 가능해지면 여기 조건을 넓히면 된다). 전형·정원 등 설정은 워커가 좋아요 시트에서 찾는다(없으면 전체 순위).
     const post = likePostOf(g.url);
     // 시트 색을 버튼에 입히던 것 폐지(2026-09-01): 색으로 대회를 구분하던 건 모바일에서 이름을 못 넣던 시절의 방편이고,
     // 이제 각 묶음 머리에 이름이 붙어 있어 색이 할 일이 없다. 사이트 공통 버튼 문법으로 통일한다.
-    const rankBtn = post
-      ? `<button class="lrg-rank-btn${likeRankPost === post.titleNo ? ' on' : ''}" type="button" data-post="${escapeHtml(post.titleNo)}" title="좋아요 순위 보기">${SVG_ICONS.barChart}<span>순위</span></button>`
-      : '';
+    const rankBtn = post ? rankBtnOf(post.titleNo) : '';
     const head = `<div class="lrg-head">` + (g.url
       ? `<a class="lrg-head-txt" href="${escapeHtml(g.url)}" target="_blank" rel="noopener">${title}</a>`
       : `<span class="lrg-head-txt">${title}</span>`) + rankBtn + `</div>`;
@@ -6206,12 +6277,14 @@ async function loadLikeRanking() {
 }
 
 // 순위 칸 제목 = 그 글 묶음 머리와 같은 문구(likeReqGroupTitle — 'OOO 컨텐츠 - "글제목"'). 옛 순위 탭에서 손으로 적던 버튼 이름(C열)을 대신한다
-//   (2026-09-28 좋아요 시트 합치기 — 합친 탭엔 이름 칸이 없다, 제목 색 칸도 없어져 제목은 보통 글자색). 그 글의 요청이 목록에 없으면 '좋아요 순위'
+//   (2026-09-28 좋아요 시트 합치기 — 합친 탭엔 이름 칸이 없다, 제목 색 칸도 없어져 제목은 보통 글자색). 그 글의 요청이 목록에 없으면 순위만 글의 머리 이름(likeOnlyTitle — 2026-10-03 D47), 그것도 아니면 '좋아요 순위'
 //   순위가 묶음 안에 펼쳐지는 좁은 화면(≤1100 .like-rank-slot)에선 바로 위 머리와 같은 글이라 CSS가 숨긴다(2026-09-28 Crenop '나')
 function likeRankTitleOf(titleNo) {
   const re = new RegExp('/post/' + String(titleNo || '').replace(/\D/g, '') + '(?!\\d)');
   const entries = titleNo ? (likeReqShown || []).filter(e => re.test(normLikeUrl(e.url))) : [];
-  return entries.length ? likeReqGroupTitle(entries) : '좋아요 순위';
+  if (entries.length) return likeReqGroupTitle(entries);
+  const o = titleNo ? likeRankOnlyPosts(buildLikeReqGroups(likeReqShown || [])).find(x => x.titleNo === String(titleNo)) : null;   // 순위만 글(D47) — 머리 줄과 같은 이름
+  return o ? likeOnlyTitle(o) : '좋아요 순위';
 }
 function renderRankEvent(ev) {
   // ★ 사이트 고유 멤버 순서가 아니라 좋아요 순으로 정렬 — 순위표에서 의미 있는 배열은 성적순이다.

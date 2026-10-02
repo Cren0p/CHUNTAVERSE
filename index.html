@@ -786,9 +786,11 @@
   .sync-msg span { display: inline-block; }   /* 토막 사이에서만 줄이 바뀐다(syncSpan) */
   .sync-box[data-scene="code"] > .sync-msg:first-child { padding-bottom: 6px; }
   .sync-box[data-scene="join"] > .sync-msg:first-child { padding-bottom: 10px; }
-  .sync-msg.sync-left { padding: 0 16px 18px; }
+  .sync-msg.sync-left { padding: 0 16px 8px; }
   .sync-msg.sync-on { padding-bottom: 4px; color: var(--text); font-size: 13px; font-weight: 700; }
-  .sync-msg.sync-what { padding: 6px 16px 14px; }
+  .sync-msg.sync-what { padding: 6px 16px 8px; }
+  .sync-msg.sync-tip { padding: 0 16px 14px; }   /* 기다림 안내(2026-10-02k D43 — Crenop '동기화가 생각보다 오래 걸릴 거니까 그거에 대한 안내도 필요 … 즉각적인 동기화를 위한 게 아니라 기기를 옮겨서 사용할 때 제공되는 약간의 편의 기능임을 명시') */
+  .sync-box[data-scene="code"] > .sync-tip { padding-bottom: 18px; }
   .sync-msg.sync-note { padding: 0 16px 18px; }
   .sync-msg.sync-note:empty { display: none; }
   .sync-code { font: 700 34px/1 ui-monospace, Consolas, monospace; letter-spacing: 6px; text-align: center; padding: 14px 16px 12px; color: var(--rk-c, var(--accent)); }
@@ -1670,7 +1672,7 @@
   @container tlbar (max-width: 377px) { #timeline > .timeline-header > * { --tl-txt: none; --tl-w: 52px; } }
   @container tlbar (max-width: 724px) { .stats-sessions > .timeline-header > * { --tl-txt: none; --tl-w: 52px; } }
   @container tlbar (max-width: 480px) { .clip-col-bar > * { --tl-txt: none; --tl-w: 52px; } }
-  @container tlbar (max-width: 550px) { .clip-one-bar > * { --tl-txt: none; --tl-w: 52px; --tl-left: 1 1 auto; } }
+  @container tlbar (max-width: 557px) { .clip-one-bar > * { --tl-txt: none; --tl-w: 52px; } }   /* 글자까지 한 줄: 전환 둘 + 맨 위로·맨 아래로 + 정렬 둘(2026-10-02k 짜임 — 아래 한 목록 주석) */
   .stats-sess-head { display: inline-flex; align-items: center; padding: 5px 0; border: 1px solid transparent; line-height: 1.2; font-size: 12px; font-weight: 600; color: var(--muted); }   /* 목록 상단바 왼쪽 라벨: 글자만이지만 높이는 옆 버튼과 같게(테두리·바탕 없음 — 버튼으로 보이면 안 된다, 2026-09-19 Crenop) */   /* 간격 통일(2026-08-09): 버튼 사이·가장자리·행간 전부 상하 패딩과 같은 8px */
   .timeline-scroll-btn {
     display: inline-flex;
@@ -2115,14 +2117,21 @@
   .clip-col-bar.timeline-header { top: 0; margin: 0 0 12px; }
   .clip-col-bar.timeline-header::before { display: none; }
   .clip-bar-n { margin-left: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
-  /* 한 목록(data-mode one — 칸 하나가 타일 둘을 못 담는 폭: 휴대폰·기둥 편 태블릿): 상단바 토글로 두 목록을 오가고 페이지가 스크롤한다. 첫 줄 [토글 | 맨 위로·맨 아래로],
-     그다음 [정렬](모자라면 줄이 는다). 맨 위로·맨 아래로는 모든 폭에서 글자까지(2026-09-29 Crenop Q2 — 종전 그림만은 최근 활동·통계와 문법이 갈렸고, 그림만으로 뜻이 통할 만큼 알려지지 않았다). 타일은 360에서도 한 줄 2장(목록 312 → 152 — 두 칸 시절 한 칸 150과 같은 크기, 160 하한 아래를 알고 둔 2026-09-26 결정 그대로) */
+  /* 한 목록(data-mode one — 칸 하나가 타일 둘을 못 담는 폭: 휴대폰·기둥 편 태블릿): 상단바 토글로 두 목록을 오가고 페이지가 스크롤한다. 머리 줄 짜임은 다른 목록 머리 줄과 같다
+     (2026-10-02 D43 Q3 '가' — 왼쪽 = 전환 버튼, 오른쪽 = 맨 위로·맨 아래로 + 정렬: 다 들어가면 한 줄, 안 들어가면 오른쪽 묶음이 두 줄(2×2)로 접힌다. 종전 '첫 줄 전환 + 맨 위로·맨 아래로, 둘째 줄 정렬'(9/29)은
+     글자까지 보이는 넓은 폭에서도 늘 두 줄이었고, 그림만인 600 안팎 한 줄에서는 두 묶음이 남는 폭을 나눠 가져 맨 위로·맨 아래로가 가운데 떴다). 타일은 360에서도 한 줄 2장(목록 312 → 152 — 두 칸 시절 한 칸 150과 같은 크기, 160 하한 아래를 알고 둔 2026-09-26 결정 그대로) */
   #clipsBody[data-mode="one"] .clip-cols { grid-template-columns: minmax(0, 1fr); }
   #clipsBody[data-mode="one"] .clip-flow { grid-template-columns: repeat(auto-fill, minmax(min(150px, calc(50% - 4px)), 1fr)); }
-  .clip-one-bar.timeline-header { flex-wrap: wrap; row-gap: 8px; }
-  .clip-one-bar .timeline-bar-left { flex: var(--tl-left, 1 1 100%); justify-content: space-between; flex-wrap: wrap; row-gap: 8px; }   /* 좁은 머리 줄(그림만)에선 제 내용 폭에서 시작 — 정렬 묶음이 같은 줄에 들면 한 줄(412부터), 안 들면 정렬만 다음 줄(360). 남는 폭은 이 묶음이 받아 맨 위로·맨 아래로가 오른쪽 끝에 선다 */
-  .clip-one-bar .timeline-bar-left > .tl-pair:last-child { margin-left: auto; }   /* 맨 위로·맨 아래로(글자까지 — Q2)가 토글 옆에 안 들면 다음 줄 오른쪽으로(360에서 '맨 아래로'가 화면 밖으로 64px 나갔다) */
-  .clip-view-n { margin-left: 4px; font-weight: 600; color: var(--muted); min-width: 3ch; font-variant-numeric: tabular-nums; text-align: left; }   /* 개수 자리는 늘 — 모를 땐 빈칸('0'으로 적지 않는다), 세 자리 폭·같은 폭 숫자라 자릿수가 바뀌어도 토글 폭이 그대로(2026-09-29 A21 — 102.1px와 76.7px 사이를 오갔다) */
+  /* 전환 버튼(2026-10-02 D43 Crenop '안 이뻐 — 멤버 NN·외부인 NN의 폭도 일치시키는 게 맞겠고 … 박스 좌변~XX~NN~박스 우변 사이의 간격도 조율' → Q1 '다' 양 끝 맞춤 — '디자인의 목표는 이쁨'):
+     두 버튼 폭은 넓은 쪽에 맞추고(같은 폭 두 칸 격자), 글자는 왼쪽 끝·숫자는 오른쪽 끝(양옆 10 + 테두리 1, 글자~숫자는 6 이상 — .sort-toggle의 gap).
+     숫자 자리는 미리 잡아 두지 않는다. 모를 때만(첫 응답 전 — '0'으로 적지 않는다) 두 칸을 비워, 숫자가 뜰 때 폭이 크게 뛰지 않게 한다(9/29 A21은 세 칸을 늘 잡고 숫자를 왼쪽에 붙여 오른쪽이 비었다: 11 · 10 · 18.6).
+     나란히 안 들어가는 폭(머리 줄 안쪽 307 이하 = 화면 약 357 이하 — 320 휴대폰)에서는 위아래로 쌓는다(Q2 '가' — '폭이 부족하다면 2행을 활용'): 종전 세 줄(112) → 두 줄(78).
+     307 = 버튼 90(외부인 + 네 자리) × 2 + 틈 8 + 묶음 사이 8 + 오른쪽 2×2 묶음 112 − 1 */
+  .clip-view-pair { display: grid; grid-template-columns: 1fr 1fr; }
+  .clip-view-pair > .sort-toggle { justify-content: space-between; }
+  @container tlbar (max-width: 307px) { .clip-one-bar .clip-view-pair { grid-template-columns: 1fr; } }
+  .clip-view-n { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+  .clip-view-n:empty { min-width: 2ch; }
   .sort-toggle.active .clip-view-n { color: inherit; }
   .clip-day + .clip-day, .clip-sec + .clip-sec { margin-top: 24px; }
   .clip-day-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
@@ -4181,7 +4190,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-02j';   // 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-02m';   // 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -8548,10 +8557,10 @@ function renderClips(keep) {
     clipState.moreLast[col] = more;
     return `<div class="clip-col" data-col="${col}">${bar}${inner}${clipFreshHtml(col, items, secs)}${more}</div>`;   // 끝 줄은 칸마다
   }).join('');
-  // 한 목록의 상단바(sticky — 통계 방송 목록과 같은 자리): 첫 줄 [토글 | 맨 위로·맨 아래로], 둘째 줄 [정렬] — 버튼은 보이는 칸 몫
+  // 한 목록의 상단바(sticky — 통계 방송 목록과 같은 자리·같은 짜임, 2026-10-02k D43): 왼쪽 [전환 버튼], 오른쪽 [맨 위로·맨 아래로][정렬] — 버튼은 보이는 칸 몫
   const v = clipState.view;
-  const oneBar = two ? '' : `<div class="timeline-header clip-one-bar"><div class="timeline-bar-left"><div class="tl-pair">${['own', 'men'].map(c => `<button class="sort-toggle${c === v ? ' active' : ''}" data-clipview="${c}" type="button" aria-pressed="${c === v}"><span>${labelOf(c).replace(' 방송', '')}</span><span class="clip-view-n">${counts[c] === null ? '' : counts[c]}</span></button>`).join('')}</div>${scrollBtns(v)}</div>`
-    + `<div class="timeline-bar-right"><div class="tl-group"><div class="tl-pair">${sortBtns(v)}</div></div></div></div>`;
+  const oneBar = two ? '' : `<div class="timeline-header clip-one-bar"><div class="timeline-bar-left"><div class="tl-pair clip-view-pair">${['own', 'men'].map(c => `<button class="sort-toggle${c === v ? ' active' : ''}" data-clipview="${c}" type="button" aria-pressed="${c === v}"><span>${labelOf(c).replace(' 방송', '')}</span><span class="clip-view-n">${counts[c] === null ? '' : counts[c]}</span></button>`).join('')}</div></div>`
+    + `<div class="timeline-bar-right"><div class="tl-group">${scrollBtns(v)}</div><div class="tl-group"><div class="tl-pair">${sortBtns(v)}</div></div></div></div>`;
   body.innerHTML = oneBar + `<div class="clip-cols">${colsHtml}</div>`;
   clipFreshSync();
   body.querySelectorAll('[data-clipsort]').forEach(b => b.addEventListener('click', () => clipSortClick(b.dataset.clipsort, b.dataset.col)));
@@ -11680,6 +11689,7 @@ loadLikeReqForDot();   // 좋아요 빨간 점용 목록 1회 로드
 //   받은 전체에 내 사본의 것이 없으면 다시 올린다 — 워커의 '읽고 합쳐 쓰기'가 다른 지역의 옛 값 위에 쓰여 내 몫이 덮였을 때 스스로 낫는다.
 // 버리는 기준은 워커와 같은 값(SYNC_KEEP·SYNC_KEY_MAX — 다르면 한쪽이 버린 것을 다른 쪽이 계속 올린다): 읽은 시각보다 옛 누른 알림 · 클립 30일(CLIP_WINDOW_DAYS) · 좋아요 180일.
 //   좋아요 요청은 지금 목록(likeReqCache, 워커 보존 100건)에 있는 것만 새로 올린다 — 이 브라우저에 쌓인 옛 열쇠를 통째로 올리지 않는다.
+// 주기(1분 올리기·5분 받기)는 줄이지 않는다(2026-10-02 D43 Q6 '가' — Crenop '간격을 줄이는 건 사용량 평가 이후'). 두 기기를 나란히 켜 두면 길게는 7분쯤 걸린다(주기로 셈한 값) — 그 사정은 모달의 안내 문구(.sync-tip)가 알린다.
 // 알고 둔 것: 새 기기는 처음 연 시각이 읽은 시각이라, 묶으면 다른 기기의 그 시각 이전 안 읽음도 확인으로 바뀐다(읽은 시각은 큰 쪽).
 const LS_SYNC = 'chuntaverse_sync_v1';   // { id 묶음 번호, rev 받은 판, at 마지막으로 맞춘 시각, fail 마지막 실패 시각, why 실패 사유, r 사본, d 올릴 것 }
 const SYNC_TICK_MS = 60 * 1000, SYNC_PULL_MS = 5 * 60 * 1000;
@@ -11839,10 +11849,10 @@ function syncScene(name, arg) {
   const note = '<div class="lr-msg sync-msg sync-note" role="status"></div>';
   let h = '';
   if (name === 'start') h = `<div class="lr-msg sync-msg">${syncSpan('최근 활동·클립·좋아요 요청의|확인 표시를 다른 기기와 맞춥니다.')}<br>${syncSpan('한 기기에서 코드를 만들고,|다른 기기에서 그 코드를 넣으면 됩니다.')}</div><div class="sync-foot">${btn('code', '코드 만들기')}${btn('join', '코드 넣기')}</div>${note}`;
-  else if (name === 'code') h = `<div class="lr-msg sync-msg">${syncSpan('다른 기기에서 [기기 동기화] → [코드 넣기]에|아래 코드를 넣어 주세요.')}</div><div class="sync-code">${escapeHtml(syncCodeFmt(arg.code))}</div><div class="lr-msg sync-msg sync-left">${syncSpan('10분 동안 쓸 수 있습니다|· <span id="syncLeft"></span>')}</div>`;
+  else if (name === 'code') h = `<div class="lr-msg sync-msg">${syncSpan('다른 기기에서 [기기 동기화] → [코드 넣기]에|아래 코드를 넣어 주세요.')}</div><div class="sync-code">${escapeHtml(syncCodeFmt(arg.code))}</div><div class="lr-msg sync-msg sync-left">${syncSpan('10분 동안 쓸 수 있습니다|· <span id="syncLeft"></span>')}</div><div class="lr-msg sync-msg sync-tip">${syncSpan('코드를 넣은 기기의 표시가|여기 보이기까지 몇 분 걸릴 수 있습니다.')}</div>`;
   else if (name === 'join') h = `<div class="lr-msg sync-msg">${syncSpan('다른 기기에서 만든|코드 여섯 자리를 넣어 주세요.')}</div><div class="sync-in-wrap"><input class="sync-in" id="syncIn" type="text" maxlength="7" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="코드 여섯 자리"></div><div class="sync-foot">${btn('go', '연결')}</div>${note}`;
   else if (name === 'off') h = `<div class="lr-msg sync-msg">${syncSpan('이 기기의 동기화를 끕니다.|확인 표시는 이 기기에 그대로 남습니다.')}</div><div class="sync-foot">${btn('off-yes', '끄기')}${btn('back', '취소', true)}</div>`;
-  else { const s = syncLoad(); if (!s) return syncScene('start'); h = `<div class="lr-msg sync-msg sync-on">${syncSpan('동기화 켜짐|· ' + syncAgo(s))}</div><div class="lr-msg sync-msg sync-what">${syncSpan('맞추는 것:|최근 활동 확인 · 클립 확인 · 좋아요 요청 확인')}</div><div class="sync-foot">${btn('code', '기기 더 연결')}${btn('off', '동기화 끄기', true)}</div>${note}`; }
+  else { const s = syncLoad(); if (!s) return syncScene('start'); h = `<div class="lr-msg sync-msg sync-on">${syncSpan('동기화 켜짐|· ' + syncAgo(s))}</div><div class="lr-msg sync-msg sync-what">${syncSpan('맞추는 것:|최근 활동 확인 · 클립 확인 · 좋아요 요청 확인')}</div><div class="lr-msg sync-msg sync-tip">${syncSpan('다른 기기에 보이기까지|몇 분 걸릴 수 있습니다.')}<br>${syncSpan('실시간 동기화 목적이 아닌|기기를 옮겨 사용하는 경우를 위한 기능입니다.')}</div><div class="sync-foot">${btn('code', '기기 더 연결')}${btn('off', '동기화 끄기', true)}</div>${note}`; }
   body.innerHTML = `<div class="sync-box" data-scene="${name}">${h}</div>`;
   if (name === 'code') {
     const left = () => {

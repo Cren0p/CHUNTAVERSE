@@ -4207,7 +4207,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-03b';   // 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-03c';   // 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -7932,7 +7932,7 @@ const CLIP_SORTS = [{ key: 'reg', label: '등록순', ic: 'clockTime' }, { key: 
 //   · base: 연 날 수를 센 날(자정을 넘기면 clipRebase가 옮긴다) · moreLast: 칸마다 마지막으로 그린 끝 줄 글(clipMoreRow가 같으면 건너뜀)
 //   · fresh: 칸마다 마지막 버튼 누름 { edge: 누르기 전 마지막으로 연 날, asc, hold: 끝 줄 붙잡기(clipHoldEnd) } — '방금 불러온' 클립 번호는 clipNewNos(clipFreshNos 곁 주석)
 const CLIP_TWO_MIN = 2 * 328 + 20;   // 두 칸의 최소 목록 폭 = 칸마다 160 타일 둘(160 + 8 + 160)·칸 사이 20 — 좁은 칸 규칙(@container clipcol 327px 이하)과 같은 경계
-const clipState = { sel: null, sort: { own: 'broad', men: 'broad' }, asc: { own: false, men: false }, depth: { own: 1, men: 1 }, seek: { own: 0, men: 0 }, fresh: { own: null, men: null }, base: null, moreLast: {}, view: 'own', mode: '', viewY: { own: 0, men: 0 }, reset: new Set(), stores: {}, groups: new Map(), ro: null };
+const clipState = { sel: null, sort: { own: 'broad', men: 'broad' }, asc: { own: false, men: false }, depth: { own: 1, men: 1 }, seek: { own: 0, men: 0 }, fresh: { own: null, men: null }, scene: new Map(), base: null, moreLast: {}, view: 'own', mode: '', viewY: { own: 0, men: 0 }, reset: new Set(), stores: {}, groups: new Map(), ro: null };
 
 function clipToday() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
 function clipAddDays(d, n) { return new Date(Date.parse(d + 'T00:00:00Z') + n * 86400e3).toISOString().slice(0, 10); }
@@ -8340,7 +8340,7 @@ function clipTileInner(x, cls) {
 //   알고 둔 것: 다른 기기·브라우저와 공유 안 됨, 숲 앱 등 사이트 밖에서 본 것과 길게 눌러 '새 탭에서 열기'는 모른다(창이 30일이라 기록도 30일 뒤 지움).
 //   2026-09-29 D23(Crenop '안 볼 영상도 봤다고 하려면 열어야 하는 게 별로'): 타일마다 체크 칸 — 열지 않고 봄, 다시 누르면 되돌림(종전엔 되돌리기 없음).
 //   방송순 방송 머리 칸 = 그 방송 클립 전부(전부 봄일 때만 켜짐). 상단바 '모두 봄'은 넣지 않는다(Crenop: 누르고 불러오면 어떻게 될지 상상하게 만든다).
-//   같은 장면 카드는 그 안의 클립 하나라도 봤으면 가라앉힌다(같은 장면을 본 것 — 모달 안 타일은 각자).
+//   같은 장면 카드는 그 안의 클립 하나라도 봤으면 가라앉힌다(같은 장면을 본 것). 2026-10-03c부터는 기억도 장면 단위 — 아래 clipSceneNos 곁 주석(종전엔 모달 안 타일은 각자였다).
 const LS_CLIP_SEEN = 'chuntaverse_clip_seen_v1';   // { 클립 번호: 누른 시각 ms }
 let clipSeenMap = null;
 function clipSeen() {
@@ -8351,10 +8351,31 @@ function clipSeen() {
   for (const k of Object.keys(o)) if (!(o[k] > cut)) delete o[k];
   return (clipSeenMap = o);
 }
+// 같은 장면은 한 덩이로 확인한다(2026-10-03c D48 Q1 '나'·Q2 '가' — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 뒤늦게 추가되면 밖에서는 흐림처리되있고
+//   모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'). 종전: 카드는 안의 클립 하나라도 확인이면 흐림·체크 켜짐인데 기억과 상단바 개수는 클립 하나씩 —
+//   확인한 카드에 클립이 뒤늦게 끼거나(더 불러오기 — 실자료: 카드 88개 중 39개, 그 안 안 본 클립 59개) 창 안에서 하나만 열면 카드는 확인으로 보이는데 개수가 모자랐다.
+//   지금: 장면 = 칸에 불러온 클립 전체로 묶은 같은 장면(clipState.scene — renderClips가 칸마다 채운다. 여럿 고르기의 단계로 갈라 그린 카드보다 넓을 수 있다 — 단계가 달라도 같은 장면).
+//   ① 켜고 끄기는 장면째(clipSceneNos — 타일을 열어도, 창 안 타일의 체크 칸도) ② 하나라도 확인인 장면의 나머지 클립은 확인으로 채운다(clipSceneFill — 그릴 때 칸마다,
+//   기억이 바뀔 때 clipSyncSeen에서: 뒤늦게 들어온 클립 · 다른 기기에서 하나만 확인돼 온 것). 그래서 카드의 '하나라도'와 개수가 늘 같다.
+function clipSceneNos(nos) {
+  const s = new Set(nos);
+  for (const n of nos) for (const x of clipState.scene.get(n) || []) s.add(x.title_no);
+  return [...s];
+}
+function clipSceneFill(scenes) {
+  const o = clipSeen(), now = Date.now();
+  let ch = false;
+  for (const arr of scenes) {
+    if (!arr.some(x => o[x.title_no])) continue;
+    for (const x of arr) if (!o[x.title_no]) { o[x.title_no] = now; ch = true; }
+  }
+  if (ch) lsSet(LS_CLIP_SEEN, JSON.stringify(o));
+  return ch;
+}
 // 봄 켜고 끄기(D23 체크 칸) — 기억을 고친 뒤 보이는 타일·카드·방송 머리·모달 타일의 흐림과 칸을 기억에 맞춘다(다시 그리지 않는다 — 읽던 자리·초점 그대로)
 function clipSetSeen(nos, on) {
   const o = clipSeen(), now = Date.now();
-  for (const n of nos) { if (on) o[n] = now; else delete o[n]; }
+  for (const n of clipSceneNos(nos)) { if (on) o[n] = now; else delete o[n]; }
   lsSet(LS_CLIP_SEEN, JSON.stringify(o));
   clipSyncSeen();
 }
@@ -8371,6 +8392,7 @@ function clipCountSync() {
   }
 }
 function clipSyncSeen() {
+  clipSceneFill(new Set(clipState.scene.values()));   // 장면 단위(clipSceneNos 곁 주석) — 다른 기기에서 하나만 확인돼 온 장면도 여기서 채운다
   const o = clipSeen(), press = (b, on) => { if (b) b.setAttribute('aria-pressed', String(on)); };
   document.querySelectorAll('#clipsBody .clip-item[data-clipno]').forEach(el => {   // 같은 장면 카드는 하나라도 봄이면 흐림·켜짐
     const on = el.dataset.clipno.split(' ').some(n => o[n]);
@@ -8625,6 +8647,7 @@ function renderClips(keep) {
     + `<button class="timeline-scroll-btn" data-clipscroll="bottom" data-col="${col}" type="button" title="맨 아래로">${SVG_ICONS.chevronsDown}<span>맨 아래로</span></button></div>`;
   const sortBtns = col => CLIP_SORTS.map(o => `<button class="sort-toggle${o.key === clipState.sort[col] ? ' active' : ''}" data-clipsort="${o.key}" data-col="${col}" type="button">${SVG_ICONS[o.ic]}<span>${o.label}</span>${sortDirSvg(o.key === clipState.sort[col] && clipState.asc[col])}</button>`.replace('type="button">', `type="button" title="${o.label}">`)).join('');
   clipState.groups = new Map();
+  clipState.scene = new Map();   // 클립 번호 → 그 장면의 클립들(칸 전체로 묶은 같은 장면 — clipSceneNos 곁 주석)
   clipState.nos = {};   // 칸마다 불러온 클립 번호 — 머리 줄의 확인 개수(clipCountSync)
   clipNewNos = new Set();
   const counts = {};
@@ -8633,6 +8656,9 @@ function renderClips(keep) {
     const items = clipColItems(col, shown, idx);
     counts[col] = k ? items.length : null;   // 개수는 연 날이 생긴 뒤부터(첫 응답 전 '0개'는 틀린 말)
     clipState.nos[col] = k ? items.map(x => x.title_no) : null;
+    const scenes = [...clipGroupItems(items, col).groups.values()];   // 확인은 장면 단위 — 안 그리는 칸(한 목록의 다른 칸)도 개수를 세므로 여기서(그리기 전에) 채운다
+    for (const arr of scenes) for (const x of arr) clipState.scene.set(x.title_no, arr);
+    clipSceneFill(scenes);
     for (const n of clipFreshNos(col, items) || []) clipNewNos.add(n);
     if (!two && col !== clipState.view) return '';   // 한 목록: 보이는 칸만 그린다(다른 칸 개수는 토글에)
     const ctx = { idx, nowMs, asc: clipState.asc[col], showName: crew || col === 'men' || sel.size > 1, vodMap: clipVodMap(items) };
@@ -8754,7 +8780,7 @@ function openClipGroupModal(gid) {
   modalPanel('vod-pick-panel');
   modalTone(cssVar('--ev-start'));   // 클립 = 숲 파랑(구획 그림 data-kind="clip"과 같은 색)
   head.innerHTML = `<span>같은 장면 ${g.arr.length}개${g.dk ? ` — ${escapeHtml(calDateLabel(g.dk))}` : ''}</span><button class="lr-close" type="button" onclick="closeModal()">✕</button>`;
-  body.innerHTML = `<div class="ds-vods clip-vods">${g.arr.map(x => { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="cal-vod clip-mt" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x, (on ? ' clip-seen' : '') + (fr && !on ? ' clip-new' : '')), fr)}${clipCheckHtml(on, '확인 표시')}</div>`; }).join('')}</div>`;   // 감싸개 = 링크 고르기(.cal-vod)와 같은 폭 규칙
+  body.innerHTML = `<div class="ds-vods clip-vods">${g.arr.map(x => { const on = !!clipSeen()[x.title_no], fr = clipNewNos.has(x.title_no); return `<div class="cal-vod clip-mt" data-clipno="${escapeHtml(x.title_no)}">${clipNewBadge(clipTileInner(x, (on ? ' clip-seen' : '') + (fr && !on ? ' clip-new' : '')), fr)}${clipCheckHtml(on, '같은 장면 모두 확인 표시')}</div>`; }).join('')}</div>`;   // 감싸개 = 링크 고르기(.cal-vod)와 같은 폭 규칙
   showModal();
 }
 // 기둥 — 필터(2026-10-01): 천타버스 칸(Favicon) + 13명을 켜고 끈다(.filter-member — 최근 활동·케미와 같은 부품). 버튼은 한 번만 만들고 켜짐만 바꾼다

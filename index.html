@@ -461,6 +461,11 @@
     box-shadow: 0 0 6px var(--live-glow);
     animation: pulse 1.8s ease-in-out infinite;
   }
+  /* 보조바의 방송 수 표시(2026-10-04d D49 '나' — Crenop '버튼은 아니지만 크기를 맞출지' → '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 버튼 속 크기에 맞춘다 —
+     높이는 같은 줄 버튼(PC 28 · 서랍 26 — 아래 세로 배치 규칙), 숫자는 13px 상당(liveCountSvg — 옆 버튼 글자 12px와 비슷한 키), 점 10, 틈 6, 옆 여백 9. 테두리는 없다(버튼이 아니다).
+     두 자리일 때 폭 44 — 알림 버튼과의 틈 9(탭 한 칸 58, 실측). 같은 옷을 쓰는 클립 방송 머리의 '방송 중' 칩(.clip-bc .nav-live-badge — 점 7)은 그대로라 아이디로 좁힌다 */
+  #navLiveBadge { min-height: 28px; padding: 0 9px; gap: 6px; }
+  #navLiveBadge .nav-live-dot { width: 10px; height: 10px; }
 
   .nav-notify-bell {
     display: inline-flex;         /* 보조바 줄(생방송 수 배지·일정 버튼 옆) */
@@ -3512,6 +3517,12 @@
     transition: background 0.15s, box-shadow 0.15s;
   }
   .profile-info-row[data-mi]:hover, .profile-info-row-full[data-mi]:hover { background: var(--row-hover); box-shadow: inset 0 0 0 1px var(--accent); }
+  /* 기념일 도착 강조(2026-10-04b Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조 — 케미탭 관련 케미와 비슷한 방식' · 04c '색은 민트로 일괄통일하지 말고 각각의 고유색 …
+     라이트/다크 모드에 따라 네온효과가 필요할수도 · 결성일 테두리는 다른 줄을 침범하지 않게'): 기념일 버튼을 눌러 온 프로필에서 그 줄에 1.4초(celebFlash).
+     테두리 = 최애 도착 표시(.fav-flash)를 그대로 쓴다 — 그 멤버의 색(크루는 민트), 라이트 모드의 옅은 색 멤버는 테두리 둘레에 번짐. 여기는 바탕(줄의 hover 바탕)만 보탠다.
+     크루 연혁의 결성 줄은 줄째가 아니라 그 글(링크 버튼 — 없으면 글 조각)에 두른다: 연혁 줄의 hover 자리(글 둘레 2·6, 음수 여백으로 줄 간격 그대로)라 위아래 줄에 닿지 않는다 */
+  .celeb-flash { background: var(--row-hover); }
+  .crew-act-li > span.celeb-flash { padding: 2px 6px; margin: -2px -6px; }
   .mi-collect-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
   .mi-collect-row:last-child { border-bottom: none; }
   .mi-collect-row img { width: 26px; height: 26px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
@@ -3629,6 +3640,7 @@
     /* 종전 2px 8px('행 높이를 넘지 않게')는 행이 40px가 되기 전 값 — 4px 10px 25px 상자도 행 안에 넉넉히 든다. 다른 버튼(알림 종·일정·최애·화면 모드)과 같은 높이로(2026-09-06 Crenop: 혼자 작았다) */
     .tab-aux .celebration-box { padding: 4px 10px; font-size: 12px; }
     .celebration-box .tb-t-mb { display: inline; }
+    #navLiveBadge { min-height: 26px; }   /* 방송 수 표시도 이 줄 버튼 높이(26)에 — 2026-10-04d */
     .nav-notify-bell { padding: 4px 8px; }   /* 세로 배치의 .page-title-link과 같은 위아래 4px. 종 아이콘의 -1px 되감기도 위와 같은 이유로 그대로 */
     /* 탭 타일은 PC 규칙 그대로(그림 위 + 글자 아래, 활성 = 아래 민트 선) — 세로 목록(한 줄 = 그림 + 글자, 왼쪽 민트 선)은 2026-09-06 3열 격자로 대체 */
     /* 세로 목록에서도 배지는 라벨을 덮는다(2026-09-02 회귀) — 부속을 탭 줄 안으로 들이는 방향과 같다.
@@ -4207,7 +4219,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-04a';   // 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-04d';   // 2026-10-04d: 보조바의 방송 수 표시를 버튼 속 크기에 맞춤(D49 '나' — Crenop '방송수 인디케이터만 다른 버튼과 달리 크기가 다른데 … 크기를 맞출지' · '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 높이 = 같은 줄 버튼(PC 28 · 서랍 26), 숫자 11 → 13px 상당, 점 7 → 10. 테두리는 없다(버튼이 아니다). 클립 방송 머리의 '방송 중' 칩은 그대로 · 2026-10-04c: 기념일 도착 강조의 색·자리(Crenop '천타버스 결성일 테두리는 다른 줄을 침범하지 않게 … 색은 민트로 일괄통일하지 말고 각각의 고유색 … 라이트/다크 모드에 따라 네온효과가 필요할수도') — 테두리 = 그 멤버 색(크루는 민트), 옷은 최애 도착 표시(.fav-flash)와 같다(라이트 모드의 옅은 색 멤버는 번짐). 결성 줄은 연혁 줄의 hover 자리(글 둘레 2·6) 안에서만 두른다 · 2026-10-04b: 기념일 버튼을 누르면 프로필의 그 기념일 줄(생일·첫 방송일·숲 기준 첫 방송일·크루 연혁의 결성)로 가서 민트 테두리를 잠깐 켠다(Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로' — celebFlash) · 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -5008,7 +5020,7 @@ function navBadgeSvg(n) {
 // 빨강 라이브 카운트(숫자만, 11px 상당). SVG 박스 = 잉크 경계 그 자체 → 컨테이너 flex 중앙정렬이 곧 잉크 중앙정렬(점과 중심 일치).
 // 2026-08-24: 수평도 잉크 경계로 정정 — 종전엔 자간폭(사이드베어링 포함)이라 '1' 등에서 박스가 잉크보다 넓어 ±0.3px 치우침.
 function liveCountSvg(n) {
-  const s = 11 / BADGE_GLYPHS.upem;
+  const s = 13 / BADGE_GLYPHS.upem;   // 13px 상당(2026-10-04d D49 '나' — 종전 11. 옆 버튼 글자 12px와 비슷한 키)
   const str = String(n);
   let aw = 0, first = null, last = null;
   for (const ch of str) { const g = BADGE_GLYPHS.g[ch]; aw += g.a; if (!first) first = g; last = g; }
@@ -5626,9 +5638,9 @@ const CELEB_SVG = {
   broadcast: SVG_ICONS.soop,
 };
 
-function celebBox(svg, pcText, mbName, mbType, hexColor, hash, rgb = hexToRgb(hexColor)) {   // 크루 상자는 색 토큰 짝(hexColor 'var(--accent)' · rgb 'var(--accent-rgb)' — 라이트 모드 채움은 원래 민트라 btnInk에 그 값을)
+function celebBox(svg, pcText, mbName, mbType, hexColor, hash, mark, rgb = hexToRgb(hexColor)) {   // mark = 눌러 간 프로필에서 강조할 줄(celebFlash — birthday·firstStream·soopDate·crew)   // 크루 상자는 색 토큰 짝(hexColor 'var(--accent)' · rgb 'var(--accent-rgb)' — 라이트 모드 채움은 원래 민트라 btnInk에 그 값을)
   // 아이콘 PC·모바일 공통. PC: 전체 문구 / 모바일: "이름 종류" 한 줄(C안 — 높이는 다른 버튼과 동일, 폭만 가변)
-  return `<a class="celebration-box" href="#${hash}" style="--btn-rgb:${rgb};color:${hexColor}${btnInk(/^#/.test(hexColor) ? hexColor : cssVar('--accent-solid'))}">${svg}<span class="tb-t-pc">${pcText}</span><span class="tb-t-mb">${mbName} ${mbType}</span></a>`;
+  return `<a class="celebration-box" href="#${hash}" data-celeb="${mark}" style="--btn-rgb:${rgb};color:${hexColor}${btnInk(/^#/.test(hexColor) ? hexColor : cssVar('--accent-solid'))}">${svg}<span class="tb-t-pc">${pcText}</span><span class="tb-t-mb">${mbName} ${mbType}</span></a>`;
 }
 
 function getTodayCelebrations() {
@@ -5644,11 +5656,11 @@ function getTodayCelebrations() {
     // '만 N세'로 못박는다(2026-08-11): 구 'N번째 생일'은 태어난 날을 첫 번째로 세는 감각과 충돌해 해석이 갈렸다.
     // 값 자체는 동일(cy - 출생연도 = 만 나이). 출생연도를 모르면 나이 조각을 통째로 뺀다.
     const nthText = birthMatch ? `만 ${cy - parseInt(birthMatch[1])}세 ` : '';
-    results.push(celebBox(CELEB_SVG.birthday, `${m.name}님의 ${nthText}생일을 축하합니다!`, m.name, '생축!', m.color, `members:${m.en}`));
+    results.push(celebBox(CELEB_SVG.birthday, `${m.name}님의 ${nthText}생일을 축하합니다!`, m.name, '생축!', m.color, `members:${m.en}`, 'birthday'));
   }
 
   if (cm === 11 && cd === 30 && cy > 2025) {
-    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을 축하합니다!`, '천타버스', `${cy - 2025}주년!`, 'var(--accent)', 'members:crew', 'var(--accent-rgb)'));
+    results.push(celebBox(CELEB_SVG.chuntaverse, `천타버스 결성 ${cy - 2025}주년을 축하합니다!`, '천타버스', `${cy - 2025}주년!`, 'var(--accent)', 'members:crew', 'crew', 'var(--accent-rgb)'));
   }
   // N00일 기념은 폐지(2026-08-11): 경과일(시작일=0) 기준이라 시작일을 1일차로 세는 실제 기념 방식과 하루 어긋난다.
   // 기준을 바꾸면 프로필의 (D+N일) 표기와 어긋나므로, 해석이 갈리지 않는 연 단위(주년)만 남긴다.
@@ -5670,12 +5682,55 @@ function getTodayCelebrations() {
     const bcWord = isSoop ? '숲 방송' : '방송';
     const fy = parseInt(match[1]), fm = parseInt(match[2]), fd = parseInt(match[3]);
     if (fm === cm && fd === cd && cy > fy) {
-      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} ${cy - fy}주년을 축하합니다!`, m.name, `${cy - fy}주년!`, m.color, `members:${m.en}`));
+      results.push(celebBox(CELEB_SVG.broadcast, `${m.name}님의 ${bcWord} ${cy - fy}주년을 축하합니다!`, m.name, `${cy - fy}주년!`, m.color, `members:${m.en}`, isSoop && info.soopDate ? 'soopDate' : 'firstStream'));   // 기산한 날짜가 적힌 줄
     }
   }
 
   return results;
 }
+
+// 기념일 도착 강조(2026-10-04b Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로'):
+//   기념일 버튼(celebBox의 data-celeb)을 누르면 그 멤버(또는 크루) 프로필로 가는 것은 종전 그대로(주소 #members:…), 거기서 그 기념일이 적힌 줄을 화면 가운데로 옮기고
+//   그 기념일의 고유색 테두리를 1.4초 켠다(케미 '연관 케미로 이동' jumpToChem과 같은 수법 — 즉시 이동, 연타하면 다시 켜짐 · 색·옷은 04c부터 최애 도착 표시와 같다). 줄 = 프로필 표의 생일·첫 방송일·(숲 기준) 줄(data-mi),
+//   크루는 연혁의 결성 줄(날짜 2025년 11월 30일 — 주년 판정과 같은 날). 줄이 없으면(값이 비어 줄이 안 그려진 멤버) 아무 일도 없다.
+//   프로필은 주소가 바뀐 뒤(hashchange → switchPage)에 그려지므로 그 줄이 나타날 때까지 잠깐 기다린다(같은 프로필을 보고 있었으면 바로). 탭 전환이 끝에 맨 위로 올리므로 그 뒤에 옮긴다
+let celebFlashTimer = null;
+function celebFlashTarget(mark) {
+  if (currentPage !== 'profile') return null;
+  const body = document.getElementById('profileBody');
+  if (!body) return null;
+  if (mark === 'crew') {   // 결성 줄의 글(연혁 줄의 hover 자리) — 줄째로 두르면 위아래 줄에 닿는다
+    const li = [...body.querySelectorAll('.crew-act-li')].find(x => { const d = x.querySelector('.d'); return d && d.textContent.trim() === '2025년 11월 30일'; });
+    return li ? (li.querySelector('.crew-act-link') || li.querySelector(':scope > span:last-child')) : null;
+  }
+  return body.querySelector(`[data-mi="${mark}"]`);
+}
+function celebFlashOff(row) { row.classList.remove('celeb-flash', 'fav-flash'); row.style.removeProperty('--fav-color'); row.style.removeProperty('--fav-glow'); }
+function celebFlash(mark, color, tries = 0) {   // color = 그 기념일의 고유색(멤버 색 · 크루는 민트 var(--accent))
+  const row = celebFlashTarget(mark);
+  if (!row) { if (tries < 20) setTimeout(() => celebFlash(mark, color, tries + 1), 50); return; }   // 프로필이 아직 안 그려졌다(주소 바뀜 → 그리기) — 1초까지
+  if (row.scrollIntoView) row.scrollIntoView({ block: 'center' });
+  document.querySelectorAll('.celeb-flash').forEach(celebFlashOff);
+  void row.offsetWidth;   // 연타 시 강조 재시작(케미와 같은 수법)
+  const glow = paleOf(color);   // 라이트 모드의 번짐 멤버(LIGHT_GLOW) — 최애 도착 표시(applyFavMark)와 같은 규칙
+  row.style.setProperty('--fav-color', color || 'var(--accent)');
+  if (glow) row.style.setProperty('--fav-glow', glow.glow);
+  row.classList.add('celeb-flash', 'fav-flash');
+  clearTimeout(celebFlashTimer);
+  celebFlashTimer = setTimeout(() => celebFlashOff(row), 1400);
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a.celebration-box[data-celeb]');
+  if (!a) return;
+  const mark = a.dataset.celeb, want = (a.getAttribute('href') || '').replace(/^#members:/, '');
+  // 주소가 바뀌어 그 프로필이 그려진 다음에(다음 박자부터 확인) — 지금 보이는 다른 멤버의 같은 줄을 먼저 잡지 않게, 고른 프로필이 될 때까지 기다린다
+  const go = (n) => {
+    const sub = profileState.selectedTab, on = currentPage === 'profile' && (want === 'crew' ? sub === 'crew' : (MEMBER_BY_ID[sub] || {}).en === want);
+    if (on) return celebFlash(mark, want === 'crew' ? 'var(--accent)' : (MEMBER_BY_ID[sub] || {}).color);
+    if (n < 20) setTimeout(() => go(n + 1), 50);
+  };
+  setTimeout(() => go(0), 0);
+});
 
 // ── 상단바 링크 버튼 (구글 시트 gid=981813639) — 커버곡 하드코딩(구 BV_LINK) 대체: 곡·이벤트 교체를 배포 없이 시트에서 ──
 // 열: A=링크(https) 또는 모달 gid(숫자) B=아이콘 이름(SVG_ICONS 키, 빈칸/미지=externalLink) C=모바일 라벨 D=PC 라벨(한 줄) E=hex 색(#RRGGBB, 빈칸/무효=흰색) F=만료 G=좌/우 (기본값은 2026-09-04 Crenop 지정)

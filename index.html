@@ -4240,7 +4240,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-08a';   // 2026-10-08a: 켜 둔 화면에서 시트 자료도 시간이 지나면 다시 받는다(Crenop '유저가 사이트를 사용할때 새로고침을 자주할 가능성이 있을까 싶어 … 일정시간동안은 캐시를 공유하고 그걸 넘으면 새 데이터를 받아오는 방식' → '가') — 늘 보이는 곳의 시트 넷(일정·상단바·휴방·멤버 정보)은 보이는 동안 10분마다, 탭에서만 쓰는 시트는 그 탭에 들어올 때 10분이 넘었으면. 내용이 같으면 다시 그리지 않는다(refreshSheets) · 2026-10-07d: 켜 둔 화면에서 자정·시트 만료 시각이 지나면 보조바의 기념일 상자·시트 버튼과 좌상단 로고(생일·시트 로고)를 다시 가른다 — 종전엔 그릴 때에만 가려, 켜 둔 채 자정을 넘기면 그날 생일 상자·로고가 안 뜨고 다음 날엔 전날 것이 남았다(tickBarTime) · 2026-10-07c: 좋아요 탭이 숨김 시트를 들어올 때마다 새로 받는다 — 모달을 닫은 적 없이 탭에 다시 들어오면 처음 받은 숨김 목록으로 계속 걸러, 시트 줄의 날짜가 지나 탭 버튼은 흐려졌는데(07a) 들어가 보면 요청이 그대로였다 · 2026-10-07b: 휴대폰 탭 바의 제목에 '(N)'이 남던 것(Crenop 캡처 — 최근 활동을 보는 중인데 삼성 인터넷 탭에 '천타버스 (7)') — 서랍·모달의 뒤로 가기 칸을 걷은 뒤 제목을 브라우저에 다시 알린다(reannounceTabTitle) · 2026-10-07a: 좋아요 탭이 비었을 때 탭 버튼을 40%로 흐리게(Crenop D52 'Q1다 Q2가 Q3가' — '좋아요 탭 버튼을 요청이 없을때에 약간 흐리게 … 요청이 있어도 숨김상태인지 확인 … 비수기일때는 한참 비어있는 탭') — 숨긴 요청을 뺀 요청도 순위만 글도 없을 때, 켜 둔 채 새 요청이 오면 요청 목록을 다시 받아 흐림을 풀고 새 요청 점도 켠다 · 2026-10-06f: 일정 버튼·목록도 시각이 적힌 일정은 그 시각이 지나면 내린다(Crenop '일정버튼과 목록도 시간 지나면 사라지면 안되나?' — 2026-06-15의 '시각이 지나도 그날 자정까지 D-DAY'를 바꿈. 시각이 없는 일정은 그대로 그날 자정까지) · 2026-10-06e: 06d와 동작은 같다 — 배포 폴더에 먼저 들어간 06d에서 주석 한 곳과 겹친 조건 하나(한 줄 말줄임 줄 판정 — 높이 판정이 이미 거른다)를 정리한 판이라 도장만 올림 · 2026-10-06d: 달력 칸의 일정(Crenop '일정이 언제 사라지게 할건지가 중요할듯 가령 방송켜지면 사라진다거나 시간이 있으면 해당시간 후에 사라지고 시간 없으면 해당일자 지나면 사라지는걸로 · 표기도 시간-SVG-이름 · 이름안에서도 줄바꿈이 좀더 이뻤으면 … NN의 MMM이면 의에서 줄바꿈') — 시각이 적힌 일정은 그 시각이 지나면, 시각이 없는 일정은 그날 그 멤버의 방송이 켜지면(없으면 그날이 지나면) 달력에서 내린다 · 줄은 [시각 · 종류 그림 · 제목] · 'NN의 MMM' 제목은 줄이 넘치면 '…NN의 / MMM'으로 가르고(줄 수가 늘 때만 예외 — fitCalSchedLines), 그 밖의 제목은 줄 길이를 고르게 나눈다 · 2026-10-06c: 클립 방송순 머리에서 'N월 N일 처음 올라옴'이라는 말을 없앰(Crenop '"처음 올라옴" 이라는 표현은 당최 이해가 안됨') — 방송 정보를 못 받은 크루 방송 묶음의 머리는 '원본 방송 확인 안 됨'(같은 뜻에 이미 쓰는 말), 날짜 없음 · 2026-10-06b: 클립 탭 방송순 — 사이트 방송 기록에 없는 옛 방송의 묶음 머리를 실제 방송 날짜·시간·제목으로, 누르면 그 다시보기(Crenop D51 Q1 '가' — 스크린샷의 '10월 5일 (월) 처음 올라옴' 둘: 2026-04-10·2025-03-14 방송의 다시보기에서 10/5에 새로 딴 클립). 워커 2026-10-06a가 실어 주는 src를 쓴다 — 없으면 종전 머리 · 2026-10-06a: 달력 탭에 일정(D50 Q1 '가' · Q2 '나' — Crenop '일정을 달력탭에도 추가하는것 … 다시 넣을만 한 것 같기도'): 고른 종류의 기록이 없는 날 칸에 그 멤버가 참가하는 다가올 일정을 적는다(참가자를 안 적은 일정은 달력에 없다), 기간 버튼은 일정이 있는 달까지 열린다 — calSchedBoxHtml 곁 주석 · 기기 동기화 주기 단축(Crenop '동기화 주기는 줄일 수 있으면 줄이는데'): 올리기 1분 → 15초 · 받기 5분 → 1분(실패 뒤 쉼은 5분 그대로) · 2026-10-04d: 보조바의 방송 수 표시를 버튼 속 크기에 맞춤(D49 '나' — Crenop '방송수 인디케이터만 다른 버튼과 달리 크기가 다른데 … 크기를 맞출지' · '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 높이 = 같은 줄 버튼(PC 28 · 서랍 26), 숫자 11 → 13px 상당, 점 7 → 10. 테두리는 없다(버튼이 아니다). 클립 방송 머리의 '방송 중' 칩은 그대로 · 2026-10-04c: 기념일 도착 강조의 색·자리(Crenop '천타버스 결성일 테두리는 다른 줄을 침범하지 않게 … 색은 민트로 일괄통일하지 말고 각각의 고유색 … 라이트/다크 모드에 따라 네온효과가 필요할수도') — 테두리 = 그 멤버 색(크루는 민트), 옷은 최애 도착 표시(.fav-flash)와 같다(라이트 모드의 옅은 색 멤버는 번짐). 결성 줄은 연혁 줄의 hover 자리(글 둘레 2·6) 안에서만 두른다 · 2026-10-04b: 기념일 버튼을 누르면 프로필의 그 기념일 줄(생일·첫 방송일·숲 기준 첫 방송일·크루 연혁의 결성)로 가서 민트 테두리를 잠깐 켠다(Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로' — celebFlash) · 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-08c';   // 2026-10-08c: 안 본 범위 검토에서 나온 화면 쪽 결함 — 켜 둔 채 달이 넘어가면 옛 '이번 달' 통계가 그때 모습으로 굳던 것 · 지난달을 버리라는 신호를 다른 탭이 먼저 받으면 놓치던 것 · 클립 탭의 지난 날이 마지막으로 본 때에 멈추던 것과 두 탭이 서로의 확인 표시를 지우던 것 · 명전·달력이 한 번 실패하면 탭에 머무는 동안 다시 안 받던 것 · 끝난 방송이 없을 때 '평균 종료 00:00' · 연간 합이 방송 날짜 기록을 빼던 것 · 주소로 연 음악 탭의 멤버가 풀리던 것 · 2026-10-08b: 통계 탭을 한 번 본 화면을 켜 둔 채 달이 바뀌면 새 달 버튼이 잠긴 채 남던 것(해가 바뀌면 다음 해 화살표도) — 기간 선택기를 달이 바뀐 때도 다시 만든다(안 본 범위 자체 점검) · 2026-10-08a: 켜 둔 화면에서 시트 자료도 시간이 지나면 다시 받는다(Crenop '유저가 사이트를 사용할때 새로고침을 자주할 가능성이 있을까 싶어 … 일정시간동안은 캐시를 공유하고 그걸 넘으면 새 데이터를 받아오는 방식' → '가') — 늘 보이는 곳의 시트 넷(일정·상단바·휴방·멤버 정보)은 보이는 동안 10분마다, 탭에서만 쓰는 시트는 그 탭에 들어올 때 10분이 넘었으면. 내용이 같으면 다시 그리지 않는다(refreshSheets) · 2026-10-07d: 켜 둔 화면에서 자정·시트 만료 시각이 지나면 보조바의 기념일 상자·시트 버튼과 좌상단 로고(생일·시트 로고)를 다시 가른다 — 종전엔 그릴 때에만 가려, 켜 둔 채 자정을 넘기면 그날 생일 상자·로고가 안 뜨고 다음 날엔 전날 것이 남았다(tickBarTime) · 2026-10-07c: 좋아요 탭이 숨김 시트를 들어올 때마다 새로 받는다 — 모달을 닫은 적 없이 탭에 다시 들어오면 처음 받은 숨김 목록으로 계속 걸러, 시트 줄의 날짜가 지나 탭 버튼은 흐려졌는데(07a) 들어가 보면 요청이 그대로였다 · 2026-10-07b: 휴대폰 탭 바의 제목에 '(N)'이 남던 것(Crenop 캡처 — 최근 활동을 보는 중인데 삼성 인터넷 탭에 '천타버스 (7)') — 서랍·모달의 뒤로 가기 칸을 걷은 뒤 제목을 브라우저에 다시 알린다(reannounceTabTitle) · 2026-10-07a: 좋아요 탭이 비었을 때 탭 버튼을 40%로 흐리게(Crenop D52 'Q1다 Q2가 Q3가' — '좋아요 탭 버튼을 요청이 없을때에 약간 흐리게 … 요청이 있어도 숨김상태인지 확인 … 비수기일때는 한참 비어있는 탭') — 숨긴 요청을 뺀 요청도 순위만 글도 없을 때, 켜 둔 채 새 요청이 오면 요청 목록을 다시 받아 흐림을 풀고 새 요청 점도 켠다 · 2026-10-06f: 일정 버튼·목록도 시각이 적힌 일정은 그 시각이 지나면 내린다(Crenop '일정버튼과 목록도 시간 지나면 사라지면 안되나?' — 2026-06-15의 '시각이 지나도 그날 자정까지 D-DAY'를 바꿈. 시각이 없는 일정은 그대로 그날 자정까지) · 2026-10-06e: 06d와 동작은 같다 — 배포 폴더에 먼저 들어간 06d에서 주석 한 곳과 겹친 조건 하나(한 줄 말줄임 줄 판정 — 높이 판정이 이미 거른다)를 정리한 판이라 도장만 올림 · 2026-10-06d: 달력 칸의 일정(Crenop '일정이 언제 사라지게 할건지가 중요할듯 가령 방송켜지면 사라진다거나 시간이 있으면 해당시간 후에 사라지고 시간 없으면 해당일자 지나면 사라지는걸로 · 표기도 시간-SVG-이름 · 이름안에서도 줄바꿈이 좀더 이뻤으면 … NN의 MMM이면 의에서 줄바꿈') — 시각이 적힌 일정은 그 시각이 지나면, 시각이 없는 일정은 그날 그 멤버의 방송이 켜지면(없으면 그날이 지나면) 달력에서 내린다 · 줄은 [시각 · 종류 그림 · 제목] · 'NN의 MMM' 제목은 줄이 넘치면 '…NN의 / MMM'으로 가르고(줄 수가 늘 때만 예외 — fitCalSchedLines), 그 밖의 제목은 줄 길이를 고르게 나눈다 · 2026-10-06c: 클립 방송순 머리에서 'N월 N일 처음 올라옴'이라는 말을 없앰(Crenop '"처음 올라옴" 이라는 표현은 당최 이해가 안됨') — 방송 정보를 못 받은 크루 방송 묶음의 머리는 '원본 방송 확인 안 됨'(같은 뜻에 이미 쓰는 말), 날짜 없음 · 2026-10-06b: 클립 탭 방송순 — 사이트 방송 기록에 없는 옛 방송의 묶음 머리를 실제 방송 날짜·시간·제목으로, 누르면 그 다시보기(Crenop D51 Q1 '가' — 스크린샷의 '10월 5일 (월) 처음 올라옴' 둘: 2026-04-10·2025-03-14 방송의 다시보기에서 10/5에 새로 딴 클립). 워커 2026-10-06a가 실어 주는 src를 쓴다 — 없으면 종전 머리 · 2026-10-06a: 달력 탭에 일정(D50 Q1 '가' · Q2 '나' — Crenop '일정을 달력탭에도 추가하는것 … 다시 넣을만 한 것 같기도'): 고른 종류의 기록이 없는 날 칸에 그 멤버가 참가하는 다가올 일정을 적는다(참가자를 안 적은 일정은 달력에 없다), 기간 버튼은 일정이 있는 달까지 열린다 — calSchedBoxHtml 곁 주석 · 기기 동기화 주기 단축(Crenop '동기화 주기는 줄일 수 있으면 줄이는데'): 올리기 1분 → 15초 · 받기 5분 → 1분(실패 뒤 쉼은 5분 그대로) · 2026-10-04d: 보조바의 방송 수 표시를 버튼 속 크기에 맞춤(D49 '나' — Crenop '방송수 인디케이터만 다른 버튼과 달리 크기가 다른데 … 크기를 맞출지' · '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 높이 = 같은 줄 버튼(PC 28 · 서랍 26), 숫자 11 → 13px 상당, 점 7 → 10. 테두리는 없다(버튼이 아니다). 클립 방송 머리의 '방송 중' 칩은 그대로 · 2026-10-04c: 기념일 도착 강조의 색·자리(Crenop '천타버스 결성일 테두리는 다른 줄을 침범하지 않게 … 색은 민트로 일괄통일하지 말고 각각의 고유색 … 라이트/다크 모드에 따라 네온효과가 필요할수도') — 테두리 = 그 멤버 색(크루는 민트), 옷은 최애 도착 표시(.fav-flash)와 같다(라이트 모드의 옅은 색 멤버는 번짐). 결성 줄은 연혁 줄의 hover 자리(글 둘레 2·6) 안에서만 두른다 · 2026-10-04b: 기념일 버튼을 누르면 프로필의 그 기념일 줄(생일·첫 방송일·숲 기준 첫 방송일·크루 연혁의 결성)로 가서 민트 테두리를 잠깐 켠다(Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로' — celebFlash) · 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -6895,7 +6895,7 @@ const sheetPulled = { banner: false, content: false };
 //   켜 둔 화면에 시트 수정이 닿는 길이 유저의 새로 고침·'새로고침' ㄱ·새 판 배포뿐이었다. 시트는 브라우저가 구글에서 직접 받고 응답이 no-store라 같이 쓰는 사본이 없다(워커를 거치게 하지 않는다 — 워커 요청·CPU).
 //   늘 보이는 곳에 쓰는 시트(SHEET_ALWAYS — 일정 버튼·상단바·생방송 카드의 휴방·기념일 상자의 멤버 정보): 보이는 동안 1분마다 나이를 보고 10분이 넘었으면(POLLERS sheetTick — 가려졌다 돌아오면 바로 한 번).
 //   탭에서만 쓰는 시트(SHEET_BY_PAGE): 그 탭에 들어올 때 10분이 넘었으면(switchPage). 컨텐츠 탭은 종전대로 들어올 때마다(pullContentSheets).
-//   10분 = 사이트 새 판 확인과 같은 값(SITE_CHECK_MS). 바로 반영하려면 종전대로 '새로고침' ㄱ.
+//   10분 = 사이트 새 판 확인과 같은 값(SITE_CHECK_MS). 더 빨리 닿게 하고 싶으면 종전대로 '새로고침' ㄱ — 다만 ㄱ은 새로 고쳐 달라는 알림일 뿐이라 유저가 닫으면 그만이다(시트 수정은 닫은 화면에도 이 다시 받기로 닿는다).
 //   받는 법: 먼저 그 시트만 물어 보고(1회) 이 화면이 마지막으로 받아 그린 내용(sheetNet.js — 각 로더가 sheetGot으로 적는다)과 다를 때만 그 시트의 로더를 다시 부른다 —
 //     받아서 그리는 길을 두 벌로 만들지 않는다(로더가 한 번 더 받는다 — 시트가 바뀐 때뿐). 같으면 아무것도 다시 그리지 않는다. 기준을 저장소(localStorage) 사본으로 삼지 않는 까닭: 탭 둘이 같이 쓴다 —
 //     다른 탭이 먼저 받아 적으면 이 탭은 '같다'고 보고 옛 화면에 머문다. 로더가 받기에 실패해 기준이 없으면 '다르다'로 보고 로더를 부른다(다시 시도). 크루 시트는 로더가 여섯을 한꺼번에 받는다.
@@ -7477,7 +7477,7 @@ function renderMusic() {
   const targets = [{ id: 'all', name: '천타버스', img: 'Favicon.webp' + SITE_IMG_V, color: '' }].concat(MEMBERS.map(m => ({ id: m.id, name: m.name, img: m.img, color: m.color })))
     .filter(t => profileVideos.some(v => v.target === t.name));
   const fav = favMemberId();
-  if (!targets.some(t => t.id === musicState.member)) musicState.member = targets.some(t => t.id === fav) ? fav : (targets[0] ? targets[0].id : null);
+  if (profVideoOk && !targets.some(t => t.id === musicState.member)) musicState.member = targets.some(t => t.id === fav) ? fav : (targets[0] ? targets[0].id : null);   // 영상 시트를 아직 못 받았으면 고르지 않는다(2026-10-08c) — 종전엔 저장본 없는 브라우저에서 #music:멤버 로 열면 '곡이 없는 멤버'로 보고 지워, 주소가 #music으로 바뀌고 시트가 온 뒤엔 크루·최애가 나왔다
   renderMusicSide(targets);
   // 우상단 붙박이 버튼 — 곡이 없어도 남는다(자료가 아니라 이 탭이 늘 가진 링크다).
   // 첫 이름 행(맨 위 묶음의 제목 줄) 오른쪽 끝에 같은 행으로 선다(2026-09-02 Crenop 지정 — 종전엔 이름 위 별도 줄).
@@ -8322,7 +8322,7 @@ function clipIncCount(x) {
 }
 function clipStore(member, col) {
   const k = member + '|' + col;
-  return clipState.stores[k] || (clipState.stores[k] = { member, col, items: new Map(), cov: new Set(), trunc: new Set(), busy: new Set(), wait: {}, stuck: new Set(), failAt: {}, todayAt: 0 });   // busy = 받는 중(재요청 사이도), wait = 정리 중 남은 수, stuck = 끝내 정리 못 한 날
+  return clipState.stores[k] || (clipState.stores[k] = { member, col, items: new Map(), cov: new Set(), trunc: new Set(), busy: new Set(), wait: {}, stuck: new Set(), failAt: {}, todayAt: 0, gotAt: {} });   // busy = 받는 중(재요청 사이도), wait = 정리 중 남은 수, stuck = 끝내 정리 못 한 날
 }
 // 응답 한 장이 통째로 담은 날(워커 clipSearchDayPage): truncated = 그날 일부 · next 있음 = (next, day] · 없음(complete) = [창 첫날, day]
 function clipCoverDays(reqDay, body, start) {
@@ -8355,6 +8355,7 @@ function clipFetch(st, day, attempt, prevPending, force, prevBody) {
   const land = (body) => {
     st.busy.delete(day); delete st.wait[day];
     const days = clipApplyBody(st, day, body, clipAddDays(clipToday(), -(CLIP_WINDOW_DAYS - 1)));
+    for (const d of days) st.gotAt[d] = Date.now();   // 그 날을 받은 때(clipDayStale)
     st.failAt[day] = 0;
     if (body.pending > 0) st.stuck.add(day); else st.stuck.delete(day);
     if (day === clipToday()) st.todayAt = Date.now();
@@ -8662,6 +8663,21 @@ function clipSeen() {
 //   지금: 장면 = 칸에 불러온 클립 전체로 묶은 같은 장면(clipState.scene — renderClips가 칸마다 채운다. 여럿 고르기의 단계로 갈라 그린 카드보다 넓을 수 있다 — 단계가 달라도 같은 장면).
 //   ① 켜고 끄기는 장면째(clipSceneNos — 타일을 열어도, 창 안 타일의 체크 칸도) ② 하나라도 확인인 장면의 나머지 클립은 확인으로 채운다(clipSceneFill — 그릴 때 칸마다,
 //   기억이 바뀔 때 clipSyncSeen에서: 뒤늦게 들어온 클립 · 다른 기기에서 하나만 확인돼 온 것). 그래서 카드의 '하나라도'와 개수가 늘 같다.
+// 확인 표시 저장(2026-10-08c): 저장소에 지금 적힌 것 위에 이번에 바꾼 것만 얹는다 — 종전엔 이 탭이 처음 읽어 둔 사본을 통째로 써서, 같은 브라우저의 두 탭이 서로의 확인 표시를 지웠다
+//   (기기 동기화가 켜져 있으면 그 '꺼짐'이 다른 기기로도 갔다). 읽음 열쇠 saveReadKeys와 같은 처방. 저장소에 없거나 못 읽으면 이 탭의 것 그대로.
+function clipSeenSave(changed) {
+  const mine = clipSeen();
+  let o = null;
+  try { const raw = lsGet(LS_CLIP_SEEN, null); o = raw === null ? null : JSON.parse(raw); } catch (e) { o = null; }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) o = mine;
+  else {
+    for (const n of changed) { if (mine[n]) o[n] = mine[n]; else delete o[n]; }
+    const cut = Date.now() - CLIP_WINDOW_DAYS * 86400000;
+    for (const k of Object.keys(o)) if (!(o[k] > cut)) delete o[k];
+    clipSeenMap = o;
+  }
+  lsSet(LS_CLIP_SEEN, JSON.stringify(o));
+}
 function clipSceneNos(nos) {
   const s = new Set(nos);
   for (const n of nos) for (const x of clipState.scene.get(n) || []) s.add(x.title_no);
@@ -8669,19 +8685,19 @@ function clipSceneNos(nos) {
 }
 function clipSceneFill(scenes) {
   const o = clipSeen(), now = Date.now();
-  let ch = false;
+  const chg = [];
   for (const arr of scenes) {
     if (!arr.some(x => o[x.title_no])) continue;
-    for (const x of arr) if (!o[x.title_no]) { o[x.title_no] = now; ch = true; }
+    for (const x of arr) if (!o[x.title_no]) { o[x.title_no] = now; chg.push(x.title_no); }
   }
-  if (ch) lsSet(LS_CLIP_SEEN, JSON.stringify(o));
-  return ch;
+  if (chg.length) clipSeenSave(chg);
+  return chg.length > 0;
 }
 // 봄 켜고 끄기(D23 체크 칸) — 기억을 고친 뒤 보이는 타일·카드·방송 머리·모달 타일의 흐림과 칸을 기억에 맞춘다(다시 그리지 않는다 — 읽던 자리·초점 그대로)
 function clipSetSeen(nos, on) {
-  const o = clipSeen(), now = Date.now();
-  for (const n of clipSceneNos(nos)) { if (on) o[n] = now; else delete o[n]; }
-  lsSet(LS_CLIP_SEEN, JSON.stringify(o));
+  const o = clipSeen(), now = Date.now(), chg = clipSceneNos(nos);
+  for (const n of chg) { if (on) o[n] = now; else delete o[n]; }
+  clipSeenSave(chg);
   clipSyncSeen();
 }
 // 머리 줄의 개수(2026-10-02p D45 — Crenop '상단바에 … 본 영상 갯수를 넣어 주는 것도 좋을지도'): PC 두 칸 머리 줄 = 'N개 중 M개 확인'(Q3 '다' — 좁으면 'M/N', 02q), 한 목록 전환 버튼 = 'M/N'(Q4 '나'). 모를 땐(첫 응답 전) 빈칸.
@@ -8955,6 +8971,7 @@ function renderClips(keep) {
     }
     const o = clipOpenDays(c);   // 연 날을 아직 안 받았으면 받는다(실패 뒤 30초 쉼은 clipFetch가 — 그동안 끝 줄은 '다시 시도')
     if (o.target !== null && o.k < clipState.depth[c]) for (const st of o.need) if (!st.cov.has(o.target)) clipFetch(st, o.target);
+    if (!clipState.asc[c] && clipState.depth[c] > 1) for (const st of o.need) if (!st.cov.has(o.seq[0])) clipFetch(st, o.seq[0]);   // 건너뛴 새 오늘(자정 뒤 받기 실패 — clipOpenDays의 skip)도 그릴 때마다 다시(2026-10-08c: 종전엔 날짜가 바뀐 그 한 번뿐이라 탭을 나갔다 들어올 때까지 오늘이 빠진 채였다). 실패 뒤 30초 쉼은 clipFetch가
   }
   // 상단바 부품 — 통계 방송 목록과 같은 부품(맨 위로·맨 아래로·정렬 둘), 칸마다(data-col). 좁은 머리 줄에선 그림만(CSS '좁은 머리 줄' — 이름은 title)
   const scrollBtns = col => `<div class="tl-pair"><button class="timeline-scroll-btn" data-clipscroll="top" data-col="${col}" type="button" title="맨 위로">${SVG_ICONS.chevronsUp}<span>맨 위로</span></button>`
@@ -9124,12 +9141,18 @@ function clipSetSel(set) {   // 필터를 바꿨다 — 끈 칸을 기억하고 
 function clipEnsureMonths() {
   for (const ym of clipWindowMonths(clipToday())) if (!statsState.data[ym]) loadStatsMonth(ym).then(() => { if (currentPage === 'clips' && statsState.data[ym]) renderClips(true); });
 }
+// 그날이 끝나기 전에 받은 지난 날인가(2026-10-08c) — '오늘'로 받았던 날은 자정 뒤로 다시 받는 길이 없어, 켜 둔 화면에서는 마지막으로 탭을 본 때의 모습으로 굳었다
+//   (그 뒤 그날 밤의 클립이 없고, 방송 중에 딴 클립은 '다시보기 대기'인 채). 새 오늘의 응답이 어제까지 덮는 것은 클립이 적은 목록뿐이다.
+//   그날이 끝나고 CLIP_DAY_SETTLE_MS가 지난 뒤 한 번 더 받는다 — 워커가 어제 목록을 00:10까지 5분 캐시로 열어 두므로 그 뒤에 받은 것은 그날 전부다.
+const CLIP_DAY_SETTLE_MS = 10 * 60 * 1000;
+function clipDayStale(st, d) { const end = Date.parse(d + 'T00:00:00+09:00') + 86400000 + CLIP_DAY_SETTLE_MS, got = st.gotAt[d]; return got !== undefined && got < end && Date.now() >= end; }
 // 오늘 몫(5분 넘었으면)과 끝내 정리 못 한 날(st.stuck — D20 Q3 '가')을 다시 받는다 — 받는 동안 옛 화면 그대로, 끝나면 한 번에
 function clipRefreshToday() {
   const today = clipToday();
   for (const c of ['own', 'men']) for (const st of clipNeed(c)) {
     if ((st.cov.has(today) && Date.now() - st.todayAt > CLIP_REFRESH_MS) || (!st.cov.has(today) && st.cov.size && !clipState.asc[c] && clipState.depth[c] > 1)) clipFetch(st, today);   // 못 받은 새 오늘(자정 뒤)도
     for (const d of st.stuck) clipFetch(st, d);
+    for (const d of st.cov) if (d < today && clipDayStale(st, d)) clipFetch(st, d);   // 그날이 끝나기 전에 받은 지난 날(clipDayStale)
   }
 }
 function renderClipsTab() {
@@ -10720,7 +10743,7 @@ function ensureVodMonth(memberId, ym) {
         if (!cur) lsSet(LS_VOD_PREFIX + key, JSON.stringify(j.vods));
         if (currentPage === 'stats') renderStats();   // 방송별 목록 행의 링크 목적지(목록 → 직행/모달)를 도착분으로 다시 정한다
         else if (currentPage === 'calendar') queueCalRender();   // 썸네일 탭(2026-09-02): 도착마다 그리지 않고 한 프레임에 합친다
-      } else vodFailed(key);
+      } else { vodFailed(key); if (currentPage === 'calendar') calLoadingSettle(); }   // 실패 응답({ok:false})도 끊김(아래 catch)처럼 '불러오는 중'을 뗀다(2026-10-08c)
     })
     .catch(() => { vodState.loading.delete(key); vodFailed(key); if (currentPage === 'calendar') calLoadingSettle(); });   // 실패는 조용히 — 다음 진입 때 재시도(통계 월 로딩과 같은 태도). 다시 그리면 곧바로 재요청이 돌아 실패 루프가 되므로 표시만 내린다
 }
@@ -10965,7 +10988,7 @@ function computeAnnualSums(year, nowMs = Date.now()) {
       annualSums[m.id].sessions += daySet.size;
       (ms.sessions || []).forEach(s => {
         const t = new Date(s.start).getTime();
-        if (isNaN(t) || t < monthStart || t >= monthEnd) return;
+        if (isNaN(t) || !sessionDateKeys(s, ym, nowMs).length) return;   // 달 소속 = 첫 날짜 키(위 일수·달 합계 computeMonthSummary·명전 합과 같은 판정, 2026-10-08c) — 종전 시작 시각 범위 검사는 방송 날짜(bdate)가 따로 있는 기록의 시간·시청자를 연간 합에서만 뺐다(일수는 세고 시간은 0)
         if (s.end) {
           const e = new Date(s.end).getTime();
           if (!isNaN(e) && e > t) annualSums[m.id].totalDurationMs += (e - t);
@@ -11044,7 +11067,8 @@ function drawGraphChart(wrap, memberId, range, metric) {
     const [y, mo] = ym.split('-').map(Number);
     if (metric.getYm) return metric.getYm(ym);   // 시간대 그래프(2026-09-07): 달 단위 값 함수 — 없는 달은 null(빈 점)
     if (metric.special) return fancntMonthEnd(id, y, mo);   // 애청자(월말 누적), 없으면 null → 라인 끊김
-    const ms = statsState.data[ym] && statsState.data[ym][id];
+    if (!statsState.data[ym]) return null;   // 못 받은 달은 빈 점(2026-10-08c — 종전엔 0일·0분으로 찍혔다). 받았는데 이 멤버 자료가 없는 달은 0
+    const ms = statsState.data[ym][id];
     if (!ms) return 0;
     return metric.get(computeMonthSummary(ms, y, mo));
   };
@@ -11598,15 +11622,29 @@ async function loadFeed() {
 // index.html을 재배포하고 순서까지 지키던 일(v18→v19 사고)을 없앤다. 처음 보는 값도 '바뀜'으로 본다(그 전 캐시는 어느 판인지 모른다 — 한 번 다시 받는 비용뿐).
 // 구 워커(값 없음)에는 아무것도 하지 않는다.
 const LS_DATA_VER = 'chuntaverse_stats_dataver';
+let dataVerSeen = null;   // 이 탭이 마지막으로 본 자료 판(syncDataVersion)
 function syncDataVersion(ver, freshYm) {
   if (ver === undefined || ver === null) return;
   const v = String(ver);
-  if (lsGet(LS_DATA_VER, null) === v) return;
-  lsSet(LS_DATA_VER, v);
-  try {
-    for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith(LS_STATS_PREFIX)) localStorage.removeItem(k); }
-  } catch (e) {}
+  // 이 탭이 본 판(dataVerSeen)으로 가른다(2026-10-08c) — 종전엔 저장소 한 칸(LS_DATA_VER)만 봤는데 그 칸은 같은 브라우저의 탭끼리 같이 써서,
+  //   다른 탭이 새 판을 먼저 받아 적으면 이 탭은 '이미 본 판'으로 넘기고 메모리의 옛 지난달을 새로 고칠 때까지 썼다. 저장소가 막힌 브라우저에서는 늘 '다름'이라 달이 올 때마다 나머지를 지웠다.
+  //   굳혀 둔 저장본은 저장소의 판이 옛것일 때만 버린다(다른 탭이 이미 새 판으로 채운 것을 지우지 않는다). 이 탭이 처음 보는 판이 저장소와 같으면 버릴 것이 없다(저장본이 그 판의 것).
+  if (dataVerSeen === v) return;
+  const hadOther = dataVerSeen !== null;
+  dataVerSeen = v;
+  const lsOld = lsGet(LS_DATA_VER, null) !== v;
+  if (lsOld) {
+    lsSet(LS_DATA_VER, v);
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith(LS_STATS_PREFIX)) localStorage.removeItem(k); }
+    } catch (e) {}
+  }
+  if (!lsOld && !hadOther) return;
   for (const ym of Object.keys(statsState.data)) if (!isCurrentMonth(ym) && ym !== freshYm) delete statsState.data[ym];
+  redrawPastMonths();
+}
+// 지난달 자료를 버린 뒤 보고 있던 화면을 다시 그린다 — 빠진 달은 각 화면이 다시 받는다(자료 판 변경 syncDataVersion · 달 넘김 loadStats)
+function redrawPastMonths() {
   if (currentPage === 'stats') renderStats();
   else if (currentPage === 'hall') renderHall();
   else if (currentPage === 'calendar') { ensureCalMonth(); queueCalRender(); }   // 빠진 달은 ensureCalMonth가 다시 받고 도착하면 다시 그린다
@@ -11654,11 +11692,19 @@ async function loadStatsMonth(yyyymm) {
   }
 }
 
+// 켜 둔 채 달이 넘어가면(2026-10-08c): 메모리의 옛 '이번 달'은 마지막으로 받은 때의 모습이다 — 이 폴러는 이번 달만 받고, 다른 곳은 그 달이 메모리에 없을 때만 받으며,
+//   자료 판 번호는 워커가 '이미 지난 달'에 쓸 때만 오른다. 가려 두었다(폴러 멈춤) 다음 달에 돌아온 화면은 가려지기 전의 지난달을 그대로 썼다(그 뒤 방송·글 빠짐, 켜져 있던 방송은 '진행 중').
+//   달이 바뀐 것을 알아채면 그 사본을 버린다 — 쓰는 화면이 다시 받는다(그 뒤에 워커가 지난달을 고치면 자료 판 번호가 올라 또 버린다).
+let statsCurYm = '';   // 마지막으로 '이번 달'로 받은 달
 async function loadStats() {
   try {
     const now = kstNow();
     const cur = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    const rolled = !!statsCurYm && statsCurYm !== cur, hadCur = !!statsState.data[cur];
+    if (rolled) delete statsState.data[statsCurYm];
+    statsCurYm = cur;
     await Promise.all([loadStatsMonth(cur), loadFancnt()]);
+    if (rolled) redrawPastMonths();
     // 무변화 스킵: 현재월 데이터가 직전 렌더 시점과 같으면 재구축 생략(타임라인·배너와 정책 통일 — 무변화 틱마다 텍스트 선택 풀림·DOM 낭비 방지).
     // 미종료 세션이 있으면 분 버킷을 sig에 섞음 — '진행 중' 시간 합계는 렌더 시점 now까지 집계라, 뷰어 표본이 안 잡히는 방송
     // (fetchStationInfo null 지속)이나 전월 시작 자정 걸친 방송(표본이 전월 키에 기록돼 당월 무변)에서 표시가 동결되는 것 방지.
@@ -11670,6 +11716,10 @@ async function loadStats() {
       const csig = JSON.stringify(statsState.data[cur] || null);
       if (csig !== lastCalStatsSig) { lastCalStatsSig = csig; queueCalRender(); }
       ensureCalMonth();
+    } else if (currentPage === 'calendar') ensureCalMonth();   // 지난달을 보는 중: 못 받은 달이면 30초 쉼 뒤 다시 받는다(2026-10-08c — 종전엔 다음 조작까지 '불러오지 못했습니다'). 받아 둔 달이면 아무 일도 없다
+    if (currentPage === 'clips') {   // 클립 탭(2026-10-08c): 방송 기록(달 자료)이 늦게 오거나 실패했던 달 — 종전엔 탭에 들어올 때만 받아, 실패하면 방송 머리가 '원본 방송 확인 안 됨'인 채 남았다
+      if (!hadCur && statsState.data[cur]) renderClips(true);
+      clipEnsureMonths();
     }
     if (currentPage === 'stats') {
       const hasOpen = Object.values(statsState.data[cur] || {}).some(ms => (ms.sessions || []).some(s => s.start && !s.end));
@@ -11677,7 +11727,7 @@ async function loadStats() {
       if (sig !== lastStatsSig) renderStats();
       lastStatsSig = sig;
     }
-    lastStatsUpdate = new Date();
+    if (!statsState.failAt[cur]) lastStatsUpdate = new Date();   // 받은 때만(2026-10-08c) — loadStatsMonth는 실패를 삼키고 돌아와, 종전엔 못 받아도 '… 기준' 시각이 매분 새로 찍혔다
     updateHeaderCenter();
   } catch (e) {
     if (currentPage === 'stats') {
@@ -13449,7 +13499,9 @@ async function refreshHallChem() {
     const res = await fetch(url);
     if (!res.ok) return;   // 실패 시 기존 캐시 유지
     const fresh = await res.json();
-    if (JSON.stringify(fresh) === JSON.stringify(cached)) return;   // 무변화면 재렌더 생략
+    const hadFail = !!hallChemFailAt[period];
+    delete hallChemFailAt[period];   // 받았다 — 실패 표시를 지운다(2026-10-08c: 남겨 두면 자료가 왔는데도 두 채팅 카드가 실패 문구로 남았다)
+    if (!hadFail && JSON.stringify(fresh) === JSON.stringify(cached)) return;   // 무변화면 재렌더 생략
     hallChemCache[period] = fresh;
     if (currentPage === 'hall' && statsPeriod === period) renderHall();
   } catch (e) {}
@@ -13458,6 +13510,12 @@ async function refreshHallChem() {
 // 기간 월 목록의 월 stats 합산 (연간탭 computeAnnualSums와 동일 월별 산식 — viewer 제외 + seed 포함)
 // 진행 중 세션의 '진짜 방송 중' 판정용 라이브 스냅샷(broad_no) — 명전 착시 방지용, 실패 시 빈 맵 → 48h 상한 폴백
 let hallLiveCache = null, hallLiveAt = 0;
+// 실패 문구를 띄운 채 탭에 머물러도 30초 뒤 한 번 다시 그린다(2026-10-08c) — 명전을 다시 그리는 곳은 탭 진입·기간 버튼·시트 도착뿐이라, 종전엔 '30초 뒤 다음 그리기'가 오지 않아 문구가 그대로 남았다
+let hallRetryTimer = 0;
+function hallRetrySoon() {
+  if (hallRetryTimer) return;
+  hallRetryTimer = setTimeout(() => { hallRetryTimer = 0; if (currentPage === 'hall') renderHall(); }, 30500);
+}
 let hallFailAt = 0;   // 명전에 필요한 달 중 하나라도 못 받은 시각(2026-09-27i) — 30초 동안은 실패 문구(renderHall)
 async function loadHallLive() {
   hallLiveAt = Date.now();
@@ -13607,7 +13665,7 @@ function statsNumRowsHtml(memberId, sum, md, mode, year, month) {
 // 시간 통계 다섯 값(2026-09-18): 평균 시작·평균 종료·평균 시간·시간대 구성·주중/주말 — 그래프 상자 위에 한 줄(관련 숫자를 그래프 옆에 묶는다). 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 // 시간 통계 다섯 값(2026-09-18): 글·아이콘·색은 모달 표 TIME_GRAPHS에서(단일 출처). 그래프 상자 위 한 줄, 항목 클릭 = 월별 추이(2026-09-07 문법의 tkey).
 function timeStatsRowHtml(ts) {
-  const hm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+  const hm = (min) => min === null ? '—' : `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;   // 평균을 정할 수 없으면(끝난 방송 없음 · 방향 상쇄 — circularMeanMinutes가 null) '—'. 종전엔 null을 0으로 셈해 '00:00'이 나왔다(2026-10-08c)
   const hl = (labels, vals) => { const mx = Math.max(...vals); return labels.map((l, i) => vals[i] === mx ? `<span class="hl">${l} ${vals[i]}%</span>` : `${l} ${vals[i]}%`).join('/'); };
   const values = { tStart: hm(ts.startMin), tEnd: hm(ts.endMin), tAvg: `${Math.floor(ts.avgMin / 60)}시간 ${ts.avgMin % 60}분`, tBands: hl(['새벽', '오전', '오후', '야간'], ts.bands), tWdWe: hl(['주중', '주말'], ts.wdwe) };
   // 줄바꿈(2026-09-18 Crenop): 한 줄이 안 되면 3/2(시작·종료·시간 | 분포·주중/주말), 더 좁으면 3/1/1 — 상자 폭 기준 컨테이너 규칙(.kv-brk)
@@ -13657,11 +13715,15 @@ function renderStats() {
   document.querySelectorAll('#statsMembersSide .cal-tab').forEach(b => b.classList.toggle('active', b.dataset.member === memberId));
   if (!statsState.viewMonth) { const n = kstNow(); statsState.viewMonth = { year: n.getUTCFullYear(), month: n.getUTCMonth() + 1 }; }   // 기간 선택기보다 먼저(첫 진입에 viewMonth가 없다 — 헤드리스 실측 2026-09-18)
   // 기간 선택기는 연도가 바뀔 때만 다시 만든다(2026-09-19, 달력 탭과 같은 절약) — 같은 연도면 켜짐 표시만 갱신. 1분 폴링·다시보기 도착 재렌더마다 버튼을 새로 만들지 않는다.
+  //   켜 둔 채 달이 바뀐 때에도 다시 만든다(2026-10-08b): 오지 않은 달 버튼·다음 해 화살표의 잠김은 만들 때의 '이번 달'로 정해져(periodSelectorHtml), 종전엔 11월 1일이 돼도 11월 버튼이,
+  //   해가 바뀌어도 다음 해 화살표가 잠긴 채였다(실화면, 시계만 돌림). 달력 탭은 그릴 때마다 잠김을 다시 본다(renderCalendarTab) — 여기는 한 달에 한 번이라 통째로 다시 만든다.
+  const nowK = kstNow(), nowYm = `${nowK.getUTCFullYear()}-${nowK.getUTCMonth() + 1}`;
   if (side) {
-    if (side.dataset.year === String(statsState.viewMonth.year)) {
+    if (side.dataset.year === String(statsState.viewMonth.year) && side.dataset.now === nowYm) {
       side.querySelectorAll('.stats-period-btn[data-period]').forEach(b => b.classList.toggle('active', b.dataset.period === 'all' ? statsState.periodAll : (!statsState.periodAll && Number(b.dataset.period) === statsState.viewMonth.month)));
     } else {
       side.dataset.year = String(statsState.viewMonth.year);
+      side.dataset.now = nowYm;
       side.innerHTML = `<div><div class="filter-title">기간</div>${periodSelectorHtml(true)}</div>`;   // 정렬은 목록 상단바(2026-09-18 3차: 기둥은 PC에서 아래가 잘린다)
       bindPeriodSelector(side, true, renderStats);
     }
@@ -13951,6 +14013,7 @@ function renderHallTab() {
       statsPeriod = btn.dataset.period;
       renderHallTab();
       renderHall();
+      refreshHallChem();   // 기간을 바꿔 볼 때도 채팅 수를 다시 받는다(2026-10-08c) — 종전엔 탭에 들어올 때 고른 기간만 다시 받아, 켜 둔 화면에서 바꿔 본 기간은 처음 본 때의 수·순위였다
     }));
   }
 }
@@ -13975,11 +14038,11 @@ function renderHall() {
   if (monthsToLoad.length > 0) {
     // 못 받은 달이 남으면 실패 문구, 30초 뒤 다음 그리기에서 다시(통계 탭과 같은 태도) — 종전엔 실패한 달을 부르면 30초 대기로 즉시 돌아와
     //   '다시 그리기 → 다시 부르기'가 쉬지 않고 돌아 페이지가 멈췄다(2026-09-27i 목업: 한 달 실패에 40초 동안 타이머 한 번도 못 돔)
-    if (Date.now() - hallFailAt < 30000) { body.innerHTML = STATS_FAILED; return; }
+    if (Date.now() - hallFailAt < 30000) { body.innerHTML = STATS_FAILED; hallRetrySoon(); return; }
     body.innerHTML = '<div class="loading"><div class="spinner"></div><div>명전 불러오는 중...</div></div>';
     Promise.all(monthsToLoad.map(ym => loadStatsMonth(ym))).then(() => {
       if (currentPage !== 'hall') return;
-      if (monthsToLoad.some(ym => !statsState.data[ym])) { hallFailAt = Date.now(); body.innerHTML = STATS_FAILED; return; }
+      if (monthsToLoad.some(ym => !statsState.data[ym])) { hallFailAt = Date.now(); body.innerHTML = STATS_FAILED; hallRetrySoon(); return; }
       renderHall();
     });
     return;
@@ -13994,6 +14057,7 @@ function renderHall() {
   }
   const chem = hallChemCache[period];
   const chemFail = !!hallChemFailAt[period];
+  if (chemFail) hallRetrySoon();   // 두 채팅 카드의 '불러오지 못했습니다'도 30초 뒤 아래 다시 받기가 돌게(2026-10-08c)
   if (chemFail && Date.now() - hallChemFailAt[period] > 30000) { hallChemFailAt[period] = Date.now(); loadHallChem(period).then(() => { if (currentPage === 'hall' && statsPeriod === period && !hallChemFailAt[period]) renderHall(); }); }
   // 기간별 월 목록(월 stats 합산용) / 세션·시트 시각 경계
   const periodMonths = period === 'h1' ? allMonths.filter(ym => ym >= HALL_H1_START_MONTH && ym <= HALL_H1_END_MONTH)   // 리터럴 → 상수(2026-09-19): 연초 갱신은 상수 여섯 줄만

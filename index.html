@@ -2742,6 +2742,20 @@
   .cal-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface); }
   .cal-thumb:empty { background: transparent; }   /* 빈 상자는 높이만 잡고 음영 없이(옛 폼 v5 Crenop 지정) */
   .cal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* 하루를 넘긴 방송(노방종 — 2026-10-18 D56 Crenop 'Q1 가+마 · Q2 다' — calItemsByDate 곁 주석): 이어진 날 'N일째'(생방송 칩과 같은 숲 파랑) · 칸 맨 아래를 잇는 4px 띠 · '방송 중' 칩 */
+  .cd-day { font-size: 12px; font-weight: 700; line-height: 14px; color: var(--ev-start); white-space: nowrap; }
+  .cal-cell.nbj { position: relative; }
+  .cal-grid-form .cal-cell.nbj { overflow: visible; }   /* 띠가 칸 사이 틈까지 나간다 — 칸 안의 그림·글은 .cal-thumb이 자른다 */
+  .cal-nbj-bar { position: absolute; bottom: 0; left: 5px; right: 5px; height: 4px; background: var(--ev-start); pointer-events: none; }   /* 끝 칸은 그림 선(안쪽 여백 5)에서 끊는다 */
+  .cal-nbj-bar.lc { left: -3.5px; } .cal-nbj-bar.rc { right: -3.5px; }   /* 이어지는 쪽: 테두리 1.5 + 틈 4의 절반 — 이웃 칸 띠와 틈 가운데서 만난다 */
+  .cal-nbj-bar.wl { left: -1.5px; } .cal-nbj-bar.wr { right: -1.5px; }   /* 주의 처음·끝 칸은 칸 끝까지(다음 줄로 이어진다) */
+  .cal-list-form .cal-nbj-bar { left: 0; right: 0; }   /* 타일 흐름은 타일이 떨어져 있어 타일마다 끝까지 */
+  .cal-cell .cal-nbj-bar.brl { right: calc(50% + 2px); } .cal-cell .cal-nbj-bar.brr { left: calc(50% + 2px); }   /* 두 방송이 만나는 칸: 가운데서 끊는다 — 끊긴 틈 4 = 칸 사이 틈 */
+  .calendar-day.today .cal-nbj-bar { bottom: 1.5px; }   /* 오늘 칸의 안쪽 테두리(1.5px 그림자) 위에 */
+  .cal-onair { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }   /* 그림이 없으면 그림 자리 가운데 */
+  .cal-onair.tr { inset: auto; top: 4px; right: 4px; }   /* 그림이 있으면 오른쪽 위 — 다시보기 19+·구독+ 배지 자리 */
+  .cal-onair .nav-live-badge { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 1px 6px; min-height: 0; white-space: nowrap; }   /* 클립 방송 머리의 '방송 중' 칩(.clip-bc .nav-live-badge)과 같은 옷 */
+  .cal-onair.tr .nav-live-badge { background: var(--surface2); }   /* 그림 위에서는 바탕을 채운다 — 다시보기 배지(2026-09-23d: 반투명이면 그림에 묻혔다)와 같은 처방 */
   /* 달력 4종(2026-09-18): 고르지 않은 종류의 존재 칩은 아이콘만 흐리게 · 글 종류 상자 = 그날 글 제목 최대 3줄 · 종류 격자 빈칸(채팅 자리) */
   .cal-main .cd-chip.cd-mark .cd-full { display: none; }
   .cal-main .cd-chip.cd-mark .cd-ic { display: inline-flex; opacity: 0.45; }
@@ -4258,7 +4272,7 @@
 </main>
 
 <script>
-const BUILD = '2026-10-16a';   // 2026-10-16a: 컨텐츠·현수막·케미 링크 모달에서 구획마다 타일이 한 장뿐이면 빈 칸이 없게(Crenop '최소 폭이 2열로 설정되어있지만 컨텐츠는 1열이라 남는 빈공간에 대한 대책' → 추천대로): PC·태블릿은 모달을 타일 한 장 폭까지 좁히고(종전 가장 좁아도 440 — 타일 두 장 폭), 휴대폰은 모달 폭 그대로 타일을 모달 폭으로 · 2026-10-11a: 관련 링크 유튜브 줄 — 시트 E열 숫자가 PC 표의 자리(Crenop '1행 본채널, 2행 부채널, 3행 소속채널 … E열에 숫자가 연결되지 않아도 인식이 되어야': 2가 없는 멤버의 3은 셋째 자리에, 둘째 자리는 비운다. 종전엔 E가 순서일 뿐이라 위로 붙었다) · 2026-10-10a: 채팅 묶음을 접으면 첫 1줄만(종전 앞 3줄 — Crenop '채팅 줄일때 1줄빼고 다줄이는게 아니라 3줄 남기는 이유는 뭐야?': 3은 근거 없는 어림값이었다) · 접기 띠는 2줄 묶음부터 = 모든 묶음(종전 4줄부터 — 원칙 '남기는 줄 + 1' 그대로) · 2026-10-09d: X 아이콘 — 글리프만, 다크 흰색 · 라이트 검정(Crenop 'X자 모양만 두고 모드에 따라 흰/검만 바꾸는 방식'. 종전: 검은 바탕 칩 + 흰 X) · 그래서 09b의 칩 여백 처리(margin: -2px 0)는 걷음(Crenop '억지로 손봤던 크기 이슈도 같이 손보면') · 2026-10-09c: 인스타그램 아이콘 — 공식 글리프 + 그라데이션(Crenop D54 Q1 '나'. 종전: 꽉 찬 분홍 네모에 고리·점 구멍) · 2026-10-09b: 관련 링크 단추 높이 — 바탕 칩이 있는 아이콘(X)의 단추만 4px 높던 것(Crenop D53 Q1 '다': 칩이 위아래 여백을 2px씩 차지, 아이콘 크기는 그대로) · 2026-10-09a: 관련 링크의 유튜브 줄 개수 제한 없음(Crenop '유튜브 쪽이 최대 3칸이 필요해지니까' — 문모모 클립 채널. 종전엔 둘까지만 읽고 셋째 줄부터 버렸다) · 2026-10-08g: 좋아요 탭 셋 — 탭을 떠난 뒤에 도착한 목록이 요청을 '본 것'으로 찍던 것 · 보는 중에 새 요청이 와 다시 그리면 앞서 있던 새 요청 표시가 사라지던 것 · 시트 받기 실패가 이 화면의 시트를 저장소 사본으로 바꿔 끼우던 것 · 2026-10-08f: 프론트 나머지 구획 전수 읽기에서 나온 것 — 좋아요 순위(모달을 닫으면 사라지던 것 · 받기 실패가 표를 덮던 것 · 늦은 응답 · 목록에서 빠진 글) · 지난달 통계 저장본이 페이지를 열 때마다 버려지던 것 · 폰 알림 글의 알림 두 번 · 컨텐츠 카드 창의 다시보기 문구 · 필터를 건 최근 활동의 다시보기 직링크 · 켜 둔 화면의 애청자·달력 오늘 테두리·달력 기본 달 · 한 번 실패한 썸네일·영상 조회·순위만 글 이름 · 컨텐츠 탭 '불러오는 중' 멈춤 · 제자리에서 바뀐 최근 활동 줄 · 시각 표기 둘 · 2026-10-08e: 통계 탭 — 받기에 실패한 달(해)의 실패 문구는 아직 그 달(해)을 보고 있을 때만 그린다(받는 동안 다른 달로 옮긴 화면을 덮던 것) · 2026-10-08d: 첫 달(25년 12월)의 시간대 격자 맨 앞에 결성일 11/30 칸(Crenop '정할거~나') — 같은 줄의 방송 일수·방송 시간은 11/30을 세는데 격자·시간대 분포·주중/주말만 빼던 것 · 2026-10-08c: 안 본 범위 검토에서 나온 화면 쪽 결함 — 켜 둔 채 달이 넘어가면 옛 '이번 달' 통계가 그때 모습으로 굳던 것 · 지난달을 버리라는 신호를 다른 탭이 먼저 받으면 놓치던 것 · 클립 탭의 지난 날이 마지막으로 본 때에 멈추던 것과 두 탭이 서로의 확인 표시를 지우던 것 · 명전·달력이 한 번 실패하면 탭에 머무는 동안 다시 안 받던 것 · 끝난 방송이 없을 때 '평균 종료 00:00' · 연간 합이 방송 날짜 기록을 빼던 것 · 주소로 연 음악 탭의 멤버가 풀리던 것 · 2026-10-08b: 통계 탭을 한 번 본 화면을 켜 둔 채 달이 바뀌면 새 달 버튼이 잠긴 채 남던 것(해가 바뀌면 다음 해 화살표도) — 기간 선택기를 달이 바뀐 때도 다시 만든다(안 본 범위 자체 점검) · 2026-10-08a: 켜 둔 화면에서 시트 자료도 시간이 지나면 다시 받는다(Crenop '유저가 사이트를 사용할때 새로고침을 자주할 가능성이 있을까 싶어 … 일정시간동안은 캐시를 공유하고 그걸 넘으면 새 데이터를 받아오는 방식' → '가') — 늘 보이는 곳의 시트 넷(일정·상단바·휴방·멤버 정보)은 보이는 동안 10분마다, 탭에서만 쓰는 시트는 그 탭에 들어올 때 10분이 넘었으면. 내용이 같으면 다시 그리지 않는다(refreshSheets) · 2026-10-07d: 켜 둔 화면에서 자정·시트 만료 시각이 지나면 보조바의 기념일 상자·시트 버튼과 좌상단 로고(생일·시트 로고)를 다시 가른다 — 종전엔 그릴 때에만 가려, 켜 둔 채 자정을 넘기면 그날 생일 상자·로고가 안 뜨고 다음 날엔 전날 것이 남았다(tickBarTime) · 2026-10-07c: 좋아요 탭이 숨김 시트를 들어올 때마다 새로 받는다 — 모달을 닫은 적 없이 탭에 다시 들어오면 처음 받은 숨김 목록으로 계속 걸러, 시트 줄의 날짜가 지나 탭 버튼은 흐려졌는데(07a) 들어가 보면 요청이 그대로였다 · 2026-10-07b: 휴대폰 탭 바의 제목에 '(N)'이 남던 것(Crenop 캡처 — 최근 활동을 보는 중인데 삼성 인터넷 탭에 '천타버스 (7)') — 서랍·모달의 뒤로 가기 칸을 걷은 뒤 제목을 브라우저에 다시 알린다(reannounceTabTitle) · 2026-10-07a: 좋아요 탭이 비었을 때 탭 버튼을 40%로 흐리게(Crenop D52 'Q1다 Q2가 Q3가' — '좋아요 탭 버튼을 요청이 없을때에 약간 흐리게 … 요청이 있어도 숨김상태인지 확인 … 비수기일때는 한참 비어있는 탭') — 숨긴 요청을 뺀 요청도 순위만 글도 없을 때, 켜 둔 채 새 요청이 오면 요청 목록을 다시 받아 흐림을 풀고 새 요청 점도 켠다 · 2026-10-06f: 일정 버튼·목록도 시각이 적힌 일정은 그 시각이 지나면 내린다(Crenop '일정버튼과 목록도 시간 지나면 사라지면 안되나?' — 2026-06-15의 '시각이 지나도 그날 자정까지 D-DAY'를 바꿈. 시각이 없는 일정은 그대로 그날 자정까지) · 2026-10-06e: 06d와 동작은 같다 — 배포 폴더에 먼저 들어간 06d에서 주석 한 곳과 겹친 조건 하나(한 줄 말줄임 줄 판정 — 높이 판정이 이미 거른다)를 정리한 판이라 도장만 올림 · 2026-10-06d: 달력 칸의 일정(Crenop '일정이 언제 사라지게 할건지가 중요할듯 가령 방송켜지면 사라진다거나 시간이 있으면 해당시간 후에 사라지고 시간 없으면 해당일자 지나면 사라지는걸로 · 표기도 시간-SVG-이름 · 이름안에서도 줄바꿈이 좀더 이뻤으면 … NN의 MMM이면 의에서 줄바꿈') — 시각이 적힌 일정은 그 시각이 지나면, 시각이 없는 일정은 그날 그 멤버의 방송이 켜지면(없으면 그날이 지나면) 달력에서 내린다 · 줄은 [시각 · 종류 그림 · 제목] · 'NN의 MMM' 제목은 줄이 넘치면 '…NN의 / MMM'으로 가르고(줄 수가 늘 때만 예외 — fitCalSchedLines), 그 밖의 제목은 줄 길이를 고르게 나눈다 · 2026-10-06c: 클립 방송순 머리에서 'N월 N일 처음 올라옴'이라는 말을 없앰(Crenop '"처음 올라옴" 이라는 표현은 당최 이해가 안됨') — 방송 정보를 못 받은 크루 방송 묶음의 머리는 '원본 방송 확인 안 됨'(같은 뜻에 이미 쓰는 말), 날짜 없음 · 2026-10-06b: 클립 탭 방송순 — 사이트 방송 기록에 없는 옛 방송의 묶음 머리를 실제 방송 날짜·시간·제목으로, 누르면 그 다시보기(Crenop D51 Q1 '가' — 스크린샷의 '10월 5일 (월) 처음 올라옴' 둘: 2026-04-10·2025-03-14 방송의 다시보기에서 10/5에 새로 딴 클립). 워커 2026-10-06a가 실어 주는 src를 쓴다 — 없으면 종전 머리 · 2026-10-06a: 달력 탭에 일정(D50 Q1 '가' · Q2 '나' — Crenop '일정을 달력탭에도 추가하는것 … 다시 넣을만 한 것 같기도'): 고른 종류의 기록이 없는 날 칸에 그 멤버가 참가하는 다가올 일정을 적는다(참가자를 안 적은 일정은 달력에 없다), 기간 버튼은 일정이 있는 달까지 열린다 — calSchedBoxHtml 곁 주석 · 기기 동기화 주기 단축(Crenop '동기화 주기는 줄일 수 있으면 줄이는데'): 올리기 1분 → 15초 · 받기 5분 → 1분(실패 뒤 쉼은 5분 그대로) · 2026-10-04d: 보조바의 방송 수 표시를 버튼 속 크기에 맞춤(D49 '나' — Crenop '방송수 인디케이터만 다른 버튼과 달리 크기가 다른데 … 크기를 맞출지' · '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 높이 = 같은 줄 버튼(PC 28 · 서랍 26), 숫자 11 → 13px 상당, 점 7 → 10. 테두리는 없다(버튼이 아니다). 클립 방송 머리의 '방송 중' 칩은 그대로 · 2026-10-04c: 기념일 도착 강조의 색·자리(Crenop '천타버스 결성일 테두리는 다른 줄을 침범하지 않게 … 색은 민트로 일괄통일하지 말고 각각의 고유색 … 라이트/다크 모드에 따라 네온효과가 필요할수도') — 테두리 = 그 멤버 색(크루는 민트), 옷은 최애 도착 표시(.fav-flash)와 같다(라이트 모드의 옅은 색 멤버는 번짐). 결성 줄은 연혁 줄의 hover 자리(글 둘레 2·6) 안에서만 두른다 · 2026-10-04b: 기념일 버튼을 누르면 프로필의 그 기념일 줄(생일·첫 방송일·숲 기준 첫 방송일·크루 연혁의 결성)로 가서 민트 테두리를 잠깐 켠다(Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로' — celebFlash) · 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
+const BUILD = '2026-10-19a';   // 2026-10-19a: 달을 넘긴 노방종을 다음 달 달력에도 잇는다(Crenop '가' — 기록은 시작한 달에만 있어 다음 달 칸이 비던 것): 달력이 지난달 통계도 받아 지난달에 시작한 방송의 이 달 날짜를 싣는다(N일째·띠·'방송 중' 그대로) · 방송 중인 노방종의 '방송 중'이 시작 시각 전(0시~)엔 어제 칸에 붙고 오늘 칸이 비던 것 — 방송 중이면 오늘 칸까지 · 2026-10-18a(올라가기 전에 19a에 합침): 달력 탭의 하루를 넘긴 방송(노방종 — Crenop D56 'Q1 가+마 · Q2 다 · Q3 가'): 시작한 날 칸 하나에만 들어가 이어진 날이 빈 칸이던 것 — 걸침 규칙(방송 일수와 같은 24시간마다 하루)의 날마다 그날 녹화된 다시보기 조각 그림 + 'N일째' + 칸 아래를 잇는 얇은 띠, 방송 중이면 그 방송의 마지막 칸만 '방송 중'(방송 중에도 숲에 올라온 조각을 받는다), 하루 모달은 그날의 변경 줄·조각만이고 방송 행 시각에 날짜(통계 탭 방송 목록도) · 2026-10-16a: 컨텐츠·현수막·케미 링크 모달에서 구획마다 타일이 한 장뿐이면 빈 칸이 없게(Crenop '최소 폭이 2열로 설정되어있지만 컨텐츠는 1열이라 남는 빈공간에 대한 대책' → 추천대로): PC·태블릿은 모달을 타일 한 장 폭까지 좁히고(종전 가장 좁아도 440 — 타일 두 장 폭), 휴대폰은 모달 폭 그대로 타일을 모달 폭으로 · 2026-10-11a: 관련 링크 유튜브 줄 — 시트 E열 숫자가 PC 표의 자리(Crenop '1행 본채널, 2행 부채널, 3행 소속채널 … E열에 숫자가 연결되지 않아도 인식이 되어야': 2가 없는 멤버의 3은 셋째 자리에, 둘째 자리는 비운다. 종전엔 E가 순서일 뿐이라 위로 붙었다) · 2026-10-10a: 채팅 묶음을 접으면 첫 1줄만(종전 앞 3줄 — Crenop '채팅 줄일때 1줄빼고 다줄이는게 아니라 3줄 남기는 이유는 뭐야?': 3은 근거 없는 어림값이었다) · 접기 띠는 2줄 묶음부터 = 모든 묶음(종전 4줄부터 — 원칙 '남기는 줄 + 1' 그대로) · 2026-10-09d: X 아이콘 — 글리프만, 다크 흰색 · 라이트 검정(Crenop 'X자 모양만 두고 모드에 따라 흰/검만 바꾸는 방식'. 종전: 검은 바탕 칩 + 흰 X) · 그래서 09b의 칩 여백 처리(margin: -2px 0)는 걷음(Crenop '억지로 손봤던 크기 이슈도 같이 손보면') · 2026-10-09c: 인스타그램 아이콘 — 공식 글리프 + 그라데이션(Crenop D54 Q1 '나'. 종전: 꽉 찬 분홍 네모에 고리·점 구멍) · 2026-10-09b: 관련 링크 단추 높이 — 바탕 칩이 있는 아이콘(X)의 단추만 4px 높던 것(Crenop D53 Q1 '다': 칩이 위아래 여백을 2px씩 차지, 아이콘 크기는 그대로) · 2026-10-09a: 관련 링크의 유튜브 줄 개수 제한 없음(Crenop '유튜브 쪽이 최대 3칸이 필요해지니까' — 문모모 클립 채널. 종전엔 둘까지만 읽고 셋째 줄부터 버렸다) · 2026-10-08g: 좋아요 탭 셋 — 탭을 떠난 뒤에 도착한 목록이 요청을 '본 것'으로 찍던 것 · 보는 중에 새 요청이 와 다시 그리면 앞서 있던 새 요청 표시가 사라지던 것 · 시트 받기 실패가 이 화면의 시트를 저장소 사본으로 바꿔 끼우던 것 · 2026-10-08f: 프론트 나머지 구획 전수 읽기에서 나온 것 — 좋아요 순위(모달을 닫으면 사라지던 것 · 받기 실패가 표를 덮던 것 · 늦은 응답 · 목록에서 빠진 글) · 지난달 통계 저장본이 페이지를 열 때마다 버려지던 것 · 폰 알림 글의 알림 두 번 · 컨텐츠 카드 창의 다시보기 문구 · 필터를 건 최근 활동의 다시보기 직링크 · 켜 둔 화면의 애청자·달력 오늘 테두리·달력 기본 달 · 한 번 실패한 썸네일·영상 조회·순위만 글 이름 · 컨텐츠 탭 '불러오는 중' 멈춤 · 제자리에서 바뀐 최근 활동 줄 · 시각 표기 둘 · 2026-10-08e: 통계 탭 — 받기에 실패한 달(해)의 실패 문구는 아직 그 달(해)을 보고 있을 때만 그린다(받는 동안 다른 달로 옮긴 화면을 덮던 것) · 2026-10-08d: 첫 달(25년 12월)의 시간대 격자 맨 앞에 결성일 11/30 칸(Crenop '정할거~나') — 같은 줄의 방송 일수·방송 시간은 11/30을 세는데 격자·시간대 분포·주중/주말만 빼던 것 · 2026-10-08c: 안 본 범위 검토에서 나온 화면 쪽 결함 — 켜 둔 채 달이 넘어가면 옛 '이번 달' 통계가 그때 모습으로 굳던 것 · 지난달을 버리라는 신호를 다른 탭이 먼저 받으면 놓치던 것 · 클립 탭의 지난 날이 마지막으로 본 때에 멈추던 것과 두 탭이 서로의 확인 표시를 지우던 것 · 명전·달력이 한 번 실패하면 탭에 머무는 동안 다시 안 받던 것 · 끝난 방송이 없을 때 '평균 종료 00:00' · 연간 합이 방송 날짜 기록을 빼던 것 · 주소로 연 음악 탭의 멤버가 풀리던 것 · 2026-10-08b: 통계 탭을 한 번 본 화면을 켜 둔 채 달이 바뀌면 새 달 버튼이 잠긴 채 남던 것(해가 바뀌면 다음 해 화살표도) — 기간 선택기를 달이 바뀐 때도 다시 만든다(안 본 범위 자체 점검) · 2026-10-08a: 켜 둔 화면에서 시트 자료도 시간이 지나면 다시 받는다(Crenop '유저가 사이트를 사용할때 새로고침을 자주할 가능성이 있을까 싶어 … 일정시간동안은 캐시를 공유하고 그걸 넘으면 새 데이터를 받아오는 방식' → '가') — 늘 보이는 곳의 시트 넷(일정·상단바·휴방·멤버 정보)은 보이는 동안 10분마다, 탭에서만 쓰는 시트는 그 탭에 들어올 때 10분이 넘었으면. 내용이 같으면 다시 그리지 않는다(refreshSheets) · 2026-10-07d: 켜 둔 화면에서 자정·시트 만료 시각이 지나면 보조바의 기념일 상자·시트 버튼과 좌상단 로고(생일·시트 로고)를 다시 가른다 — 종전엔 그릴 때에만 가려, 켜 둔 채 자정을 넘기면 그날 생일 상자·로고가 안 뜨고 다음 날엔 전날 것이 남았다(tickBarTime) · 2026-10-07c: 좋아요 탭이 숨김 시트를 들어올 때마다 새로 받는다 — 모달을 닫은 적 없이 탭에 다시 들어오면 처음 받은 숨김 목록으로 계속 걸러, 시트 줄의 날짜가 지나 탭 버튼은 흐려졌는데(07a) 들어가 보면 요청이 그대로였다 · 2026-10-07b: 휴대폰 탭 바의 제목에 '(N)'이 남던 것(Crenop 캡처 — 최근 활동을 보는 중인데 삼성 인터넷 탭에 '천타버스 (7)') — 서랍·모달의 뒤로 가기 칸을 걷은 뒤 제목을 브라우저에 다시 알린다(reannounceTabTitle) · 2026-10-07a: 좋아요 탭이 비었을 때 탭 버튼을 40%로 흐리게(Crenop D52 'Q1다 Q2가 Q3가' — '좋아요 탭 버튼을 요청이 없을때에 약간 흐리게 … 요청이 있어도 숨김상태인지 확인 … 비수기일때는 한참 비어있는 탭') — 숨긴 요청을 뺀 요청도 순위만 글도 없을 때, 켜 둔 채 새 요청이 오면 요청 목록을 다시 받아 흐림을 풀고 새 요청 점도 켠다 · 2026-10-06f: 일정 버튼·목록도 시각이 적힌 일정은 그 시각이 지나면 내린다(Crenop '일정버튼과 목록도 시간 지나면 사라지면 안되나?' — 2026-06-15의 '시각이 지나도 그날 자정까지 D-DAY'를 바꿈. 시각이 없는 일정은 그대로 그날 자정까지) · 2026-10-06e: 06d와 동작은 같다 — 배포 폴더에 먼저 들어간 06d에서 주석 한 곳과 겹친 조건 하나(한 줄 말줄임 줄 판정 — 높이 판정이 이미 거른다)를 정리한 판이라 도장만 올림 · 2026-10-06d: 달력 칸의 일정(Crenop '일정이 언제 사라지게 할건지가 중요할듯 가령 방송켜지면 사라진다거나 시간이 있으면 해당시간 후에 사라지고 시간 없으면 해당일자 지나면 사라지는걸로 · 표기도 시간-SVG-이름 · 이름안에서도 줄바꿈이 좀더 이뻤으면 … NN의 MMM이면 의에서 줄바꿈') — 시각이 적힌 일정은 그 시각이 지나면, 시각이 없는 일정은 그날 그 멤버의 방송이 켜지면(없으면 그날이 지나면) 달력에서 내린다 · 줄은 [시각 · 종류 그림 · 제목] · 'NN의 MMM' 제목은 줄이 넘치면 '…NN의 / MMM'으로 가르고(줄 수가 늘 때만 예외 — fitCalSchedLines), 그 밖의 제목은 줄 길이를 고르게 나눈다 · 2026-10-06c: 클립 방송순 머리에서 'N월 N일 처음 올라옴'이라는 말을 없앰(Crenop '"처음 올라옴" 이라는 표현은 당최 이해가 안됨') — 방송 정보를 못 받은 크루 방송 묶음의 머리는 '원본 방송 확인 안 됨'(같은 뜻에 이미 쓰는 말), 날짜 없음 · 2026-10-06b: 클립 탭 방송순 — 사이트 방송 기록에 없는 옛 방송의 묶음 머리를 실제 방송 날짜·시간·제목으로, 누르면 그 다시보기(Crenop D51 Q1 '가' — 스크린샷의 '10월 5일 (월) 처음 올라옴' 둘: 2026-04-10·2025-03-14 방송의 다시보기에서 10/5에 새로 딴 클립). 워커 2026-10-06a가 실어 주는 src를 쓴다 — 없으면 종전 머리 · 2026-10-06a: 달력 탭에 일정(D50 Q1 '가' · Q2 '나' — Crenop '일정을 달력탭에도 추가하는것 … 다시 넣을만 한 것 같기도'): 고른 종류의 기록이 없는 날 칸에 그 멤버가 참가하는 다가올 일정을 적는다(참가자를 안 적은 일정은 달력에 없다), 기간 버튼은 일정이 있는 달까지 열린다 — calSchedBoxHtml 곁 주석 · 기기 동기화 주기 단축(Crenop '동기화 주기는 줄일 수 있으면 줄이는데'): 올리기 1분 → 15초 · 받기 5분 → 1분(실패 뒤 쉼은 5분 그대로) · 2026-10-04d: 보조바의 방송 수 표시를 버튼 속 크기에 맞춤(D49 '나' — Crenop '방송수 인디케이터만 다른 버튼과 달리 크기가 다른데 … 크기를 맞출지' · '높이만 늘리면 의미없지 위아래 여백만 쓸데없이 넓어지잖아'): 높이 = 같은 줄 버튼(PC 28 · 서랍 26), 숫자 11 → 13px 상당, 점 7 → 10. 테두리는 없다(버튼이 아니다). 클립 방송 머리의 '방송 중' 칩은 그대로 · 2026-10-04c: 기념일 도착 강조의 색·자리(Crenop '천타버스 결성일 테두리는 다른 줄을 침범하지 않게 … 색은 민트로 일괄통일하지 말고 각각의 고유색 … 라이트/다크 모드에 따라 네온효과가 필요할수도') — 테두리 = 그 멤버 색(크루는 민트), 옷은 최애 도착 표시(.fav-flash)와 같다(라이트 모드의 옅은 색 멤버는 번짐). 결성 줄은 연혁 줄의 hover 자리(글 둘레 2·6) 안에서만 두른다 · 2026-10-04b: 기념일 버튼을 누르면 프로필의 그 기념일 줄(생일·첫 방송일·숲 기준 첫 방송일·크루 연혁의 결성)로 가서 민트 테두리를 잠깐 켠다(Crenop '기념일 버튼을 눌렀을때 어떤게 기념일인지 강조하기, 방식은 케미탭 관련 케미와 비슷한 방식으로' — celebFlash) · 2026-10-04a: 케미 탭 연관 케미를 묶음 낱말로(Crenop '지금은 직접 관련 케미 명을 모두 입력해야 하는데, 그 케미들을 대표하는 단어를 넣고 그 단어가 포함되면 전부 묶이는 걸로' → 기준 'D열만') — 케미 시트 D열에 같은 낱말을 적은 케미끼리 서로 연관(chemRelatedMap). 케미 이름을 적던 옛 줄도 그대로 통한다 · 2026-10-03c: 클립 탭의 확인을 같은 장면 단위로(D48 Q1나 Q2가 — Crenop '체크를 다했는데 상단바에 전부 확인안된걸로 나오는 경우 … 같은 장면 클립 … 뒤늦게 추가되면 밖에서는 흐림처리되있고 모달안에서만 NEW 처리되어서 찾기가 힘들단 말이지'): 같은 장면의 클립 하나라도 확인이면 그 장면의 클립을 모두 확인으로 적는다 — 하나만 열어도, 더 불러와 뒤늦게 들어온 클립도(clipSceneNos·clipSceneFill). 종전엔 카드는 '하나라도'로 흐려지는데 개수는 클립 하나씩이라 어긋났다 · 2026-10-03b: 최근 활동이 화면에 보이는 동안에는 탭 제목에 안 읽음 수 (N)을 붙이지 않는다(Crenop '알림을 읽었을때 제목옆에 (NN)이 모바일에서는 안사라지네' — 읽음은 떠날 때 찍혀, 탭 바가 늘 보이는 휴대폰에서는 보고 있는 동안 내내 남았다). 줄의 안 읽음 표시·배지·읽음 처리 시점은 그대로 · 2026-10-03a: D47(Crenop '좋아요 탭에 좋아요 요청은 없지만 순위 제공이 필요한 경우가 있어서' → Q1나 Q2나 Q3다) — 좋아요 시트에 숨기지 않은 줄이 있는 숲 글은 요청이 없어도 머리 줄 + [순위]를 낸다(likeRankOnlyPosts). 이름은 워커 /like-post(worker 2026-10-03a)가 받아 온 방송국 닉·글 제목, 머리 아래 '좋아요 요청이 없습니다.' 한 줄, 자리는 시트 줄 차례(아래 = 최신 → 위 — likeListItems) · 2026-10-02t: D46 Q1 '가'(일관성 점검 ⑤) — 클립 한 목록 머리 줄, 휴대폰 폭(머리 줄 안쪽 347 이하)에서 전환 버튼 둘을 위아래로 쌓고 오른쪽은 2×2(윗줄 맨 위로·맨 아래로, 아랫줄 정렬 — 통계·넓은 휴대폰의 클립과 같은 자리, 높이 78 그대로). 종전 02p~02s는 전환 한 줄 + 버튼 넷 한 줄 · 2026-10-02s: 일관성 점검 뒤 Crenop 결정 — ① 클립 방송순 머리의 '클립 N개'·방송 길이를 좁은 칸(화면 약 359 이하)에서도 보여 준다(Claude가 넣었던 숨김 규칙 삭제) ② 좋아요 요청의 확인한 줄을 클립과 같은 옷으로(무채 체크 + 흑백 50%) ④ 말 통일: 옛 이름(이벤트·봄 표시·디스코그래피·명예의 전당) → 지금 이름(최근 활동/활동·확인 표시·음악·명전) · 받기 실패는 '불러오지 못했습니다'(시도했다가 실패한 것) · '데이터' 뺌 · '~는 중'엔 말줄임표 ⑥ 숫자에 천 단위 쉼표를 쓰지 않는다. 2026-10-02r: 글꼴 버그 — 필터 판의 종류 칩(최근 활동·케미·컨텐츠·현수막)과 최애 고르기 모달의 발 버튼이 사이트 글꼴을 물려받지 않아 브라우저 기본 글꼴로 그려지던 것(버튼은 글꼴 상속이 끊긴다 — 일관성 점검 실측: 조작부 948개 중 이 둘만). 발 버튼은 손가락 커서도. 2026-10-02q: 클립 PC 두 칸 머리 줄의 확인 개수를 좁은 폭(화면 약 1273 이하)에서도 보여 준다 — 02p는 그 폭에서 숨겼다(Crenop '휴대폰 폭에서도 보여 주는데 특정 화면 폭에서 정보를 제공하지 않는 건 일관성을 해치는 결정'). 자리가 좁으면 휴대폰 전환 버튼과 같은 짧은 꼴('멤버 0/278'). 2026-10-02p: 클립 탭(Crenop D45 'Q1나 Q2다 Q3다 Q4나') — 새 클립 배지 New → NEW · 확인 체크는 색 없이(민트는 새 클립에만) · 확인한 타일은 흑백 + 50%(밝은 화면에서도 갈리게) · 머리 줄 개수에 확인 개수(PC '251개 중 80개 확인' · 휴대폰 전환 버튼 '80/251', 체크를 바꾸면 바로) · 한 목록 머리 줄에서 전환 버튼이 [맨 위로][맨 아래로] 옆에 안 들어가면 그 둘을 다음 줄로(전환 버튼을 위아래로 쌓던 02k를 대신 — '맨위로/맨아래로 버튼을 다음 행으로 넘기는 게 나을 것 같네'). 2026-10-02o: 최근 활동 채팅 묶음 접기(Crenop D44 '좁히고 나면 늘리는 방법이 두 가지라서 별로야 — 채팅 갯수는 마지막 채팅 옆에 별도로 표기') — [나머지 N줄 보기] 버튼을 없애고 펴는 길은 접기 띠 하나, 개수는 접혔을 때 마지막으로 보이는 채팅 끝에 '+N' 상자(Q1 가 · Q2 가), 띠는 4줄부터(Q3 가 — 버튼 줄이 없어져 4줄도 접으면 한 줄 준다). 2026-10-02n: 모아보기 모달이 한 건이면 패널도 한 칸 폭(377 — Crenop '1개일 때 굳이 폭을 넓게 쓰는 건 안 바꿨나 보네': 02d는 머리글만 고쳐 카드 옆 절반이 비었다). 2026-10-02m: 동기화 켜짐 장면 안내 둘째 문장의 줄바꿈을 못 박지 않고 필요할 때만 그 자리에서(Crenop '(\n)이면 줄바꿈 필요할 때 위치로 이해할 줄 알았는데' — 02l은 <br>로 늘 끊었다: PC는 한 줄, 휴대폰은 '아닌' 뒤에서). 2026-10-02l: 기기 동기화 켜짐 장면 안내 문구(Crenop '문구가 너무 지리멸렬 — 실시간 동기화 목적이 아닌 (줄바꿈) 기기를 옮겨 사용하는 경우를 위한 기능입니다. 로') — 종전 '바로 맞추는 기능이 아니라, 기기를 옮겨 쓸 때를 위한 작은 편의 기능입니다.'. 2026-10-02k: 클립 한 목록 머리 줄(Crenop D43 '안 이뻐' — [멤버 NN][외부인 NN] 폭을 넓은 쪽에 맞추고 글자는 왼쪽 끝·숫자는 오른쪽 끝(Q1 다), 나란히 안 들어가는 폭에서만 위아래로(Q2 가), 짜임을 다른 머리 줄과 같게 — 왼쪽 전환·오른쪽 맨 위로·맨 아래로 + 정렬: 넓은 폭은 한 줄(Q3 가)) · 기기 동기화 안내 문구(켜짐 장면 두 줄·코드 장면 한 줄 — D43 Q4 나·Q5 나, 동작은 그대로). 2026-10-02j: 기기 동기화(Crenop D40·D42 — 보조바 오른쪽 묶음 끝 [기기 동기화] 버튼(하늘) · 코드 6자리로 기기를 묶어 최근 활동·클립·좋아요 요청의 확인 표시를 맞춘다, 워커 2026-10-02a의 POST /sync — syncTick 곁 주석) · 화면 모드 버튼 색(어두운 화면의 해 = 주황, 밝은 화면의 달 = 보라 — 종전 기본 파랑). 2026-10-02i: 최근 활동 [모두 읽음] → [모두 확인함](클립의 [여기까지 모두 확인함]과 같은 말 — Crenop '3가지 모두 확인했다고 표현을 통일'). 2026-10-02h: 최근 활동 접기 띠를 목록 상자 바깥으로 · 안 읽음 막대를 줄 안으로 맞바꿈 — 줄 좌우 여백 같게(D39 Q1 가, .event 곁 주석) · 좋아요 요청 탭 막대도 안으로. 2026-10-02g: 좁은 머리 줄의 그림만 버튼을 정렬 버튼과 같은 폭으로(같은 열 — D38 Q1 나). 2026-10-02f: 채팅 접기 띠는 5줄부터(접으면 실제로 줄어드는 길이 — D37 Q1 가). 2026-10-02e: 좁은 머리 줄에서 빼는 것은 글자뿐(02d의 여백 8·안 켜진 화살표 숨김 되돌림 — 정렬을 바꿀 때 버튼 폭·자리가 흔들렸다). 2026-10-02d: D36 답 — 모아보기 한 건이면 머리글은 제목만 · 클립 [여기까지 모두 확인함]·[이 방송 모두 확인함] · 채팅 접기 10줄부터 · 접기 띠 18 · 클립 칸 스크롤 띠 숨김 · 좁은 머리 줄은 버튼 그림만. 2026-10-02c: 일정 버튼 폭 상한 없앰(폭이 남는데 제목이 말줄임되던 것 — .subbar-lead .sch-line 곁 주석). 2026-10-02b: 라이트 모드 알림 종을 보조바 버튼 규칙으로(켬 = 앰버 채움 + 짙은 글자, 끔 = 회색 테두리) · 문장 '상단의' → '위의'. 2026-10-02a: 종 버튼에 '알림' 글자(D35 Q1 가) · 최근 활동 오른쪽 칸 아래 문장 '위의 멤버/종류 필터는 알림에도 적용됩니다.'(02a는 '상단의'). 2026-10-01d: 휴대폰에서도 종 알림이 울리게(sw.js 새 파일 — swNotify 곁 주석). 2026-10-01c: 휴대폰·태블릿 손짓 안내 띠(D34 — swipeHintDone 곁 주석). 2026-10-01b: 클립 탭 기둥을 '하나 고르기'에서 필터로(천타버스 + 13명 14칸, 여럿이면 많이 포함된 순 단계 — clipNeed 곁 주석, D33) · 좋아요 요청 줄에서 시간 뺌. 2026-10-01a: 좋아요 탭 PC(두 칸)에서 요청이 있으면 맨 위 요청의 순위를 기본으로 고름(likeRankAutoDone). 2026-09-30a: 클립 끝 버튼을 누른 칸은 끝 줄을 그 자리에(안내 줄 '첫 새 클립으로'가 칸 아래 끝에 잘리거나 칸 밖으로 밀리던 것 — clipHoldEnd). 29j: 접기 띠 화살표마다 제 구역(화면 가장자리에 조금 걸칠 때 겹침 고침). 29i: 긴 채팅 묶음 접기 띠(D29 Q1 가 — 10줄 넘는 묶음, 안 읽음 막대는 상자 바깥) · 순위표 비멤버 대표 이름 사진 칸까지 오른쪽 붙임(C5 가). 29h: 좋아요 요청 줄도 누구 댓글인지 늘 이름(C2 — 29f Q7의 같은 멤버 이름 빼기 되돌림). 29g: 휴대폰 좌우 여백 16(Q5) · 기둥 편 태블릿 컨텐츠·현수막 두 칸(Q10) · 케미 채팅 수 13px(C18) · 이모티콘 버튼 29e로 되돌림(Q8 — 버튼 통일성). 29f: 전 탭 리뷰 A 남은 18건 · B 답(Q2 글자·Q3 24px·Q6 이름·기간 줄·Q7 좋아요 좁은 배치·Q8 이모티콘 짝·Q13 문구) · D25 모달 고유 색 · C1 안 읽음 = 줄 수. 29e: 모달 점검 — 새 모달·2단계는 맨 위부터(본문 상자를 같이 써 앞 모달 스크롤이 남았다, showModal·bindLinkPicks 곁 주석), 칭호 그림이 1280×800에서 49px 잘리던 것. 29d: 클립 방금 불러온 표시(D24b "가'1 · 민트 · Q1가" — 글자 칸 막대·바탕 + 썸네일 오른쪽 위 New 배지 + 끝 줄 위 안내 '첫 새 클립으로', clipFreshNos 곁 주석). 29c: 전 탭 리뷰 A 첫 묶음 · 클립 자정 뒤 새 오늘을 따로 받기
 console.log('[build] front ' + BUILD);
 const WORKER_URL = 'https://outage-nll.pages.dev';   // 2026-09-28j: 워커를 Cloudflare Pages 앞문으로 부른다(Pages 프로젝트의 _worker.js가 받은 요청을 서비스 바인딩 API로 기존 워커에 그대로 넘긴다 — 원본은 프로젝트 폴더 pages-front/_worker.js).
 //   까닭: 한국 KT 회선에서 workers.dev는 미국(DFW·LAX)으로 들어가 요청마다 약 0.5초가 붙었다(Cloudflare가 KT에 싼 요금제 주소 묶음을 서울에서 알리지 않음 — 구조적, 복구 기약 없음).
@@ -7653,7 +7667,57 @@ function ensureCalMonth() {
   if (!statsState.data[ym] && Date.now() - (calStatsFailAt[ym] || 0) > 30000) {   // 받는 중이면 loadStatsMonth가 그 요청을 돌려줘 같이 기다린다(2026-09-27i — 종전엔 부르지 않아 도착해도 다시 안 그렸다)
     loadStatsMonth(ym).then(() => { if (!statsState.data[ym]) calStatsFailAt[ym] = Date.now(); queueCalRender(); });   // 실패도 다시 그려 '불러오지 못했습니다'를 띄운다 — 30초 안엔 위 조건이 다시 묻지 않아 맴돌지 않는다
   }
-  if (calState.type === 'live' && monthNeedsVodList(calMember().id, ym)) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
+  // 지난달 통계 — 지난달에 시작해 이 달로 이어진 방송(calCarrySessions)을 잇는다(2026-10-18 D56 후속 Crenop '가'). 지난달은 브라우저에 저장되므로 방문자마다 처음 한 번 받는다
+  //   (끝 안 난 방송이 있으면 저장 보류 — loadStatsMonth). 받는 중이면 그 요청을 같이 기다린다(위와 같다 — 다른 탭이 먼저 부른 달도 도착하면 다시 그린다).
+  //   실패해도 이 달 그림은 그대로 두고 다시 그리지 않는다(30초 뒤 다음 그리기에서 한 번 더 — 맴돌지 않게)
+  const pym = prevYmOf(ym);
+  if (calState.type === 'live' && pym >= STATS_FIRST_YM && !statsState.data[pym] && Date.now() - (statsState.failAt[pym] || 0) >= 30000) {
+    loadStatsMonth(pym).then(() => { if (statsState.data[pym]) queueCalRender(); else calLoadingSettle(); });
+  }
+  if (calState.type === 'live' && (monthNeedsVodList(calMember().id, ym) || calLiveSpanNeedsList(calMember().id, ym))) ensureVodMonth(calMember().id, ym);   // 스냅샷 없는 세션이 있을 때만 폴백 목록(2026-09-07). 유튜브 종류는 월 통계에 업로드 목록이 있어 따로 받을 것이 없다
+}
+// 방송 중인 방송이 하루를 넘겼나(2026-10-18 D56 Q2 다): 숲은 긴 방송의 조각을 방송 도중에도 올린다(10/18 나나문 7일째 — 10/13 ~ 그날 13:17 조각 13개가 이미 목록에) —
+//   지난 날 칸을 그날 그림으로 채우려면 방송 중에도 목록을 받는다(목록은 당월 5분 신선도 · 워커 /vods 엣지 캐시 5분, KV 읽기 없음). 종전엔 끝난 방송에만 받았다(monthNeedsVodList)
+//   지난달에서 이어진 방송도 스냅샷이 없으면 이 달에 올라온 조각을 이 달 목록에서 찾는다(목록은 올라온 시각으로 달을 가른다 — 워커 /vods)
+function calLiveSpanNeedsList(memberId, ym) {
+  const ms = statsState.data[ym] && statsState.data[ym][memberId];
+  if (!ms) return false;
+  const now = Date.now();
+  return (ms.sessions || []).some(s => s.broad_no && !Array.isArray(s.vods) && sessionOpenLive(memberId, s) && sessionDateKeys(s, ym, now).length > 1)
+    || calCarrySessions(memberId, ym, now).some(s => s.broad_no && !Array.isArray(s.vods));
+}
+// 지난달에 시작해 이 달로 이어진 방송(2026-10-18 D56 후속 Crenop '가' — 달을 넘긴 노방종을 다음 달 달력에도 잇는다). 기록은 시작한 달에만 있어 지난달 통계에서 꺼낸다:
+//   지난달 통계의 그 달 방송(computeMonthSummary — 통계와 같은 월 게이트) 중 끝 시각이 있거나 지금 방송 중이고, 날짜 키가 이 달에 닿는 것. 지난달 통계가 아직 없으면 없음
+//   (ensureCalMonth가 받아 오면 다시 그린다). 두 달을 넘긴 방송(30일 넘게)은 안 본다
+function calCarrySessions(memberId, ym, nowMs) {
+  const pym = prevYmOf(ym), pd = pym >= STATS_FIRST_YM && statsState.data[pym];
+  if (!pd || !pd[memberId]) return [];
+  const [py, pm] = pym.split('-').map(Number);
+  const out = [];
+  for (const ss of Object.values(computeMonthSummary(pd[memberId], py, pm, nowMs).sessionsByDate)) {
+    for (const s of ss) { const onAir = sessionOpenLive(memberId, s); if ((s.end || onAir) && calSessionKeys(s, onAir, nowMs).some(dk => dayInStatsMonth(dk, ym))) out.push(s); }
+  }
+  return out;
+}
+// 달력에 실을 방송의 날짜 키 — 걸침 규칙(sessionDateKeys — 24시간마다 하루, 달에서 끊지 않음) + 방송 중인 노방종은 오늘까지(2026-10-19a).
+//   걸침 규칙만이면 방송 중인 노방종의 오늘은 시작 시각이 지나야 들어와(10/12 20:01 시작 → 10/19 0시~20시엔 10/18까지), '방송 중'이 어제 칸에 붙고
+//   오늘 칸이 비었다(D56 Q2 다 '오늘만 방송중'). 하루짜리(자정을 넘긴 방송 포함)는 늘이지 않는다 — 방송 일수와 같은 규칙(자정을 넘겨도 하루). 끝나면 걸침 규칙 그대로
+function calSessionKeys(s, onAir, nowMs) {
+  const keys = sessionDateKeys(s, null, nowMs);
+  if (onAir && keys.length > 1) {
+    const today = isoToKstDateKey(new Date(nowMs).toISOString());
+    if (today && today > keys[keys.length - 1]) keys.push(today);   // 오늘은 마지막 키와 같거나 그다음 날이다(남은 시각이 하루를 못 채움)
+  }
+  return keys;
+}
+// 끝 시각이 없는 기록이 지금 실제로 방송 중인 그 방송인가 — 최신 /feed의 방송 상태(liveInfoMap)와 방송 번호로.
+//   끝이 빠진 채 남은 기록(종료 누락 — 명전이 48시간 상한으로 막는 것)은 아니다: 달력이 그 기록을 달 끝까지 이은 '노방종'으로 그리거나 '방송 중'을 달지 않게(2026-10-18 D56).
+//   방송 상태를 아직 못 받았으면(첫 /feed 전) 믿는다 — 받으면 다음 그리기에서 바로잡힌다
+function sessionOpenLive(memberId, s) {
+  if (!s || s.end) return false;
+  const info = liveInfoMap[memberId];
+  if (!info) return !Object.keys(liveInfoMap).length;
+  return !!info.live && (!s.broad_no || !info.broad_no || String(info.broad_no) === String(s.broad_no));
 }
 // 자료 도착에 따른 재렌더를 한 프레임에 한 번으로 합친다(2026-09-02) — 통계와 다시보기 목록이 잇따라 도착해도 한 번만 그린다
 // (깜빡임 + 그 사이 클릭 유실 방지). 썸네일 탭이 아니면 그리지 않는다(다음 진입 때 그린다).
@@ -7668,7 +7732,7 @@ function queueCalRender() {
 function calMonthLoading() {
   const ym = calYm();
   if (statsState.loadingMonths.has(ym)) return true;
-  return calState.type === 'live' && vodState.loading.has(vodKey(calMember().id, ym));
+  return calState.type === 'live' && (vodState.loading.has(vodKey(calMember().id, ym)) || statsState.loadingMonths.has(prevYmOf(ym)));   // 지난달 통계(이어진 방송 — calCarrySessions)
 }
 // 요청이 실패로 끝났을 때 — 더 오는 것이 없으면 표시만 떼어낸다. 다시 그리지 않는 이유: 그리면 ensureCalMonth가 실패한 목록을
 // 곧바로 다시 요청해 '실패 → 그림 → 재요청 → 실패'가 맴돈다(도착 성공 때만 다시 그린다는 종전 규칙 유지).
@@ -7699,24 +7763,53 @@ function calItemsByDate() {
     for (const d of Object.values(map)) if (d.n.live && d.sched.length) { d.sched = d.sched.filter(s => s.hasTime); d.n.sched = d.sched.length; }   // 시각이 없는 일정: 그날 방송이 켜지면 내린다(06d — 그날 시작한 방송 기록)
     if (calState.type === 'live') {
       const seenVod = {};   // 날짜별 이미 센 다시보기 — 두 방송이 같은 다시보기를 가리켜도 한 번만
-      for (const [dk, sessions] of Object.entries(sum.sessionsByDate)) {
-        const seen = seenVod[dk] || (seenVod[dk] = new Set());
+      const nowMs = Date.now();
+      const groups = Object.entries(sum.sessionsByDate);
+      const carry = calCarrySessions(m.id, ym, nowMs);   // 지난달에 시작해 이 달로 이어진 방송(시작일 키 없음 — 늘 하루를 넘긴 방송이다)
+      if (carry.length) groups.push([null, carry]);
+      for (const [dk0, sessions] of groups) {
         for (const s of sessions) {
           const at = new Date(s.start).getTime();   // 정렬 기준(시각 → 파트)
           const parts = sessionVods(s) ?? vodsForBroad(m.id, ym, s.broad_no);   // 세션 스냅샷 우선(2026-09-07) · null = 목록 미도착 → 그림 보류, 도착 시 재렌더로 채움
-          day(dk).live.push({ s, at, parts });
-          if (parts === null) {
-            if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(세션 70)
-              day(dk).vodPending = true;
-              if ((vodState.fails[vodKey(m.id, ym)] || 0) >= VOD_FAIL_LIMIT) day(dk).vodFail = true;   // 연달아 실패 — '불러오는 중'이 아니라 '불러오지 못함'
+          // 하루를 넘긴 방송(노방종 — 2026-10-18 D56 Crenop 'Q1 가+마 · Q2 다 · Q3 가'): 종전엔 시작한 날 칸에만 들어가 이어진 날이 빈 칸이었다
+          //   (7월 나나문 7일 방송 — 방송 일수 27일인데 달력에 보이는 날 20일). 방송 일수와 같은 걸침 규칙(sessionDateKeys — 24시간마다 하루)의 날마다 싣는다:
+          //   그날 칸의 다시보기 = 그날 녹화된 조각(vodPartSpan이 그날과 겹치는 것 — 이틀에 걸친 조각은 양쪽 날, 시각을 모르는 조각은 시작일) · 하루 모달의 변경 줄도 그날 것만(rowS).
+          //   한 날짜짜리 방송은 종전 그대로. 날짜 키는 달에서 끊지 않고 전부 센다(N일째·띠·'방송 중'이 방송 전체 기준) — 칸은 이 달 것만 싣고,
+          //   다음 달로 이어진 날은 다음 달 달력이 지난달 통계에서 꺼내 잇는다(calCarrySessions — 기록은 시작한 달에만 있다)
+          const onAir = sessionOpenLive(m.id, s);
+          const keys = s.end || onAir ? calSessionKeys(s, onAir, nowMs) : [dk0];   // 끝이 빠진 채 남은 기록은 종전처럼 시작일 칸만(sessionOpenLive 곁 주석)
+          const span = keys.length > 1;
+          (span ? keys : [dk0]).forEach((dk, i) => {
+            if (span && !dayInStatsMonth(dk, ym)) return;   // 이 달 칸만
+            const a = Date.parse(dk + 'T00:00:00+09:00'), b = a + 86400000;
+            const ovOf = v => { const sp = vodPartSpan(v); return sp ? Math.min(sp.en, b) - Math.max(sp.st, a) : (i === 0 ? 1 : 0); };
+            const dayParts = parts && span ? parts.filter(v => ovOf(v) > 0) : parts;
+            const e = { s, at, parts: dayParts };
+            if (span) { e.span = { i, n: keys.length }; e.rowS = Object.assign({}, s, { changes: (s.changes || []).filter(c => { const t = Date.parse(c.time); return t >= a && t < b; }) }); }
+            const d = day(dk);
+            d.live.push(e);
+            if (onAir && i === (span ? keys.length - 1 : 0)) d.onAir = true;   // 방송 중이면 그 방송의 마지막 칸만 '방송 중'(D56 Q2 다 — 지난 날은 이어진 날이지 방송 중이 아니다)
+            if (span) {   // 칸 아래 띠가 왼쪽·오른쪽 칸으로 이어지나(D56 Q1 마). mid = 한 방송이 이 칸을 지나간다 — 없이 lc·rc가 다 서면 앞 방송이 끝난 날 다른 방송이 시작한 것
+              const nb = d.nbjBar || (d.nbjBar = { lc: false, rc: false, mid: false });
+              if (i > 0) nb.lc = true;
+              if (i < keys.length - 1) nb.rc = true;
+              if (i > 0 && i < keys.length - 1) nb.mid = true;
             }
-            continue;
-          }
-          for (const v of parts) {
-            if (seen.has(v.title_no)) continue;
-            seen.add(v.title_no);
-            day(dk).vods.push({ v, at });
-          }
+            if (span && i > 0 && !d.contDay) d.contDay = i + 1;   // 'N일째'(그날 새로 켠 방송이 있으면 칩이 그 자리 — calChips)
+            if (dayParts === null) {
+              if (!vodState.data[vodKey(m.id, ym)]) {   // 목록 미도착만 기다린다 — 방송번호 없는 세션은 목록이 와도 못 찾으니 '없음'(세션 70)
+                d.vodPending = true;
+                if ((vodState.fails[vodKey(m.id, ym)] || 0) >= VOD_FAIL_LIMIT) d.vodFail = true;   // 연달아 실패 — '불러오는 중'이 아니라 '불러오지 못함'
+              }
+              return;
+            }
+            const seen = seenVod[dk] || (seenVod[dk] = new Set());
+            for (const v of dayParts) {
+              if (seen.has(v.title_no)) continue;
+              seen.add(v.title_no);
+              d.vods.push({ v, at, ov: span ? ovOf(v) : undefined });   // ov = 그날과 겹친 길이(대표 그림 — calRepImg)
+            }
+          });
         }
       }
     } else if (calState.type === 'youtube') {
@@ -7746,7 +7839,8 @@ function calItemsByDate() {
 // 다시보기·유튜브 썸네일은 밖에서 오는 그림이라 그대로 쓴다.
 function calRepImg(d) {
   if (calState.type === 'live' && d.vods.length) {
-    const longest = d.vods.reduce((a, b) => ((b.v.duration_ms || 0) > (a.v.duration_ms || 0) ? b : a));   // 같은 길이면 앞 것(시각·파트 순)
+    const len = x => x.ov ?? (x.v.duration_ms || 0);   // 하루를 넘긴 방송의 조각은 그날과 겹친 길이(2026-10-18 D56 — 그날 가장 길게 담긴 조각이 그날의 얼굴)
+    const longest = d.vods.reduce((a, b) => (len(b) > len(a) ? b : a));   // 같은 길이면 앞 것(시각·파트 순)
     if (longest.v.thumb) return escapeHtml(longest.v.thumb);
   }
   if (calState.type === 'youtube' && d.youtube.length) { const id = ytVideoId(d.youtube[0].y.url); if (id) return `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; }
@@ -7766,11 +7860,13 @@ function calTextBoxHtml(d) {
 }
 function calChips(d) {   // 칸 상단 칩(2026-09-18): 그날 있는 종류 전부 — 고른 종류는 아이콘+개수, 나머지는 아이콘만 흐리게. 순서 고정(생방송·유튜브·게시글·카페)
   const order = ['live', 'youtube', 'post', 'cafe'];
-  return order.map(k => {
+  // 하루를 넘긴 방송의 이어진 날(2026-10-18 D56): 그날 새로 켠 방송이 없으면 칩 자리 앞에 'N일째'(생방송 칩과 같은 숲 파랑). 개수는 그날 켠 방송 수(d.n — 이어진 방송은 세지 않는다)
+  const cont = calState.type === 'live' && d.contDay && !d.n.live ? `<span class="cd-day">${d.contDay}일째</span>` : '';
+  return cont + order.map(k => {
     const n = d.n[k] || 0;
     if (!n) return '';
     const cls = CAL_KIND_BY_KEY[k].chip;
-    if (k === calState.type) return chipHtml(cls, CAL_TYPE_ICON[k], d.count);
+    if (k === calState.type) return chipHtml(cls, CAL_TYPE_ICON[k], n);
     return `<span class="cd-chip cd-mark ${cls}" title="${CAL_KIND_BY_KEY[k].label} ${n}"><span class="cd-ic" aria-hidden="true">${SVG_ICONS[CAL_TYPE_ICON[k]]}</span></span>`;
   }).join('') + (d.n.sched ? (d.schedShow ? chipHtml('sched', 'calendar', d.n.sched) : `<span class="cd-chip cd-mark sched" title="일정 ${d.n.sched}"><span class="cd-ic" aria-hidden="true">${SVG_ICONS.calendar}</span></span>`) : '');   // 일정(D50): 칸에 적힌 날은 달력 그림 + 개수, 기록에 자리를 내준 날(오늘)은 흐린 그림만 — 종류 칩 뒤
 }
@@ -7816,7 +7912,8 @@ function openDayPickModal(key, d) {
   const memberId = calMember().id, ym = calYm();
   if (calState.type === 'live') {
     // 방송 단위: 방송마다 글자 행(시각·길이·시청자 — 통계 탭의 방송별 목록과 같은 부품) + 그 방송의 다시보기 타일. 다시보기 없는 방송은 행만.
-    body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, parts }) => sessionRowHtml(s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v, calMember())}</div>`).join('')}</div>` : '')).join('')}</div>`;
+    // 하루를 넘긴 방송(2026-10-18 D56 Q3 가): 방송 행은 방송 전체(시각에 날짜 — sessionRowHtml)이되 변경 줄은 그날 것만(rowS), 타일도 그날 조각만(calItemsByDate)
+    body.innerHTML = `<div class="day-detail-list">${d.live.map(({ s, rowS, parts }) => sessionRowHtml(rowS || s, memberId, ym, '') + (parts && parts.length ? `<div class="ds-vods">${parts.map(v => `<div class="cal-vod">${vodTileHtml(v, calMember())}</div>`).join('')}</div>` : '')).join('')}</div>`;
     body.querySelectorAll('button.day-session[data-vodpick]').forEach(b => b.addEventListener('click', () => {
       const sess = d.live.find(({ s }) => String(s.broad_no) === b.dataset.vodpick);
       openVodPickModal(sess ? (sess.parts || []) : [], `https://www.sooplive.com/station/${memberId}/vod`, MEMBER_BY_ID[memberId], (sess && isoToKstDateKey(sess.s.start)) || key);
@@ -7838,6 +7935,7 @@ function calDateLabel(key) { const dow = new Date(key + 'T00:00:00Z').getUTCDay(
 function calSingleTarget(d) {
   if (calState.type === 'live') {
     const it = d.live[0];
+    if (it && it.span && it.span.i > 0) return null;   // 하루를 넘긴 방송의 이어진 날 — 개수가 안 보이는 칸이라 늘 모달(사이트 규칙, 2026-10-18 D56)
     if (it && it.parts && it.parts.length === 1) return { href: vodPlayerUrl(it.parts[0]), tip: `${it.parts[0].title || ''}${it.parts[0].duration_ms ? ` · ${formatDuration(it.parts[0].duration_ms)}` : ''}` };
     return null;
   }
@@ -7893,8 +7991,16 @@ function openCalSchedModal(key, list) {
   showModal();
 }
 function calCellHtml(key, label, dow, d, extraCls) {
-  const cls = ['calendar-day', 'cal-cell', d && (d.count || d.schedShow) ? 'has' : '', extraCls || ''].filter(Boolean).join(' ');
-  const inner = `<span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${d ? (d.schedShow ? calSchedBoxHtml(d) : calRepImgTag(d)) : ''}</span>`;
+  const cls = ['calendar-day', 'cal-cell', d && (d.count || d.schedShow) ? 'has' : '', d && d.nbjBar ? 'nbj' : '', extraCls || ''].filter(Boolean).join(' ');
+  const rep = d && !d.schedShow ? calRepImgTag(d) : '';
+  // 방송 중(2026-10-18 D56 Q2 다): 사이트의 '방송 중' 칩 — 그림이 있으면 오른쪽 위에 얹고(19+·구독+ 배지 자리, 바탕을 채운다) 없으면 그림 자리 가운데
+  const onAir = d && d.onAir && calState.type === 'live' ? `<span class="cal-onair${rep ? ' tr' : ''}"><span class="nav-live-badge on"><span class="nav-live-dot"></span><span>방송 중</span></span></span>` : '';
+  // 하루를 넘긴 방송의 띠(D56 Q1 마): 칸 맨 아래 4px — 이어지는 쪽은 칸 사이 틈까지(.lc·.rc), 주의 끝 칸은 칸 끝까지(.wl·.wr).
+  // 앞 방송이 끝난 날 다른 방송이 시작하면 띠를 칸 가운데서 끊는다(.brl·.brr) — 한 띠 = 한 방송
+  const nb = d && d.nbjBar, lcC = dow === 0 ? ' wl' : ' lc', rcC = dow === 6 ? ' wr' : ' rc';
+  const bar = !nb ? '' : nb.lc && nb.rc && !nb.mid ? `<span class="cal-nbj-bar${lcC} brl"></span><span class="cal-nbj-bar${rcC} brr"></span>`
+    : `<span class="cal-nbj-bar${nb.lc ? lcC : ''}${nb.rc ? rcC : ''}"></span>`;
+  const inner = `<span class="cd-top"><span class="calendar-daynum${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${label}</span><span class="cd-chips">${d ? calChips(d) : ''}</span></span><span class="cal-thumb">${d ? (d.schedShow ? calSchedBoxHtml(d) : rep + onAir) : ''}</span>${bar}`;
   if (d && d.schedShow) {   // 일정 칸(D50): 하나이고 링크가 있으면 그 글로 직행, 그 밖은 그날 일정 창 — 사이트 공통 규칙(개수가 보이면 1개 직행)
     const one = d.sched.length === 1 && d.sched[0].link ? d.sched[0] : null;
     if (one) return `<a class="${cls}" href="${escapeHtml(one.link)}" target="_blank" rel="noopener" title="${escapeHtml(one.title)}">${inner}</a>`;
@@ -7905,7 +8011,7 @@ function calCellHtml(key, label, dow, d, extraCls) {
     const one = calSingleTarget(d);   // 종류별 직행 대상 — 없으면(다시보기 없는 방송 등) 모달
     if (one) return `<a class="${cls}" href="${escapeHtml(one.href)}" target="_blank" rel="noopener" title="${escapeHtml(one.tip)}">${inner}</a>`;
   }
-  return `<button class="${cls}" type="button" data-caldate="${key}" title="${d.count}개">${inner}</button>`;
+  return `<button class="${cls}" type="button" data-caldate="${key}" title="${d.contDay && !d.n.live ? `${d.contDay}일째` : `${d.count}개`}">${inner}</button>`;   // 이어진 날은 개수 대신 'N일째'(칩과 같은 말)
 }
 
 // 누구의 언제인지 한 줄(2026-09-29 Crenop Q6 가) — 기둥이 서랍에 들어가는 폭(1150 이하)에서만 보인다(CSS .pick-line). 기둥이 보이는 PC에선 기둥이 말한다(9/18 '통계 상단 사진·이름 없음' 그대로)
@@ -9826,7 +9932,7 @@ function isoToKstDateKey(iso) {
 // 고아 방어는 두 겹이 대신함: ① monthPrefix가 그 달 밖 날짜를 끊음(월간·연간·명전합산) ② 프리픽스 없는 스트릭 호출자는
 // 라이브 확인(broad_no 일치)으로 게이트하고, 불일치 고아에는 유사-now(시작+48h)를 넘겨 상한을 재현.
 // monthPrefix('YYYY-MM')를 주면 그 달 밖 날짜는 버림. 세션은 시작월 키에만 있어 월경계 마라톤의
-// 다음 달 조각은 다음 달이 셀 수 없는 알려진 한계(발생 시 수동 보정).
+// 다음 달 조각은 다음 달이 셀 수 없는 알려진 한계(발생 시 수동 보정 — 통계의 방송 일수. 달력 칸은 다음 달이 지난달 통계에서 꺼내 잇는다: calCarrySessions, 2026-10-19a).
 // 방송 날짜 bdate(2026-09-03 세션 70): 다시보기가 잘려 계산 시작이 자정을 넘긴 소급 기록(start_cut)은 실제 시작 '날짜'만 따로 갖는다.
 // 시각·길이는 못 믿는 채로 두고 날짜만 바로잡는다 — 첫 날짜 키를 bdate로, 이어지는 날짜는 거기서 하루씩(개수는 기록된 길이대로).
 // bdate가 시작 날짜보다 앞일 때만 뜻이 있다(같거나 뒤면 무시). 첫 키가 곧 '이 달에 속하는가'의 기준이라 월 게이트도 이 함수의 결과로 판단한다.
@@ -10887,7 +10993,13 @@ function vodInfoAsItem(no, info, url, sheetTitle) {
 // 목록 항목 꼴(title_no·thumb·duration_ms·auth_no·grade)로. gone(목록에서 사라짐)은 뺀다. 없으면(개편 전 세션·포착 대기 중) null → 종전 /vods 폴백.
 function sessionVods(s) {
   if (!s || !Array.isArray(s.vods)) return null;
-  return s.vods.filter(v => !v.gone).map(v => ({ title_no: v.no, part: v.part, title: v.title || (v.manual ? '다시보기' : ''), thumb: v.thumb || '', duration_ms: v.dur || 0, auth_no: v.auth ?? null, grade: v.grade || 0, manual: !!v.manual }));
+  return s.vods.filter(v => !v.gone).map(v => ({ title_no: v.no, part: v.part, title: v.title || (v.manual ? '다시보기' : ''), thumb: v.thumb || '', duration_ms: v.dur || 0, auth_no: v.auth ?? null, grade: v.grade || 0, manual: !!v.manual, time: v.reg || '' }));   // time = 목록 항목과 같은 칸(올라온 시각) — vodPartSpan
+}
+// 다시보기 조각이 녹화된 구간 — 숲은 조각을 끝날 때 올린다: 목록·스냅샷의 time(올라온 시각) = 조각의 끝, 끝 − 길이 = 시작
+//   (2026-07-14 나나문 7일 방송 조각 13개: 첫 조각의 시작이 방송 시작과 같은 13:30). 시각이나 길이를 모르면 null
+function vodPartSpan(v) {
+  const en = Date.parse((v && v.time) || ''), dur = (v && v.duration_ms) || 0;
+  return isFinite(en) && dur > 0 ? { st: en - dur, en } : null;
 }
 // 그 달의 종료 방송 중 세션 스냅샷이 없는 것이 있나 — 있으면 /vods 폴백 목록이 필요하다(통계가 아직 없으면 판단 보류 = false)
 function monthNeedsVodList(memberId, ym) {
@@ -13668,8 +13780,12 @@ function titleQuoteOnly(c) { return !!c && c.type === 'title' && String(c.before
 function sessionRowHtml(s, memberId, ym, dateLabel) {
   let out = '';
   const dateSpan = dateLabel ? `<span class="day-session-date">${escapeHtml(dateLabel)}</span>` : '';
-    const startStr = s.start_cut ? '-' : formatHHMM(s.start);   // start_cut(세션 70): 잘린 다시보기 소급 기록 — 시작 시각을 모른다('-' = 값 없음 문법, 종료·길이는 기록대로)
-  const endStr = s.end ? formatHHMM(s.end) : '진행 중';
+  // 하루를 넘긴 방송(걸침 규칙 — 24시간 이상, 2026-10-18 D56 Q3 가): 시각에 날짜 'M/D HH:MM ~ M/D HH:MM' — 종전 '13:30 ~ 16:22'는 7일 방송이 3시간처럼 읽혔다.
+  //   날짜 머리(dateLabel — 통계 탭 방송 목록)가 시작 날짜를 이미 말하면 끝에만
+  const multiDay = (s.end || sessionOpenLive(memberId, s)) && sessionDateKeys(s, null, Date.now()).length > 1;   // 끝이 빠진 채 남은 기록은 종전대로(sessionOpenLive)
+  const mdOf = iso => { const k = isoToKstDateKey(iso); return k ? `${+k.slice(5, 7)}/${+k.slice(8, 10)} ` : ''; };
+  const startStr = s.start_cut ? '-' : (multiDay && !dateLabel ? mdOf(s.start) : '') + formatHHMM(s.start);   // start_cut(세션 70): 잘린 다시보기 소급 기록 — 시작 시각을 모른다('-' = 값 없음 문법, 종료·길이는 기록대로)
+  const endStr = s.end ? (multiDay ? mdOf(s.end) : '') + formatHHMM(s.end) : '진행 중';
   let durSpan = '';
   if (s.end) {
     const ms = new Date(s.end).getTime() - new Date(s.start).getTime();

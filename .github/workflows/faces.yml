@@ -1,0 +1,86 @@
+# 생방송 카드 얼굴 사본(faces/) — 하루 한 번, 숲 방송국 사진이 바뀐 멤버만 108px webp로 다시 만든다(2026-10-28 점검 F21,
+# Crenop '지금상태로 저장해두고 하루에 한번 변경여부를 체크하는 방식'). 숲 원본은 한 장 최대 약 1.9MB, 13장이 첫 방문 내려받기의 약 80%였다.
+# 바뀌었는지는 사진을 받지 않고 머리(Last-Modified·Content-Length)로 본다 — 기록은 faces/faces.json. 멤버 목록은 index.html의 MEMBERS에서 읽는다.
+# 사진 하나를 못 받으면 그 멤버는 옛 사본을 둔다. 13명 모두 못 받으면 실패로 끝낸다(숲이 이 서버를 막았는지 알 수 있게).
+# 파일 하나로 둔다 — GitHub 웹 화면은 폴더째 올리기가 안 되어 'Create new file'로 이 파일만 만든다(2026-10-28 Crenop).
+# 손으로 돌리기: 레포의 Actions 탭 → faces → Run workflow.
+name: faces
+on:
+  schedule:
+    - cron: '17 20 * * *'   # 매일 05:17 KST — 정각은 GitHub 예약이 몰려 늦어진다
+  workflow_dispatch:
+permissions:
+  contents: write   # 바뀐 사본을 레포에 올린다
+  pages: write      # 올린 뒤 사이트 다시 만들기를 청한다(아래 마지막 줄)
+concurrency: faces
+jobs:
+  faces:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: 바뀐 사진만 줄여 사본 만들기
+        run: |
+          python - <<'PY'
+          import io, json, os, re, sys, urllib.request
+          from PIL import Image
+
+          OUT = 'faces'   # 레포 맨 위에서 돈다
+          SIZE = 108      # 카드 얼굴 36px × 휴대폰 화면 배율 3(S25 — 360 폭이 1080 화소)
+          UA = 'chuntaverse-faces/1.0 (+https://chuntaverse.com)'
+
+          html = open('index.html', encoding='utf-8').read()
+          block = html[html.index('const MEMBERS = ['):]
+          ids = re.findall(r"\{ id: '([^']+)',", block[:block.index('];')])
+          if not ids:
+              sys.exit('index.html의 MEMBERS에서 아이디를 찾지 못했습니다.')
+
+          def req(url, method):
+              return urllib.request.urlopen(urllib.request.Request(url, method=method, headers={'User-Agent': UA}), timeout=30)
+
+          os.makedirs(OUT, exist_ok=True)
+          rec_path = os.path.join(OUT, 'faces.json')
+          rec = json.load(open(rec_path, encoding='utf-8')) if os.path.exists(rec_path) else {}
+          changed, failed = [], []
+          for uid in ids:
+              url = f'https://profile.img.sooplive.com/LOGO/{uid[:2]}/{uid}/{uid}.jpg'
+              out = os.path.join(OUT, uid + '.webp')
+              try:
+                  with req(url, 'HEAD') as r:
+                      head = {'lm': r.headers.get('Last-Modified', ''), 'len': r.headers.get('Content-Length', '')}
+                  if rec.get(uid) == head and os.path.exists(out):
+                      continue
+                  with req(url, 'GET') as r:
+                      im = Image.open(io.BytesIO(r.read())).convert('RGB')
+                  s = min(im.size)   # 카드는 object-fit: cover — 가운데 정사각으로 자른다
+                  x, y = (im.width - s) // 2, (im.height - s) // 2
+                  im.crop((x, y, x + s, y + s)).resize((SIZE, SIZE), Image.LANCZOS).save(out, 'WEBP', quality=88, method=6)
+                  rec[uid] = head
+                  changed.append(uid)
+              except Exception as e:
+                  failed.append(f'{uid}: {e}')
+          if changed:
+              with open(rec_path, 'w', encoding='utf-8', newline='\n') as f:
+                  json.dump(rec, f, ensure_ascii=False, indent=1, sort_keys=True)
+                  f.write('\n')
+          print(f'멤버 {len(ids)}명 · 새로 만든 사본 {len(changed)}개 {changed} · 못 받음 {len(failed)}개')
+          for x in failed:
+              print('  ' + x)
+          if len(failed) == len(ids):
+              sys.exit('숲 사진을 하나도 받지 못했습니다 — 이 서버에서 숲 사진 주소가 막혔을 수 있습니다.')
+          PY
+      - name: 바뀐 사본만 올리기
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add faces
+          if git diff --cached --quiet; then echo '바뀐 사진 없음'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898283+github-actions[bot]@users.noreply.github.com'
+          git commit -m '생방송 카드 얼굴 사본 갱신'
+          git push
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || true   # 이 작업이 올린 것으로 사이트가 저절로 다시 만들어지지 않는 설정이어도 다시 만들게

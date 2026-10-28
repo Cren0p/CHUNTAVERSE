@@ -27,6 +27,7 @@ jobs:
         run: |
           python - <<'PY'
           import io, json, os, re, sys, urllib.request
+          from email.utils import parsedate_to_datetime
           from PIL import Image
 
           OUT = 'faces'   # 레포 맨 위에서 돈다
@@ -42,6 +43,16 @@ jobs:
           def req(url, method):
               return urllib.request.urlopen(urllib.request.Request(url, method=method, headers={'User-Agent': UA}), timeout=30)
 
+          # 숲 사진 서버는 지역마다 Last-Modified가 1초 다를 수 있다(2026-10-28 실측 — 체비 사진이 이 작업에선 :39, 한국에선 늘 :40).
+          # 크기가 같고 1분 안이면 같은 사진으로 본다(안 그러면 사진은 그대로인데 기록 파일만 다시 올라간다)
+          def same(a, b):
+              if not a or a.get('len') != b['len']:
+                  return False
+              try:
+                  return abs((parsedate_to_datetime(a['lm']) - parsedate_to_datetime(b['lm'])).total_seconds()) <= 60
+              except Exception:
+                  return a.get('lm') == b['lm']
+
           os.makedirs(OUT, exist_ok=True)
           rec_path = os.path.join(OUT, 'faces.json')
           rec = json.load(open(rec_path, encoding='utf-8')) if os.path.exists(rec_path) else {}
@@ -52,7 +63,7 @@ jobs:
               try:
                   with req(url, 'HEAD') as r:
                       head = {'lm': r.headers.get('Last-Modified', ''), 'len': r.headers.get('Content-Length', '')}
-                  if rec.get(uid) == head and os.path.exists(out):
+                  if same(rec.get(uid), head) and os.path.exists(out):
                       continue
                   with req(url, 'GET') as r:
                       im = Image.open(io.BytesIO(r.read())).convert('RGB')

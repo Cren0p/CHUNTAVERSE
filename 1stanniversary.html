@@ -39,6 +39,7 @@
   --content-glow: rgba(97,255,236,0.12);
   --lb-overlay: rgba(3,5,10,0.78);        /* 크게 보기 뒤 가림막 — 사진을 보는 창이라 사이트 창(0.5)보다 짙게 */
   --scrub: rgba(97,255,236,0.22);         /* 이동 막대에서 지금 보이는 구간 */
+  --need-lo: rgba(97,255,236,0.2); --need-hi: rgba(97,255,236,0.9); --need-glow: rgba(97,255,236,0.45);   /* 눌러야 할 단추의 번지는 테두리(옅을 때 · 짙을 때 · 번짐) */
   /* 멤버 색 — 사이트 MEMBERS와 같은 값·같은 차례 */
   --m0: #43EAF6; --m1: #FFDE9B; --m2: #DBDCE5; --m3: #F5D3FE; --m4: #8D4BD6; --m5: #FFCFB7; --m6: #EA4335;
   --m7: #BFEF90; --m8: #366CD8; --m9: #F8C24F; --m10: #FFFFFF; --m11: #A8D6FF; --m12: #30BBBA;
@@ -55,7 +56,8 @@ button { font: inherit; }
 .sec em { font-style: normal; color: var(--accent); }
 
 /* 첫 화면 — 왼쪽 이름, 오른쪽 한 해 잔디 */
-.hero { display: grid; grid-template-columns: 380px minmax(0, 1fr); column-gap: 56px; align-items: center; padding: 64px 0 80px; }
+/* 첫 화면은 화면 한 장을 다 쓴다 — 사진 구역이 아래로 비치지 않게(2026-11-24 Crenop '첫화면에서는 아래쪽이 안보이고') */
+.hero { display: grid; grid-template-columns: 380px minmax(0, 1fr); column-gap: 56px; align-items: center; align-content: center; min-height: 100vh; padding: 64px 0 80px; }
 .hero-logo { display: block; width: 100%; height: auto; margin-bottom: 36px; }
 h1 { font-size: 46px; font-weight: 800; line-height: 1.2; margin: 10px 0 14px; letter-spacing: -0.01em; white-space: nowrap; }
 .today { margin: 0; color: var(--text2); font-variant-numeric: tabular-nums; }
@@ -99,14 +101,22 @@ h1 { font-size: 46px; font-weight: 800; line-height: 1.2; margin: 10px 0 14px; l
 .spd { display: flex; align-items: center; column-gap: 4px; font-size: 12px; color: var(--muted); }
 .spd span { margin-right: 4px; }
 .spd .btn { width: 36px; padding: 0; }
+.spd .btn.fit { width: auto; padding: 0 10px; }
 #auto { min-width: 88px; }
 #auto .i-pause, html.auto #auto .i-play { display: none; }
 html.auto #auto .i-pause { display: block; }
-.hero-auto { margin-top: 28px; height: 40px; }
+/* '자동으로 보기' — 첫 화면에서는 이것을 눌러야 사진 구역으로 넘어간다(html.gate인 동안 아래로 못 내려간다. 2026-11-24 Crenop '자동으로 보기를 눌러야만 사진쪽으로 넘어가게 … 버튼을 강조해줘').
+   누르기 전에는 민트 테두리가 숨쉬듯 번진다 — 천랜달의 '눌러야 할 단추' 효과(needSelectPulse: 2px 옅게 ↔ 4px 짙게 + 번짐, 1.4초)를 이 페이지의 민트로 옮긴 것(같은 날 '천랜달에서 클릭해야하는 버튼 테두리로 강조하던 효과') */
+.hero-auto { margin-top: 28px; height: 44px; padding: 0 20px; font-size: 14px; color: var(--accent); border-color: var(--accent); }
+html.gate { overflow: hidden; }
+html.gate .hero-auto { animation: needPress 1.4s ease-in-out infinite; }
+@keyframes needPress { 0%, 100% { box-shadow: 0 0 0 2px var(--need-lo); } 50% { box-shadow: 0 0 0 4px var(--need-hi), 0 0 20px var(--need-glow); } }
+html.gate.still .hero-auto { animation: none; box-shadow: 0 0 0 3px var(--need-hi); }
 /* 배경음악(2026-11-24 Crenop '유튜브 배경음악을 넣었으면 해 음소거 가능하도록 하고' → '그냥 배경음악 음소거랑 볼륨 조절 기능만 있으면 되는데') — 조작은 음소거 단추와 볼륨 막대뿐(.vol).
    유튜브 약관: 플레이어는 200×200 이상으로 페이지에 보여야 하고, 가리거나 숨긴 채 소리만 틀 수 없다 — 그래서 플레이어(.bgm)는 첫 화면의 '자동으로 보기' 아래에 보이게 둔다.
+   크기는 약관이 허락하는 가장 작은 200×200(같은 날 Crenop '플레이어 크기를 최대한 줄일수 있을걸?' — 더 줄이면 약관에 어긋난다).
    조작 칸(.vol)은 화면 오른쪽 아래에 늘 떠 있다. 사진 구역에서는 아래 줄(.nav)의 오른쪽 끝 자리와 겹치게 맞췄다(높이 24 · 아래 10 — 아래 줄은 그만큼 짧아진다) */
-.bgm { width: 356px; height: 200px; margin-top: 20px; background: var(--surface2); }
+.bgm { width: 200px; height: 200px; margin-top: 20px; background: var(--surface2); }
 .bgm[hidden], .vol[hidden] { display: none; }
 .bgm iframe { display: block; }
 .vol { position: fixed; right: 40px; bottom: 10px; z-index: 45; display: flex; align-items: center; column-gap: 6px; height: 24px; padding-right: 10px; background: var(--surface2); border: 1px solid var(--border); }
@@ -224,7 +234,7 @@ html.lock { overflow: hidden; }
 .fx.in { opacity: 1; transform: none; }
 html.still { scroll-behavior: auto; }
 html.still .fx { opacity: 1; transform: none; transition: none; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .fx { opacity: 1; transform: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .fx { opacity: 1; transform: none; transition: none; } html.gate .hero-auto { animation: none; box-shadow: 0 0 0 3px var(--need-hi); } }
 /* 넓은 화면(1920) — 첫 화면만 키운다 */
 @media (min-width: 1600px) {
   .hero { grid-template-columns: 460px minmax(0, 1fr); column-gap: 72px; padding: 88px 0 104px; }
@@ -249,7 +259,7 @@ html.still .fx { opacity: 1; transform: none; transition: none; }
 <section class="story" id="story">
   <div class="pin" id="pin">
     <div class="ctl" id="ctl">
-      <div class="spd" id="spd"><span>속도</span><button type="button" class="btn" data-v="80">1</button><button type="button" class="btn" data-v="120" aria-pressed="true">2</button><button type="button" class="btn" data-v="160">3</button><button type="button" class="btn" data-v="240">4</button><button type="button" class="btn" data-v="360">5</button><button type="button" class="btn" data-v="480">6</button></div>
+      <div class="spd" id="spd"><span>속도</span><button type="button" class="btn fit" data-v="fit" aria-pressed="true" title="음악이 끝날 때 사진도 끝나는 속도">맞춤</button><button type="button" class="btn" data-v="80">1</button><button type="button" class="btn" data-v="120">2</button><button type="button" class="btn" data-v="160">3</button><button type="button" class="btn" data-v="240">4</button><button type="button" class="btn" data-v="360">5</button><button type="button" class="btn" data-v="480">6</button></div>
       <button type="button" class="btn" id="auto" aria-pressed="false"><svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg><svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span id="autoT">자동</span></button>
     </div>
     <div class="track" id="track"></div>
@@ -509,45 +519,69 @@ function preload() { const vw = pin.clientWidth; if (IM.length) IM = IM.filter(o
 let preT = 0;
 const sync = () => { sx = Math.min(Math.max(scrollY - storyTop, 0), travel); place(); clearTimeout(preT); preT = setTimeout(preload, 120); };
 // 먼 자리로 갈 때는 곧바로 옮긴다 — 부드럽게 가면 띠 수만 px가 1초 안에 지나간다
-const jump = y => { setAuto(false); scrollTo({ top: y, behavior: 'instant' }); };
+//   첫 화면의 잠김(html.gate)은 사진 구역으로 가는 것을 누를 때 풀린다 — '자동으로 보기' · 잔디의 달 이름
+const unlock = () => document.documentElement.classList.remove('gate');
+const jump = y => { unlock(); setAuto(false); scrollTo({ top: y, behavior: 'instant' }); };
 
-// 자동 넘김 — 페이지를 스스로 내린다(초당 speed px). 손으로 움직이거나(휠 · 키 · 스크롤 막대) 사진을 열면 멈춘다. 띠 끝에서 멈춘다.
-let auto = false, speed = 120, pos = 0, lastY = 0, lastT = 0;
+// 자동 넘김 — 페이지를 스스로 내린다. 손으로 움직이면(휠 · 키 · 스크롤 막대 · 이동 막대) 멈춘다. 띠 끝에서 멈춘다.
+//   사진을 열면 멈췄다가 닫으면 이어 간다(2026-11-24 Crenop '사진 확대했다가 끄면 이어서 재생' — lbHide가 다시 켠다).
+//   속도: 처음 값은 '맞춤' — 음악 한 곡에 띠 한 번이 끝나는 속도 = 띠 길이 ÷ 곡 길이(같은 날 Crenop '노래가 3분 31초인데 거기에 맞춰서 딱 끝나는 속도로').
+//     띠의 처음에서 시작하면 곡도 처음으로 돌려 같이 끝나게 한다. 중간에서 다시 시작하면(사진을 보고 온 뒤 · 손으로 옮긴 뒤) 남은 띠 ÷ 남은 곡으로 다시 맞춘다
+//     — 맞춤 속도의 절반~두 배 안에서(곡이 거의 끝났을 때 띠가 날아가지 않게). 음악이 안 돌고 있으면 띠 길이 ÷ 곡 길이 그대로.
+//     1~6은 정한 속도(초당 80 · 120 · 160 · 240 · 360 · 480px)
+const SONG = 211;   // 곡 길이(초, 3분 31초) — 플레이어가 알려 주기 전 · 음악이 없을 때 쓰는 값
+let auto = false, fit = true, speed = 120, runV = 0, pos = 0, lastY = 0, lastT = 0, lbPaused = false;   // fit: 속도 '맞춤', speed: 정한 속도, runV: 지금 가는 속도, lbPaused: 사진을 열어서 멈춘 것
+const songLen = () => (ytReady && yt.getDuration() > 0 ? yt.getDuration() : SONG);
+function pickSpeed(fromHead) {
+  if (!fit) return speed;
+  const base = travel / songLen();
+  if (!fromHead && ytReady && yt.getPlayerState() === 1) { const left = songLen() - yt.getCurrentTime(); if (left > 1) return Math.min(Math.max((travel - pos) / left, base / 2), base * 2); }
+  return base;
+}
 function setAuto(on) {
   auto = on; document.documentElement.classList.toggle('auto', on);
   document.getElementById('auto').setAttribute('aria-pressed', on); document.getElementById('autoT').textContent = on ? '멈춤' : '자동';
-  if (on) { pos = sx; lastY = scrollY; lastT = performance.now(); requestAnimationFrame(tick); }
+  if (on) { pos = sx; const head = fit && pos < 1; if (head && ytReady) yt.seekTo(0, true); runV = pickSpeed(head); lastY = scrollY; lastT = performance.now(); requestAnimationFrame(tick); }
 }
 function tick(t) {
   if (!auto) return;
-  if (!lb.hidden || Math.abs(scrollY - lastY) > 2) { setAuto(false); sync(); return; }
-  pos = Math.min(travel, pos + speed * Math.min(Math.max(t - lastT, 0), 50) / 1000); lastT = t;
+  if (!lb.hidden) { lbPaused = true; setAuto(false); sync(); return; }
+  if (Math.abs(scrollY - lastY) > 2) { setAuto(false); sync(); return; }
+  pos = Math.min(travel, pos + runV * Math.min(Math.max(t - lastT, 0), 50) / 1000); lastT = t;
   scrollTo({ top: storyTop + pos, behavior: 'instant' }); lastY = scrollY;
   sx = pos; place(); preload();
   if (pos >= travel) { setAuto(false); return; }
   requestAnimationFrame(tick);
 }
-// 배경음악: 유튜브 영상 하나를 되풀이해 튼다. 소리가 나기 시작하는 길은 셋 — 자동 넘김을 시작할 때(이번에 손으로 끈 적이 없으면) · 음소거 단추 · 첫 화면의 플레이어를 직접 누를 때.
-//   끄는 것은 음소거(영상은 계속 돈다). 볼륨은 막대(0~100, 처음 50). 누른 뒤에만 틀어서 브라우저의 자동 재생 막기에 걸리지 않는다.
+// 배경음악: 유튜브 영상 하나를 되풀이해 튼다. 페이지를 열면 바로 틀어 본다(2026-11-24 Crenop '음악 자동 재생' — 플레이어가 첫 화면에 보이는 채로).
+//   브라우저가 막으면(그 사이트에서 소리를 튼 적이 없는 사람은 대개 막힌다 — needTap) 페이지의 아무 곳이나 처음 누르거나 글쇠를 누를 때 튼다. 첫 화면은 '자동으로 보기'를 눌러야 넘어가므로 늦어도 그때는 난다.
+//   끄는 것은 음소거(영상은 계속 돈다 — 손으로 끄면 다시 저절로 켜지지 않는다). 볼륨은 막대(0~100, 처음 50).
 //   페이지가 웹 주소로 열려 있어야 한다 — 유튜브가 페이지 주소를 요구해서 파일로 연 페이지(file://)에서는 재생이 막힌다(오류 153 — 2026-11-24 창 없는 Chrome으로 확인). 그때는 플레이어와 조작 칸을 내지 않는다
 const BGM_ID = 'zeqyKrTZiKo', bgm = document.getElementById('bgm'), vol = document.getElementById('vol'), snd = document.getElementById('snd'), volR = document.getElementById('volR');
 const BGM_OK = location.protocol !== 'file:';
-let yt = null, ytReady = false, sndOn = false, sndOff = false, ytMuted = false, ytErr = 0;   // sndOn: 소리가 나고 있나, sndOff: 손으로 껐나, ytMuted: 이 페이지가 음소거했나, ytErr: 유튜브가 알린 오류 번호
+let yt = null, ytReady = false, sndOn = false, sndOff = false, ytMuted = false, needTap = false, ytErr = 0;   // sndOn: 소리가 나고 있나, sndOff: 손으로 껐나, ytMuted: 이 페이지가 음소거했나, needTap: 자동 재생이 막혀 처음 누를 때를 기다리나, ytErr: 유튜브가 알린 오류 번호
 function showSound(on) { sndOn = on; document.documentElement.classList.toggle('snd', on); snd.setAttribute('aria-pressed', on); snd.setAttribute('aria-label', on ? '배경음악 음소거' : '배경음악 켜기'); }
 function setSound(on, byUser) {
   if (byUser) sndOff = !on;
+  if (on) needTap = false;
   showSound(on); ytMuted = !on;
   if (!ytReady) return;   // 준비되면 onReady가 이 상태대로 맞춘다
   if (on) { yt.unMute(); yt.playVideo(); } else yt.mute();
 }
 if (BGM_OK) {
   bgm.hidden = vol.hidden = false;
-  window.onYouTubeIframeAPIReady = () => { yt = new YT.Player('bgmP', { width: 356, height: 200, videoId: BGM_ID, host: 'https://www.youtube-nocookie.com',
+  window.onYouTubeIframeAPIReady = () => { yt = new YT.Player('bgmP', { width: 200, height: 200, videoId: BGM_ID, host: 'https://www.youtube-nocookie.com',
     playerVars: { loop: 1, playlist: BGM_ID, playsinline: 1, rel: 0, origin: location.origin },
-    events: { onReady: () => { ytReady = true; yt.setVolume(+volR.value); if (sndOn) { yt.unMute(); yt.playVideo(); } },
+    events: { onReady: () => { ytReady = true; yt.setVolume(+volR.value); if (sndOff) return;
+        setSound(true);   // 열자마자 틀어 본다. 2.5초 뒤에도 안 돌고 있으면 막힌 것으로 본다(막혔다는 신호 onAutoplayBlocked가 안 오는 브라우저)
+        setTimeout(() => { const st = yt.getPlayerState(); if (sndOn && !sndOff && st !== 1 && st !== 3) blocked(); }, 2500); },
+      onAutoplayBlocked: () => blocked(),
       // 플레이어를 직접 눌러 틀거나 멈춘 것도 단추에 비춘다
       onStateChange: e => { if (e.data === 1 && !ytMuted) showSound(true); else if (e.data === 2) { showSound(false); sndOff = true; } },
       onError: e => { ytErr = e.data; } } }); };
+  const blocked = () => { if (!sndOff) { needTap = true; showSound(false); } };
+  const wake = e => { if (!needTap || sndOff || !ytReady || (e.target.closest && e.target.closest('#vol'))) return; setSound(true); };   // 조작 칸을 누른 것은 그 단추가 알아서 한다
+  addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
   const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
   snd.addEventListener('click', () => setSound(!sndOn, true));
   volR.addEventListener('input', () => { if (ytReady) yt.setVolume(+volR.value); if (ytMuted && +volR.value > 0) setSound(true, true); });
@@ -555,6 +589,7 @@ if (BGM_OK) {
 // 띠 밖(첫 화면 · 통계)이거나 띠 끝에서 누르면 띠의 처음으로 간 뒤 시작한다
 function toggleAuto() {
   if (auto) return setAuto(false);
+  unlock();
   const begin = () => { sync(); setAuto(true); if (BGM_OK && !sndOn && !sndOff) setSound(true); };
   if (scrollY < storyTop - 1) {   // 첫 화면에서: 가까우니 부드럽게 내려간 뒤 시작
     let done = false; const go = () => { if (done) return; done = true; removeEventListener('scrollend', go); begin(); };
@@ -717,7 +752,8 @@ function lbOpen(k, from) {
   lbFrom = from; lbShow(k); lb.hidden = false; document.documentElement.classList.add('lock');
   history.pushState({ lb: 1 }, ''); document.getElementById('lbX').focus();
 }
-function lbHide() { if (lb.hidden) return; lb.hidden = true; document.documentElement.classList.remove('lock'); lbImg.removeAttribute('src'); if (lbFrom) lbFrom.focus({ preventScroll: true }); lbFrom = null; }
+function lbHide() { if (lb.hidden) return; lb.hidden = true; document.documentElement.classList.remove('lock'); lbImg.removeAttribute('src'); if (lbFrom) lbFrom.focus({ preventScroll: true }); lbFrom = null;
+  if (lbPaused) { lbPaused = false; sync(); setAuto(true); } }   // 자동 넘김 중에 연 사진이면 닫을 때 이어 간다
 const lbClose = () => { if (!lb.hidden) history.back(); };   // 방문 기록 한 칸을 되돌리면 popstate가 창을 닫는다
 addEventListener('popstate', lbHide);
 document.getElementById('story').addEventListener('click', e => { const t = e.target.closest('[data-ph]'); if (t) lbOpen(+t.dataset.ph, t); });
@@ -735,6 +771,9 @@ const io = !still && 'IntersectionObserver' in window
   ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' })
   : null;
 
+// 첫 화면에서 시작하고 잠근다 — 새로 고쳤을 때 브라우저가 읽던 자리(사진 구역 한가운데)로 되돌리면 잠긴 채 갇힌다
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+document.documentElement.classList.add('gate');
 renderToday();
 renderYear();
 renderStory();
@@ -749,7 +788,8 @@ addEventListener('scroll', () => { if (!auto) sync(); }, { passive: true });
 document.getElementById('auto').addEventListener('click', toggleAuto);
 document.getElementById('heroAuto').addEventListener('click', toggleAuto);
 document.getElementById('spd').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return;
-  speed = +b.dataset.v; document.querySelectorAll('#spd [data-v]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+  fit = b.dataset.v === 'fit'; if (!fit) speed = +b.dataset.v; if (auto) runV = pickSpeed(false);
+  document.querySelectorAll('#spd [data-v]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
 // 잔디의 달 이름 → 그 달이 띠의 왼쪽에 오는 자리로
 document.getElementById('year').addEventListener('click', e => { const a = e.target.closest('a.lab'), o = a && MS.find(o => '#' + o.m.id === a.getAttribute('href')); if (!o) return;
   e.preventDefault(); jump(storyTop + Math.min(travel, o.L - pad)); });

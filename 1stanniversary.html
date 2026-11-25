@@ -664,6 +664,9 @@ function tick(t) {
   if (!auto) return;
   if (!lb.hidden) { lbPaused = true; setAuto(false); sync(); return; }
   if (Math.abs(scrollY - lastY) > 2) { setAuto(false); sync(); return; }
+  // 멈출 자리는 프레임마다 다시 잰다 — 넘기는 사이 그림이 읽혀 띠가 다시 자리 잡으면 길이가 바뀌는데, 시작할 때 잰 값으로 멈추면 그만큼 통계 첫 화면을 지나쳤다
+  //   (2026-11-25 Crenop '이번에도 자동스크롤이 과했어' — 실제 주소 1903×916에서 그림이 다 읽힌 뒤 띠가 179px 짧아짐)
+  autoEnd = Math.max(travel, statsTop() - storyTop);
   pos = Math.min(autoEnd, pos + speed * Math.min(Math.max(t - lastT, 0), 50) / 1000); lastT = t;
   scrollTo({ top: storyTop + pos, behavior: 'instant' }); lastY = scrollY;
   sx = Math.min(pos, travel); place(); preload();

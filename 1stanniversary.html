@@ -4,6 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>천타버스의 첫 1년</title>
+<!-- 공유 미리보기(카페 · 디스코드 등에 주소를 붙였을 때) — 사이트(dotcom/index.html)의 태그를 그대로 쓰고 제목 · 주소 · 설명만 이 페이지 것으로(2026-11-27 Crenop '천타버스닷컴용 태그가 있는데 그거 같이 쓰면 안되나').
+     그림은 사이트의 og-image. 설명 문장은 Claude가 지은 것 -->
+<meta name="description" content="천타버스(CHUNTAVERSE)의 첫 1년 — 2025. 11. 30 결성부터 2026. 11. 30 한 살까지">
+<meta property="og:type" content="website">
+<meta property="og:title" content="천타버스의 첫 1년">
+<meta property="og:description" content="천타버스(CHUNTAVERSE)의 첫 1년 — 2025. 11. 30 결성부터 2026. 11. 30 한 살까지">
+<meta property="og:url" content="https://chuntaverse.com/1stanniversary.html">
+<meta property="og:image" content="https://chuntaverse.com/og-image.png?v=2">
+<meta property="og:locale" content="ko_KR">
+<!-- 글꼴은 사이트와 같이 웹 글꼴로 받는다 — 팬들 PC에는 Pretendard가 없을 수 있다(2026-11-27 검토). 이 PC처럼 설치돼 있으면 'Pretendard'로도 그린다 -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAlklEQVR4nO3QsQ2AMBRDQTokahZkf3YIM3wBMSFXvN6+5Whnm7klPSAdgPSAdADSA9IBSA9I1x1g3fZSAAAAGBugehgAAABjA9w9DAAAgLEAqgcAAADwL4CnwQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3wWoHno7AAAAAAAAAEA/gNEDkB6QDkB6QDoA6QHppge4AIoLkXT2Opv5AAAAAElFTkSuQmCC">
 <style>
 /* 둘째 판(2026-11-20 Crenop '만들어 줘') — 내용·셈은 첫 판(year_template.html)과 같고 모양만 사이트(chuntaverse.com) 문법으로.
@@ -47,7 +59,7 @@
 }
 * { box-sizing: border-box; }
 html { background: var(--bg); scrollbar-gutter: stable; scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Pretendard', sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
@@ -82,7 +94,8 @@ h1 { font-size: 46px; font-weight: 800; line-height: 1.2; margin: 10px 0 14px; l
    사진 구역(.story)은 띠 길이만큼 길고, 그 안의 한 화면(.pin)이 붙어 있는 동안 내린 만큼 띠(.track)가 왼쪽으로 간다. 자동 = 페이지가 스스로 내려가는 것.
    달 머리(.mh — 달 이름 · 머리 문장)는 그 달이 지나가는 동안 왼쪽에 붙어 있다(스크립트가 민다 — 띠를 transform으로 옮겨서 sticky가 안 먹는다) */
 .story { position: relative; }
-.pin { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+/* overflow: clip — hidden이면 Tab으로 화면 밖 사진에 초점이 갈 때 브라우저가 붙은 화면째 옆으로 밀어 조작부 · 아래 줄이 화면 밖으로 나갔다(2026-11-27 Codex 검토). 초점 간 칸은 스크립트가 띠를 옮겨 보인다 */
+.pin { position: sticky; top: 0; height: 100vh; overflow: clip; }
 .track { position: relative; display: flex; align-items: flex-start; width: max-content; will-change: transform; }
 .month { flex: none; }
 .month + .month { margin-left: 56px; padding-left: 56px; border-left: 1px solid var(--border); }
@@ -104,6 +117,8 @@ h1 { font-size: 46px; font-weight: 800; line-height: 1.2; margin: 10px 0 14px; l
 .said { margin: 0; font-size: 14px; line-height: 22px; color: var(--text2); white-space: nowrap; }
 /* 조작부 — 붙은 화면의 오른쪽 위. 바탕을 화면 오른쪽 끝까지 깔아, 다음 달 머리가 오른쪽에서 올 때 이 밑에 가려 있다가 왼쪽 끝에서 나온다(오른쪽 여백은 스크립트가 띠 여백과 맞춘다) */
 .ctl { position: absolute; top: 0; right: 0; z-index: 2; display: flex; align-items: center; column-gap: 16px; height: 92px; padding: 16px 40px 12px 24px; background: var(--bg); }
+/* 조작부 왼쪽 24px는 바탕색으로 옅어진다 — 밑으로 들어가는 달 이름 · 문구가 칼로 자른 듯 잘린 채 서 있지 않게(2026-11-27 Gemini 검토: 1280×600에서 영상이 도는 24초 동안 '11월 2025'의 연도가 반쯤 잘려 있었다 → Crenop '목업없이 수정해도 되는데') */
+.ctl::before { content: ''; position: absolute; top: 0; bottom: 0; left: -24px; width: 24px; background: linear-gradient(to right, transparent, var(--bg)); pointer-events: none; }
 .btn { display: inline-flex; align-items: center; justify-content: center; column-gap: 8px; height: 36px; padding: 0 14px; font-size: 13px; font-weight: 700; line-height: 1; color: var(--text); background: var(--surface2); border: 1px solid var(--border); cursor: pointer; }
 .btn:hover, .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .btn svg { display: block; width: 12px; height: 12px; fill: currentColor; }
@@ -150,6 +165,12 @@ html.snd #snd .i-on { display: block; }
 .vol input::-moz-range-thumb { width: 8px; height: 14px; background: var(--text2); border: 0; }
 html.snd .vol input::-webkit-slider-thumb { background: var(--accent); }
 html.snd .vol input::-moz-range-thumb { background: var(--accent); }
+/* 사진 구역 아래(통계 · 끝)에서는 조작 칸을 가운데 내용 밖 오른쪽 여백에 둔다 — 내용 오른쪽 끝에 맞춰 두면 오른쪽 끝 칸의 숫자를 가렸다(2026-11-27 Gemini 검토: 1280×600 '86개').
+   여백에 다 안 들어가면(화면 폭 약 1830 아래 — 노트북 배율 150% · 125%) 음소거 단추만 두고, 마우스를 올리거나 초점이 가면 볼륨 막대가 왼쪽으로 펼쳐진다(volPlace — 같은 날 Crenop '목업없이 수정해도 되는데') */
+.vol.slim { padding-right: 0; }
+.vol.slim input { display: none; }
+.vol.slim:hover, .vol.slim:focus-within { padding-right: 10px; }
+.vol.slim:hover input, .vol.slim:focus-within input { display: block; }
 /* 아래 줄 — 왼쪽 끝 '첫 화면'(띠의 앞) · 이동 막대 · 오른쪽 끝 '통계'(띠의 뒤). 이동 막대는 띠 전체를 줄인 것: 칸 = 달(폭은 그 달의 길이만큼), 민트 틀 = 지금 화면에 보이는 구간.
    누르거나 끌면 그 자리로 간다(2026-11-24 Crenop '스크롤바를 두거나 해서 수동으로 원하는 곳으로 이동도 가능하게' · '초기화면과 아래쪽 통계 화면으로 바로 갈수 있는 버튼') */
 .nav { position: absolute; left: 40px; right: 40px; bottom: 10px; z-index: 2; display: flex; column-gap: 12px; height: 24px; }
@@ -169,7 +190,7 @@ html.snd .vol input::-moz-range-thumb { background: var(--accent); }
 .pics { position: relative; display: block; flex: none; background: var(--surface2); }
 .pic { position: absolute; display: block; margin: 0; padding: 0; border: 0; background: var(--surface2); }
 button.pic { cursor: zoom-in; }
-button.pic:focus-visible { outline-offset: -2px; }   /* 칸이 넘치는 것을 자르므로 테두리를 안쪽에 */
+button.pic:focus-visible, .pic.vid:focus-visible { outline-offset: -2px; }   /* 칸이 넘치는 것을 자르므로 테두리를 안쪽에 */
 .pic img { display: block; width: 100%; height: 100%; }
 .tile.none .pics, .pic.none { background: transparent; }
 .pic.none { box-shadow: inset 0 0 0 1px var(--cell-future); }
@@ -224,7 +245,8 @@ button.pic:focus-visible { outline-offset: -2px; }   /* 칸이 넘치는 것을 
 .ic[data-tag="music"] { color: var(--tag-music); }
 
 /* 한 살 */
-.end { padding: 140px 0 140px; text-align: center; }
+/* 끝 구역은 적어도 화면 한 장 — 키 큰 화면(1920×950)에서 케이크 바로 밑에 플레이어가 같이 보였다(2026-11-27 검토 · '마지막은 케잌이 주인공이어야'). 플레이어는 한 번 더 내려야 나온다 */
+.end { min-height: 100vh; padding: 140px 0 140px; text-align: center; }
 .dday { margin-top: 10px; font-size: 22px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
 .cake { display: block; width: 360px; height: 360px; margin: 40px auto 0; }   /* 360: 노트북 화면(높이 600)에서 한 살 문장과 케이크가 한 화면에 들어오는 크기 */
 
@@ -266,6 +288,7 @@ html.still .fx { opacity: 1; transform: none; transition: none; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><mask id="mical"><rect x="0" y="0" width="24" height="24" fill="white"/><rect x="13.8" y="14.3" width="4.2" height="4.2" rx="1" fill="black"/></mask><mask id="mick"><circle cx="12" cy="12" r="10" fill="white" stroke="white" stroke-width="2"/><polyline points="12 6.5 12 12 16 14" fill="none" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></mask><mask id="micb"><rect x="4" y="4" width="16" height="16" rx="2" fill="white" stroke="white" stroke-width="2"/><rect x="7" y="8" width="10" height="2.6" rx="1.3" fill="black"/><rect x="7" y="13" width="7" height="2.4" rx="1.2" fill="black"/></mask><mask id="mics"><path d="M22 2 15 22l-4-9-9-4z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/><path d="M22 2 11 13" fill="none" stroke="black" stroke-width="2" stroke-linecap="round"/></mask><mask id="mich"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/><path d="M12 14 C 10.2 12.2, 8 10.8, 8 9 C 8 7.7, 9 7, 10 7 C 10.9 7, 11.6 7.5, 12 8.1 C 12.4 7.5, 13.1 7, 14 7 C 15 7, 16 7.7, 16 9 C 16 10.8, 13.8 12.2, 12 14 Z" fill="black"/></mask><mask id="micp"><path d="M16.5 4.5l3 3L8 19l-4 1 1-4L16.5 4.5z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.5 17.5 9.5" stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M4 20 6.5 17.5" stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round"/></mask></defs></svg>
 <div class="wrap">
   <section class="hero">
     <div>
@@ -288,7 +311,7 @@ html.still .fx { opacity: 1; transform: none; transition: none; }
       <button type="button" class="btn" id="auto" aria-pressed="false"><svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg><svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span id="autoT">자동</span></button>
     </div>
     <div class="track" id="track"></div>
-    <div class="nav" id="nav"><button type="button" class="btn" id="toTop">▲ 첫 화면</button><div class="bar" id="bar" aria-hidden="true"><i class="thumb" id="thumb"></i></div><button type="button" class="btn" id="toStats">통계 ▼</button></div>
+    <div class="nav" id="nav"><button type="button" class="btn" id="toTop">▲ 첫 화면</button><div class="bar" id="bar" role="slider" tabindex="0" aria-label="사진 구역 이동" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="thumb" id="thumb"></i></div><button type="button" class="btn" id="toStats">통계 ▼</button></div>
   </div>
 </section>
 <div class="wrap">
@@ -336,19 +359,19 @@ const STORY = [
   { ym: '2025-09', pre: true, caps: [{ at: 'v250926', head: '마다옴이 처음으로 천타버스에 합류합니다.' }] },   // 결성 전 — 띠 맨 앞의 영상 칸(2026-11-25 Crenop '가로스크롤 맨처음에 추가하면 됨' · 문구 그대로). pre: 잔디에는 넣지 않는다
   { ym: '2025-11', main: 'c251130', caps: [{ at: 'c251130', head: '11월 30일, 천타버스가 결성되었습니다.' }] },
   { ym: '2025-12', main: 'c251206', caps: [{ at: 'c251206', head: '12월 6일, 첫 모임, 각자의 목표를 정했습니다.' },
-    { at: 'p251224/썩&썩', head: '12월 24일, 크루 만들고 한달동안 맹든링 서버를 즐겼습니다.' },
+    { at: 'p251224/썩&썩', head: '12월 24일, 크루 만들고 한 달 동안 맹든링 서버를 즐겼습니다.' },   // 띄어쓰기 — 2026-11-27 Crenop '맞춤법 수정'(2월 20일 '첫 번째'도)
     { at: 'p251227/숲 스트리머 시상식', head: '12월 27일, 천양 옆에 앉아있는 한 소녀는 후에... (더보기)' },   // 2026-11-25 Crenop(날짜 뒤 쉼표는 다른 문구와 같게 Claude). '천양님' → '천양'(같은 날 '상단 문구에 경어체로 XX와 XX님이 혼용되어 있다면 XX로 통일')
     { at: 'c251229', head: '12월 29일, 단체 노래방 컨텐츠를 통해 따뜻한 마음을 전달했습니다.' }] },   // 2026-11-25 Crenop(천코노래방 칸 — 그 옆에 후원증서). 날짜는 칸의 날짜로 Claude가 붙임
   { ym: '2026-01', main: 'c260102', caps: [{ at: 'c260102', head: '1월 2일, 첫 정기 티타임.', lines: ['그 뒤로 11월까지, 매달 초에 한 번도 거르지 않았습니다.'] }] },
-  { ym: '2026-02', main: 'b260227', caps: [{ at: 'c260220', head: '2월 20일, 천타버스로 첫번째 광고를 받았습니다.' }, { at: 'b260227', head: '2월 27일, 릴동파2에서 문모모가 은메달 2개를 획득했습니다.' }] },   // 2026-11-15 Crenop '2026년 2월의 메인은 릴동파로'
+  { ym: '2026-02', main: 'b260227', caps: [{ at: 'c260220', head: '2월 20일, 천타버스로 첫 번째 광고를 받았습니다.' }, { at: 'b260227', head: '2월 27일, 릴동파2에서 문모모가 은메달 2개를 획득했습니다.' }] },   // 2026-11-15 Crenop '2026년 2월의 메인은 릴동파로'
   { ym: '2026-03', main: 'c260329', caps: [{ at: 'c260329', head: '3월 29일, 제1회 정기 모캡. 문모모가 기획했습니다.', lines: ['그 뒤로 매달, 다른 멤버가 기획을 이어받았습니다.'] }] },
   { ym: '2026-04', main: 'c260412', caps: [{ at: 'c260412', head: '4월 12일, 임하밍이 황금저울게임을 직접 열었습니다.', lines: ['와종리 황금저울게임에서 우승한 지 13일 만이었습니다.'] }] },
   { ym: '2026-05', main: 'c260530', img: { src: 'content/260530-2.webp' }, caps: [{ at: 'c260530', head: '5월 30일, 첫 단체 커버곡 〈블루 발렌타인〉.' }] },
   { ym: '2026-06', main: 'c260627', img: { src: 'content/260627-2.webp', cap: 'WELCOME 천타버스' },
     caps: [{ at: 'n260622', head: '6월 22일, 천양 생일을 맞아 마다옴 정규 1집이 공개되었습니다.' }, { at: 'c260627', head: '6월 27일, 체비와 플리가 합류했습니다.' }, { at: 'c260628', head: '6월 28일, 두 번째 단체 커버곡 〈귀엽기만 하면 안되나요?〉.' }] },
   { ym: '2026-07', main: 'b260711',   // 큰 사진은 현수막(2026-11-15 Crenop '7월 사진은 content 쪽이 아니라 banner 쪽')
-    caps: [{ at: 'b260711', head: '7월 11일, 반장선거. 문모모가 1대 반장, 임하밍이 1대 부반장이 되었습니다.' }, { at: 'c260725', head: '7월 25일, 첫 모임에서 정한 목표를 중간 결산하였습니다.' }] },
-  { ym: '2026-08', main: 'c260802', img: { src: 'content/260802.webp', cap: 'WELCOME 천타버스 빙밍' }, caps: [{ at: 'c260802', head: '8월 2일, 빙밍이 합류했습니다. 열세 명이 되었습니다.' }] },
+    caps: [{ at: 'b260711', head: '7월 11일, 반장선거. 문모모가 1대 반장, 임하밍이 1대 부반장이 되었습니다.' }, { at: 'c260725', head: '7월 25일, 첫 모임에서 정한 목표를 중간 결산했습니다.' }] },   // 다른 문구와 같은 어투로(2026-11-27 Crenop '어투는 통일' — 종전 '결산하였습니다')
+  { ym: '2026-08', main: 'c260802', caps: [{ at: 'c260802', head: '8월 2일, 빙밍이 합류했습니다. 열세 명이 되었습니다.' }] },   // 큰 사진 이름은 시트 제목 '26년 8월 정기 티타임'(2026-11-27 Crenop — 종전 'WELCOME 천타버스 빙밍')
   { ym: '2026-09', main: 'c260919', img: { src: 'content/260919-2.webp' },
     caps: [{ at: 'c260906', head: '9월 6일, 플레이리스트 〈드라이브 할 때 듣기 좋은 노래〉.' }, { at: 'c260919', head: '9월 19일, 세 번째 단체 커버곡 〈갑자기〉.' }] },
   { ym: '2026-10', main: 'b261025', img: { src: 'banner/261026.webp' },
@@ -418,7 +441,8 @@ const ADD = {
   'c260912': [AN + '260912.webp'], 'c260913': [AN + '260913.webp'], 'c260926-2': [AN + '260926.webp'], 'c261017': [AN + '261017.webp'], 'c261125': [AN + '261125.webp'],
 };
 // 칸 이름(2026-11-25 Crenop): TNAME = 그 칸의 이름을 이것으로(크게 보기 창의 제목도 — 키는 칸의 줄 번호들), NONAME = 합친 칸의 이름에서 뺄 줄(그 줄의 사진 제목은 칸 이름)
-const TNAME = { 'p251224/썩&썩': '썩&썩, 개찐마단, 도그마, 온리킹스' };   // '12월 24일 썩&썩, 개찐마단, 도그마, 온리킹스'
+const TNAME = { 'p251224/썩&썩': '썩&썩, 개찐마단, 도그마, 온리킹스',   // '12월 24일 썩&썩, 개찐마단, 도그마, 온리킹스'
+  'b260427': '“방과후 설레임” 오버워치 대회 우승' };   // 시트 제목의 닫는 따옴표가 여는 따옴표(“)였다 — 2026-11-27 Crenop '따옴표만 고쳐'(시트는 그대로)
 const NONAME = new Set(['p260515/빙차차']);   // '5월 6일~15일 뒤에 빙차차만 빼자 다른팀은 팀이름이 따로 없음'
 // 시트에 없는 줄 — 칸 하나씩(2026-11-25 Crenop '신규 항목 추가 요청 260622 마다옴 정규 1집'). 그림은 Claude가 유튜브 영상 썸네일에서 앨범 표지만 잘라 만든 것(레포 1stanniversary 폴더에 Crenop이 올림)
 const NEWX = [{ id: 'n260622', d: '260622', t: '마다옴 정규 1집', p: AN + '260622.webp' },
@@ -437,6 +461,8 @@ const md = s => (+s.slice(2, 4)) + '월 ' + (+s.slice(4, 6)) + '일';
 const BDAY = idxOf('261130');
 const kst = new Date(Date.now() + 9 * 3600e3);   // 한국 날짜 = +9시간 뒤 UTC 메서드
 const TODAY = Math.round((Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()) - START) / DAY);
+// 방송 기록을 받은 날(asOf) — 그날부터는 기록이 없거나 덜 들어와서 날 셈(지금까지)에서 빼고 잔디에서도 빈 칸으로 둔다
+const GOT = idxOf(DATA.asOf.slice(2, 4) + DATA.asOf.slice(5, 7) + DATA.asOf.slice(8, 10));
 const mStart = ym => ym === '2025-11' ? 0 : idxOf(ym.slice(2, 4) + ym.slice(5, 7) + '01');
 const mEnd = ym => Math.round((Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0) - START) / DAY);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -486,10 +512,12 @@ function renderYear() {
       //   모두 방송한 날이 가장 밝다 — 처음엔 명수로 칠해 10명 시절에 10명 모두 방송한 날이 가장 밝지 않았다(같은 날 Crenop).
       const list = C.filter(c => c.i === i), n = (DATA.days[s] || []).length, cls = ['cell'];
       const roster = rosterOn(s), r = n / roster;
-      if (i > TODAY) cls.push('fut');
+      //   기록을 아직 받지 않은 날(GOT부터)은 앞날처럼 빈 칸 — 칠하면 '아무도 방송하지 않은 날'처럼 보였다(2026-11-27 검토: 11월 22~27일이 '방송 0 / 13명')
+      const known = i <= TODAY && i < GOT;
+      if (!known) cls.push('fut');
       else if (n) cls.push('g' + (r >= 1 ? 4 : r >= 0.75 ? 3 : r >= 0.5 ? 2 : 1));
       if (i === BDAY) cls.push('bday');
-      const tip = md(s) + (i <= TODAY ? ` · 방송 ${n} / ${roster}명` : '') + (list.length ? ' · ' + list.map(c => c.t).join(' / ') : '');
+      const tip = md(s) + (known ? ` · 방송 ${n} / ${roster}명` : '') + (list.length ? ' · ' + list.map(c => c.t).join(' / ') : '');
       cells += `<i class="${cls.join(' ')}" style="grid-column:${d + 1}" title="${esc(tip)}"></i>`;
     }
     // 결성 달은 30일 한 칸뿐 — 그 칸 바로 앞에 '결성'을 적는다. 달 이름은 글자일 뿐이다(누르면 그 달로 가던 기능은 뺐다 — 2026-11-24 Crenop '달눌러서 가는 기능은 필요 없어').
@@ -520,8 +548,9 @@ function tile(parts, main = false) {
   const info = `<span class="info"><span class="tt">${parts[0].tag}${esc(nm)}</span><span class="d">${date}</span></span>`;
   if (!parts[0].p) return `<div class="tile none" data-ids="${ids}"><span class="pics"><span class="pic none" data-a="0.5625"></span></span>${info}</div>`;   // 빈 틀은 세로로 선 9:16(띠 높이를 다 쓰되 자리를 덜 차지하게)
   // data-pt: 사진마다 몇째 줄의 사진인지, data-join: 달을 넘겨 합친 칸에서 다음 달의 줄이 시작하는 번호(그 사진 위에 다음 달 머리가 선다)
+  //   영상 칸은 button이 아니라 role="button"인 span이다 — button.pic은 '크게 볼 사진'을 뜻한다(크게 보기 · 시험이 그것으로 사진을 고른다)
   const jk = parts.findIndex(o => o.mi > parts.mi);
-  return `<div class="tile${main ? ' main' : ''}" data-ids="${ids}"${jk > 0 ? ` data-join="${jk}"` : ''}><span class="pics">${parts.map((o, k) => (o.x.vid ? `<span class="pic vid" data-a="${(o.x.vid[0] / o.x.vid[1]).toFixed(4)}"><video id="introV" src="${SITE + esc(o.p)}" playsinline preload="metadata" aria-label="${esc(o.name)}"></video></span>`
+  return `<div class="tile${main ? ' main' : ''}" data-ids="${ids}"${jk > 0 ? ` data-join="${jk}"` : ''}><span class="pics">${parts.map((o, k) => (o.x.vid ? `<span class="pic vid" role="button" tabindex="0" aria-label="${esc(o.name)} 영상 재생 · 멈춤" data-a="${(o.x.vid[0] / o.x.vid[1]).toFixed(4)}"><video id="introV" src="${SITE + esc(o.p)}" playsinline preload="metadata" aria-label="${esc(o.name)}"></video></span>`
         : (ONLY[o.x.id] || [o.p].concat(o.x.ph || [], ADD[o.x.id] || [])).map(q => pic(q, o.x.d, title(o))).join('')).split('class="pic"').join(`class="pic" data-pt="${k}"`)).join('')}</span>${info}</div>`;
 }
 // 가로 띠 자리 잡기 — 띠 높이 H = 화면 높이 − 136(위 16 · 달 머리 64 · 사이 12 · 아래 44 = 사이 10 · 이동 막대 24 · 아래 10).
@@ -534,6 +563,7 @@ const GAP = 16, PGAP = 2, ROW = 220, MINW = 168;
 const story = document.getElementById('story'), pin = document.getElementById('pin'), track = document.getElementById('track'), ctl = document.getElementById('ctl');
 const nav = document.getElementById('nav'), bar = document.getElementById('bar'), thumb = document.getElementById('thumb');
 let pad = 40, travel = 0, storyTop = 0, sx = 0, MS = [], IM = [], TL = [];   // pad: 띠 양 끝 여백, travel: 띠가 가는 거리, sx: 지금 간 거리, MS: 달마다 { m, h(달 머리), L(왼쪽 끝), W(폭), hw(머리 폭) }, IM: 아직 안 읽은 그림 { i, l, r }, TL: 칸마다 { i(이름 줄), L(칸 안쪽 왼쪽 끝), max(이름 줄이 갈 수 있는 거리), tx(지금 간 거리) }
+let volOut = null, volW = 0;   // 조작 칸: volOut 사진 구역 아래(통계 · 끝)가 화면에 들어왔나, volW 다 펼친 폭
 let SEG = [], barW = 0, barX = 0, thumbW = 0, curK = -1;   // 이동 막대: SEG 달 칸들, barW 막대 안쪽 폭, barX 막대 안쪽 왼쪽 끝(화면에서), thumbW 민트 틀 폭, curK 지금 달
 // 여러 장 칸의 단 나누기: 사진 차례를 지킨 채 끊는 자리를 모두 해 보고, 사진마다 제 크기(세로 그림 = 칸 높이 P, 가로 그림 = P를 R로 나눈 높이)에서 가장 덜 벗어나는 나눔을 고른다.
 //   단 안의 사진은 폭이 같고 높이의 합이 P. 돌려주는 값: 단마다 { W, ix(사진 번호들) }
@@ -605,7 +635,8 @@ function layoutStrip() {
   songAt = SONGS.map(g => { if (!g.at) return -Infinity; const t = [...track.querySelectorAll('.tile')].find(t => t.dataset.ids.split('|').includes(g.at)); return t ? t.getBoundingClientRect().left - t0 - vw * 0.75 : Infinity; });
   IM = [...track.querySelectorAll('.pic img')].filter(i => i.loading === 'lazy').map(i => { const r = i.getBoundingClientRect(); return { i, l: r.left - t0, r: r.right - t0 }; });
   // 이동 막대: 달 칸의 폭 = 띠에서 그 달이 차지하는 몫(달 사이 선에서 다음 선까지). 글자가 안 들어가는 좁은 칸(결성 달)은 비운다
-  vol.style.right = nav.style.left = pad + 'px'; nav.style.right = pad + (BGM_OK ? vol.offsetWidth + 12 : 0) + 'px';   // 조작 칸이 있으면 아래 줄은 그 앞에서 끝난다
+  nav.style.left = pad + 'px'; vol.classList.remove('slim'); volW = vol.offsetWidth; nav.style.right = pad + (BGM_OK ? volW + 12 : 0) + 'px';   // 조작 칸이 있으면 아래 줄은 그 앞에서 끝난다
+  volOut = null;   // 조작 칸 자리는 place가 다시 놓는다(volPlace)
   const tw = track.offsetWidth, st = MS.map((o, k) => (k ? o.line : 0));
   barW = bar.clientWidth;
   const need = SEG.map(s => { s.style.width = 'auto'; s.textContent = s.dataset.t; return s.getBoundingClientRect().width + 4; });   // 달 이름마다 드는 폭(글자 + 양옆 2)
@@ -630,8 +661,20 @@ function place() {
   for (const o of TL) { const t = Math.min(Math.max(v + pad - o.L, 0), o.max); if (t !== o.tx) { o.tx = t; o.i.style.transform = t ? `translateX(${t}px)` : ''; } }
   const tx = travel ? v / travel * (barW - thumbW) : 0; thumb.style.transform = `translateX(${Math.round((barX + tx) * d) / d - barX}px)`;
   songCheck();
-  { const vv = introV(); if (vv && !vv.paused && vv.parentElement.getBoundingClientRect().right < 0) vv.pause(); }   // 영상 칸이 화면 밖으로 나가면 멈춤
-  if (k !== curK) { SEG.forEach((s, j) => s.classList.toggle('on', j === k)); curK = k; }
+  // 영상 칸이 화면 밖으로 나가면(왼쪽으로 지나감 · 첫 화면이나 통계로 감) 영상을 멈추고, 끝나면 회상을 시작하려던 것도 거둔다
+  //   — 거두지 않으면 '▲ 첫 화면'으로 나간 뒤 영상이 끝나는 순간 자동 넘김이 켜져 사진 구역으로 끌려갔다(2026-11-27 Codex 검토)
+  { const vv = introV(); if (vv && !vv.paused) { const pr = pin.getBoundingClientRect(); if (vv.parentElement.getBoundingClientRect().right < 0 || pr.bottom <= 0 || pr.top >= innerHeight) stopIntro(); } }
+  { const out = story.getBoundingClientRect().bottom < innerHeight; if (out !== volOut) { volOut = out; volPlace(); } }
+  const pct = String(travel ? Math.round(v / travel * 100) : 0); if (bar.getAttribute('aria-valuenow') !== pct) bar.setAttribute('aria-valuenow', pct);   // 이동 막대를 읽어 주는 값(키보드 · 화면 읽기)
+  if (k !== curK) { SEG.forEach((s, j) => s.classList.toggle('on', j === k)); curK = k; bar.setAttribute('aria-valuetext', SEG[k].dataset.t + ' ' + STORY[k].ym.slice(0, 4)); }
+}
+// 조작 칸 자리: 첫 화면 · 사진 구역에서는 아래 줄의 오른쪽 끝(내용 오른쪽 끝에 맞춤), 사진 구역 아래(통계 · 끝)에서는 가운데 내용 밖 오른쪽 여백의 가운데.
+//   여백이 다 펼친 폭 + 16보다 좁으면 음소거 단추만 둔다(.slim — 올리거나 초점이 가면 볼륨 막대가 왼쪽으로 펼쳐진다. 오른쪽 끝이 그대로라 펼쳐도 마우스 밑을 벗어나지 않는다)
+function volPlace() {
+  if (!BGM_OK) return;
+  if (!volOut) { vol.classList.remove('slim'); vol.style.right = pad + 'px'; return; }
+  const slim = pad < volW + 16; vol.classList.toggle('slim', slim);
+  vol.style.right = Math.max(4, Math.round((pad - (slim ? snd.offsetWidth + 2 : volW)) / 2)) + 'px';
 }
 // 그림은 화면에 들어오기 전에 미리 읽는다(왼쪽 한 화면 · 오른쪽 두 화면) — 붙은 화면이 밖을 잘라서 브라우저의 늦게 읽기는 그림이 화면에 들어온 뒤에야 읽기 시작한다.
 //   손으로 움직일 때는 멈춘 자리에서만(지나치는 구간의 그림까지 다 읽지 않게)
@@ -640,7 +683,7 @@ let preT = 0;
 const sync = () => { sx = Math.min(Math.max(scrollY - storyTop, 0), travel); place(); clearTimeout(preT); preT = setTimeout(preload, 120); };
 // 먼 자리로 갈 때는 곧바로 옮긴다 — 부드럽게 가면 띠 수만 px가 1초 안에 지나간다
 //   첫 화면의 잠김(html.gate)은 사진 구역으로 가는 것을 누를 때 풀린다 — 첫 화면의 단추 둘뿐이다(잔디의 달 이름으로 가던 기능은 뺐다 — 2026-11-24 Crenop '달눌러서 가는 기능은 필요 없어')
-const unlock = () => document.documentElement.classList.remove('gate');
+const unlock = () => { document.documentElement.classList.remove('gate'); setInert(); };
 const jump = y => { unlock(); setAuto(false); scrollTo({ top: y, behavior: 'instant' }); };
 
 // 자동 넘김 — 페이지를 스스로 내린다(초당 speed px). 손으로 움직이면(휠 · 키 · 스크롤 막대 · 이동 막대) 멈춘다.
@@ -684,7 +727,8 @@ const BGM_OK = location.protocol !== 'file:';
 //   틀기 전에 조작 칸을 누르면 음소거 여부만 바뀌고 음악은 시작하지 않는다
 let yt = null, ytReady = false, bgmOn = false, bgmMute = false, byPause = false, ytErr = 0;
 const introV = () => document.getElementById('introV');   // 띠 맨 앞 영상(아래 startRecall)
-let introOn = false;   // 영상이 첫 화면 단추로 도는 중 — 음악 코드(applySound)가 처음부터 읽으므로 여기서 선언한다
+const vidOn = () => { const v = introV(); return !!v && !v.paused && !v.ended; };   // 영상이 도는 중 — 그동안 배경음악을 줄인다(첫 화면 단추로 튼 것이든 칸을 눌러 튼 것이든)
+let introOn = false, introDog = 0;   // introOn: 첫 화면 단추로 튼 영상이 끝나면 회상(배경음악 · 가로 넘김)을 시작하기로 한 상태, introDog: 영상이 멈춰 있는지 보는 타이머
 // 곡 구간(2026-11-25 Crenop '커버곡/ 플레이리스트 사진이 나올때쯤 BGM을 해당 곡으로 바꿔주면 분위기 환기되고 좋을것 같긴 하네' → '구간마다 바꾸는게 좋은데'):
 //   곡은 시간이 아니라 화면 자리로 고른다 — 띠에서 마지막으로 지난 커버곡 칸의 곡. 그래서 멈추거나 · 사진을 열거나 · 속도를 바꿔도 자리가 그대로면 곡도 그대로이고,
 //   뒤로 가면 그 자리의 곡으로 돌아간다(같은 날 '시간으로 정하면 잠시 사진을 확대해보거나 멈추거나 뒤돌아가거나 하는 변수에 대응이 안되지 않아?'). 첫 화면은 처음 곡, 통계는 마지막 곡.
@@ -719,9 +763,11 @@ function songSwitch() {
 }   // bgmOn: 음악을 틀기로 했나(첫 화면 단추 · '자동'을 누른 뒤), bgmMute: 음소거(조작 칸에 보이는 상태), byPause: 그 음소거가 플레이어에서 멈춘 것이라서인가, ytErr: 유튜브가 알린 오류 번호
 function applySound() {
   document.documentElement.classList.toggle('snd', !bgmMute); snd.setAttribute('aria-pressed', !bgmMute); snd.setAttribute('aria-label', bgmMute ? '배경음악 켜기' : '배경음악 음소거');
-  if (!ytReady || !bgmOn) { const v = introV(); if (v && introOn) v.muted = bgmMute; return; }   // 준비되면 onReady가, 틀기로 하면 startMusic · toggleAuto가 이 상태대로 맞춘다
-  if (bgmMute || introOn) yt.mute(); else { yt.unMute(); yt.playVideo(); }   // 첫 화면 단추로 영상이 도는 동안은 배경음악을 줄인다
-  const v = introV(); if (v && introOn) v.muted = bgmMute;   // 영상 소리도 음소거를 따른다
+  const v = introV(); if (v) v.muted = bgmMute;   // 영상 소리도 음소거를 따른다
+  if (!ytReady || !bgmOn) return;   // 준비되면 onReady가, 틀기로 하면 startMusic · toggleAuto가 이 상태대로 맞춘다
+  // 영상이 도는 동안은 배경음악을 줄인다 — 영상이 멈추거나 끝나면(play · pause · ended가 이 함수를 부른다) 되돌린다.
+  //   종전에는 '첫 화면 단추로 튼 영상' 표시(introOn)로 정해서, 영상 도중 '자동'을 누르면 영상과 음악이 같이 났고 다시 회상한 뒤에는 음악이 음소거로 남았다(2026-11-27 Codex 검토)
+  if (bgmMute || vidOn()) yt.mute(); else { yt.unMute(); yt.playVideo(); }
 }
 function setMute(on) { bgmMute = on; byPause = false; applySound(); }
 if (BGM_OK) {
@@ -743,15 +789,22 @@ if (BGM_OK) {
 }
 // 첫 화면 단추: 띠 맨 앞(영상 칸)으로 내려가 영상을 소리와 함께 틀고, 끝나면 배경음악과 가로 넘김을 시작한다(2026-11-25 Crenop '추가할 영상은 추억회상하기 버튼을 눌렀을때
 //   재생되고 나서 기존의 가로스크롤로 연결하면 됨' · '가로스크롤 맨처음에 추가하면 됨'). 영상을 못 읽으면(파일이 없음 등) 곧바로 시작한다.
-//   영상이 도는 동안 '자동'을 누르거나 손으로 옮기면 그때부터는 평소대로 — 영상 칸이 화면 밖으로 나가면 영상을 멈춘다(place). 영상 소리는 조작 칸의 음소거를 따르고, 배경음악이 이미 돌고 있으면 영상 동안만 줄인다
+//   영상이 도는 동안 '자동'을 누르면 영상을 멈추고 곧바로 가로 넘김 · 배경음악으로, 손으로 옮겨 영상 칸이 화면 밖으로 나가면 영상을 멈춘다(place — 둘 다 stopIntro).
+//   영상 소리는 조작 칸의 음소거를 따르고, 배경음악이 이미 돌고 있으면 영상이 도는 동안만 줄인다(applySound)
 function startMusic() { if (BGM_OK && !bgmOn) { bgmOn = true; applySound(); songSwitch(); } }
+// 영상을 멈추고, 끝나면 회상을 시작하려던 것을 거둔다 — '자동'을 누를 때 · 영상 칸이 화면 밖으로 나갈 때(place)
+function stopIntro() { introOn = false; clearInterval(introDog); const v = introV(); if (v && !v.paused) v.pause(); applySound(); }
 function startRecall() {
   unlock(); setAuto(false);
   const go = () => { sync(); const v = introV();
-    const after = () => { if (!introOn) return; introOn = false; applySound(); startMusic(); if (!auto && sx < 2) setAuto(true); };
+    const after = () => { if (!introOn) return; stopIntro(); startMusic(); if (!auto && sx < 2) setAuto(true); };
     if (!v || v.error) { introOn = true; return after(); }
     introOn = true; v.onended = v.onerror = after; v.currentTime = 0; v.muted = bgmMute; applySound();
-    const p = v.play(); if (p) p.catch(() => { v.muted = true; v.play().catch(after); }); };
+    // 영상이 받아지지 않고 5초 넘게 멈춰 있으면(끝 · 오류 소식 없이 연결이 멎음) 기다리지 않고 회상을 시작한다 — 종전에는 하염없이 기다렸다(2026-11-27 Codex 검토).
+    //   손으로 멈춘 동안은 세지 않는다. 5초는 Claude가 정함
+    let last = -1, since = performance.now(); clearInterval(introDog);
+    introDog = setInterval(() => { if (!introOn) return clearInterval(introDog); if (v.paused || v.currentTime !== last) { last = v.currentTime; since = performance.now(); } else if (performance.now() - since >= 5000) after(); }, 500);
+    const p = v.play(); if (p) p.catch(() => { if (!introOn) return; v.muted = true; v.play().catch(after); }); };   // 거둔 뒤(멈춰서 play가 깨짐)에는 다시 틀지 않는다
   if (scrollY < storyTop - 1) { let done = false; const g = () => { if (done) return; done = true; removeEventListener('scrollend', g); go(); };
     addEventListener('scrollend', g); setTimeout(g, 1500); scrollTo({ top: storyTop, behavior: 'smooth' }); }
   else { scrollTo({ top: storyTop, behavior: 'instant' }); go(); }
@@ -759,7 +812,7 @@ function startRecall() {
 // 띠 밖(첫 화면 · 통계)이거나 띠 끝에서 누르면 띠의 처음으로 간 뒤 시작한다
 function toggleAuto() {
   if (auto) return setAuto(false);
-  introOn = false; unlock();
+  stopIntro(); unlock();   // 영상 도중이면 영상은 멈추고 배경음악으로(줄였던 소리도 되돌림)
   if (BGM_OK && !bgmOn) { bgmOn = true; applySound(); songSwitch(); }   // 음악은 누른 그 자리에서 시작한다(음소거해 두었으면 소리 없이)
   const begin = () => { sync(); setAuto(true); };
   if (scrollY < storyTop - 1) {   // 첫 화면에서: 가까우니 부드럽게 내려간 뒤 시작
@@ -820,7 +873,7 @@ function renderTogether() {
     //   방송 횟수 · 하루 평균은 2026-11-21에 더했다(Crenop '지금까지랑 통계쪽이 좀더 보강되면 좋을것같다는 생각' — Claude가 고른 것, Crenop이 뺄 수 있다).
     //   같이 넣었던 기념 사진 수는 뺐다(같은 날 Crenop '기념사진 갯수는 내가 주관적으로 고른부분도 있어서 빼는게 좋을듯')
     // 날 셈은 방송 기록을 받은 날(asOf)의 전날까지 — 받은 날은 기록이 덜 들어와 '아무도 방송하지 않은 날'로 잘못 셌다
-    + (() => { const done = Math.min(TODAY + 1, idxOf(DATA.asOf.slice(2, 4) + DATA.asOf.slice(5, 7) + DATA.asOf.slice(8, 10)), BDAY + 1);
+    + (() => { const done = Math.min(TODAY + 1, GOT, BDAY + 1);
       const past = Array.from({ length: done }, (_, x) => ymd6(x)), on = d => (DATA.days[d] || []).length;
       return '<div class="stats">' + stat(Math.round(DATA.bc.reduce((a, v) => a + v, 0) / 60) + '시간', '멤버들의 방송 시간')
         + stat(DATA.sn + '회', '방송 횟수') + stat((past.reduce((a, d) => a + on(d), 0) / past.length).toFixed(1) + '명', '하루 평균 방송 멤버')
@@ -837,7 +890,7 @@ function renderTogether() {
     //   오간 카테고리(카테고리를 바꾼 기록의 앞·뒤에 나온 이름의 가짓수 — 한 번도 바꾸지 않은 방송의 카테고리는 기록에 없어 '카테고리 종류'라고 적지 않는다. 같은 날 Crenop '바꾼것만이라도 종류를 세볼수는 있을것같은데').
     //   다시보기 수는 뺐다(같은 날 Crenop '방송횟수랑 겹치는 느낌이 있고 그닥 정보가 안되는 다시보기만 빼면 갯수가 딱 맞고' — 줄마다 다섯 칸)
     + '<div class="stats">' + stat(DATA.fanInc + '명', '늘어난 애청자') + stat(DATA.chat.flat().reduce((a, v) => a + v, 0) + '회', '멤버끼리 나눈 채팅')
-      + stat(DATA.x.titleCh + '번', '방송 제목 변경') + stat(DATA.x.catCh + '번', '카테고리 변경') + stat(DATA.x.cats + '개', '오간 카테고리') + '</div>';
+      + stat(DATA.x.titleCh + '회', '방송 제목 변경') + stat(DATA.x.catCh + '회', '카테고리 변경') + stat(DATA.x.cats + '개', '오간 카테고리') + '</div>';
 }
 // 크루 대전 결과: 1:1은 크루 활동 시트의 전적, 크루대전 둘은 우승 현수막(8/1 스탈존 크루대전 · 8/25 크루 4파전 전승 우승).
 //   날짜로 매기고 크루 대전 컨텐츠에만 붙인다 — 줄 번호로 매겼더니 같은 날 컨텐츠가 둘인 8/8에 승리가 '소소 싱크룸'(c260808)에 붙었다(진드기전은 c260808-2).
@@ -896,8 +949,8 @@ function renderHall() {
     return hc((c.icons || []).map(([svg, col]) => hcIcon(svg, col)).join(''), c.label, ids, c.value, hallSub(c, ids)); });
   const one = (icon, label, vals, unit) => { const t = topOf(vals); if (t) cards.push(hc(icon, label, t[0], t[1] + unit, gap(t[1], t[2], unit))); };
   one(hcIcon((DATA.icons['모캡'] || [])[1], '', 'mocap'), '정기 모캡 참여', all.map(i => count(cs.filter(isMocap), i)), '회');
-  one(hcIcon(ui.swords, 'var(--ev-chat)'), '크루 대전 출전', all.map(i => (i ? count(cs.filter(isBattle), i) : null)), '번');
-  one(hcIcon(ui.pencil, 'var(--ev-yellow)'), '방송 제목 변경', DATA.x.titleBy, '번');
+  one(hcIcon(ui.swords, 'var(--ev-chat)'), '크루 대전 출전', all.map(i => (i ? count(cs.filter(isBattle), i) : null)), '회');   // 횟수 단위는 모두 '회'(2026-11-27 Crenop)
+  one(hcIcon(ui.pencil, 'var(--ev-yellow)'), '방송 제목 변경', DATA.x.titleBy, '회');
   one(hcIcon(ui.tag, 'var(--ev-yellow)'), '오간 카테고리', DATA.x.catsBy, '개');
   // 가장 자주 함께한 둘: 둘 다 합류한 뒤, 둘 중 하나라도 나온 컨텐츠 가운데 둘이 함께 나온 비율(아랫줄 = 함께 / 하나라도). 횟수로 세면 컨텐츠에 가장 많이 나온 멤버가 위 짝에 모두 끼었다(2026-11-15 잼).
   // 채팅을 가장 많이 나눈 둘: 둘이 서로의 방송에서 친 채팅의 합(DATA.chat[보낸 멤버][방송 주인]) — '함께한 둘' 곁에(2026-11-21 Crenop '페어링하면 좋겠다')
@@ -909,7 +962,7 @@ function renderHall() {
     const n = DATA.chat[a][b] + DATA.chat[b][a]; if (n) duo.push({ ids: [a, b], n });
   }
   duo.sort((x, y) => y.n - x.n);
-  if (pal) cards.push(hc(hcIcon(ui.people), '가장 자주 함께한 둘', pal.ids, Math.round(pal.r * 100) + '%', `${pal.t} / ${pal.u}번`));
+  if (pal) cards.push(hc(hcIcon(ui.people), '가장 자주 함께한 둘', pal.ids, Math.round(pal.r * 100) + '%', `${pal.t} / ${pal.u}회`));
   if (duo.length) cards.push(hc(hcIcon(ui.chatBubble, 'var(--ev-chat)'), '채팅을 가장 많이 나눈 둘', duo[0].ids, duo[0].n + '회', gap(duo[0].n, duo[1] ? duo[1].n : null, '회')));
   // 분야별 활약: 분야(종류)마다 그 종류의 컨텐츠·현수막에 가장 많이 나온 멤버만(같으면 모두 — 그 단을 넓혀 옆으로). 2026-11-21 Crenop '각 분야별 1등만' · '명전이랑 비슷하게 수직배치 수평나열'
   const both = cs.concat(bs);
@@ -923,28 +976,42 @@ function renderHall() {
 // 사진 크게 보기: 그림(data-ph)을 누르면 창. ← → 로 앞뒤 사진, 닫기 = ✕ · 바깥 누르기 · Esc · 뒤로 가기(창을 열 때 방문 기록 한 칸).
 const lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'), lbBody = document.getElementById('lbBody');
 let lbAt = -1, lbFrom = null;
-function lbShow(k) {
-  lbAt = (k + PH.length) % PH.length;
-  const p = PH[lbAt], z = DATA.sizes[p.src] || [1200, 800], r = z[1] / z[0];
-  // 화면에 다 들어오게 맞춘다. 그러면 폭이 560보다 좁아지는 긴 그림은 폭 760까지 키우고 창 안에서 내려 본다.
+// 그림 크기: 화면에 다 들어오게 맞춘다. 그러면 폭이 560보다 좁아지는 긴 그림은 폭 760까지 키우고 창 안에서 내려 본다.
+//   창을 연 채 창 크기가 바뀌어도 다시 맞춘다(아래 resize — 2026-11-27 Codex 검토: 1920×950에서 열고 1280×600으로 줄이면 닫기 단추가 화면 위로 잘렸다)
+function lbFit() {
+  const z = DATA.sizes[PH[lbAt].src] || [1200, 800], r = z[1] / z[0];
   const availH = innerHeight - 48 - 54, availW = Math.min(1400, innerWidth - 176);
   let w = Math.min(z[0], availW, availH / r);
   if (r > 1.6 && w < 560) w = Math.min(z[0], 760, availW);
-  lbImg.removeAttribute('src');   // 앞 사진이 새 크기로 늘어나 보이지 않게
   lbImg.width = Math.round(w); lbImg.height = Math.round(w * r); lbImg.style.width = Math.round(w) + 'px';
-  lbImg.src = SITE + p.src; lbImg.alt = p.t;
-  lbBody.style.maxHeight = availH + 'px'; lbBody.scrollTop = 0;
+  lbBody.style.maxHeight = availH + 'px';
+}
+function lbShow(k) {
+  lbAt = (k + PH.length) % PH.length;
+  const p = PH[lbAt];
+  lbImg.removeAttribute('src');   // 앞 사진이 새 크기로 늘어나 보이지 않게
+  lbFit();
+  lbImg.src = SITE + p.src; lbImg.alt = p.t; lbBody.scrollTop = 0;
   document.getElementById('lbD').textContent = md(p.d);
   document.getElementById('lbT').textContent = p.t;
+  if (!lb.hidden) history.replaceState({ lb: 1, k: lbAt }, '');   // ← → 로 넘긴 사진도 방문 기록에(앞으로 가기로 다시 열 때 그 사진)
 }
-function lbOpen(k, from) {
-  lbFrom = from; lbShow(k); lb.hidden = false; document.documentElement.classList.add('lock');
-  history.pushState({ lb: 1 }, ''); document.getElementById('lbX').focus();
+// push: 방문 기록에 한 칸을 더한다 — 앞으로 가기로 다시 여는 것(popstate)은 이미 그 칸에 있어서 더하지 않는다
+function lbOpen(k, from, push = true) {
+  lbFrom = from; lbShow(k); lb.hidden = false; document.documentElement.classList.add('lock'); setInert();
+  if (push) history.pushState({ lb: 1, k: lbAt }, ''); document.getElementById('lbX').focus();
 }
-function lbHide() { if (lb.hidden) return; lb.hidden = true; document.documentElement.classList.remove('lock'); lbImg.removeAttribute('src'); if (lbFrom) lbFrom.focus({ preventScroll: true }); lbFrom = null;
+function lbHide() { if (lb.hidden) return; lb.hidden = true; document.documentElement.classList.remove('lock'); setInert(); lbImg.removeAttribute('src'); if (lbFrom) lbFrom.focus({ preventScroll: true }); lbFrom = null;
   if (lbPaused) { lbPaused = false; sync(); setAuto(true); } }   // 자동 넘김 중에 연 사진이면 닫을 때 이어 간다
 const lbClose = () => { if (!lb.hidden) history.back(); };   // 방문 기록 한 칸을 되돌리면 popstate가 창을 닫는다
-addEventListener('popstate', lbHide);
+// 사진 칸(방문 기록에 적힌 사진 번호)으로 오면 그 사진을 연다 — 닫은 뒤 앞으로 가기를 하면 종전에는 창이 닫힌 채 그 칸에 남아 뒤로 가기를 한 번 더 해야 했다(2026-11-27 Codex 검토)
+addEventListener('popstate', e => { const s = e.state; if (s && s.lb && PH[s.k]) { if (lb.hidden) lbOpen(s.k, track.querySelector(`[data-ph="${s.k}"]`), false); else lbShow(s.k); } else lbHide(); });
+addEventListener('resize', () => { if (!lb.hidden) lbFit(); });
+// 키보드 초점을 막는 곳(inert): 첫 화면 잠김 동안은 사진 구역 · 통계 · 끝 — Tab으로 잠김을 넘어 내려갔다,
+//   크게 보기 창이 열린 동안은 창 밖 모두 — Tab이 창 뒤의 페이지로 나가 페이지가 움직였다(2026-11-27 Codex 검토). 조작 칸(음소거 · 볼륨)은 첫 화면에서도 닿는다
+const wraps = document.querySelectorAll('body > .wrap');   // [0] 첫 화면, [1] 통계 · 끝 · 플레이어
+function setInert() { const modal = !lb.hidden, gate = document.documentElement.classList.contains('gate');
+  wraps[0].inert = vol.inert = modal; story.inert = wraps[1].inert = modal || gate; }
 document.getElementById('story').addEventListener('click', e => { const t = e.target.closest('[data-ph]'); if (t) lbOpen(+t.dataset.ph, t); });
 lb.addEventListener('click', e => { if (e.target === lb) lbClose(); });
 document.getElementById('lbX').addEventListener('click', lbClose);
@@ -962,7 +1029,7 @@ const io = !still && 'IntersectionObserver' in window
 
 // 첫 화면에서 시작하고 잠근다 — 새로 고쳤을 때 브라우저가 읽던 자리(사진 구역 한가운데)로 되돌리면 잠긴 채 갇힌다
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-document.documentElement.classList.add('gate');
+document.documentElement.classList.add('gate'); setInert();
 renderToday();
 renderYear();
 renderStory();
@@ -970,17 +1037,41 @@ renderTogether();
 renderHall();
 renderEnd();
 heroTimes();
-// 띠는 화면 크기가 바뀌면 · 글꼴이 늦게 읽혀 글 폭이 바뀌면 다시 자리 잡는다
+// 띠는 화면 크기가 바뀌면 · 글꼴이 늦게 읽혀 글 폭이 바뀌면 · 그림 비율이 적어 둔 것과 다르면 다시 자리 잡는다(relayout).
+//   띠 길이가 바뀌어도 보던 곳이 그대로 보이게 붙잡는다 — 띠 안이면 화면 왼쪽 끝에 걸린 칸을(칸 안의 몇 % 자리까지), 띠 아래면 보던 구역의 윗변을.
+//   붙잡지 않으면 같은 세로 자리가 다른 달이 됐다(2026-11-27 Codex 검토: 1920×950에서 4월을 보다 1280×600으로 줄이면 7월)
+function relayout() {
+  let a = null;
+  if (scrollY >= storyTop && scrollY <= storyTop + travel) { const t = [...track.querySelectorAll('.tile')].find(t => t.getBoundingClientRect().right > pad);
+    if (t) { const r = t.getBoundingClientRect(); a = { t, f: (pad - r.left) / r.width }; } }
+  else if (scrollY > storyTop + travel) { const s = [...wraps[1].querySelectorAll('section')].find(s => s.getBoundingClientRect().bottom > 0); if (s) a = { s, y: s.getBoundingClientRect().top }; }
+  layoutStrip();
+  if (a) {
+    const y = a.t ? storyTop + Math.min(Math.max(Math.round(a.t.getBoundingClientRect().left - track.getBoundingClientRect().left + a.f * a.t.offsetWidth - pad), 0), travel)
+      : Math.round(scrollY + a.s.getBoundingClientRect().top - a.y);
+    scrollTo({ top: y, behavior: 'instant' });
+    if (auto) { pos = scrollY - storyTop; lastY = scrollY; }   // 자동 넘김은 옮긴 자리에서 잇는다(세로 자리가 바뀐 것을 손으로 움직인 것으로 보지 않게)
+  }
+  sync();
+}
 if ('ResizeObserver' in window) { let was = pin.clientWidth + 'x' + pin.clientHeight;
-  new ResizeObserver(() => { const now = pin.clientWidth + 'x' + pin.clientHeight; if (now !== was) { was = now; layoutStrip(); sync(); } }).observe(pin); }
-if (document.fonts) document.fonts.ready.then(() => { layoutStrip(); sync(); });
+  new ResizeObserver(() => { const now = pin.clientWidth + 'x' + pin.clientHeight; if (now !== was) { was = now; relayout(); } }).observe(pin); }
+if (document.fonts) document.fonts.ready.then(relayout);
 addEventListener('scroll', () => { if (!auto) sync(); }, { passive: true });
 document.getElementById('auto').addEventListener('click', toggleAuto);
 // 첫 화면 단추 둘: 그 속도로 바꾸고 시작한다
 // 첫 화면 단추 둘: 그 속도로 바꾸고, 영상을 먼저 튼 뒤 가로 넘김(과 배경음악)으로 잇는다
 for (const id of ['heroAuto', 'heroFast']) { const el = document.getElementById(id); el.addEventListener('click', () => { setSpeed(+el.dataset.v); startRecall(); }); }
-// 영상 칸을 누르면 재생 · 멈춤(첫 화면 단추 없이 손으로 왔을 때도 볼 수 있게)
-track.addEventListener('click', e => { const v = e.target.closest('.pic.vid') && introV(); if (!v) return; if (v.paused) { v.muted = bgmMute; v.play().catch(() => {}); } else v.pause(); });
+// 영상 칸을 누르면(Enter · 스페이스도) 재생 · 멈춤(첫 화면 단추 없이 손으로 왔을 때도 볼 수 있게). 영상이 틀고 멈출 때마다 배경음악을 줄이고 되돌린다(applySound)
+function vidToggle() { const v = introV(); if (!v) return; if (v.paused) { v.muted = bgmMute; v.play().catch(() => {}); } else v.pause(); }
+track.addEventListener('click', e => { if (e.target.closest('.pic.vid')) vidToggle(); });
+track.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.pic.vid')) { e.preventDefault(); vidToggle(); } });
+{ const v = introV(); if (v) for (const ev of ['play', 'pause', 'ended']) v.addEventListener(ev, applySound); }
+// 키보드로 사진 칸을 옮겨 다니면(Tab) 초점 간 것이 보이게 띠를 옮긴다 — 붙은 화면은 overflow: clip이라 브라우저가 스스로 밀지 못한다.
+//   마우스로 누른 것(초점 표시가 안 뜸)은 옮기지 않는다 — 반쯤 보이는 사진을 눌렀을 때 띠가 움찔하지 않게
+track.addEventListener('focusin', e => { const el = e.target; if (!el.matches(':focus-visible')) return;
+  const r = el.getBoundingClientRect(), vw = pin.clientWidth; if (r.left >= pad && r.right <= vw - pad) return;
+  setAuto(false); scrollTo({ top: storyTop + Math.min(Math.max(sx + r.left - pad, 0), travel), behavior: 'instant' }); sync(); });
 document.getElementById('spd').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return;
   setSpeed(+b.dataset.v); });
 // 사진 구역에서 첫 화면 · 통계로(통계 = 띠 바로 아래 '지금까지'부터 — 작은 제목이 위에서 48px에 오게)
@@ -996,11 +1087,19 @@ bar.addEventListener('pointerdown', e => {
   move(e); bar.setPointerCapture(e.pointerId);
   bar.onpointermove = move; bar.onlostpointercapture = () => { bar.onpointermove = null; };
 });
+// 이동 막대를 키보드로(2026-11-27 Codex 검토 — 마우스로만 움직였다): ← → 반 화면씩 · PageUp · PageDown 앞 · 다음 달의 처음 · Home · End 띠의 처음 · 끝. 걸음 크기는 Claude가 정함
+bar.addEventListener('keydown', e => {
+  const half = pin.clientWidth / 2, st = MS.map(o => o.L - pad);   // st: 달마다 달 머리가 왼쪽에 붙기 시작하는 자리(place의 지금 달과 같은 기준)
+  const x = { ArrowRight: sx + half, ArrowDown: sx + half, ArrowLeft: sx - half, ArrowUp: sx - half, Home: 0, End: travel,
+    PageDown: st.find(s => s > sx + 1) ?? travel, PageUp: [...st].reverse().find(s => s < sx - 1) ?? 0 }[e.key];
+  if (x === undefined) return;
+  e.preventDefault(); jump(storyTop + Math.min(Math.max(Math.round(x), 0), travel));
+});
 // 적어 둔 크기와 실제 그림의 비율이 다르면(사이트가 같은 이름으로 그림을 바꿈 — 2026-11-24 content/261125.webp) 실제 비율로 다시 자리 잡는다. 띠는 가로 · 세로를 다 정해 놓아서, 그대로 두면 그림이 찌그러진다
 let fixT = 0;
 track.addEventListener('load', e => { const i = e.target, b = i.parentElement; if (i.tagName !== 'IMG' || !i.naturalWidth || !b.dataset.a) return;
   const a = i.naturalWidth / i.naturalHeight; if (Math.abs(a / b.dataset.a - 1) <= 0.01) return;
-  b.dataset.a = a.toFixed(4); clearTimeout(fixT); fixT = setTimeout(() => { layoutStrip(); sync(); }, 50); }, true);
+  b.dataset.a = a.toFixed(4); clearTimeout(fixT); fixT = setTimeout(relayout, 50); }, true);
 document.querySelectorAll('.fx').forEach(el => io ? io.observe(el) : el.classList.add('in'));
 </script>
 </body>

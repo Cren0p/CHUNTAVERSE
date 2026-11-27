@@ -130,11 +130,15 @@ h1 { font-size: 46px; font-weight: 800; line-height: 1.2; margin: 10px 0 14px; l
 html.auto #auto .i-pause { display: block; }
 /* '추억 돌아보기' — 첫 화면에서는 이것을 눌러야 사진 구역으로 넘어간다(html.gate인 동안 아래로 못 내려간다. 2026-11-24 Crenop '추억 돌아보기를 눌러야만 사진쪽으로 넘어가게 … 버튼을 강조해줘').
    누르기 전에는 민트 테두리가 숨쉬듯 번진다 — 천랜달의 '눌러야 할 단추' 효과(needSelectPulse: 2px 옅게 ↔ 4px 짙게 + 번짐, 1.4초)를 이 페이지의 민트로 옮긴 것(같은 날 '천랜달에서 클릭해야하는 버튼 테두리로 강조하던 효과') */
-/* 첫 화면 단추 둘(2026-11-25 Crenop '시작화면 버튼도 2개로 나누고 보통 속도로 추억 회상하기, 빠른 속도로 추억 회상하기 각각 예상 시간을 적어주면 좋을것 같아' · '양식은 버튼 밑에 "예상 시간: NN분"'):
-   위아래로 놓고 폭을 같게(긴 쪽에 맞춤), 예상 시간은 단추 밑 왼쪽 — 위아래 배치 · 같은 폭 · 왼쪽 맞춤은 Claude가 정함(왼쪽 기둥 380px에 둘이 옆으로 안 들어간다) */
+/* 첫 화면 단추 둘 — '자동으로 추억 회상하기'(영상 뒤 자동 넘김) · '수동으로 추억 회상하기'(영상 뒤 손으로 넘김)(2026-11-27 Crenop — 종전 '보통 · 빠른 속도로 추억 회상하기', 2026-11-25).
+   예상 시간은 자동 단추 밑에만('예상시간은 필요할까 싶고'), 양식 '예상 시간: NN분'은 2026-11-25 Crenop.
+   위아래로 놓고 폭을 같게(긴 쪽에 맞춤), 단추 밑 줄은 왼쪽 — 위아래 배치 · 같은 폭 · 왼쪽 맞춤은 Claude가 정함(왼쪽 기둥 380px에 둘이 옆으로 안 들어간다) */
 .hero-go { display: inline-grid; row-gap: 16px; margin-top: 28px; }
 .hero-go1 { display: grid; row-gap: 8px; }
-.hero-time { margin: 0; font-size: 13px; line-height: 18px; color: var(--text2); font-variant-numeric: tabular-nums; }
+/* 단추 밑 줄: 예상 시간 옆에 안내 글(2026-11-27 Crenop '예상시간 옆에 "자동 스크롤되는 화면을 보며 회상합니다."'). 토막마다 통째로 — 한 줄에 안 들어가면 안내 글이 통째로 다음 줄로 */
+.hero-time { display: flex; flex-wrap: wrap; column-gap: 12px; margin: 0; font-size: 13px; line-height: 18px; color: var(--text2); font-variant-numeric: tabular-nums; }
+.hero-time span { white-space: nowrap; }
+.hero-time span:empty { display: none; }
 .hero-auto { width: 100%; height: 44px; padding: 0 20px; font-size: 14px; color: var(--accent); border-color: var(--accent); }
 html.gate { overflow: hidden; }
 html.gate .hero-auto { animation: needPress 1.4s ease-in-out infinite; }
@@ -297,8 +301,8 @@ html.still .fx { opacity: 1; transform: none; transition: none; }
       <h1>천타버스의 첫 1년</h1>
       <p class="today" id="todayLine"></p>
       <div class="hero-go">
-        <div class="hero-go1"><button type="button" class="btn hero-auto" id="heroAuto" data-v="240"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg>보통 속도로 추억 회상하기</button><p class="hero-time" id="heroTimeN"></p></div>
-        <div class="hero-go1"><button type="button" class="btn hero-auto" id="heroFast" data-v="480"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg>빠른 속도로 추억 회상하기</button><p class="hero-time" id="heroTimeF"></p></div>
+        <div class="hero-go1"><button type="button" class="btn hero-auto" id="heroAuto"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg>자동으로 추억 회상하기</button><p class="hero-time"><span id="heroTimeN"></span><span>자동 스크롤되는 화면을 보며 회상합니다.</span></p></div>
+        <div class="hero-go1"><button type="button" class="btn hero-auto" id="heroManual"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg>수동으로 추억 회상하기</button><p class="hero-time"><span>수동으로 스크롤하며 회상합니다.</span></p></div>
       </div>
     </div>
     <div class="year" id="year" role="img" aria-label="천타버스의 첫 1년, 날마다 방송한 멤버 수를 칠한 달력"></div>
@@ -695,7 +699,7 @@ const jump = y => { unlock(); setAuto(false); scrollTo({ top: y, behavior: 'inst
 let auto = false, speed = 240, pos = 0, lastY = 0, lastT = 0, autoEnd = 0, lbPaused = false;   // autoEnd: 자동 넘김이 멈출 자리(띠 처음에서 잰 거리 — 통계 첫 화면), lbPaused: 사진을 열어서 멈춘 것
 const statsTop = () => document.getElementById('together').offsetTop + 72;
 // 첫 화면 단추 밑의 예상 시간: 자동 넘김이 가는 거리(띠 처음 → 통계 첫 화면) ÷ 그 단추의 속도, 반올림한 분. 화면 크기마다 띠 길이가 달라 그때그때 잰다
-function heroTimes() { const L = Math.max(travel, statsTop() - storyTop), iv = (introV() || {}).duration || 24; [['heroTimeN', 240], ['heroTimeF', 480]].forEach(([id, v]) => { document.getElementById(id).textContent = '예상 시간: ' + Math.max(1, Math.round((L / v + iv) / 60)) + '분'; }); }   // + 띠 맨 앞 영상의 길이(읽기 전에는 24초)   // 통계 첫 화면: '지금까지'의 작은 제목이 위에서 48px
+function heroTimes() { const L = Math.max(travel, statsTop() - storyTop), iv = (introV() || {}).duration || 24; document.getElementById('heroTimeN').textContent = '예상 시간: ' + Math.max(1, Math.round((L / 240 + iv) / 60)) + '분'; }   // + 띠 맨 앞 영상의 길이(읽기 전에는 24초)   // 통계 첫 화면: '지금까지'의 작은 제목이 위에서 48px
 function setSpeed(v) { speed = v; document.querySelectorAll('#spd [data-v]').forEach(x => x.setAttribute('aria-pressed', +x.dataset.v === v)); }
 setSpeed(speed);
 function setAuto(on) {
@@ -794,10 +798,10 @@ if (BGM_OK) {
 function startMusic() { if (BGM_OK && !bgmOn) { bgmOn = true; applySound(); songSwitch(); } }
 // 영상을 멈추고, 끝나면 회상을 시작하려던 것을 거둔다 — '자동'을 누를 때 · 영상 칸이 화면 밖으로 나갈 때(place)
 function stopIntro() { introOn = false; clearInterval(introDog); const v = introV(); if (v && !v.paused) v.pause(); applySound(); }
-function startRecall() {
+function startRecall(manual) {   // manual: 영상이 끝나면 배경음악만 — 가로 넘김은 손으로(첫 화면의 '수동으로' 단추)
   unlock(); setAuto(false);
   const go = () => { sync(); const v = introV();
-    const after = () => { if (!introOn) return; stopIntro(); startMusic(); if (!auto && sx < 2) setAuto(true); };
+    const after = () => { if (!introOn) return; stopIntro(); startMusic(); if (!manual && !auto && sx < 2) setAuto(true); };
     if (!v || v.error) { introOn = true; return after(); }
     introOn = true; v.onended = v.onerror = after; v.currentTime = 0; v.muted = bgmMute; applySound();
     // 영상이 받아지지 않고 5초 넘게 멈춰 있으면(끝 · 오류 소식 없이 연결이 멎음) 기다리지 않고 회상을 시작한다 — 종전에는 하염없이 기다렸다(2026-11-27 Codex 검토).
@@ -1059,9 +1063,10 @@ if ('ResizeObserver' in window) { let was = pin.clientWidth + 'x' + pin.clientHe
 if (document.fonts) document.fonts.ready.then(relayout);
 addEventListener('scroll', () => { if (!auto) sync(); }, { passive: true });
 document.getElementById('auto').addEventListener('click', toggleAuto);
-// 첫 화면 단추 둘: 그 속도로 바꾸고 시작한다
-// 첫 화면 단추 둘: 그 속도로 바꾸고, 영상을 먼저 튼 뒤 가로 넘김(과 배경음악)으로 잇는다
-for (const id of ['heroAuto', 'heroFast']) { const el = document.getElementById(id); el.addEventListener('click', () => { setSpeed(+el.dataset.v); startRecall(); }); }
+// 첫 화면 단추 둘: 영상을 먼저 튼 뒤 배경음악(과 가로 넘김)으로 잇는다(startRecall).
+//   '자동으로' = 속도 보통으로 영상 뒤 가로 넘김, '수동으로' = 영상만 틀고 뒤는 손으로(배경음악은 영상 뒤에 같이 시작 — Claude) — 2026-11-27 Crenop '두번째 버튼은 첫 영상만 띄워주고 뒷부분은 알아서 스크롤하도록'
+document.getElementById('heroAuto').addEventListener('click', () => { setSpeed(240); startRecall(false); });
+document.getElementById('heroManual').addEventListener('click', () => startRecall(true));
 // 영상 칸을 누르면(Enter · 스페이스도) 재생 · 멈춤(첫 화면 단추 없이 손으로 왔을 때도 볼 수 있게). 영상이 틀고 멈출 때마다 배경음악을 줄이고 되돌린다(applySound)
 function vidToggle() { const v = introV(); if (!v) return; if (v.paused) { v.muted = bgmMute; v.play().catch(() => {}); } else v.pause(); }
 track.addEventListener('click', e => { if (e.target.closest('.pic.vid')) vidToggle(); });
